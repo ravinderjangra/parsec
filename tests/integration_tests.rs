@@ -376,6 +376,64 @@ fn custom_is_interesting_event_that_requires_only_one_vote() {
     unwrap!(env.network.execute_schedule(schedule));
 }
 
+#[test]
+fn extensive_dynamic_membership() {
+    use parsec::dev_utils::ObservationEvent::*;
+
+    let max_num_nodes = 12;
+    let min_num_nodes = 6;
+    let genesis_size = 4;
+    let initial_size = 9;
+    // one in X chance to add a node
+    let chance_to_add = 3;
+    // max X nodes to be removed at once
+    let remove_at_once = 2;
+
+    let all_names: Vec<&str> = NAMES.iter().by_ref().take(max_num_nodes).cloned().collect();
+    let mut names = all_names.iter();
+    let mut env = Environment::new(SEED);
+
+    let mut live_nodes: Vec<&str> = names.by_ref().take(genesis_size).cloned().collect();
+    let genesis: BTreeSet<PeerId> = live_nodes.iter().map(|name| PeerId::new(name)).collect();
+
+    let mut schedule = vec![];
+    let mut step = 0;
+    while live_nodes.len() < initial_size {
+        step += 50;
+        let name = unwrap!(names.next());
+        schedule.push((step, AddPeer(PeerId::new(name))));
+        live_nodes.push(name);
+    }
+
+    loop {
+        if env.rng.gen_weighted_bool(chance_to_add) {
+            if let Some(name) = names.next() {
+                step += 200;
+                schedule.push((step, AddPeer(PeerId::new(name))));
+                live_nodes.push(name);
+            }
+        }
+
+        if live_nodes.len() > min_num_nodes {
+            step += 300;
+            for _ in 0..env.rng.gen_range(1, remove_at_once + 1) {
+                let num_of_nodes = live_nodes.len();
+                let removed_peer = live_nodes.remove(env.rng.gen_range(0, num_of_nodes));
+                schedule.push((step, RemovePeer(PeerId::new(removed_peer))));
+            }
+        } else {
+            break;
+        }
+    }
+
+    let obs_schedule = ObservationSchedule { genesis, schedule };
+
+    let schedule =
+        Schedule::from_observation_schedule(&mut env, &ScheduleOptions::default(), obs_schedule);
+
+    unwrap!(env.network.execute_schedule(schedule));
+}
+
 proptest! {
     #![proptest_config(ProptestConfig {
         failure_persistence: Some(Box::new(FileFailurePersistence::WithSource("regressions"))),
