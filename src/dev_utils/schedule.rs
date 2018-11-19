@@ -36,15 +36,6 @@ pub struct Request {
     pub resp_delay: usize,
 }
 
-/// Describes whether the node should make a request during its local step
-#[derive(Clone, Debug)]
-pub enum RequestTiming {
-    /// Don't make a request
-    Later,
-    /// Make a request
-    DuringThisStep(Request),
-}
-
 /// Represents an event the network is supposed to simulate.
 /// The simulation proceeds in steps. During every global step, every node has some probability
 /// of being scheduled to perform a local step, consisting of receiving messages that reached it
@@ -53,14 +44,9 @@ pub enum RequestTiming {
 pub enum ScheduleEvent {
     /// Event storing the names of the initial nodes
     Genesis(BTreeSet<PeerId>),
-    /// This event variant represents a node being scheduled to execute a local step. It contains a
-    /// global step number, the ID of the node being scheduled, and optionally data of the request
-    /// the node will send.
-    LocalStep {
-        global_step: usize,
-        peer: PeerId,
-        request_timing: RequestTiming,
-    },
+    /// This event variant represents a scheduled slot to execute a local step for all active peers.
+    /// It contains a global step number.
+    LocalStep(usize),
     /// This event causes the node with the given ID to stop responding. All further events
     /// concerning that node will be ignored.
     Fail(PeerId),
@@ -75,44 +61,6 @@ pub enum ScheduleEvent {
 }
 
 impl ScheduleEvent {
-    fn gen_request<R: Rng>(
-        rng: &mut R,
-        peer: &PeerId,
-        peers: &[PeerId],
-        options: &ScheduleOptions,
-    ) -> Request {
-        let mut recipient = peer;
-        while recipient == peer {
-            recipient = unwrap!(rng.choose(peers));
-        }
-        let req_delay = options.gen_delay(rng);
-        let resp_delay = options.gen_delay(rng);
-        Request {
-            recipient: recipient.clone(),
-            req_delay,
-            resp_delay,
-        }
-    }
-
-    pub fn gen_local_step<R: Rng>(
-        rng: &mut R,
-        step: usize,
-        peer: &PeerId,
-        peers: &[PeerId],
-        options: &ScheduleOptions,
-    ) -> ScheduleEvent {
-        let request_timing = if rng.gen::<f64>() < options.gossip_prob {
-            RequestTiming::DuringThisStep(Self::gen_request(rng, peer, peers, options))
-        } else {
-            RequestTiming::Later
-        };
-        ScheduleEvent::LocalStep {
-            global_step: step,
-            peer: peer.clone(),
-            request_timing,
-        }
-    }
-
     pub fn fail(&self) -> Option<&PeerId> {
         if let ScheduleEvent::Fail(ref peer) = self {
             Some(peer)
@@ -123,7 +71,7 @@ impl ScheduleEvent {
 
     pub fn get_peer(&self) -> &PeerId {
         match *self {
-            ScheduleEvent::LocalStep { ref peer, .. } => peer,
+            ScheduleEvent::LocalStep(_) => panic!("ScheduleEvent::get_peer called on LocalStep!"),
             ScheduleEvent::Fail(ref peer) => peer,
             ScheduleEvent::VoteFor(ref peer, _) => peer,
             ScheduleEvent::AddPeer(ref peer) => peer,
@@ -498,16 +446,9 @@ impl Schedule {
                         schedule.push(ScheduleEvent::VoteFor(peer.clone(), observation));
                     }
                 }
-                let present_peers: Vec<_> = peers.present_peers().cloned().collect();
-                schedule.push(ScheduleEvent::gen_local_step(
-                    rng,
-                    step,
-                    peer,
-                    &present_peers,
-                    options,
-                ));
             }
         }
+        schedule.push(ScheduleEvent::LocalStep(step));
     }
 
     pub fn new(env: &mut Environment, options: &ScheduleOptions) -> Schedule {
@@ -649,8 +590,8 @@ impl Schedule {
         let adjustment_coeff = 200.0;
         let additional_steps = (adjustment_coeff * n.ln() / options.prob_local_step) as usize;
         // Schedule events could be delayed due to parsec status, hence we add this additional
-        // steps to allow those delayed events could be drained.
-        let drain_steps = n * 50.0;
+        // steps to allow those delayed events to be drained.
+        let drain_steps = n * 10.0;
         for _ in 0..(additional_steps + drain_steps as usize) {
             Self::perform_step(&mut env.rng, step, &mut peers, None, &mut schedule, options);
             step += 1;

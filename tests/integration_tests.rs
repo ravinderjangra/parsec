@@ -82,18 +82,18 @@ fn minimal_network() {
     // 4 is the minimal network size for which the super majority is less than it.
     let num_peers = 4;
     let mut env = Environment::new(SEED);
+    let options = ScheduleOptions {
+        genesis_size: num_peers,
+        opaque_to_add: 1,
+        votes_before_gossip: true,
+        ..Default::default()
+    };
 
-    let schedule = Schedule::new(
-        &mut env,
-        &ScheduleOptions {
-            genesis_size: num_peers,
-            opaque_to_add: 1,
-            votes_before_gossip: true,
-            ..Default::default()
-        },
-    );
+    let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(schedule);
+    let result = env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -101,17 +101,17 @@ fn minimal_network() {
 fn multiple_votes_before_gossip() {
     let num_observations = 10;
     let mut env = Environment::new(SEED);
+    let options = ScheduleOptions {
+        opaque_to_add: num_observations,
+        votes_before_gossip: true,
+        ..Default::default()
+    };
 
-    let schedule = Schedule::new(
-        &mut env,
-        &ScheduleOptions {
-            opaque_to_add: num_observations,
-            votes_before_gossip: true,
-            ..Default::default()
-        },
-    );
+    let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(schedule);
+    let result = env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -119,33 +119,33 @@ fn multiple_votes_before_gossip() {
 fn multiple_votes_during_gossip() {
     let num_observations = 10;
     let mut env = Environment::new(SEED);
+    let options = ScheduleOptions {
+        opaque_to_add: num_observations,
+        ..Default::default()
+    };
 
-    let schedule = Schedule::new(
-        &mut env,
-        &ScheduleOptions {
-            opaque_to_add: num_observations,
-            ..Default::default()
-        },
-    );
+    let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(schedule);
+    let result = env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options);
     assert!(result.is_ok(), "{:?}", result);
 }
 
 #[test]
 fn duplicate_vote_is_reduced_to_single() {
     let mut env = Environment::new(SEED);
+    let options = ScheduleOptions {
+        votes_before_gossip: true,
+        prob_vote_duplication: 0.5,
+        ..Default::default()
+    };
 
-    let schedule = Schedule::new(
-        &mut env,
-        &ScheduleOptions {
-            votes_before_gossip: true,
-            prob_vote_duplication: 0.5,
-            ..Default::default()
-        },
-    );
+    let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(schedule);
+    let result = env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -158,17 +158,17 @@ fn faulty_third_never_gossip() {
 
     let mut failures = BTreeMap::new();
     let _ = failures.insert(0, num_faulty);
-    let schedule = Schedule::new(
-        &mut env,
-        &ScheduleOptions {
-            genesis_size: num_peers,
-            opaque_to_add: num_observations,
-            deterministic_failures: failures,
-            ..Default::default()
-        },
-    );
+    let options = ScheduleOptions {
+        genesis_size: num_peers,
+        opaque_to_add: num_observations,
+        deterministic_failures: failures,
+        ..Default::default()
+    };
+    let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(schedule);
+    let result = env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -181,17 +181,17 @@ fn faulty_third_terminate_concurrently() {
 
     let mut failures = BTreeMap::new();
     let _ = failures.insert(env.rng.gen_range(10, 50), num_faulty);
-    let schedule = Schedule::new(
-        &mut env,
-        &ScheduleOptions {
-            genesis_size: num_peers,
-            opaque_to_add: num_observations,
-            deterministic_failures: failures,
-            ..Default::default()
-        },
-    );
+    let options = ScheduleOptions {
+        genesis_size: num_peers,
+        opaque_to_add: num_observations,
+        deterministic_failures: failures,
+        ..Default::default()
+    };
+    let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(schedule);
+    let result = env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -201,17 +201,17 @@ fn faulty_nodes_terminate_at_random_points() {
     let num_observations = 10;
     let prob_failure = 0.05;
     let mut env = Environment::new(SEED);
-    let schedule = Schedule::new(
-        &mut env,
-        &ScheduleOptions {
-            genesis_size: num_peers,
-            opaque_to_add: num_observations,
-            prob_failure,
-            ..Default::default()
-        },
-    );
+    let options = ScheduleOptions {
+        genesis_size: num_peers,
+        opaque_to_add: num_observations,
+        prob_failure,
+        ..Default::default()
+    };
+    let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(schedule);
+    let result = env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -219,34 +219,35 @@ fn faulty_nodes_terminate_at_random_points() {
 fn random_schedule_no_delays() {
     let num_observations = 10;
     let mut env = Environment::new(SEED);
-    let schedule = Schedule::new(
-        &mut env,
-        &ScheduleOptions {
-            opaque_to_add: num_observations,
-            delay_distr: DelayDistribution::Constant(0),
-            ..Default::default()
-        },
-    );
+    let options = ScheduleOptions {
+        opaque_to_add: num_observations,
+        delay_distr: DelayDistribution::Constant(0),
+        ..Default::default()
+    };
+    let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(schedule);
+    let result = env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options);
     assert!(result.is_ok(), "{:?}", result);
 }
 
 #[test]
 fn add_many_peers() {
     let mut env = Environment::new(SEED);
+    let options = ScheduleOptions {
+        genesis_size: 2,
+        peers_to_add: 8,
+        opaque_to_add: 0,
+        ..Default::default()
+    };
 
-    let schedule = Schedule::new(
-        &mut env,
-        &ScheduleOptions {
-            genesis_size: 2,
-            peers_to_add: 8,
-            opaque_to_add: 0,
-            ..Default::default()
-        },
+    let schedule = Schedule::new(&mut env, &options);
+
+    unwrap!(
+        env.network
+            .execute_schedule(&mut env.rng, schedule, &options)
     );
-
-    unwrap!(env.network.execute_schedule(schedule));
 }
 
 #[test]
@@ -268,42 +269,46 @@ fn add_few_peers_and_vote() {
         ],
     };
 
-    let schedule =
-        Schedule::from_observation_schedule(&mut env, &ScheduleOptions::default(), obs_schedule);
+    let options = ScheduleOptions::default();
+    let schedule = Schedule::from_observation_schedule(&mut env, &options, obs_schedule);
 
-    unwrap!(env.network.execute_schedule(schedule));
+    unwrap!(
+        env.network
+            .execute_schedule(&mut env.rng, schedule, &options)
+    );
 }
 
 #[test]
 fn add_many_peers_and_vote() {
     let mut env = Environment::new(SEED);
+    let options = ScheduleOptions {
+        genesis_size: 2,
+        peers_to_add: 8,
+        opaque_to_add: 10,
+        ..Default::default()
+    };
 
-    let schedule = Schedule::new(
-        &mut env,
-        &ScheduleOptions {
-            genesis_size: 2,
-            peers_to_add: 8,
-            opaque_to_add: 10,
-            ..Default::default()
-        },
+    let schedule = Schedule::new(&mut env, &options);
+
+    unwrap!(
+        env.network
+            .execute_schedule(&mut env.rng, schedule, &options)
     );
-
-    unwrap!(env.network.execute_schedule(schedule));
 }
 
 #[test]
 fn remove_one_peer() {
     let mut env = Environment::new(SEED);
-    let schedule = Schedule::new(
-        &mut env,
-        &ScheduleOptions {
-            genesis_size: 6,
-            peers_to_remove: 1,
-            ..Default::default()
-        },
-    );
+    let options = ScheduleOptions {
+        genesis_size: 6,
+        peers_to_remove: 1,
+        ..Default::default()
+    };
+    let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(schedule);
+    let result = env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -321,10 +326,12 @@ fn remove_many_peers_at_once() {
             (500, Opaque(Transaction::new("whatever"))),
         ],
     };
-    let schedule =
-        Schedule::from_observation_schedule(&mut env, &ScheduleOptions::default(), obs_schedule);
+    let options = ScheduleOptions::default();
+    let schedule = Schedule::from_observation_schedule(&mut env, &options, obs_schedule);
 
-    let result = env.network.execute_schedule(schedule);
+    let result = env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -351,29 +358,32 @@ fn fail_add_remove() {
             (1500, Opaque(Transaction::new("whatever"))),
         ],
     };
-    let schedule =
-        Schedule::from_observation_schedule(&mut env, &ScheduleOptions::default(), obs_schedule);
+    let options = ScheduleOptions::default();
+    let schedule = Schedule::from_observation_schedule(&mut env, &options, obs_schedule);
 
-    let result = env.network.execute_schedule(schedule);
+    let result = env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options);
     assert!(result.is_ok(), "{:?}", result);
 }
 
 #[test]
 fn custom_is_interesting_event_that_requires_only_one_vote() {
     let mut env = Environment::with_consensus_mode(SEED, ConsensusMode::Single);
-    let schedule = Schedule::new(
-        &mut env,
-        &ScheduleOptions {
-            genesis_size: 4,
-            peers_to_add: 4,
-            peers_to_remove: 4,
-            opaque_to_add: 10,
-            opaque_voters: Sampling::Constant(1),
-            ..Default::default()
-        },
-    );
+    let options = ScheduleOptions {
+        genesis_size: 4,
+        peers_to_add: 4,
+        peers_to_remove: 4,
+        opaque_to_add: 10,
+        opaque_voters: Sampling::Constant(1),
+        ..Default::default()
+    };
+    let schedule = Schedule::new(&mut env, &options);
 
-    unwrap!(env.network.execute_schedule(schedule));
+    unwrap!(
+        env.network
+            .execute_schedule(&mut env.rng, schedule, &options)
+    );
 }
 
 #[test]
@@ -427,11 +437,13 @@ fn extensive_dynamic_membership() {
     }
 
     let obs_schedule = ObservationSchedule { genesis, schedule };
+    let options = ScheduleOptions::default();
+    let schedule = Schedule::from_observation_schedule(&mut env, &options, obs_schedule);
 
-    let schedule =
-        Schedule::from_observation_schedule(&mut env, &ScheduleOptions::default(), obs_schedule);
-
-    unwrap!(env.network.execute_schedule(schedule));
+    unwrap!(
+        env.network
+            .execute_schedule(&mut env.rng, schedule, &options)
+    );
 }
 
 proptest! {
@@ -455,7 +467,7 @@ proptest! {
     }) {
         let _ = log::init(true);
 
-        let result = env.network.execute_schedule(sched);
+        let result = env.network.execute_schedule(&mut env.rng, sched, &ScheduleOptions::default());
         assert!(result.is_ok(), "{:?}", result);
     }
 }

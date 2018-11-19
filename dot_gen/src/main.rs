@@ -236,7 +236,9 @@ impl Scenario {
         let mut env = Environment::new(self.seed);
         let schedule = (self.schedule_fn)(&mut env);
         println!("Using {:?}", env.rng);
-        let result = env.network.execute_schedule(schedule);
+        let result =
+            env.network
+                .execute_schedule(&mut env.rng, schedule, &ScheduleOptions::default());
         assert!(result.is_ok(), "{:?}", result);
 
         if self.files.is_empty() {
