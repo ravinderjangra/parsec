@@ -120,7 +120,7 @@ fn main() {
     // Define scenarios here:
 
     let _ = scenarios.add(
-        "parsec::functional_tests::handle_malice_genesis_event_not_after_initial",
+        "functional_tests::handle_malice_genesis_event_not_after_initial",
         |env| {
             let obs = ObservationSchedule {
                 genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
@@ -135,7 +135,7 @@ fn main() {
     );
 
     let _ = scenarios.add(
-        "parsec::functional_tests::handle_malice_genesis_event_creator_not_genesis_member",
+        "functional_tests::handle_malice_genesis_event_creator_not_genesis_member",
         |env| {
             let obs = ObservationSchedule {
                 genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
@@ -378,6 +378,10 @@ fn run(mut scenarios: Scenarios) {
     if matches.is_present("list") {
         for scenario in scenarios.iter() {
             println!("- {}", scenario.name);
+
+            for file in scenario.files.values() {
+                println!("  - {}", file);
+            }
         }
 
         return;
