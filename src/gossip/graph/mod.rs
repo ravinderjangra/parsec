@@ -127,6 +127,15 @@ impl<T: NetworkEvent, P: PublicId> Graph<T, P> {
             visited: vec![false; event.topological_index() + 1],
         }
     }
+
+    /// Returns whether `x` is descendant of `y`.
+    pub fn is_descendant(&self, x: IndexedEventRef<T, P>, y: IndexedEventRef<T, P>) -> bool {
+        x.is_descendant_of(y).unwrap_or_else(|| {
+            self.ancestors(x)
+                .take_while(|e| e.topological_index() >= y.topological_index())
+                .any(|e| e.topological_index() == y.topological_index())
+        })
+    }
 }
 
 #[cfg(test)]

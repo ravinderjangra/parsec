@@ -109,14 +109,14 @@ impl<T: NetworkEvent, P: PublicId> Event<T, P> {
         graph: &Graph<T, P>,
         peer_list: &PeerList<S>,
         forking_peers: &BTreeSet<P>,
-    ) -> Result<Option<Self>, Error> {
+    ) -> Result<UnpackedEvent<T, P>, Error> {
         let hash = compute_event_hash_and_verify_signature(
             &packed_event.content,
             &packed_event.signature,
         )?;
 
-        if graph.contains(&hash) {
-            return Ok(None);
+        if let Some(index) = graph.get_index(&hash) {
+            return Ok(UnpackedEvent::Known(index));
         }
 
         let (self_parent, other_parent) =
@@ -130,7 +130,7 @@ impl<T: NetworkEvent, P: PublicId> Event<T, P> {
             peer_list,
         );
 
-        Ok(Some(Self {
+        Ok(UnpackedEvent::New(Self {
             content: packed_event.content,
             signature: packed_event.signature,
             cache,
@@ -149,16 +149,32 @@ impl<T: NetworkEvent, P: PublicId> Event<T, P> {
     // to `self` in the graph, and no two events created by `other`'s creator are ancestors to
     // `self` (fork).
     pub fn sees<E: AsRef<Event<T, P>>>(&self, other: E) -> bool {
-        if self.cache.forking_peers.contains(other.as_ref().creator()) {
-            return false;
-        }
+        self.is_descendant_of(other).unwrap_or(false)
+    }
 
-        self.cache
-            .last_ancestors
-            .get(other.as_ref().creator())
-            .map_or(false, |last_index| {
-                *last_index >= other.as_ref().index_by_creator()
-            })
+    // Returns whether this event is descendant of `other`. If there are forks between this event
+    // and `other` the answer cannot be determined from the events themselves and graph traversal
+    // is required. `None` is returned in that case. Otherwise returns `Some` with the correct
+    // answer.
+    pub fn is_descendant_of<E: AsRef<Event<T, P>>>(&self, other: E) -> Option<bool> {
+        match self.last_ancestor_by(other.as_ref().creator()) {
+            LastAncestor::Some(last_index) => Some(last_index >= other.as_ref().index_by_creator()),
+            LastAncestor::None => Some(false),
+            LastAncestor::Fork => None,
+        }
+    }
+
+    // Returns the index-by-creator of the last ancestor of this event created by the given peer.
+    pub fn last_ancestor_by(&self, peer: &P) -> LastAncestor {
+        if self.cache.forking_peers.contains(peer) {
+            LastAncestor::Fork
+        } else {
+            self.cache
+                .last_ancestors
+                .get(peer)
+                .map(|last_index| LastAncestor::Some(*last_index))
+                .unwrap_or(LastAncestor::None)
+        }
     }
 
     /// Returns `Some(vote)` if the event is for a vote of network event, otherwise returns `None`.
@@ -386,6 +402,23 @@ impl Event<Transaction, PeerId> {
             cache,
         }
     }
+}
+
+#[derive(Debug)]
+pub(crate) enum UnpackedEvent<T: NetworkEvent, P: PublicId> {
+    // Event is already in our gossip graph
+    Known(EventIndex),
+    // Event is not yet in our gossip graph
+    New(Event<T, P>),
+}
+
+pub(crate) enum LastAncestor {
+    // There are no forks and the ancestor exists.
+    Some(usize),
+    // Ancestor doesn't exist.
+    None,
+    // Fork detected. Ancestor cannot be determined from the events only. Graph traversal required.
+    Fork,
 }
 
 #[cfg(any(test, feature = "testing"))]
@@ -622,6 +655,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use error::Error;
     use gossip::{
         cause::Cause,
@@ -872,26 +906,30 @@ mod tests {
         );
 
         let packed_event = event_from_observation.pack();
-        let unpacked_event = unwrap!(unwrap!(Event::unpack(
+        let unpacked_event = match unwrap!(Event::unpack(
             packed_event.clone(),
             &graph,
             &alice.peer_list,
             &BTreeSet::new(),
-        )));
+        )) {
+            UnpackedEvent::New(event) => event,
+            UnpackedEvent::Known(_) => panic!("Unexpected known event"),
+        };
 
         assert_eq!(event_from_observation, unpacked_event);
-        assert!(graph.get_index(unpacked_event.hash()).is_none());
+        assert!(!graph.contains(unpacked_event.hash()));
 
         let _ = graph.insert(unpacked_event);
 
-        assert!(
-            unwrap!(Event::unpack(
-                packed_event,
-                &graph,
-                &alice.peer_list,
-                &BTreeSet::new()
-            )).is_none()
-        );
+        match unwrap!(Event::unpack(
+            packed_event,
+            &graph,
+            &alice.peer_list,
+            &BTreeSet::new()
+        )) {
+            UnpackedEvent::New(_) => panic!("Unexpected new event"),
+            UnpackedEvent::Known(_) => (),
+        }
     }
 
     #[test]

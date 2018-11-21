@@ -7,63 +7,77 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use peer_list::PeerState;
+use std::fmt::{self, Display, Formatter};
 use std::result;
 
-quick_error! {
-    /// Parsec error variants.
-    #[derive(Debug)]
-    #[allow(missing_docs)] // quick_error chokes on doc comments inside the variants.
-    pub enum Error {
-        /// Payload of a `Vote` doesn't match the payload of a `Block`.
-        MismatchedPayload {
-            display("The payload of the vote doesn't match the payload of targeted block.")
-        }
-        /// Failed to verify signature.
-        SignatureFailure {
-            display("The message or signature might be corrupted, or the signer is wrong.")
-        }
-        /// Serialisation Error.
-        Serialisation(error: ::maidsafe_utilities::serialisation::SerialisationError) {
-            display("Serialisation error: {}", error)
-            from()
-        }
-        /// Peer is not known to our node.
-        UnknownPeer {
-            display("The peer_id is not known to our node's peer_list.")
-        }
-        /// Peer is known to us, but has unexpected state.
-        InvalidPeerState {
-            required: PeerState,
-            actual: PeerState,
-        } {
-            display("The peer is in invalid state (required: {:?}, actual: {:?}).", required, actual)
-        }
-        /// Our node is in unexpected state.
-        InvalidSelfState {
-            required: PeerState,
-            actual: PeerState
-        } {
-            display("Our node is in invalid state (required: {:?}, actual: {:?}).", required, actual)
-        }
-        /// The given event is invalid or malformed.
-        InvalidEvent {
-            display("The given event is invalid or malformed.")
-        }
-        /// This event's self-parent or other-parent is unknown to our node.
-        UnknownParent {
-            display("This event's self-parent or other-parent is unknown to this node.")
-        }
-        /// Our node has already voted for this network event.
-        DuplicateVote {
-            display("Our node has already voted for this network event.")
-        }
-        /// The peer sent a message to us before knowing we could handle it.
-        PrematureGossip {
-            display("The peer did not know we could handle a message from it.")
-        }
-        /// Logic error.
-        Logic {
-            display("This a logic error and represents a flaw in the code.")
+/// Parsec error
+#[derive(Debug)]
+pub enum Error {
+    /// Payload of a `Vote` doesn't match the payload of a `Block`.
+    MismatchedPayload,
+    /// Failed to verify signature.
+    SignatureFailure,
+    /// Peer is not known to our node.
+    UnknownPeer,
+    /// Peer is known to us, but has unexpected state.
+    InvalidPeerState {
+        /// State we require the peer to be in
+        required: PeerState,
+        /// Peers actual state
+        actual: PeerState,
+    },
+    /// Our node is in unexpected state.
+    InvalidSelfState {
+        /// State we require us to be in
+        required: PeerState,
+        /// Our actual state
+        actual: PeerState,
+    },
+    /// The given event is invalid or malformed.
+    InvalidEvent,
+    /// This event's self-parent or other-parent is unknown to our node.
+    UnknownParent,
+    /// Our node has already voted for this network event.
+    DuplicateVote,
+    /// The peer sent a message to us before knowing we could handle it.
+    PrematureGossip,
+    /// Logic error.
+    Logic,
+}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match *self {
+            Error::MismatchedPayload => write!(
+                f,
+                "The payload of the vote doesn't match the payload of targeted block."
+            ),
+            Error::SignatureFailure => write!(
+                f,
+                "The message or signature might be corrupted, or the signer is wrong."
+            ),
+            Error::UnknownPeer => write!(f, "The peer_id is not known to our node's peer_list."),
+            Error::InvalidPeerState { required, actual } => write!(
+                f,
+                "The peer is in invalid state (required: {:?}, actual: {:?}).",
+                required, actual
+            ),
+            Error::InvalidSelfState { required, actual } => write!(
+                f,
+                "Our node is in invalid state (required: {:?}, actual: {:?}).",
+                required, actual
+            ),
+            Error::InvalidEvent => write!(f, "The given event is invalid or malformed."),
+            Error::UnknownParent => write!(
+                f,
+                "This event's self-parent or other-parent is unknown to this node."
+            ),
+            Error::DuplicateVote => write!(f, "Our node has already voted for this network event."),
+            Error::PrematureGossip => write!(
+                f,
+                "The peer did not know we could handle a message from it."
+            ),
+            Error::Logic => write!(f, "This a logic error and represents a flaw in the code."),
         }
     }
 }

@@ -70,8 +70,6 @@ extern crate pom;
 #[cfg(feature = "testing")]
 #[macro_use]
 extern crate proptest as proptest_crate;
-#[macro_use]
-extern crate quick_error;
 #[cfg(any(test, feature = "dump-graphs", feature = "mock"))]
 extern crate rand;
 extern crate serde;
