@@ -1825,7 +1825,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             ref malice,
         }) = event.vote().map(Vote::payload)
         {
-            (offender, malice)
+            // Unprovable accusations are never invalid.
+            if let Malice::Unprovable = *malice {
+                return;
+            } else {
+                (offender, malice)
+            }
         } else {
             return;
         };
