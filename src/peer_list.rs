@@ -276,14 +276,14 @@ impl<S: SecretId> PeerList<S> {
         }
     }
 
-    /// Returns the hash of the last event created by this peer. Returns `None` if cannot find.
+    /// Returns the index of the last event created by this peer. Returns `None` if cannot find.
     pub fn last_event(&self, peer_id: &S::PublicId) -> Option<EventIndex> {
         self.peers
             .get(peer_id)
             .and_then(|peer| peer.events().rev().next())
     }
 
-    /// Returns the hashes of the indexed event.
+    /// Returns the indices of the events at the given index-by-creator.
     pub fn events_by_index<'a>(
         &'a self,
         peer_id: &S::PublicId,
@@ -293,6 +293,32 @@ impl<S: SecretId> PeerList<S> {
             .get(peer_id)
             .into_iter()
             .flat_map(move |peer| peer.events_by_index(index))
+    }
+
+    /// Returns the index of the last event gossiped to us by the given peer.
+    pub fn last_gossiped_event_by(&self, peer_id: &S::PublicId) -> Option<EventIndex> {
+        self.peers
+            .get(peer_id)
+            .and_then(|peer| peer.last_gossiped_event)
+    }
+
+    /// Record that the given peer gossiped to us the given event.
+    pub fn record_gossiped_event_by(&mut self, peer_id: &S::PublicId, event_index: EventIndex) {
+        if let Some(peer) = self.peers.get_mut(peer_id) {
+            if peer
+                .last_gossiped_event
+                .map(|current| current < event_index)
+                .unwrap_or(false)
+            {
+                peer.last_gossiped_event = Some(event_index)
+            }
+        } else {
+            log_or_panic!(
+                "{:?} tried to record gossiped event by unknown peer {:?}",
+                self.our_id.public_id(),
+                peer_id
+            )
+        }
     }
 
     pub fn confirm_can_add_event<T: NetworkEvent>(
@@ -525,6 +551,7 @@ pub struct Peer<P: PublicId> {
     id_hash: Hash,
     state: PeerState,
     events: Events,
+    last_gossiped_event: Option<EventIndex>,
     membership_list: BTreeSet<P>,
     membership_list_changes: Vec<(usize, MembershipListChange<P>)>,
 }
@@ -535,6 +562,7 @@ impl<P: PublicId> Peer<P> {
             id_hash: Hash::from(serialise(id).as_slice()),
             state,
             events: Events::new(),
+            last_gossiped_event: None,
             membership_list: BTreeSet::new(),
             membership_list_changes: Vec::new(),
         }
