@@ -111,6 +111,7 @@ impl Network {
     #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
     pub fn from_graphs<I: IntoIterator<Item = &'static str>>(
         consensus_mode: ConsensusMode,
+        genesis: BTreeSet<PeerId>,
         names: I,
     ) -> Self {
         let mut peers = BTreeMap::new();
@@ -120,7 +121,6 @@ impl Network {
             let id = parsed_contents.our_id.clone();
             let _ = peers.insert(id, Peer::from_parsed_contents(parsed_contents));
         }
-        let genesis = peers.keys().cloned().collect();
         Network {
             peers,
             genesis,
@@ -457,6 +457,10 @@ impl Network {
     ) -> Result<bool, ConsensusError> {
         match event {
             ScheduleEvent::Genesis(genesis_group) => {
+                if !self.peers.is_empty() {
+                    // if the peers are already initialised, we won't initialise them again
+                    return Ok(true);
+                }
                 let peers = genesis_group
                     .iter()
                     .map(|id| {

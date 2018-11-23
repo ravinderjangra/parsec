@@ -63,6 +63,8 @@ extern crate unwrap;
 
 use maidsafe_utilities::log;
 use parsec::dev_utils::proptest::{arbitrary_delay, ScheduleOptionsStrategy, ScheduleStrategy};
+#[cfg(not(feature = "malice-detection"))]
+use parsec::dev_utils::{ConsensusError, Network};
 use parsec::dev_utils::{
     DelayDistribution, Environment, ObservationSchedule, RngChoice, Sampling, Schedule,
     ScheduleOptions,
@@ -444,6 +446,57 @@ fn extensive_dynamic_membership() {
         env.network
             .execute_schedule(&mut env.rng, schedule, &options)
     );
+}
+
+// This test encounters performance problems when malice-detection is enabled, hence we only
+// execute it when the feature is disabled.
+// TODO: remove this after MAID-3270 is completed.
+#[cfg(not(feature = "malice-detection"))]
+// TODO: remove this after MAID-3164 is completed.
+#[ignore]
+#[test]
+fn consensus_with_forks() {
+    // We use a single seed that is known to generate a gossip pattern showcasing the problem.
+    let mut env = Environment::new(RngChoice::SeededXor([
+        3_138_683_280,
+        3_174_364_583,
+        1_286_743_511,
+        1_450_990_187,
+    ]));
+    let names = vec!["Alice", "Bob", "Carol", "Dave", "Eric"];
+    env.network = Network::from_graphs(
+        ConsensusMode::Supermajority,
+        names.clone().into_iter().map(PeerId::new).collect(),
+        names,
+    );
+
+    let options = ScheduleOptions {
+        genesis_size: 5,
+        opaque_to_add: 0,
+        ..Default::default()
+    };
+
+    let mut schedule = Schedule::new(&mut env, &options);
+
+    // We only expect two opaque blocks to get consensused: `OpaquePayload(one)` and
+    // `OpaquePayload(two)` from the graphs - the default value also takes genesis into account,
+    // which will get omitted here.
+    schedule.min_observations = 2;
+    schedule.max_observations = 2;
+
+    // The test framework uses agreed blocks to calculate the list of valid voters. The first block
+    // in regular tests is Genesis and it is used to initialise the list. This test starts its
+    // execution after Genesis was consensused, but the peers are initialised with empty
+    // consensused blocks lists, so the Genesis block will never appear there. This will cause the
+    // peer list not to be initialised properly, which will cause InvalidSignatory errors even
+    // during correct executions.
+    match env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options)
+    {
+        Ok(()) | Err(ConsensusError::InvalidSignatory { .. }) => (),
+        x => panic!("Unexpected test result: {:?}", x),
+    }
 }
 
 proptest! {

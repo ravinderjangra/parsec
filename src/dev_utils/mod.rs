@@ -25,7 +25,7 @@ pub(crate) use self::dot_parser::parse_test_dot_file;
 #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 pub(crate) use self::dot_parser::ParsedContents;
 pub use self::environment::{Environment, RngChoice};
-pub use self::network::Network;
+pub use self::network::{ConsensusError, Network};
 pub use self::peer::{Peer, PeerStatus, PeerStatuses};
 #[cfg(feature = "testing")]
 pub use self::record::Record;
