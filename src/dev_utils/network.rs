@@ -343,90 +343,171 @@ impl Network {
             num_observations,
             events,
         } = schedule;
-        for event in events {
-            match event {
-                ScheduleEvent::Genesis(genesis_group) => {
-                    let peers = genesis_group
-                        .iter()
-                        .map(|id| {
-                            (
-                                id.clone(),
-                                Peer::from_genesis(id.clone(), &genesis_group, self.consensus_mode),
-                            )
-                        }).collect();
-                    self.peers = peers;
-                    self.genesis = genesis_group;
-                    // do a full reset while we're at it
-                    self.msg_queue.clear();
-                }
-                ScheduleEvent::AddPeer(peer) => {
-                    let current_peers = self
-                        .peers
-                        .values()
-                        .filter(|peer| peer.status == PeerStatus::Active)
-                        .map(|peer| peer.id.clone())
-                        .collect();
-                    let _ = self.peers.insert(
-                        peer.clone(),
-                        Peer::from_existing(
-                            peer.clone(),
-                            &self.genesis,
-                            &current_peers,
-                            self.consensus_mode,
-                        ),
-                    );
-                }
-                ScheduleEvent::RemovePeer(peer) => {
-                    (*self.peer_mut(&peer)).status = PeerStatus::Removed;
-                }
-                ScheduleEvent::Fail(peer) => {
-                    (*self.peer_mut(&peer)).status = PeerStatus::Failed;
-                }
-                ScheduleEvent::LocalStep {
-                    global_step,
-                    peer,
-                    request_timing,
-                } => {
-                    self.peer_mut(&peer).make_votes();
-                    self.handle_messages(&peer, global_step);
-                    self.peer_mut(&peer).poll();
-                    self.check_unexpected_accusations(&peer)?;
+        let mut vote_participants = BTreeSet::new();
+        let mut pending_nodes = BTreeSet::new();
+        let mut pending_events = vec![];
 
-                    if let RequestTiming::DuringThisStep(req) = request_timing {
-                        match self.peer(&peer).parsec.create_gossip(Some(&req.recipient)) {
-                            Ok(request) => {
-                                self.send_message(
-                                    peer.clone(),
-                                    &req.recipient,
-                                    Message::Request(request, req.resp_delay),
-                                    global_step + req.req_delay,
-                                );
-                            }
-                            Err(e @ Error::InvalidPeerState { .. })
-                            | Err(e @ Error::InvalidSelfState { .. }) => {
-                                if self
-                                    .peer(&peer)
-                                    .parsec
-                                    .gossip_recipients()
-                                    .any(|peer_id| peer_id == &req.recipient)
-                                {
-                                    panic!("Should be able to gossip {:?}", e);
-                                }
-                            }
-                            Err(e) => panic!("{:?}", e),
-                        }
+        for event in events {
+            loop {
+                let num_prev_pending = pending_events.len();
+                if !pending_events.is_empty() {
+                    let pended_event = pending_events.remove(0);
+                    self.execute_event(
+                        pended_event,
+                        &mut vote_participants,
+                        &mut pending_nodes,
+                        &mut pending_events,
+                    )?;
+                    if num_prev_pending == pending_events.len() {
+                        let last_event = pending_events.remove(num_prev_pending - 1);
+                        pending_events.insert(0, last_event);
+                        break;
                     }
-                }
-                ScheduleEvent::VoteFor(peer, observation) => {
-                    self.peer_mut(&peer).vote_for(&observation);
+                } else {
+                    break;
                 }
             }
+
+            self.execute_event(
+                event,
+                &mut vote_participants,
+                &mut pending_nodes,
+                &mut pending_events,
+            )?;
+
             self.check_consensus_broken()?;
             if self.consensus_complete(&peers, num_observations) {
                 break;
             }
         }
+
         self.check_consensus(&peers, num_observations)?;
         self.check_blocks_signatories()
     }
+
+    fn execute_event(
+        &mut self,
+        event: ScheduleEvent,
+        vote_participants: &mut BTreeSet<PeerId>,
+        pending_nodes: &mut BTreeSet<PeerId>,
+        pending_events: &mut Vec<ScheduleEvent>,
+    ) -> Result<(), ConsensusError> {
+        match event.clone() {
+            ScheduleEvent::Genesis(genesis_group) => {
+                let peers = genesis_group
+                    .iter()
+                    .map(|id| {
+                        (
+                            id.clone(),
+                            Peer::from_genesis(id.clone(), &genesis_group, self.consensus_mode),
+                        )
+                    }).collect();
+                for node in &genesis_group {
+                    let _ = vote_participants.insert(node.clone());
+                }
+                self.peers = peers;
+                self.genesis = genesis_group;
+                // do a full reset while we're at it
+                self.msg_queue.clear();
+            }
+            ScheduleEvent::AddPeer(peer) => {
+                let current_peers = self.active_peers().map(|peer| peer.id.clone()).collect();
+                let _ = self.peers.insert(
+                    peer.clone(),
+                    Peer::from_existing(
+                        peer.clone(),
+                        &self.genesis,
+                        &current_peers,
+                        self.consensus_mode,
+                    ),
+                );
+            }
+            ScheduleEvent::RemovePeer(peer) => {
+                if check_parsec_status(pending_nodes.len(), vote_participants.len())
+                    || pending_nodes.contains(&peer)
+                {
+                    let _ = pending_nodes.insert(peer.clone());
+                    (*self.peer_mut(&peer)).status = PeerStatus::Removed;
+                } else {
+                    pending_events.push(event);
+                }
+            }
+            ScheduleEvent::Fail(peer) => {
+                if check_parsec_status(pending_nodes.len(), vote_participants.len())
+                    || pending_nodes.contains(&peer)
+                {
+                    let _ = pending_nodes.insert(peer.clone());
+                    (*self.peer_mut(&peer)).status = PeerStatus::Failed;
+                } else {
+                    pending_events.push(event);
+                }
+            }
+            ScheduleEvent::LocalStep {
+                global_step,
+                peer,
+                request_timing,
+            } => {
+                self.peer_mut(&peer).make_votes();
+                self.handle_messages(&peer, global_step);
+                self.peer_mut(&peer).poll();
+                self.check_unexpected_accusations(&peer)?;
+
+                for block in self.peer(&peer).blocks_payloads() {
+                    match block {
+                        ParsecObservation::Remove { peer_id, .. } => {
+                            let _ = pending_nodes.remove(peer_id);
+                            let _ = vote_participants.remove(peer_id);
+                        }
+                        ParsecObservation::Add { peer_id, .. } => {
+                            let _ = vote_participants.insert(peer_id.clone());
+                        }
+                        _ => (),
+                    }
+                }
+
+                if let RequestTiming::DuringThisStep(req) = request_timing {
+                    match self.peer(&peer).parsec.create_gossip(Some(&req.recipient)) {
+                        Ok(request) => {
+                            self.send_message(
+                                peer.clone(),
+                                &req.recipient,
+                                Message::Request(request, req.resp_delay),
+                                global_step + req.req_delay,
+                            );
+                        }
+                        Err(e @ Error::InvalidPeerState { .. })
+                        | Err(e @ Error::InvalidSelfState { .. }) => {
+                            if self
+                                .peer(&peer)
+                                .parsec
+                                .gossip_recipients()
+                                .any(|peer_id| peer_id == &req.recipient)
+                            {
+                                panic!("Should be able to gossip {:?}", e);
+                            }
+                        }
+                        Err(e) => panic!("{:?}", e),
+                    }
+                }
+            }
+            ScheduleEvent::VoteFor(peer, observation) => {
+                if let ParsecObservation::Remove { ref peer_id, .. } = observation {
+                    if check_parsec_status(pending_nodes.len(), vote_participants.len())
+                        || pending_nodes.contains(&peer_id)
+                    {
+                        let _ = pending_nodes.insert(peer_id.clone());
+                    } else {
+                        pending_events.push(event);
+                    }
+                }
+
+                self.peer_mut(&peer).vote_for(&observation);
+            }
+        }
+        Ok(())
+    }
+}
+
+fn check_parsec_status(pending: usize, voters: usize) -> bool {
+    (pending + 1) * 3 < voters
 }

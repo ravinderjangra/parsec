@@ -394,7 +394,7 @@ fn extensive_dynamic_membership() {
     let mut env = Environment::new(SEED);
 
     let mut live_nodes: Vec<&str> = names.by_ref().take(genesis_size).cloned().collect();
-    let genesis: BTreeSet<PeerId> = live_nodes.iter().map(|name| PeerId::new(name)).collect();
+    let genesis = live_nodes.iter().map(|name| PeerId::new(name)).collect();
 
     let mut schedule = vec![];
     let mut step = 0;

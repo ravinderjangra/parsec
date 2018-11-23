@@ -648,7 +648,10 @@ impl Schedule {
         // The constant (adjustment_coeff) is for making the number big enough.
         let adjustment_coeff = 200.0;
         let additional_steps = (adjustment_coeff * n.ln() / options.prob_local_step) as usize;
-        for _ in 0..additional_steps {
+        // Schedule events could be delayed due to parsec status, hence we add this additional
+        // steps to allow those delayed events could be drained.
+        let drain_steps = n * 50.0;
+        for _ in 0..(additional_steps + drain_steps as usize) {
             Self::perform_step(&mut env.rng, step, &mut peers, None, &mut schedule, options);
             step += 1;
         }
