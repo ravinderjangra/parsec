@@ -403,8 +403,17 @@ impl Network {
                                     global_step + req.req_delay,
                                 );
                             }
-                            Err(Error::InvalidPeerState { .. })
-                            | Err(Error::InvalidSelfState { .. }) => (),
+                            Err(e @ Error::InvalidPeerState { .. })
+                            | Err(e @ Error::InvalidSelfState { .. }) => {
+                                if self
+                                    .peer(&peer)
+                                    .parsec
+                                    .gossip_recipients()
+                                    .any(|peer_id| peer_id == &req.recipient)
+                                {
+                                    panic!("Should be able to gossip {:?}", e);
+                                }
+                            }
                             Err(e) => panic!("{:?}", e),
                         }
                     }
