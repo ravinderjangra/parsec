@@ -368,7 +368,7 @@ fn fail_add_remove() {
 }
 
 #[test]
-fn custom_is_interesting_event_that_requires_only_one_vote() {
+fn consensus_mode_single() {
     let mut env = Environment::with_consensus_mode(SEED, ConsensusMode::Single);
     let options = ScheduleOptions {
         genesis_size: 4,
