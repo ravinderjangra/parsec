@@ -12,7 +12,7 @@
 There is a basic example available in the examples folder.  This allows you to simulate a network of peers each running the Parsec protocol to reach consensus on a number of random network events.  There is also the ability to dump each peer's gossip graph in dot format to a file in your system temp dir.  This can be enabled via the feature `dump-graphs`.  So, e.g. to run the example for a network of five peers and ten network events:
 
 ```
-cargo run --example=basic --features=dump-graphs -- --peers=5 --events=10
+cargo run --example=basic --features=mock,dump-graphs -- --initial-peers=5 --opaque=10
 ```
 
 If you have `dot` from [graphviz](https://graphviz.gitlab.io/download) available in your path, then SVG graphs will also have been generated from each of these dot files.  If not, you can copy the contents of a generated dot file into an online converter (e.g. http://viz-js.com) to view the gossip graph.

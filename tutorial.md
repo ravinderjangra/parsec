@@ -30,7 +30,7 @@ From the parsec repository, run the tests. Be sure to use the feature: `dump-gra
 
 ```
 cd parsec
-cargo test --release --features=mock -- --nocapture
+cargo test --release --features=dump-graphs,mock -- --nocapture
 ```
 
 # View the graphs
@@ -89,7 +89,7 @@ Now, `test_minimal_network` is a silly example as reaching consensus on a single
 
 For more control over the scenario, please run the example. To see which options you may use, run
 ```
-cargo run --release --example basic --features=mock -- --help
+cargo run --release --example basic --features=dump-graphs,mock -- --help
 ```
 
 For instance, for an example with 10 peers agreeing on the order of 5 events, run
