@@ -195,6 +195,53 @@ impl<'a> Visitor<'a> for UnprovableMaliceVisitor {
     }
 }
 
+// Key to compare observations.
+#[serde(bound = "")]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize, Debug)]
+pub(crate) enum ObservationKey<P: PublicId> {
+    Single(ObservationHash, P),
+    Supermajority(ObservationHash),
+}
+
+impl<P: PublicId> ObservationKey<P> {
+    pub fn hash(&self) -> &ObservationHash {
+        match *self {
+            ObservationKey::Single(ref hash, _) => hash,
+            ObservationKey::Supermajority(ref hash) => hash,
+        }
+    }
+
+    pub fn matches(&self, other_hash: &ObservationHash, other_creator: &P) -> bool {
+        match *self {
+            ObservationKey::Single(ref hash, ref creator) => {
+                other_hash == hash && other_creator == creator
+            }
+            ObservationKey::Supermajority(ref hash) => other_hash == hash,
+        }
+    }
+
+    pub fn consensus_mode(&self) -> ConsensusMode {
+        match *self {
+            ObservationKey::Single(..) => ConsensusMode::Single,
+            ObservationKey::Supermajority(..) => ConsensusMode::Supermajority,
+        }
+    }
+}
+
+/// Number of votes necessary to reach consensus on an `OpaquePayload`.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ConsensusMode {
+    /// One vote is enough.
+    Single,
+    /// Supermajority (more than 2/3) is required.
+    Supermajority,
+}
+
+/// Returns whether `small` is more than two thirds of `large`.
+pub fn is_more_than_two_thirds(small: usize, large: usize) -> bool {
+    3 * small > 2 * large
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

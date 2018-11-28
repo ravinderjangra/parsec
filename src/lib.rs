@@ -119,8 +119,8 @@ pub use error::{Error, Result};
 pub use gossip::{EventHash, PackedEvent, Request, Response};
 pub use id::{Proof, PublicId, SecretId};
 pub use network_event::NetworkEvent;
-pub use observation::{Malice, Observation};
-pub use parsec::{ConsensusMode, Parsec};
+pub use observation::{ConsensusMode, Malice, Observation};
+pub use parsec::Parsec;
 pub use vote::Vote;
 
 use maidsafe_utilities::serialisation;

@@ -10,7 +10,7 @@ use super::meta_event::MetaEvent;
 use super::meta_vote::MetaVote;
 use gossip::EventIndex;
 use id::PublicId;
-use observation::ObservationHash;
+use observation::{ObservationHash, ObservationKey};
 use round_hash::RoundHash;
 use std::collections::{btree_map::Entry, BTreeMap, BTreeSet, VecDeque};
 use std::fmt::{self, Debug};
@@ -54,8 +54,8 @@ pub(crate) struct MetaElection<P: PublicId> {
     pub(crate) interesting_events: BTreeMap<P, VecDeque<EventIndex>>,
     // Length of `MetaElections::consensus_history` at the time this meta-election was created.
     pub(crate) consensus_len: usize,
-    // Payload hash decided by this meta-election.
-    pub(crate) payload_hash: Option<ObservationHash>,
+    // Key of the payload decided by this meta-election.
+    pub(crate) payload_key: Option<ObservationKey<P>>,
     // Topological index of the first event processed in this meta-election.
     pub(crate) start_index: usize,
 }
@@ -69,7 +69,7 @@ impl<P: PublicId> MetaElection<P> {
             undecided_voters: voters,
             interesting_events: BTreeMap::new(),
             consensus_len,
-            payload_hash: None,
+            payload_key: None,
             start_index,
         }
     }
@@ -92,13 +92,13 @@ impl<P: PublicId> MetaElection<P> {
         self.interesting_events.clear();
     }
 
-    fn is_already_interesting_content(&self, creator: &P, payload_hash: &ObservationHash) -> bool {
+    fn is_already_interesting_content(&self, creator: &P, payload_key: &ObservationKey<P>) -> bool {
         self.interesting_events
             .get(creator)
             .map_or(false, |indices| {
                 indices.iter().any(|index| {
                     if let Some(meta_event) = self.meta_events.get(index) {
-                        meta_event.interesting_content.contains(payload_hash)
+                        meta_event.interesting_content.contains(payload_key)
                     } else {
                         false
                     }
@@ -115,8 +115,8 @@ pub(crate) struct MetaElections<P: PublicId> {
     current_election: MetaElection<P>,
     // Meta-elections that are already decided by us, but not by all the other peers.
     previous_elections: BTreeMap<MetaElectionHandle, MetaElection<P>>,
-    // Hashes of the consensused blocks' payloads in the order they were consensused.
-    consensus_history: Vec<ObservationHash>,
+    // Keys of the consensused blocks' payloads in the order they were consensused.
+    consensus_history: Vec<ObservationKey<P>>,
 }
 
 impl<P: PublicId> MetaElections<P> {
@@ -132,7 +132,7 @@ impl<P: PublicId> MetaElections<P> {
     #[cfg(any(test, feature = "testing"))]
     pub fn from_map_and_history(
         mut elections_map: BTreeMap<MetaElectionHandle, MetaElection<P>>,
-        consensus_history: Vec<ObservationHash>,
+        consensus_history: Vec<ObservationKey<P>>,
     ) -> Self {
         let current_election = unwrap!(elections_map.remove(&MetaElectionHandle::CURRENT));
         MetaElections {
@@ -236,9 +236,9 @@ impl<P: PublicId> MetaElections<P> {
     }
 
     /// Payload decided by the given meta-election, if any.
-    pub fn decided_payload_hash(&self, handle: MetaElectionHandle) -> Option<&ObservationHash> {
+    pub fn decided_payload_key(&self, handle: MetaElectionHandle) -> Option<&ObservationKey<P>> {
         self.get(handle)
-            .and_then(|election| election.payload_hash.as_ref())
+            .and_then(|election| election.payload_key.as_ref())
     }
 
     /// List of voters participating in the given meta-election.
@@ -253,7 +253,7 @@ impl<P: PublicId> MetaElections<P> {
             .unwrap_or(0)
     }
 
-    pub fn consensus_history(&self) -> &[ObservationHash] {
+    pub fn consensus_history(&self) -> &[ObservationKey<P>] {
         &self.consensus_history
     }
 
@@ -270,7 +270,7 @@ impl<P: PublicId> MetaElections<P> {
         &self,
         handle: MetaElectionHandle,
         creator: &P,
-    ) -> Option<&ObservationHash> {
+    ) -> Option<&ObservationKey<P>> {
         let election = self.get(handle)?;
         let event_hash = election
             .interesting_events
@@ -287,7 +287,7 @@ impl<P: PublicId> MetaElections<P> {
         &self,
         handle: MetaElectionHandle,
         creator: &P,
-        payload_hash: &ObservationHash,
+        payload_key: &ObservationKey<P>,
     ) -> bool {
         let election = if let Some(election) = self.get(handle) {
             election
@@ -296,12 +296,12 @@ impl<P: PublicId> MetaElections<P> {
         };
 
         // Already interesting?
-        if election.is_already_interesting_content(creator, payload_hash) {
+        if election.is_already_interesting_content(creator, payload_key) {
             return false;
         }
 
         // Already consensused?
-        !self.consensus_history()[..election.consensus_len].contains(payload_hash)
+        !self.consensus_history()[..election.consensus_len].contains(payload_key)
     }
 
     pub fn start_index(&self, handle: MetaElectionHandle) -> usize {
@@ -311,16 +311,16 @@ impl<P: PublicId> MetaElections<P> {
     /// Creates new election and returns handle of the previous election.
     pub fn new_election(
         &mut self,
-        payload_hash: ObservationHash,
+        payload_key: ObservationKey<P>,
         voters: BTreeSet<P>,
         start_index: usize,
     ) -> MetaElectionHandle {
-        self.consensus_history.push(payload_hash);
+        self.consensus_history.push(payload_key.clone());
 
         let new = MetaElection::new(voters, self.consensus_history.len(), start_index);
 
         let mut previous = mem::replace(&mut self.current_election, new);
-        previous.payload_hash = Some(payload_hash);
+        previous.payload_key = Some(payload_key);
 
         let handle = self.next_handle();
         let _ = self.previous_elections.insert(handle, previous);
@@ -370,7 +370,7 @@ impl<P: PublicId> MetaElections<P> {
         let hash = self
             .consensus_history
             .last()
-            .cloned()
+            .map(|key| *key.hash())
             .unwrap_or(ObservationHash::ZERO);
         self.current_election.initialise(peer_ids, hash);
     }
@@ -452,7 +452,7 @@ pub(crate) mod snapshot {
         all_voters: BTreeSet<P>,
         interesting_events: BTreeMap<P, Vec<EventHash>>,
         consensus_len: usize,
-        payload_hash: Option<ObservationHash>,
+        payload_key: Option<ObservationKey<P>>,
     }
 
     impl<P: PublicId> MetaElectionSnapshot<P> {
@@ -484,7 +484,7 @@ pub(crate) mod snapshot {
                 all_voters: meta_election.all_voters.clone(),
                 interesting_events,
                 consensus_len: meta_election.consensus_len,
-                payload_hash: meta_election.payload_hash,
+                payload_key: meta_election.payload_key.clone(),
             }
         }
     }

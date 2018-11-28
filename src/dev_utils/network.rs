@@ -13,8 +13,9 @@ use block::Block;
 use error::Error;
 use gossip::{Request, Response};
 use mock::{PeerId, Transaction};
-use observation::{Malice, Observation as ParsecObservation};
-use parsec::{is_more_than_two_thirds, ConsensusMode};
+use observation::{
+    is_more_than_two_thirds, ConsensusMode, Malice, Observation as ParsecObservation,
+};
 use rand::Rng;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
@@ -102,6 +103,10 @@ impl Network {
             msg_queue: BTreeMap::new(),
             consensus_mode,
         }
+    }
+
+    pub fn consensus_mode(&self) -> ConsensusMode {
+        self.consensus_mode
     }
 
     fn peers_with_status(&self, status: PeerStatus) -> impl Iterator<Item = &Peer> {
@@ -205,8 +210,10 @@ impl Network {
     fn check_consensus_broken(&self) -> Result<(), ConsensusError> {
         let mut block_order = BTreeMap::new();
         for peer in self.active_peers() {
-            for (index, block) in peer.blocks_payloads().into_iter().enumerate() {
-                if let Some((old_peer, old_index)) = block_order.insert(block, (peer, index)) {
+            for (index, block) in peer.blocks().into_iter().enumerate() {
+                let key = self.block_key(block);
+
+                if let Some((old_peer, old_index)) = block_order.insert(key, (peer, index)) {
                     if old_index != index {
                         // old index exists and isn't equal to the new one
                         return Err(ConsensusError::DifferingBlocksOrder {
@@ -224,6 +231,23 @@ impl Network {
             }
         }
         Ok(())
+    }
+
+    fn block_key<'a>(
+        &self,
+        block: &'a Block<Transaction, PeerId>,
+    ) -> (&'a Observation, Option<&'a PeerId>) {
+        let peer_id = if let ParsecObservation::OpaquePayload(_) = *block.payload() {
+            if self.consensus_mode == ConsensusMode::Single {
+                Some(&unwrap!(block.proofs().into_iter().next()).public_id)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
+        (block.payload(), peer_id)
     }
 
     fn consensus_complete(

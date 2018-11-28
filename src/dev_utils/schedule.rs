@@ -12,7 +12,7 @@ use super::{PeerStatus, PeerStatuses};
 #[cfg(feature = "dump-graphs")]
 use dump_graph::DIR;
 use mock::{PeerId, Transaction, NAMES};
-use observation::Observation as ParsecObservation;
+use observation::{ConsensusMode, Observation as ParsecObservation};
 use rand::seq;
 use rand::Rng;
 use std::collections::{BTreeMap, BTreeSet};
@@ -480,11 +480,16 @@ impl Schedule {
         // if votes before gossip enabled, insert all votes
         if options.votes_before_gossip {
             let opaque_transactions = obs_schedule.extract_opaque();
+            let sampling = match env.network.consensus_mode() {
+                ConsensusMode::Single => Sampling::Constant(1),
+                ConsensusMode::Supermajority => options.opaque_voters,
+            };
+
             for obs in opaque_transactions {
                 pending.peers_make_observation(
                     &mut env.rng,
                     peers.active_peers(),
-                    options.opaque_voters,
+                    sampling,
                     step,
                     &obs,
                 );
@@ -520,6 +525,11 @@ impl Schedule {
                         // network, but causes problems with evaluating test results
                         for obs in &observations_made {
                             let sampling = if let ParsecObservation::OpaquePayload(_) = obs {
+                                // No need to mirror opaques if we are in the single-vote mode.
+                                if env.network.consensus_mode() == ConsensusMode::Single {
+                                    continue;
+                                }
+
                                 options.opaque_voters
                             } else {
                                 options.transparent_voters
@@ -556,10 +566,15 @@ impl Schedule {
                     }
                     ObservationEvent::Opaque(payload) => {
                         let observation = ParsecObservation::OpaquePayload(payload);
+                        let sampling = match env.network.consensus_mode() {
+                            ConsensusMode::Single => Sampling::Constant(1),
+                            ConsensusMode::Supermajority => options.opaque_voters,
+                        };
+
                         pending.peers_make_observation(
                             &mut env.rng,
                             peers.active_peers(),
-                            options.opaque_voters,
+                            sampling,
                             step,
                             &observation,
                         );

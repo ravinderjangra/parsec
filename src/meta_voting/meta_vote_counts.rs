@@ -7,7 +7,7 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::meta_vote::MetaVote;
-use parsec::is_more_than_two_thirds;
+use observation::is_more_than_two_thirds;
 use std::iter;
 
 // This is used to collect the meta votes of other events relating to a single (binary) meta vote at

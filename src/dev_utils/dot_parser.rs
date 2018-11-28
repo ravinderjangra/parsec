@@ -13,8 +13,7 @@ use meta_voting::{
     BoolSet, MetaElection, MetaElectionHandle, MetaElections, MetaEvent, MetaVote, Step,
 };
 use mock::{PeerId, Transaction};
-use observation::Observation;
-use observation::ObservationHash;
+use observation::{Observation, ObservationHash, ObservationKey};
 use peer_list::{PeerList, PeerState};
 use pom::char_class::{alphanum, digit, hex_digit, multispace, space};
 use pom::parser::*;
@@ -29,7 +28,7 @@ use std::str::FromStr;
 
 pub const HEX_DIGITS_PER_BYTE: usize = 2;
 
-type ObservationMap = Vec<(ObservationHash, Observation<Transaction, PeerId>)>;
+type ObservationMap = Vec<(ObservationKey<PeerId>, Observation<Transaction, PeerId>)>;
 
 fn newline() -> Parser<u8, ()> {
     (seq(b"\n") | seq(b"\r\n")).discard()
@@ -303,7 +302,7 @@ fn parse_last_ancestors() -> Parser<u8, BTreeMap<PeerId, usize>> {
 
 #[derive(Debug)]
 struct ParsedMetaElections {
-    consensus_history: Vec<ObservationHash>,
+    consensus_history: Vec<ObservationKey<PeerId>>,
     meta_elections: BTreeMap<MetaElectionHandle, ParsedMetaElection>,
 }
 
@@ -318,8 +317,10 @@ fn parse_meta_elections() -> Parser<u8, ParsedMetaElections> {
         })
 }
 
-fn parse_consensus_history() -> Parser<u8, Vec<ObservationHash>> {
-    let hash_line = comment_prefix() * (parse_hash()).map(ObservationHash) - next_line();
+fn parse_consensus_history() -> Parser<u8, Vec<ObservationKey<PeerId>>> {
+    let hash_line = comment_prefix()
+        * (parse_hash()).map(|hash| ObservationKey::Supermajority(ObservationHash(hash)))
+        - next_line();
     comment_prefix() * seq(b"consensus_history:") * next_line() * hash_line.repeat(0..)
 }
 
@@ -347,7 +348,7 @@ struct ParsedMetaElection {
     undecided_voters: BTreeSet<PeerId>,
     payload: Option<Observation<Transaction, PeerId>>,
     start_index: usize,
-    observation_map: BTreeMap<ObservationHash, Observation<Transaction, PeerId>>,
+    observation_map: BTreeMap<ObservationKey<PeerId>, Observation<Transaction, PeerId>>,
     meta_events: BTreeMap<String, MetaEvent<PeerId>>,
 }
 
@@ -553,7 +554,7 @@ fn parse_single_meta_event() -> Parser<u8, (String, (ObservationMap, MetaEvent<P
 fn parse_meta_event_content() -> Parser<u8, (ObservationMap, MetaEvent<PeerId>)> {
     (parse_observees() + parse_interesting_content() + parse_meta_votes().opt()).map(
         |((observees, observation_map), meta_votes)| {
-            let interesting_content = observation_map.iter().map(|(hash, _)| *hash).collect();
+            let interesting_content = observation_map.iter().map(|(key, _)| key.clone()).collect();
             (
                 observation_map,
                 MetaEvent {
@@ -575,8 +576,12 @@ fn parse_interesting_content() -> Parser<u8, ObservationMap> {
         - next_line()).map(|observations| {
         observations
             .into_iter()
-            .map(|payload| (ObservationHash::from(&payload), payload))
-            .collect()
+            .map(|payload| {
+                (
+                    ObservationKey::Supermajority(ObservationHash::from(&payload)),
+                    payload,
+                )
+            }).collect()
     })
 }
 
@@ -645,7 +650,7 @@ pub(crate) struct ParsedContents {
     pub graph: Graph<Transaction, PeerId>,
     pub meta_elections: MetaElections<PeerId>,
     pub peer_list: PeerList<PeerId>,
-    pub observation_map: BTreeMap<ObservationHash, Observation<Transaction, PeerId>>,
+    pub observation_map: BTreeMap<ObservationKey<PeerId>, Observation<Transaction, PeerId>>,
 }
 
 impl ParsedContents {
@@ -765,7 +770,7 @@ fn convert_into_parsed_contents(result: ParsedFile) -> ParsedContents {
             meta_election
                 .observation_map
                 .iter()
-                .map(|(hash, obs)| (*hash, obs.clone()))
+                .map(|(key, obs)| (key.clone(), obs.clone()))
         }).collect();
     parsed_contents.meta_elections = convert_to_meta_elections(meta_elections, &mut event_hashes);
     parsed_contents
@@ -828,9 +833,9 @@ fn convert_to_meta_election(
             }).collect(),
         consensus_len: meta_election.consensus_len,
         start_index: meta_election.start_index,
-        payload_hash: meta_election
+        payload_key: meta_election
             .payload
-            .map(|payload| ObservationHash::from(&payload)),
+            .map(|payload| ObservationKey::Supermajority(ObservationHash::from(&payload))),
     }
 }
 

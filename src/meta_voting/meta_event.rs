@@ -11,7 +11,7 @@ use super::meta_vote::{MetaVote, MetaVotes};
 use gossip::IndexedEventRef;
 use id::PublicId;
 use network_event::NetworkEvent;
-use observation::ObservationHash;
+use observation::ObservationKey;
 use std::collections::BTreeSet;
 
 #[serde(bound = "")]
@@ -21,7 +21,7 @@ pub(crate) struct MetaEvent<P: PublicId> {
     // valid block.  If there are a supermajority of peers here, this event is an "observer".
     pub observees: BTreeSet<P>,
     // Hashes of payloads of all the votes deemed interesting by this event.
-    pub interesting_content: Vec<ObservationHash>,
+    pub interesting_content: Vec<ObservationKey<P>>,
     pub meta_votes: MetaVotes<P>,
 }
 
@@ -69,8 +69,8 @@ impl<'a, T: NetworkEvent + 'a, P: PublicId + 'a> MetaEventBuilder<'a, T, P> {
         self.meta_event.observees = observees;
     }
 
-    pub fn set_interesting_content(&mut self, content_hash: Vec<ObservationHash>) {
-        self.meta_event.interesting_content = content_hash;
+    pub fn set_interesting_content(&mut self, content: Vec<ObservationKey<P>>) {
+        self.meta_event.interesting_content = content;
     }
 
     pub fn add_meta_votes(&mut self, peer_id: P, votes: Vec<MetaVote>) {

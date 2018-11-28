@@ -9,8 +9,8 @@
 use super::Observation;
 use block::Block;
 use mock::{PeerId, Transaction};
-use observation::{Malice, Observation as ParsecObservation};
-use parsec::{ConsensusMode, Parsec};
+use observation::{ConsensusMode, Malice, Observation as ParsecObservation};
+use parsec::Parsec;
 use rand::Rng;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::{self, Debug, Formatter};

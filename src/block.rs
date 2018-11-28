@@ -23,11 +23,11 @@ pub struct Block<T: NetworkEvent, P: PublicId> {
 
 impl<T: NetworkEvent, P: PublicId> Block<T, P> {
     /// Creates a `Block` from `votes`.
-    pub fn new(votes: &BTreeMap<P, Vote<T, P>>) -> Result<Option<Self>, Error> {
+    pub fn new(votes: &BTreeMap<P, Vote<T, P>>) -> Result<Self, Error> {
         let payload = if let Some(vote) = votes.values().next() {
             vote.payload().clone()
         } else {
-            return Ok(None);
+            return Err(Error::MissingVotes);
         };
 
         let proofs: Result<BTreeSet<_>, _> = votes
@@ -41,7 +41,7 @@ impl<T: NetworkEvent, P: PublicId> Block<T, P> {
             }).collect();
         let proofs = proofs?;
 
-        Ok(Some(Self { payload, proofs }))
+        Ok(Self { payload, proofs })
     }
 
     /// Returns the payload of this block.

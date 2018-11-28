@@ -23,32 +23,19 @@ use mock::{PeerId, Transaction};
 use network_event::NetworkEvent;
 #[cfg(feature = "malice-detection")]
 use observation::UnprovableMalice;
-use observation::{Malice, Observation, ObservationHash};
+use observation::{is_more_than_two_thirds, ConsensusMode, Malice, Observation, ObservationKey};
 use peer_list::{PeerList, PeerState};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
+use std::mem;
 #[cfg(all(test, feature = "mock"))]
 use std::ops::{Deref, DerefMut};
-use std::{mem, usize};
+use std::usize;
 #[cfg(feature = "malice-detection")]
 use vote::Vote;
 
 type PendingAccusations<T, P> = Vec<(P, Malice<T, P>)>;
 #[cfg(feature = "malice-detection")]
 type Accusations<T, P> = Vec<(P, Malice<T, P>)>;
-
-/// Returns whether `small` is more than two thirds of `large`.
-pub fn is_more_than_two_thirds(small: usize, large: usize) -> bool {
-    3 * small > 2 * large
-}
-
-/// Number of votes necessary to reach consensus on an `OpaquePayload`.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum ConsensusMode {
-    /// One vote is enough.
-    Single,
-    /// Supermajority (more than 2/3) is required.
-    Supermajority,
-}
 
 /// The main object which manages creating and receiving gossip about network events from peers, and
 /// which provides a sequence of consensused `Block`s by applying the PARSEC algorithm.
@@ -61,7 +48,7 @@ pub struct Parsec<T: NetworkEvent, S: SecretId> {
     // The Gossip graph.
     graph: Graph<T, S::PublicId>,
     // Information about observations stored in the graph, mapped to their hashes.
-    observations: BTreeMap<ObservationHash, ObservationInfo<T, S::PublicId>>,
+    observations: BTreeMap<ObservationKey<S::PublicId>, ObservationInfo<T, S::PublicId>>,
     // Consensused network events that have not been returned via `poll()` yet.
     consensused_blocks: VecDeque<Block<T, S::PublicId>>,
     // The map of meta votes of the events on each consensus block.
@@ -598,8 +585,11 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         self.peer_list.confirm_can_add_event(&event)?;
 
-        if let Some((payload_hash, new_info)) = ObservationInfo::create(&event) {
-            let info = self.observations.entry(payload_hash).or_insert(new_info);
+        if let Some((payload, payload_key)) = self.payload_with_key(&event) {
+            let info = self
+                .observations
+                .entry(payload_key)
+                .or_insert_with(|| ObservationInfo::new(payload.clone()));
             if our {
                 info.created_by_us = true;
             }
@@ -639,23 +629,25 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         let creator = self.get_known_event(event_index)?.creator().clone();
 
-        if let Some(payload_hash) = self.compute_consensus(MetaElectionHandle::CURRENT, event_index)
+        if let Some(payload_key) = self.compute_consensus(MetaElectionHandle::CURRENT, event_index)
         {
-            self.output_consensus_info(&payload_hash);
+            self.output_consensus_info(&payload_key);
 
-            if let Some(block) = self.create_block(&payload_hash)? {
-                self.consensused_blocks.push_back(block);
+            match self.create_block(&payload_key) {
+                Ok(block) => self.consensused_blocks.push_back(block),
+                Err(Error::MissingVotes) => (),
+                Err(error) => return Err(error),
             }
-            self.mark_observation_as_consensused(&payload_hash);
+            self.mark_observation_as_consensused(&payload_key);
 
-            self.handle_self_consensus(&payload_hash);
+            self.handle_self_consensus(&payload_key);
             if creator != *self.our_pub_id() {
-                self.handle_peer_consensus(&creator, &payload_hash);
+                self.handle_peer_consensus(&creator, &payload_key);
             }
 
             let start_index = self.compute_next_meta_election_start_index();
             let prev_election = self.meta_elections.new_election(
-                payload_hash,
+                payload_key,
                 self.peer_list.voter_ids().cloned().collect(),
                 start_index,
             );
@@ -669,9 +661,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         } else if creator != *self.our_pub_id() {
             let undecided: Vec<_> = self.meta_elections.undecided_by(&creator).collect();
             for election in undecided {
-                if let Some(payload_hash) = self.compute_consensus(election, event_index) {
+                if let Some(payload_key) = self.compute_consensus(election, event_index) {
                     self.meta_elections.mark_as_decided(election, &creator);
-                    self.handle_peer_consensus(&creator, &payload_hash);
+                    self.handle_peer_consensus(&creator, &payload_key);
                 }
             }
         }
@@ -679,7 +671,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         Ok(())
     }
 
-    fn output_consensus_info(&self, payload_hash: &ObservationHash) {
+    fn output_consensus_info(&self, payload_key: &ObservationKey<S::PublicId>) {
         dump_graph::to_file(
             self.our_pub_id(),
             &self.graph,
@@ -687,40 +679,40 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             &self.peer_list,
             self.observations
                 .iter()
-                .map(|(hash, info)| (hash, &info.observation))
+                .map(|(key, info)| (key.hash(), &info.observation))
                 .collect(),
         );
 
         let payload = self
             .observations
-            .get(payload_hash)
+            .get(payload_key)
             .map(|info| &info.observation);
         info!(
             "{:?} got consensus on block {} with payload {:?} and payload hash {:?}",
             self.our_pub_id(),
             self.meta_elections.consensus_history().len() - 1,
             payload,
-            payload_hash
+            payload_key.hash()
         )
     }
 
-    fn mark_observation_as_consensused(&mut self, payload_hash: &ObservationHash) {
-        if let Some(info) = self.observations.get_mut(payload_hash) {
+    fn mark_observation_as_consensused(&mut self, payload_key: &ObservationKey<S::PublicId>) {
+        if let Some(info) = self.observations.get_mut(payload_key) {
             info.consensused = true;
         } else {
             log_or_panic!(
                 "{:?} doesn't know about observation with hash {:?}",
                 self.peer_list.our_pub_id(),
-                payload_hash
+                payload_key.hash()
             );
         }
     }
 
     /// Handles consensus reached by us.
-    fn handle_self_consensus(&mut self, payload_hash: &ObservationHash) {
+    fn handle_self_consensus(&mut self, payload_key: &ObservationKey<S::PublicId>) {
         match self
             .observations
-            .get(payload_hash)
+            .get(payload_key)
             .map(|info| info.observation.clone())
         {
             Some(Observation::Add { ref peer_id, .. }) => self.handle_add_peer(peer_id),
@@ -788,10 +780,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     // Handle consensus reached by other peer.
-    fn handle_peer_consensus(&mut self, peer_id: &S::PublicId, payload_hash: &ObservationHash) {
+    fn handle_peer_consensus(
+        &mut self,
+        peer_id: &S::PublicId,
+        payload_key: &ObservationKey<S::PublicId>,
+    ) {
         let payload = self
             .observations
-            .get(payload_hash)
+            .get(payload_key)
             .map(|info| info.observation.clone());
         trace!(
             "{:?} detected that {:?} reached consensus on {:?}",
@@ -859,60 +855,50 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     // Any payloads which this event sees as "interesting".  If this returns a non-empty set, then
     // this event is classed as an interesting one.
     fn set_interesting_content(&self, builder: &mut MetaEventBuilder<T, S::PublicId>) {
-        if let Some(payloads_hashes) =
+        if let Some(payloads_keys) =
             self.previous_interesting_content(builder.election(), builder.event())
         {
-            builder.set_interesting_content(payloads_hashes);
+            builder.set_interesting_content(payloads_keys);
             return;
         }
 
         let peers_that_can_vote = self.voters(builder.election());
         let start_index = self.meta_elections.start_index(builder.election());
 
-        let mut payloads_set: BTreeSet<_> = self
+        let mut payload_set: BTreeSet<_> = self
             .graph
             .iter_from(start_index)
-            .filter_map(|event| {
-                event
-                    .inner()
-                    .payload_hash()
-                    .map(|payload_hash| (event, payload_hash))
-            }).filter(|(_, this_payload_hash)| {
+            .filter_map(|event| self.payload_key(&*event).map(|key| (event, key)))
+            .filter(|(_, payload_key)| {
                 self.meta_elections.is_interesting_content_candidate(
                     builder.election(),
                     builder.event().creator(),
-                    this_payload_hash,
+                    payload_key,
                 )
-            }).filter(|(event, this_payload_hash)| {
-                self.is_interesting_payload(
-                    builder,
-                    &peers_that_can_vote,
-                    this_payload_hash,
-                    start_index,
-                ) || event.sees_fork()
-                    && self.has_interesting_ancestor(builder, this_payload_hash, start_index)
-            }).map(|(_, this_payload_hash)| this_payload_hash)
-            .cloned()
+            }).filter(|(event, payload_key)| {
+                self.is_interesting_payload(builder, &peers_that_can_vote, payload_key, start_index)
+                    || event.sees_fork()
+                        && self.has_interesting_ancestor(builder, payload_key, start_index)
+            }).map(|(_, payload_key)| payload_key)
             .collect();
 
         // The code above created a set of payloads that are interesting at this event.
         // We will now sort the payloads in the order in which the creator voted for them.
-        let mut payloads_hashes = vec![];
-        for observation_hash in self
+        let mut payload_vec = vec![];
+        for this_payload_key in self
             .peer_list
             .peer_events(builder.event().creator())
             .filter_map(|hash| self.get_known_event(hash).ok())
-            .filter_map(|event| event.inner().payload_hash())
+            .filter_map(|event| self.payload_key(&*event))
         {
-            if payloads_set.remove(observation_hash) {
-                payloads_hashes.push(*observation_hash);
+            if payload_set.remove(&this_payload_key) {
+                payload_vec.push(this_payload_key);
             }
         }
         // If any payloads are left in the set, it means that the creator hasn't voted for them -
         // we will just append them at the end.
-        payloads_hashes.extend(payloads_set);
-
-        builder.set_interesting_content(payloads_hashes);
+        payload_vec.extend(payload_set);
+        builder.set_interesting_content(payload_vec);
     }
 
     // Try to get interesting content of the given event from the previous meta-election.
@@ -920,7 +906,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         &self,
         election: MetaElectionHandle,
         event: IndexedEventRef<T, S::PublicId>,
-    ) -> Option<Vec<ObservationHash>> {
+    ) -> Option<Vec<ObservationKey<S::PublicId>>> {
         let prev_election = self.meta_elections.preceding(election)?;
 
         if self.meta_elections.voter_count(election)
@@ -954,7 +940,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     fn has_interesting_ancestor(
         &self,
         builder: &MetaEventBuilder<T, S::PublicId>,
-        payload_hash: &ObservationHash,
+        payload_key: &ObservationKey<S::PublicId>,
         start_index: usize,
     ) -> bool {
         self.graph
@@ -964,7 +950,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .any(|that_event| {
                 self.meta_elections
                     .meta_event(builder.election(), that_event.event_index())
-                    .map(|meta_event| meta_event.interesting_content.contains(payload_hash))
+                    .map(|meta_event| meta_event.interesting_content.contains(payload_key))
                     .unwrap_or(false)
             })
     }
@@ -975,27 +961,17 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         &self,
         builder: &MetaEventBuilder<T, S::PublicId>,
         peers_that_can_vote: &BTreeSet<S::PublicId>,
-        payload_hash: &ObservationHash,
+        payload_key: &ObservationKey<S::PublicId>,
         start_index: usize,
     ) -> bool {
         let num_peers_that_did_vote = self.num_creators_of_ancestors_carrying_payload(
             peers_that_can_vote,
             &*builder.event(),
-            payload_hash,
+            payload_key,
             start_index,
         );
 
-        let consensus_mode = if let Some(&Observation::OpaquePayload(_)) = self
-            .observations
-            .get(payload_hash)
-            .map(|info| &info.observation)
-        {
-            self.consensus_mode
-        } else {
-            ConsensusMode::Supermajority
-        };
-
-        match consensus_mode {
+        match payload_key.consensus_mode() {
             ConsensusMode::Single => {
                 let num_ancestor_peers =
                     self.num_creators_of_ancestors(peers_that_can_vote, &*builder.event());
@@ -1027,7 +1003,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         &self,
         peers_that_can_vote: &BTreeSet<S::PublicId>,
         event: &Event<T, S::PublicId>,
-        payload_hash: &ObservationHash,
+        payload_key: &ObservationKey<S::PublicId>,
         start_index: usize,
     ) -> usize {
         peers_that_can_vote
@@ -1036,8 +1012,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 self.graph
                     .iter_from(start_index)
                     .filter(|that_event| that_event.creator() == *peer_id)
-                    .any(|that_event| {
-                        Some(payload_hash) == that_event.payload_hash() && event.sees(that_event)
+                    .map(|that_event| that_event.inner())
+                    .filter_map(|that_event| {
+                        that_event.payload_hash().map(|hash| (that_event, hash))
+                    }).any(|(that_event, that_payload_hash)| {
+                        payload_key.matches(that_payload_hash, that_event.creator())
+                            && event.sees(that_event)
                     })
             }).count()
     }
@@ -1417,7 +1397,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         &self,
         election: MetaElectionHandle,
         event_index: EventIndex,
-    ) -> Option<ObservationHash> {
+    ) -> Option<ObservationKey<S::PublicId>> {
         let last_meta_votes = self.meta_elections.meta_votes(election, event_index)?;
 
         let decided_meta_votes = last_meta_votes.iter().filter_map(|(id, event_votes)| {
@@ -1429,7 +1409,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
 
         self.meta_elections
-            .decided_payload_hash(election)
+            .decided_payload_key(election)
             .cloned()
             .or_else(|| self.compute_payload_for_consensus(election, decided_meta_votes))
     }
@@ -1438,7 +1418,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         &self,
         election: MetaElectionHandle,
         decided_meta_votes: I,
-    ) -> Option<ObservationHash>
+    ) -> Option<ObservationKey<S::PublicId>>
     where
         I: IntoIterator<Item = (&'a S::PublicId, bool)>,
         S::PublicId: 'a,
@@ -1472,22 +1452,21 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
     fn create_block(
         &self,
-        payload_hash: &ObservationHash,
-    ) -> Result<Option<Block<T, S::PublicId>>> {
+        payload_key: &ObservationKey<S::PublicId>,
+    ) -> Result<Block<T, S::PublicId>> {
         let voters = self.voters(MetaElectionHandle::CURRENT);
         let votes = self
             .graph
             .iter()
+            .map(|event| event.inner())
             .filter(|event| voters.contains(event.creator()))
             .filter_map(|event| {
-                event.vote_with_payload_hash().and_then(|(vote, hash)| {
-                    if hash == payload_hash {
-                        Some((event.creator().clone(), vote.clone()))
-                    } else {
-                        None
-                    }
-                })
-            }).collect();
+                event
+                    .vote_with_payload_hash()
+                    .map(|(vote, hash)| (vote, hash, event.creator()))
+            }).filter(|(_, hash, creator)| payload_key.matches(hash, creator))
+            .map(|(vote, _, creator)| (creator.clone(), vote.clone()))
+            .collect();
 
         Block::new(&votes)
     }
@@ -1527,9 +1506,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         self.graph
             .iter_from(previous)
             .filter(|event| {
-                event
-                    .payload_hash()
-                    .and_then(|payload_hash| self.observations.get(&payload_hash))
+                self.payload_key(event)
+                    .and_then(|payload_key| self.observations.get(&payload_key))
                     .map(|info| !info.consensused)
                     .unwrap_or(false)
             }).map(|indexed_event| indexed_event.topological_index())
@@ -1681,6 +1659,28 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
 
         Ok(())
+    }
+
+    fn payload_key(&self, event: &Event<T, S::PublicId>) -> Option<ObservationKey<S::PublicId>> {
+        self.payload_with_key(event).map(|(_, key)| key)
+    }
+
+    fn payload_with_key<'a>(
+        &self,
+        event: &'a Event<T, S::PublicId>,
+    ) -> Option<ObservationWithKey<'a, T, S::PublicId>> {
+        let (payload, hash) = event.payload_with_hash()?;
+        let mode = if let Observation::OpaquePayload(_) = payload {
+            self.consensus_mode
+        } else {
+            ConsensusMode::Supermajority
+        };
+        let key = match mode {
+            ConsensusMode::Supermajority => ObservationKey::Supermajority(*hash),
+            ConsensusMode::Single => ObservationKey::Single(*hash, event.creator().clone()),
+        };
+
+        Some((payload, key))
     }
 }
 
@@ -2221,7 +2221,7 @@ impl<T: NetworkEvent, S: SecretId> Drop for Parsec<T, S> {
                 &self.peer_list,
                 self.observations
                     .iter()
-                    .map(|(hash, info)| (hash, &info.observation))
+                    .map(|(key, info)| (key.hash(), &info.observation))
                     .collect(),
             );
         }
@@ -2236,19 +2236,16 @@ struct ObservationInfo<T: NetworkEvent, P: PublicId> {
 }
 
 impl<T: NetworkEvent, P: PublicId> ObservationInfo<T, P> {
-    fn create(event: &Event<T, P>) -> Option<(ObservationHash, Self)> {
-        event.payload_with_hash().map(|(observation, hash)| {
-            (
-                *hash,
-                Self {
-                    observation: observation.clone(),
-                    consensused: false,
-                    created_by_us: false,
-                },
-            )
-        })
+    fn new(observation: Observation<T, P>) -> Self {
+        Self {
+            observation,
+            consensused: false,
+            created_by_us: false,
+        }
     }
 }
+
+type ObservationWithKey<'a, T, P> = (&'a Observation<T, P>, ObservationKey<P>);
 
 #[cfg(all(test, feature = "mock"))]
 impl Parsec<Transaction, PeerId> {
@@ -2265,14 +2262,14 @@ impl Parsec<Transaction, PeerId> {
             .current_meta_events()
             .values()
         {
-            for payload_hash in &meta_event.interesting_content {
-                if let Some(payload) = parsed_contents.observation_map.remove(payload_hash) {
+            for payload_key in &meta_event.interesting_content {
+                if let Some(payload) = parsed_contents.observation_map.remove(payload_key) {
                     let obs_info = ObservationInfo {
                         observation: payload,
                         consensused: false,
                         created_by_us: false,
                     };
-                    let _ = parsec.observations.insert(*payload_hash, obs_info);
+                    let _ = parsec.observations.insert(payload_key.clone(), obs_info);
                 }
             }
         }
@@ -2280,8 +2277,12 @@ impl Parsec<Transaction, PeerId> {
         // ..and also the payloads carried by events.
         let our_pub_id = parsec.our_pub_id().clone();
         for event in &parsed_contents.graph {
-            if let Some((payload_hash, new_info)) = ObservationInfo::create(&*event) {
-                let info = parsec.observations.entry(payload_hash).or_insert(new_info);
+            if let Some((payload, payload_hash)) = event.payload_with_hash() {
+                let payload_key = ObservationKey::Supermajority(*payload_hash);
+                let info = parsec
+                    .observations
+                    .entry(payload_key)
+                    .or_insert_with(|| ObservationInfo::new(payload.clone()));
                 if *event.creator() == our_pub_id {
                     info.created_by_us = true;
                 }
