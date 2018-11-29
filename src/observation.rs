@@ -10,8 +10,11 @@ use gossip::{EventHash, PackedEvent};
 use hash::Hash;
 use id::PublicId;
 use network_event::NetworkEvent;
+use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 use serialise;
+use std::cmp::Ordering;
 use std::collections::BTreeSet;
+use std::error::Error;
 use std::fmt::{self, Debug, Formatter};
 
 /// An enum of the various network events for which a peer can vote.
@@ -124,5 +127,101 @@ pub enum Malice<T: NetworkEvent, P: PublicId> {
     /// Event's creator is different to its self_parent's creator. The accusation contains the
     /// original event so other peers can verify the accusation directly.
     SelfParentByDifferentCreator(Box<PackedEvent<T, P>>),
+    /// Detectable but unprovable malice. Relies on consensus.
+    Unprovable(UnprovableMalice),
     // TODO: add other malice variants
+}
+
+impl<T: NetworkEvent, P: PublicId> Malice<T, P> {
+    #[cfg(any(test, feature = "malice-detection", feature = "testing"))]
+    pub(crate) fn is_provable(&self) -> bool {
+        match *self {
+            Malice::Unprovable(_) => false,
+            _ => true,
+        }
+    }
+}
+
+// For internal diagnostics only. The value is ignored in comparison, ordering or hashing.
+#[derive(Clone, Debug)]
+pub enum UnprovableMalice {
+    // A node is spamming us.
+    Spam,
+    // Other, unspecified malice.
+    Unspecified,
+}
+
+impl PartialEq for UnprovableMalice {
+    fn eq(&self, _: &Self) -> bool {
+        true
+    }
+}
+
+impl Eq for UnprovableMalice {}
+
+impl PartialOrd for UnprovableMalice {
+    fn partial_cmp(&self, _: &Self) -> Option<Ordering> {
+        Some(Ordering::Equal)
+    }
+}
+
+impl Ord for UnprovableMalice {
+    fn cmp(&self, _: &Self) -> Ordering {
+        Ordering::Equal
+    }
+}
+
+impl Serialize for UnprovableMalice {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        s.serialize_unit()
+    }
+}
+
+impl<'a> Deserialize<'a> for UnprovableMalice {
+    fn deserialize<D: Deserializer<'a>>(deserializer: D) -> Result<Self, D::Error> {
+        deserializer.deserialize_unit(UnprovableMaliceVisitor)
+    }
+}
+
+struct UnprovableMaliceVisitor;
+
+impl<'a> Visitor<'a> for UnprovableMaliceVisitor {
+    type Value = UnprovableMalice;
+
+    fn expecting(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "UnprovableMalice")
+    }
+
+    fn visit_unit<E: Error>(self) -> Result<Self::Value, E> {
+        Ok(UnprovableMalice::Unspecified)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use maidsafe_utilities::serialisation::deserialise;
+    use mock::{PeerId, Transaction};
+
+    #[test]
+    fn malice_comparison_and_hashing_ignores_unprovable_value() {
+        let malice1 = Malice::Unprovable::<Transaction, PeerId>(UnprovableMalice::Spam);
+        let malice2 = Malice::Unprovable::<Transaction, PeerId>(UnprovableMalice::Unspecified);
+
+        assert!(malice1 == malice2);
+        assert!(!(malice1 < malice2));
+        assert!(!(malice1 > malice2));
+
+        assert_eq!(
+            Hash::from(serialise(&malice1).as_slice()),
+            Hash::from(serialise(&malice2).as_slice())
+        );
+    }
+
+    #[test]
+    fn unprovable_malice_is_deserialisable() {
+        let before = Malice::Unprovable::<Transaction, PeerId>(UnprovableMalice::Spam);
+        let serialised = serialise(&before);
+        let _: Malice<Transaction, PeerId> = unwrap!(deserialise(&serialised));
+    }
 }

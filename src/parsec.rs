@@ -13,12 +13,15 @@ use dump_graph;
 use error::{Error, Result};
 use gossip::{
     Event, EventHash, EventIndex, Graph, IndexedEventRef, PackedEvent, Request, Response,
+    UnpackedEvent,
 };
 use id::{PublicId, SecretId};
 use meta_voting::{MetaElectionHandle, MetaElections, MetaEvent, MetaEventBuilder, MetaVote, Step};
 #[cfg(all(test, feature = "mock"))]
 use mock::{PeerId, Transaction};
 use network_event::NetworkEvent;
+#[cfg(feature = "malice-detection")]
+use observation::UnprovableMalice;
 use observation::{Malice, Observation, ObservationHash};
 use peer_list::{PeerList, PeerState};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -68,9 +71,12 @@ pub struct Parsec<T: NetworkEvent, S: SecretId> {
     consensused_blocks: VecDeque<Block<T, S::PublicId>>,
     // The map of meta votes of the events on each consensus block.
     meta_elections: MetaElections<S::PublicId>,
+    consensus_mode: ConsensusMode,
     // Accusations to raise at the end of the processing of current gossip message.
     pending_accusations: PendingAccusations<T, S::PublicId>,
-    consensus_mode: ConsensusMode,
+    // Peers we accused of unprovable malice.
+    #[cfg(feature = "malice-detection")]
+    unprovable_offenders: BTreeSet<S::PublicId>,
 }
 
 impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
@@ -212,6 +218,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             meta_elections: MetaElections::new(genesis_group.clone()),
             consensus_mode,
             pending_accusations: vec![],
+            #[cfg(feature = "malice-detection")]
+            unprovable_offenders: BTreeSet::new(),
         }
     }
 
@@ -238,7 +246,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             &self.peer_list,
         );
 
-        self.add_event(event)
+        let _ = self.add_event(event)?;
+        Ok(())
     }
 
     /// Returns ids of peers who we can send gossips to. Calling `create_gossip` with a peer id
@@ -503,38 +512,49 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         self.confirm_self_state(PeerState::RECV)?;
         self.confirm_peer_state(src, PeerState::SEND)?;
 
-        let mut prev_forking_peers = BTreeSet::new();
+        let mut forking_peers = BTreeSet::new();
+        let mut known = Vec::new();
+
         for packed_event in packed_events {
-            if let Some(event) = Event::unpack(
-                packed_event,
-                &self.graph,
-                &self.peer_list,
-                &prev_forking_peers,
-            )? {
-                if self
-                    .peer_list
-                    .events_by_index(event.creator(), event.index_by_creator())
-                    .next()
-                    .is_some()
-                {
-                    let _ = prev_forking_peers.insert(event.creator().clone());
+            match Event::unpack(packed_event, &self.graph, &self.peer_list, &forking_peers)? {
+                UnpackedEvent::New(event) => {
+                    if self
+                        .peer_list
+                        .events_by_index(event.creator(), event.index_by_creator())
+                        .next()
+                        .is_some()
+                    {
+                        let _ = forking_peers.insert(event.creator().clone());
+                    }
+
+                    let event_creator = event.creator().clone();
+                    let event_index = self.add_event(event)?;
+
+                    // We have received an event of a peer in the message. The peer can now receive
+                    // gossips from us as well.
+                    self.peer_list
+                        .change_peer_state(&event_creator, PeerState::RECV);
+                    self.peer_list.record_gossiped_event_by(src, event_index);
                 }
-                let event_creator = event.creator().clone();
-                self.add_event(event)?;
-                // We have received an event of a peer in the message. The peer can now receive
-                // gossips from us as well.
-                self.peer_list
-                    .change_peer_state(&event_creator, PeerState::RECV);
+                UnpackedEvent::Known(index) => {
+                    known.push(index);
+                }
             }
         }
 
         #[cfg(feature = "malice-detection")]
-        self.detect_premature_gossip()?;
+        {
+            self.detect_premature_gossip()?;
 
-        Ok(prev_forking_peers)
+            for event_index in known {
+                self.detect_spam(src, event_index);
+            }
+        }
+
+        Ok(forking_peers)
     }
 
-    fn add_event(&mut self, event: Event<T, S::PublicId>) -> Result<()> {
+    fn add_event(&mut self, event: Event<T, S::PublicId>) -> Result<EventIndex> {
         let our = event.creator() == self.our_pub_id();
         if !our {
             #[cfg(feature = "malice-detection")]
@@ -558,7 +578,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         };
 
         if is_initial {
-            return Ok(());
+            return Ok(event_index);
         }
 
         self.initialise_membership_list(event_index);
@@ -569,7 +589,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             self.detect_malice_after_process(event_index);
         }
 
-        Ok(())
+        Ok(event_index)
     }
 
     fn process_event(&mut self, event_index: EventIndex) -> Result<()> {
@@ -1542,7 +1562,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             )
         };
 
-        self.add_event(sync_event)
+        let _ = self.add_event(sync_event)?;
+        Ok(())
     }
 
     // Returns an iterator over `self.events` which will yield all the events we think `peer_id`
@@ -1581,7 +1602,34 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         (self.voter_count(election) as f64).log2().ceil() as usize
     }
 
-    #[cfg(feature = "malice-detection")]
+    fn create_accusation_event(
+        &mut self,
+        offender: S::PublicId,
+        malice: Malice<T, S::PublicId>,
+    ) -> Result<()> {
+        let event = Event::new_from_observation(
+            self.our_last_event_hash(),
+            Observation::Accusation { offender, malice },
+            &self.graph,
+            &self.peer_list,
+        );
+
+        let _ = self.add_event(event)?;
+        Ok(())
+    }
+
+    fn create_accusation_events(&mut self) -> Result<()> {
+        let pending_accusations = mem::replace(&mut self.pending_accusations, vec![]);
+        for (offender, malice) in pending_accusations {
+            self.create_accusation_event(offender, malice)?;
+        }
+
+        Ok(())
+    }
+}
+
+#[cfg(feature = "malice-detection")]
+impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     fn detect_malice_before_process(&mut self, event: &Event<T, S::PublicId>) -> Result<()> {
         // NOTE: `detect_incorrect_genesis` must come first.
         self.detect_incorrect_genesis(event)?;
@@ -1601,38 +1649,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         Ok(())
     }
 
-    #[cfg(feature = "malice-detection")]
     fn detect_malice_after_process(&mut self, event_index: EventIndex) {
         self.detect_invalid_gossip_creator(event_index);
     }
 
-    fn create_accusation_event(
-        &mut self,
-        offender: S::PublicId,
-        malice: Malice<T, S::PublicId>,
-    ) -> Result<()> {
-        let event = Event::new_from_observation(
-            self.our_last_event_hash(),
-            Observation::Accusation { offender, malice },
-            &self.graph,
-            &self.peer_list,
-        );
-
-        self.add_event(event)
-    }
-
-    fn create_accusation_events(&mut self) -> Result<()> {
-        let pending_accusations = mem::replace(&mut self.pending_accusations, vec![]);
-        for (offender, malice) in pending_accusations {
-            self.create_accusation_event(offender, malice)?;
-        }
-
-        Ok(())
-    }
-}
-
-#[cfg(feature = "malice-detection")]
-impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     // Detect if the event carries an `Observation::Genesis` that doesn't match what we'd expect.
     fn detect_incorrect_genesis(&mut self, event: &Event<T, S::PublicId>) -> Result<()> {
         if let Some(Observation::Genesis(ref group)) = event.vote().map(Vote::payload) {
@@ -1820,14 +1840,16 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     fn detect_invalid_accusation(&mut self, event: &Event<T, S::PublicId>) {
-        let their_accusation = if let Some(&Observation::Accusation {
-            ref offender,
-            ref malice,
-        }) = event.vote().map(Vote::payload)
-        {
-            (offender, malice)
-        } else {
-            return;
+        let their_accusation = match event.vote().map(Vote::payload) {
+            Some(&Observation::Accusation {
+                ref offender,
+                ref malice,
+            })
+                if malice.is_provable() =>
+            {
+                (offender, malice)
+            }
+            _ => return,
         };
 
         // First try to find the same accusation in our pending accusations...
@@ -1912,6 +1934,45 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .map_err(|_| Error::PrematureGossip)
     }
 
+    fn detect_spam(&mut self, src: &S::PublicId, known_event_index: EventIndex) {
+        if self.unprovable_offenders.contains(src) {
+            // Already accused.
+            return;
+        }
+
+        let spam = {
+            let their_event = self
+                .peer_list
+                .last_gossiped_event_by(src)
+                .and_then(|index| self.get_known_event(index).ok())
+                .and_then(|event| self.last_ancestor_by(event, src));
+            let their_event = if let Some(their_event) = their_event {
+                their_event
+            } else {
+                return;
+            };
+
+            let known_event = if let Ok(event) = self.get_known_event(known_event_index) {
+                event
+            } else {
+                return;
+            };
+
+            self.last_ancestor_by(their_event, self.our_pub_id())
+                .map(|our_event| self.graph.is_descendant(our_event, known_event))
+                .unwrap_or(false)
+        };
+
+        if spam {
+            let _ = self.unprovable_offenders.insert(src.clone());
+            self.accuse(src.clone(), Malice::Unprovable(UnprovableMalice::Spam));
+        }
+    }
+
+    fn accuse(&mut self, offender: S::PublicId, malice: Malice<T, S::PublicId>) {
+        self.pending_accusations.push((offender, malice));
+    }
+
     fn genesis_group(&self) -> BTreeSet<&S::PublicId> {
         self.graph
             .iter()
@@ -1927,8 +1988,26 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .unwrap_or_else(|| self.peer_list.voter_ids().collect())
     }
 
-    fn accuse(&mut self, offender: S::PublicId, malice: Malice<T, S::PublicId>) {
-        self.pending_accusations.push((offender, malice));
+    // Returns the last ancestor of the given event created by the given peer, if any.
+    fn last_ancestor_by<'a>(
+        &'a self,
+        event: IndexedEventRef<'a, T, S::PublicId>,
+        creator: &S::PublicId,
+    ) -> Option<IndexedEventRef<'a, T, S::PublicId>> {
+        use gossip::LastAncestor;
+
+        match event.last_ancestor_by(creator) {
+            LastAncestor::Some(index) => self
+                .peer_list
+                .events_by_index(creator, index)
+                .next()
+                .and_then(|index| self.get_known_event(index).ok()),
+            LastAncestor::None => None,
+            LastAncestor::Fork => self
+                .graph
+                .ancestors(event)
+                .find(|ancestor| ancestor.creator() == creator),
+        }
     }
 }
 
@@ -2085,7 +2164,8 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
             )
         }
 
-        self.0.add_event(event)
+        let _ = self.0.add_event(event)?;
+        Ok(())
     }
 
     pub fn create_sync_event(
@@ -2103,13 +2183,13 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
 
     #[cfg(feature = "malice-detection")]
     pub fn unpack_and_add_event(&mut self, event: PackedEvent<T, S::PublicId>) -> Result<()> {
-        if let Some(event) =
+        if let UnpackedEvent::New(event) =
             Event::unpack(event, &self.0.graph, &self.0.peer_list, &BTreeSet::new())?
         {
-            self.0.add_event(event)
-        } else {
-            Ok(())
+            let _ = self.0.add_event(event)?;
         }
+
+        Ok(())
     }
 
     #[cfg(feature = "malice-detection")]

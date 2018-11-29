@@ -63,7 +63,7 @@ pub enum ConsensusError {
         observation: Observation,
         signatures: BTreeSet<PeerId>,
     },
-    InvalidAccusation {
+    UnexpectedAccusation {
         accuser: PeerId,
         accused: PeerId,
         malice: Malice<Transaction, PeerId>,
@@ -185,13 +185,11 @@ impl Network {
                         Err(Error::UnknownPeer) | Err(Error::InvalidPeerState { .. }) => (),
                         Err(e) => panic!("{:?}", e),
                     },
-                    Message::Response(resp) => {
-                        unwrap!(
-                            self.peer_mut(peer)
-                                .parsec
-                                .handle_response(&entry.sender, resp)
-                        );
-                    }
+                    Message::Response(resp) => unwrap!(
+                        self.peer_mut(peer)
+                            .parsec
+                            .handle_response(&entry.sender, resp)
+                    ),
                 }
             }
         }
@@ -322,12 +320,13 @@ impl Network {
     }
 
     /// Check that no node has been accused of malice.
-    fn check_invalid_accusations(&self, peer_id: &PeerId) -> Result<(), ConsensusError> {
+    fn check_unexpected_accusations(&self, peer_id: &PeerId) -> Result<(), ConsensusError> {
         let peer = self.peer(peer_id);
-
-        let invalid_accusation = peer.unpolled_accusations().next();
-        if let Some((offender, malice)) = invalid_accusation {
-            return Err(ConsensusError::InvalidAccusation {
+        let accusation = peer
+            .unpolled_accusations()
+            .find(|(_, malice)| malice.is_provable());
+        if let Some((offender, malice)) = accusation {
+            return Err(ConsensusError::UnexpectedAccusation {
                 accuser: peer.id.clone(),
                 accused: offender.clone(),
                 malice: malice.clone(),
@@ -391,7 +390,7 @@ impl Network {
                     self.peer_mut(&peer).make_votes();
                     self.handle_messages(&peer, global_step);
                     self.peer_mut(&peer).poll();
-                    self.check_invalid_accusations(&peer)?;
+                    self.check_unexpected_accusations(&peer)?;
 
                     if let RequestTiming::DuringThisStep(req) = request_timing {
                         match self.peer(&peer).parsec.create_gossip(Some(&req.recipient)) {
