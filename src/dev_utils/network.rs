@@ -7,15 +7,16 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::peer::{Peer, PeerStatus};
-use super::schedule::{RequestTiming, Schedule, ScheduleEvent};
+use super::schedule::{Schedule, ScheduleEvent, ScheduleOptions};
 use super::Observation;
 use block::Block;
 use error::Error;
 use gossip::{Request, Response};
 use mock::{PeerId, Transaction};
 use observation::{Malice, Observation as ParsecObservation};
-use parsec::ConsensusMode;
-use std::collections::{BTreeMap, BTreeSet};
+use parsec::{is_more_than_two_thirds, ConsensusMode};
+use rand::Rng;
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 enum Message {
     Request(Request<Transaction, PeerId>, usize),
@@ -111,6 +112,12 @@ impl Network {
 
     fn active_peers(&self) -> impl Iterator<Item = &Peer> {
         self.peers_with_status(PeerStatus::Active)
+    }
+
+    fn present_peers(&self) -> impl Iterator<Item = &Peer> {
+        self.peers.values().filter(move |&peer| {
+            peer.status == PeerStatus::Active || peer.status == PeerStatus::Pending
+        })
     }
 
     /// Returns true if all peers hold the same sequence of stable blocks.
@@ -337,69 +344,138 @@ impl Network {
     }
 
     /// Simulates the network according to the given schedule
-    pub fn execute_schedule(&mut self, schedule: Schedule) -> Result<(), ConsensusError> {
+    pub fn execute_schedule<R: Rng>(
+        &mut self,
+        rng: &mut R,
+        schedule: Schedule,
+        options: &ScheduleOptions,
+    ) -> Result<(), ConsensusError> {
         let Schedule {
             peers,
             num_observations,
             events,
         } = schedule;
+        let mut peer_removal_guard = PeerRemovalGuard::default();
+        let mut pending_events: VecDeque<ScheduleEvent> = VecDeque::new();
+
         for event in events {
-            match event {
-                ScheduleEvent::Genesis(genesis_group) => {
-                    let peers = genesis_group
-                        .iter()
-                        .map(|id| {
-                            (
-                                id.clone(),
-                                Peer::from_genesis(id.clone(), &genesis_group, self.consensus_mode),
-                            )
-                        }).collect();
-                    self.peers = peers;
-                    self.genesis = genesis_group;
-                    // do a full reset while we're at it
-                    self.msg_queue.clear();
+            while !pending_events.is_empty() {
+                if let Some(pending_event) = pending_events.pop_front() {
+                    if !self.execute_event(
+                        rng,
+                        options,
+                        pending_event.clone(),
+                        &mut peer_removal_guard,
+                    )? {
+                        pending_events.push_front(pending_event);
+                        break;
+                    }
                 }
-                ScheduleEvent::AddPeer(peer) => {
-                    let current_peers = self
-                        .peers
-                        .values()
-                        .filter(|peer| peer.status == PeerStatus::Active)
-                        .map(|peer| peer.id.clone())
-                        .collect();
-                    let _ = self.peers.insert(
+            }
+
+            if !self.execute_event(rng, options, event.clone(), &mut peer_removal_guard)? {
+                pending_events.push_back(event);
+            }
+
+            self.check_consensus_broken()?;
+            if self.consensus_complete(&peers, num_observations) {
+                break;
+            }
+        }
+
+        self.check_consensus(&peers, num_observations)?;
+        self.check_blocks_signatories()
+    }
+
+    // Returns 'Ok(true)' when event got executed, or 'Ok(false)' when the event needs to be delayed
+    // due to the parsec membership status.
+    fn execute_event<R: Rng>(
+        &mut self,
+        rng: &mut R,
+        options: &ScheduleOptions,
+        event: ScheduleEvent,
+        peer_removal_guard: &mut PeerRemovalGuard,
+    ) -> Result<bool, ConsensusError> {
+        match event {
+            ScheduleEvent::Genesis(genesis_group) => {
+                let peers = genesis_group
+                    .iter()
+                    .map(|id| {
+                        (
+                            id.clone(),
+                            Peer::from_genesis(id.clone(), &genesis_group, self.consensus_mode),
+                        )
+                    }).collect();
+                for node in &genesis_group {
+                    peer_removal_guard.record_new_voter(node.clone());
+                }
+                self.peers = peers;
+                self.genesis = genesis_group;
+                // do a full reset while we're at it
+                self.msg_queue.clear();
+            }
+            ScheduleEvent::AddPeer(peer) => {
+                let current_peers = self.active_peers().map(|peer| peer.id.clone()).collect();
+                let _ = self.peers.insert(
+                    peer.clone(),
+                    Peer::from_existing(
                         peer.clone(),
-                        Peer::from_existing(
-                            peer.clone(),
-                            &self.genesis,
-                            &current_peers,
-                            self.consensus_mode,
-                        ),
-                    );
-                }
-                ScheduleEvent::RemovePeer(peer) => {
+                        &self.genesis,
+                        &current_peers,
+                        self.consensus_mode,
+                    ),
+                );
+            }
+            ScheduleEvent::RemovePeer(peer) => {
+                if peer_removal_guard.attempt_to_remove_peer(&peer) {
                     (*self.peer_mut(&peer)).status = PeerStatus::Removed;
+                } else {
+                    return Ok(false);
                 }
-                ScheduleEvent::Fail(peer) => {
+            }
+            ScheduleEvent::Fail(peer) => {
+                if peer_removal_guard.attempt_to_remove_peer(&peer) {
                     (*self.peer_mut(&peer)).status = PeerStatus::Failed;
+                } else {
+                    return Ok(false);
                 }
-                ScheduleEvent::LocalStep {
-                    global_step,
-                    peer,
-                    request_timing,
-                } => {
+            }
+            ScheduleEvent::LocalStep(global_step) => {
+                let present_peers: Vec<PeerId> =
+                    self.present_peers().map(|peer| peer.id.clone()).collect();
+                for peer in &present_peers {
                     self.peer_mut(&peer).make_votes();
                     self.handle_messages(&peer, global_step);
                     self.peer_mut(&peer).poll();
                     self.check_unexpected_accusations(&peer)?;
 
-                    if let RequestTiming::DuringThisStep(req) = request_timing {
-                        match self.peer(&peer).parsec.create_gossip(Some(&req.recipient)) {
+                    for block in self.peer(&peer).blocks_payloads() {
+                        match block {
+                            ParsecObservation::Remove { peer_id, .. } => {
+                                peer_removal_guard.record_consensus_on_remove_peer(peer_id);
+                            }
+                            ParsecObservation::Add { peer_id, .. } => {
+                                peer_removal_guard.record_new_voter(peer_id.clone());
+                            }
+                            _ => (),
+                        }
+                    }
+
+                    if rng.gen::<f64>() < options.gossip_prob {
+                        let mut recipient = peer;
+                        while recipient == peer {
+                            recipient = unwrap!(rng.choose(&present_peers));
+                        }
+                        let req_delay = options.gen_delay(rng);
+                        let resp_delay = options.gen_delay(rng);
+
+                        match self.peer(&peer).parsec.create_gossip(Some(&recipient)) {
                             Ok(request) => {
                                 self.send_message(
                                     peer.clone(),
-                                    &req.recipient,
-                                    Message::Request(request, req.resp_delay),
-                                    global_step + req.req_delay,
+                                    &recipient,
+                                    Message::Request(request, resp_delay),
+                                    global_step + req_delay,
                                 );
                             }
                             Err(e @ Error::InvalidPeerState { .. })
@@ -408,7 +484,7 @@ impl Network {
                                     .peer(&peer)
                                     .parsec
                                     .gossip_recipients()
-                                    .any(|peer_id| peer_id == &req.recipient)
+                                    .any(|peer_id| peer_id == recipient)
                                 {
                                     panic!("Should be able to gossip {:?}", e);
                                 }
@@ -417,16 +493,49 @@ impl Network {
                         }
                     }
                 }
-                ScheduleEvent::VoteFor(peer, observation) => {
-                    self.peer_mut(&peer).vote_for(&observation);
-                }
             }
-            self.check_consensus_broken()?;
-            if self.consensus_complete(&peers, num_observations) {
-                break;
+            ScheduleEvent::VoteFor(peer, observation) => {
+                if let ParsecObservation::Remove { ref peer_id, .. } = observation {
+                    if !peer_removal_guard.attempt_to_remove_peer(&peer_id) {
+                        return Ok(false);
+                    }
+                }
+
+                self.peer_mut(&peer).vote_for(&observation);
             }
         }
-        self.check_consensus(&peers, num_observations)?;
-        self.check_blocks_signatories()
+        Ok(true)
+    }
+}
+
+#[derive(Default)]
+struct PeerRemovalGuard {
+    voters: BTreeSet<PeerId>,
+    nodes_to_be_removed: BTreeSet<PeerId>,
+}
+
+impl PeerRemovalGuard {
+    fn record_new_voter(&mut self, voter: PeerId) {
+        let _ = self.voters.insert(voter);
+    }
+
+    fn record_consensus_on_remove_peer(&mut self, peer: &PeerId) {
+        let _ = self.nodes_to_be_removed.remove(peer);
+        let _ = self.voters.remove(peer);
+    }
+
+    fn attempt_to_remove_peer(&mut self, peer: &PeerId) -> bool {
+        if self.can_remove(peer) {
+            let _ = self.nodes_to_be_removed.insert(peer.clone());
+            true
+        } else {
+            false
+        }
+    }
+
+    fn can_remove(&self, peer: &PeerId) -> bool {
+        let active_participants = self.voters.len() - self.nodes_to_be_removed.len();
+        is_more_than_two_thirds(active_participants, self.voters.len())
+            || self.nodes_to_be_removed.contains(&peer)
     }
 }

@@ -931,17 +931,18 @@ mod tests {
     #[test]
     fn dot_parser() {
         let mut env = Environment::new(SEED);
-        let schedule = Schedule::new(
-            &mut env,
-            &ScheduleOptions {
-                genesis_size: 4,
-                opaque_to_add: 5,
-                gossip_prob: 0.8,
-                ..Default::default()
-            },
-        );
+        let options = ScheduleOptions {
+            genesis_size: 4,
+            opaque_to_add: 5,
+            gossip_prob: 0.8,
+            ..Default::default()
+        };
+        let schedule = Schedule::new(&mut env, &options);
 
-        unwrap!(env.network.execute_schedule(schedule));
+        unwrap!(
+            env.network
+                .execute_schedule(&mut env.rng, schedule, &options)
+        );
 
         let mut num_of_files = 0u8;
         let entries = DIR.with(|dir| unwrap!(fs::read_dir(dir)));
