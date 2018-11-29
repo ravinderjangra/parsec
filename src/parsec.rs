@@ -1670,7 +1670,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         event: &'a Event<T, S::PublicId>,
     ) -> Option<ObservationWithKey<'a, T, S::PublicId>> {
         let (payload, hash) = event.payload_with_hash()?;
-        let mode = if let Observation::OpaquePayload(_) = payload {
+        let mode = if payload.is_opaque() {
             self.consensus_mode
         } else {
             ConsensusMode::Supermajority

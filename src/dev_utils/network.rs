@@ -50,7 +50,8 @@ pub enum ConsensusError {
         order_2: BlocksOrder,
     },
     WrongBlocksNumber {
-        expected: usize,
+        expected_min: usize,
+        expected_max: usize,
         got: usize,
     },
     WrongPeers {
@@ -237,7 +238,7 @@ impl Network {
         &self,
         block: &'a Block<Transaction, PeerId>,
     ) -> (&'a Observation, Option<&'a PeerId>) {
-        let peer_id = if let ParsecObservation::OpaquePayload(_) = *block.payload() {
+        let peer_id = if block.payload().is_opaque() {
             if self.consensus_mode == ConsensusMode::Single {
                 Some(&unwrap!(block.proofs().into_iter().next()).public_id)
             } else {
@@ -255,21 +256,26 @@ impl Network {
         expected_peers: &BTreeMap<PeerId, PeerStatus>,
         num_expected_observations: usize,
     ) -> bool {
-        self.check_consensus(expected_peers, num_expected_observations)
-            .is_ok()
+        self.check_consensus(
+            expected_peers,
+            num_expected_observations,
+            num_expected_observations,
+        ).is_ok()
     }
 
     /// Checks whether there is a right number of blocks and the blocks are in an agreeing order
     fn check_consensus(
         &self,
         expected_peers: &BTreeMap<PeerId, PeerStatus>,
-        num_expected_observations: usize,
+        min_expected_observations: usize,
+        max_expected_observations: usize,
     ) -> Result<(), ConsensusError> {
         // Check the number of consensused blocks.
         let got = unwrap!(self.active_peers().next()).blocks_payloads().len();
-        if num_expected_observations != got {
+        if got < min_expected_observations || got > max_expected_observations {
             return Err(ConsensusError::WrongBlocksNumber {
-                expected: num_expected_observations,
+                expected_min: min_expected_observations,
+                expected_max: max_expected_observations,
                 got,
             });
         }
@@ -308,7 +314,7 @@ impl Network {
             });
         }
 
-        let consensus_mode = if let ParsecObservation::OpaquePayload(_) = *block.payload() {
+        let consensus_mode = if block.payload().is_opaque() {
             self.consensus_mode
         } else {
             ConsensusMode::Supermajority
@@ -381,7 +387,8 @@ impl Network {
     ) -> Result<(), ConsensusError> {
         let Schedule {
             peers,
-            num_observations,
+            min_observations,
+            max_observations,
             events,
         } = schedule;
         let mut peer_removal_guard = PeerRemovalGuard::default();
@@ -407,12 +414,12 @@ impl Network {
             }
 
             self.check_consensus_broken()?;
-            if self.consensus_complete(&peers, num_observations) {
+            if self.consensus_complete(&peers, max_observations) {
                 break;
             }
         }
 
-        self.check_consensus(&peers, num_observations)?;
+        self.check_consensus(&peers, min_observations, max_observations)?;
         self.check_blocks_signatories()
     }
 

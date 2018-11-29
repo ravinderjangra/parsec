@@ -48,22 +48,13 @@ pub enum Observation<T: NetworkEvent, P: PublicId> {
     OpaquePayload(T),
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
-pub(crate) struct ObservationHash(pub(crate) Hash);
-
-impl ObservationHash {
-    pub const ZERO: Self = ObservationHash(Hash::ZERO);
-}
-
-impl<'a, T: NetworkEvent, P: PublicId> From<&'a Observation<T, P>> for ObservationHash {
-    fn from(observation: &'a Observation<T, P>) -> Self {
-        ObservationHash(Hash::from(serialise(observation).as_slice()))
-    }
-}
-
-impl Debug for ObservationHash {
-    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
-        write!(formatter, "{:?}", self.0)
+impl<T: NetworkEvent, P: PublicId> Observation<T, P> {
+    pub(crate) fn is_opaque(&self) -> bool {
+        if let Observation::OpaquePayload(_) = *self {
+            true
+        } else {
+            false
+        }
     }
 }
 
@@ -192,6 +183,25 @@ impl<'a> Visitor<'a> for UnprovableMaliceVisitor {
 
     fn visit_unit<E: Error>(self) -> Result<Self::Value, E> {
         Ok(UnprovableMalice::Unspecified)
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+pub(crate) struct ObservationHash(pub(crate) Hash);
+
+impl ObservationHash {
+    pub const ZERO: Self = ObservationHash(Hash::ZERO);
+}
+
+impl<'a, T: NetworkEvent, P: PublicId> From<&'a Observation<T, P>> for ObservationHash {
+    fn from(observation: &'a Observation<T, P>) -> Self {
+        ObservationHash(Hash::from(serialise(observation).as_slice()))
+    }
+}
+
+impl Debug for ObservationHash {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "{:?}", self.0)
     }
 }
 

@@ -142,6 +142,17 @@ impl PendingObservations {
     pub fn queues_empty<'a, I: Iterator<Item = &'a PeerId>>(&self, mut peers: I) -> bool {
         peers.all(|id| self.queues.get(id).map_or(true, |queue| queue.is_empty()))
     }
+
+    /// Number of `OpaquePayload` observations scheduled to be made by the given peer.
+    pub fn num_opaque_observations(&self, peer: &PeerId) -> usize {
+        if let Some(queues) = self.queues.get(peer) {
+            queues.values().fold(0, |sum, queue| {
+                sum + queue.iter().filter(|obs| obs.is_opaque()).count()
+            })
+        } else {
+            0
+        }
+    }
 }
 
 /// Available options for the distribution of message delays
@@ -396,7 +407,8 @@ impl ObservationSchedule {
 #[derive(Clone)]
 pub struct Schedule {
     pub peers: BTreeMap<PeerId, PeerStatus>,
-    pub num_observations: usize,
+    pub min_observations: usize,
+    pub max_observations: usize,
     pub events: Vec<ScheduleEvent>,
 }
 
@@ -467,8 +479,10 @@ impl Schedule {
         mut obs_schedule: ObservationSchedule,
     ) -> Schedule {
         let mut pending = PendingObservations::new(options);
+
         // the +1 below is to account for genesis
-        let num_observations = obs_schedule.count_observations() + 1;
+        let max_observations = obs_schedule.count_observations() + 1;
+        let mut min_observations = max_observations;
 
         let mut peers = PeerStatuses::new(&obs_schedule.genesis);
         let mut step = 0;
@@ -524,7 +538,7 @@ impl Schedule {
                         // consensused; this is something that can validly happen in a real
                         // network, but causes problems with evaluating test results
                         for obs in &observations_made {
-                            let sampling = if let ParsecObservation::OpaquePayload(_) = obs {
+                            let sampling = if obs.is_opaque() {
                                 // No need to mirror opaques if we are in the single-vote mode.
                                 if env.network.consensus_mode() == ConsensusMode::Single {
                                     continue;
@@ -551,6 +565,12 @@ impl Schedule {
                             peer_id: peer.clone(),
                             related_info: vec![],
                         };
+
+                        // The peer is going to be voted for removal. They might not get a chance to
+                        // vote for their remaining scheduled observations.
+                        if env.network.consensus_mode() == ConsensusMode::Single {
+                            min_observations -= pending.num_opaque_observations(&peer);
+                        }
 
                         peers.remove_peer(&peer);
                         pending.peers_make_observation(
@@ -614,7 +634,8 @@ impl Schedule {
 
         let result = Schedule {
             peers: peers.into(),
-            num_observations,
+            min_observations,
+            max_observations,
             events: schedule,
         };
         #[cfg(feature = "dump-graphs")]
