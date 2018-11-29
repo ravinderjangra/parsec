@@ -17,7 +17,8 @@ use std::hash::{Hash, Hasher};
 
 pub const NAMES: &[&str] = &[
     "Alice", "Bob", "Carol", "Dave", "Eric", "Fred", "Gina", "Hank", "Iris", "Judy", "Kent",
-    "Lucy", "Mike", "Nina", "Oran", "Paul", "Quin", "Rose", "Stan", "Tina",
+    "Lucy", "Mike", "Nina", "Oran", "Paul", "Quin", "Rose", "Stan", "Tina", "Ulf", "Vera", "Will",
+    "Xaviera", "Yakov", "Zaida",
 ];
 
 lazy_static! {
