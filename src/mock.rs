@@ -78,6 +78,10 @@ impl PeerId {
             initial, NAMES
         );
     }
+
+    pub fn from_index(peer_index: usize) -> Option<Self> {
+        NAMES.get(peer_index).map(|name| PeerId::new(name))
+    }
 }
 
 impl Debug for PeerId {

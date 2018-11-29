@@ -434,6 +434,7 @@ struct Environment {
     current_remove_peers: Vec<PeerId>,
     current_new_peer: Option<PeerId>,
     current_round: usize,
+    pretty_id_count: usize,
 }
 
 impl Environment {
@@ -456,6 +457,7 @@ impl Environment {
             current_remove_peers: vec![],
             current_new_peer: None,
             current_round: 0,
+            pretty_id_count: 0,
         };
 
         // Set up the requested number of peers and random network events.
@@ -478,13 +480,17 @@ impl Environment {
 
     // Returns a randomly created new `PeerId`.
     fn new_peer_id(&mut self) -> PeerId {
-        PeerId::new_with_random_keypair(
-            self.rng
-                .gen_ascii_chars()
-                .take(6)
-                .collect::<String>()
-                .as_str(),
-        )
+        let peer = PeerId::from_index(self.pretty_id_count).unwrap_or_else(|| {
+            PeerId::new_with_random_keypair(
+                self.rng
+                    .gen_ascii_chars()
+                    .take(6)
+                    .collect::<String>()
+                    .as_str(),
+            )
+        });
+        self.pretty_id_count += 1;
+        peer
     }
 
     // Returns a random number of peers which can be dropped so that we don't lose consensus, and so
