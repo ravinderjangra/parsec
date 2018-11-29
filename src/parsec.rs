@@ -285,8 +285,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             self.our_pub_id(),
             src
         );
+        let other_parent = req.hash_of_last_event_created_by(src)?;
         let forking_peers = self.unpack_and_add_events(src, req.packed_events)?;
-        self.create_sync_event(src, true, &forking_peers)?;
+        self.create_sync_event(src, true, &forking_peers, other_parent)?;
         self.create_accusation_events()?;
         self.events_to_gossip_to_peer(src).map(Response::new)
     }
@@ -303,8 +304,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             self.our_pub_id(),
             src
         );
+        let other_parent = resp.hash_of_last_event_created_by(src)?;
         let forking_peers = self.unpack_and_add_events(src, resp.packed_events)?;
-        self.create_sync_event(src, false, &forking_peers)?;
+        self.create_sync_event(src, false, &forking_peers, other_parent)?;
         self.create_accusation_events()
     }
 
@@ -1560,11 +1562,16 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
     // Constructs a sync event to prove receipt of a `Request` or `Response` (depending on the value
     // of `is_request`) from `src`, then add it to our graph.
+    //
+    // `opt_other_parent` will contain the other-parent this new sync event should use, unless the
+    // gossip message from the peer was empty, in which case this will be `None` and we'll just use
+    // `src`'s most recent event we know of.
     fn create_sync_event(
         &mut self,
         src: &S::PublicId,
         is_request: bool,
         forking_peers: &BTreeSet<S::PublicId>,
+        opt_other_parent: Option<EventHash>,
     ) -> Result<()> {
         let self_parent = self
             .peer_list
@@ -1576,15 +1583,18 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 Error::Logic
             })?;
 
-        let other_parent = self
-            .peer_list
-            .last_event(src)
-            .and_then(|index| self.get_known_event(index).ok())
-            .map(|event| *event.hash())
-            .ok_or_else(|| {
-                log_or_panic!("{:?} missing {:?} last event hash.", self.our_pub_id(), src);
-                Error::Logic
-            })?;
+        let other_parent = match opt_other_parent {
+            Some(hash) => hash,
+            None => self
+                .peer_list
+                .last_event(src)
+                .and_then(|index| self.get_known_event(index).ok())
+                .map(|event| *event.hash())
+                .ok_or_else(|| {
+                    log_or_panic!("{:?} missing {:?} last event hash.", self.our_pub_id(), src);
+                    Error::Logic
+                })?,
+        };
 
         let sync_event = if is_request {
             Event::new_from_request(
@@ -1704,7 +1714,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         self.detect_unexpected_genesis(event);
         self.detect_missing_genesis(event);
         self.detect_duplicate_vote(event);
-        self.detect_stale_other_parent(event);
         self.detect_fork(event);
         self.detect_invalid_accusation(event);
 
@@ -1861,36 +1870,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             event.creator().clone(),
             Malice::DuplicateVote(other_hash, *event.hash()),
         );
-    }
-
-    // Detect if the event's other_parent older than first ancestor of self_parent.
-    fn detect_stale_other_parent(&mut self, event: &Event<T, S::PublicId>) {
-        let (other_parent_index, other_parent_creator) =
-            if let Some(other_parent) = self.graph.other_parent(event) {
-                (
-                    other_parent.index_by_creator(),
-                    other_parent.creator().clone(),
-                )
-            } else {
-                return;
-            };
-        let self_parent_ancestor_index = if let Some(index) =
-            self.graph.self_parent(event).and_then(|self_parent| {
-                self_parent
-                    .inner()
-                    .last_ancestors()
-                    .get(&other_parent_creator)
-            }) {
-            *index
-        } else {
-            return;
-        };
-        if other_parent_index < self_parent_ancestor_index {
-            self.accuse(
-                event.creator().clone(),
-                Malice::StaleOtherParent(*event.hash()),
-            );
-        }
     }
 
     // Detect whether the event incurs a fork.
@@ -2068,7 +2047,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             Malice::UnexpectedGenesis(hash)
             | Malice::MissingGenesis(hash)
             | Malice::IncorrectGenesis(hash)
-            | Malice::StaleOtherParent(hash)
             | Malice::InvalidAccusation(hash)
             | Malice::InvalidGossipCreator(hash) => self
                 .graph
@@ -2101,7 +2079,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             Malice::OtherParentBySameCreator(packed_event)
             | Malice::SelfParentByDifferentCreator(packed_event) => self
                 .graph
-                .get_index(&packed_event.hash())
+                .get_index(&packed_event.compute_hash())
                 .and_then(|index| self.graph.get(index))
                 .map(|malicious_event| self.graph.is_descendant(event, malicious_event))
                 .unwrap_or(false),
@@ -2395,8 +2373,10 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         src: &S::PublicId,
         is_request: bool,
         forking_peers: &BTreeSet<S::PublicId>,
+        other_parent: Option<EventHash>,
     ) -> Result<()> {
-        self.0.create_sync_event(src, is_request, forking_peers)
+        self.0
+            .create_sync_event(src, is_request, forking_peers, other_parent)
     }
 
     pub fn change_peer_state(&mut self, peer_id: &S::PublicId, state: PeerState) {

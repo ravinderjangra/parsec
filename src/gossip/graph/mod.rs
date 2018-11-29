@@ -116,7 +116,8 @@ impl<T: NetworkEvent, P: PublicId> Graph<T, P> {
             .and_then(|index| self.get(index))
     }
 
-    /// Iterator over all ancestors of the given event (including itself) in reverse topological order.
+    /// Iterator over all ancestors of the given event (including itself) in reverse topological
+    /// order.
     pub fn ancestors<'a>(&'a self, event: IndexedEventRef<'a, T, P>) -> Ancestors<'a, T, P> {
         let mut queue = BTreeSet::new();
         let _ = queue.insert(event);

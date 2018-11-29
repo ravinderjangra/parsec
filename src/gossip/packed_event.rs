@@ -8,11 +8,9 @@
 
 use super::content::Content;
 use super::event_hash::EventHash;
-#[cfg(feature = "malice-detection")]
 use hash::Hash;
 use id::PublicId;
 use network_event::NetworkEvent;
-#[cfg(feature = "malice-detection")]
 use serialise;
 use std::fmt::{self, Debug, Formatter};
 
@@ -41,6 +39,10 @@ impl<T: NetworkEvent, P: PublicId> PackedEvent<T, P> {
     pub(crate) fn other_parent(&self) -> Option<&EventHash> {
         self.content.other_parent()
     }
+
+    pub(crate) fn compute_hash(&self) -> EventHash {
+        EventHash(Hash::from(serialise(&self.content).as_slice()))
+    }
 }
 
 #[cfg(feature = "malice-detection")]
@@ -51,9 +53,5 @@ impl<T: NetworkEvent, P: PublicId> PackedEvent<T, P> {
 
     pub(crate) fn creator(&self) -> &P {
         &self.content.creator
-    }
-
-    pub(crate) fn hash(&self) -> EventHash {
-        EventHash(Hash::from(serialise(&self.content).as_slice()))
     }
 }
