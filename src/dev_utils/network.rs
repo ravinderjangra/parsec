@@ -289,7 +289,12 @@ impl Network {
         } else {
             ConsensusMode::Supermajority
         };
-        let correct_signatories = consensus_mode.check(signatories.len(), section.len());
+        let correct_signatories = match consensus_mode {
+            ConsensusMode::Single => !signatories.is_empty(),
+            ConsensusMode::Supermajority => {
+                is_more_than_two_thirds(signatories.len(), section.len())
+            }
+        };
         if !correct_signatories {
             return Err(ConsensusError::TooFewSignatures {
                 observation: block.payload().clone(),

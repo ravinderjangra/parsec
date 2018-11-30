@@ -22,21 +22,26 @@ pub struct Block<T: NetworkEvent, P: PublicId> {
 }
 
 impl<T: NetworkEvent, P: PublicId> Block<T, P> {
-    /// Creates a `Block` from `payload` and `votes`.
-    pub fn new(payload: Observation<T, P>, votes: &BTreeMap<P, Vote<T, P>>) -> Result<Self, Error> {
-        let proofs: BTreeSet<Proof<P>> = votes
+    /// Creates a `Block` from `votes`.
+    pub fn new(votes: &BTreeMap<P, Vote<T, P>>) -> Result<Option<Self>, Error> {
+        let payload = if let Some(vote) = votes.values().next() {
+            vote.payload().clone()
+        } else {
+            return Ok(None);
+        };
+
+        let proofs: Result<BTreeSet<_>, _> = votes
             .iter()
-            .filter_map(|(public_id, vote)| {
-                if let Ok(proof) = vote.create_proof(public_id) {
-                    Some(proof.clone())
+            .map(|(public_id, vote)| {
+                if *vote.payload() == payload {
+                    vote.create_proof(public_id)
                 } else {
-                    None
+                    Err(Error::MismatchedPayload)
                 }
             }).collect();
-        if proofs.len() != votes.len() {
-            return Err(Error::SignatureFailure);
-        }
-        Ok(Self { payload, proofs })
+        let proofs = proofs?;
+
+        Ok(Some(Self { payload, proofs }))
     }
 
     /// Returns the payload of this block.
