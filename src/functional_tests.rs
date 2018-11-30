@@ -485,6 +485,7 @@ mod handle_malice {
     use id::SecretId;
     use mock::Transaction;
     use observation::Malice;
+    use observation::UnprovableMalice;
     use peer_list::PeerList;
     use peer_list::PeerState;
     use std::collections::BTreeMap;
@@ -968,17 +969,16 @@ mod handle_malice {
     }
 
     fn create_invalid_accusation() -> (EventHash, TestParsec<Transaction, PeerId>) {
-        let mut alice_contents = parse_dot_file_with_test_name(
-            "alice.dot",
-            "parsec_functional_tests_handle_malice_accomplice",
-        );
+        // Generated with RNG seed: [3932887254, 691979681, 2029125979, 3359276664]
+        let mut alice_contents =
+            parse_dot_file_with_test_name("alice.dot", "functional_tests_handle_malice_accomplice");
 
-        let a_10_hash = *unwrap!(find_event_by_short_name(&alice_contents.graph, "A_10")).hash();
+        let a_26_hash = *unwrap!(find_event_by_short_name(&alice_contents.graph, "A_26")).hash();
         let d_1_hash = *unwrap!(find_event_by_short_name(&alice_contents.graph, "D_1")).hash();
 
         // Create an invalid accusation from Alice
-        let a_11 = Event::<Transaction, _>::new_from_observation(
-            a_10_hash,
+        let a_27 = Event::<Transaction, _>::new_from_observation(
+            a_26_hash,
             Observation::Accusation {
                 offender: PeerId::new("Dave"),
                 malice: Malice::Fork(d_1_hash),
@@ -986,11 +986,11 @@ mod handle_malice {
             &alice_contents.graph,
             &alice_contents.peer_list,
         );
-        let a_11_hash = *a_11.hash();
-        alice_contents.add_event(a_11);
+        let a_27_hash = *a_27.hash();
+        alice_contents.add_event(a_27);
         let alice = TestParsec::from_parsed_contents(alice_contents);
-        assert!(alice.graph().contains(&a_11_hash));
-        (a_11_hash, alice)
+        assert!(alice.graph().contains(&a_27_hash));
+        (a_27_hash, alice)
     }
 
     fn verify_accused_accomplice(
@@ -1003,7 +1003,7 @@ mod handle_malice {
                 .filter_map(|payload| match payload {
                     Observation::Accusation {
                         ref offender,
-                        malice: Malice::Accomplice(hash),
+                        malice: Malice::Unprovable(UnprovableMalice::Accomplice(hash)),
                     } => Some((offender, hash)),
                     _ => None,
                 }).next()
@@ -1013,7 +1013,6 @@ mod handle_malice {
     }
 
     #[test]
-    #[ignore]
     // Carol received gossip from Bob, which should have raised an accomplice accusation against
     // Alice but didn't.
     fn accomplice() {
@@ -1021,7 +1020,7 @@ mod handle_malice {
 
         let mut bob = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(
             "bob.dot",
-            "parsec_functional_tests_handle_malice_accomplice",
+            "functional_tests_handle_malice_accomplice",
         ));
         assert!(!bob.graph().contains(&invalid_accusation));
 
@@ -1032,7 +1031,7 @@ mod handle_malice {
 
         let mut carol = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(
             "carol.dot",
-            "parsec_functional_tests_handle_malice_accomplice",
+            "functional_tests_handle_malice_accomplice",
         ));
         assert!(!carol.graph().contains(&invalid_accusation));
 
@@ -1062,7 +1061,6 @@ mod handle_malice {
     }
 
     #[test]
-    #[ignore]
     // Carol received `invalid_accusation` from Alice first, then received gossip from Bob,
     // which should have raised an accomplice accusation against Alice but didn't.
     fn accomplice_separate() {
@@ -1070,7 +1068,7 @@ mod handle_malice {
 
         let mut carol = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(
             "carol.dot",
-            "parsec_functional_tests_handle_malice_accomplice",
+            "functional_tests_handle_malice_accomplice",
         ));
         assert!(!carol.graph().contains(&invalid_accusation));
 
@@ -1081,7 +1079,7 @@ mod handle_malice {
 
         let mut bob = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(
             "bob.dot",
-            "parsec_functional_tests_handle_malice_accomplice",
+            "functional_tests_handle_malice_accomplice",
         ));
         assert!(!bob.graph().contains(&invalid_accusation));
 
@@ -1102,7 +1100,6 @@ mod handle_malice {
     }
 
     #[test]
-    #[ignore]
     // Carol received `invalid_accusation` from Alice first, then receive gossip from Bob, which
     // doesn't contain the malice of Alice. Carol shall not raise accusation against Bob.
     fn accomplice_negative() {
@@ -1110,7 +1107,7 @@ mod handle_malice {
 
         let mut carol = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(
             "carol.dot",
-            "parsec_functional_tests_handle_malice_accomplice",
+            "functional_tests_handle_malice_accomplice",
         ));
         assert!(!carol.graph().contains(&invalid_accusation));
 
@@ -1121,7 +1118,7 @@ mod handle_malice {
 
         let bob = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(
             "bob.dot",
-            "parsec_functional_tests_handle_malice_accomplice",
+            "functional_tests_handle_malice_accomplice",
         ));
         assert!(!bob.graph().contains(&invalid_accusation));
 
@@ -1132,7 +1129,7 @@ mod handle_malice {
         // Verify that Carol didn't accuse Bob of `Accomplice`.
         assert!(our_votes(&carol).all(|payload| match payload {
             Observation::Accusation {
-                malice: Malice::Accomplice(_),
+                malice: Malice::Unprovable(UnprovableMalice::Accomplice(_)),
                 ..
             } => false,
             _ => true,
