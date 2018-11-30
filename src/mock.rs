@@ -17,7 +17,8 @@ use std::hash::{Hash, Hasher};
 
 pub const NAMES: &[&str] = &[
     "Alice", "Bob", "Carol", "Dave", "Eric", "Fred", "Gina", "Hank", "Iris", "Judy", "Kent",
-    "Lucy", "Mike", "Nina", "Oran", "Paul", "Quin", "Rose", "Stan", "Tina",
+    "Lucy", "Mike", "Nina", "Oran", "Paul", "Quin", "Rose", "Stan", "Tina", "Ulf", "Vera", "Will",
+    "Xaviera", "Yakov", "Zaida",
 ];
 
 lazy_static! {
@@ -77,6 +78,10 @@ impl PeerId {
             "cannot find a name starts with {:?} within {:?}",
             initial, NAMES
         );
+    }
+
+    pub fn from_index(peer_index: usize) -> Option<Self> {
+        NAMES.get(peer_index).map(|name| PeerId::new(name))
     }
 }
 
