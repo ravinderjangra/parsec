@@ -511,7 +511,6 @@ proptest! {
         opts: ScheduleOptionsStrategy {
             num_peers: (4..=10).into(),
             num_observations: (1..=10).into(),
-            local_step: (0.01..=1.0).into(),
             recv_trans: (0.001..0.5).into(),
             failure: (0.0..1.0).into(),
             vote_duplication: (0.0..0.5).into(),

@@ -17,7 +17,6 @@ use proptest_crate::test_runner::TestRunner;
 pub struct ScheduleOptionsStrategy {
     pub num_peers: BoundedBoxedStrategy<usize>,
     pub num_observations: BoundedBoxedStrategy<usize>,
-    pub local_step: BoundedBoxedStrategy<f64>,
     pub recv_trans: BoundedBoxedStrategy<f64>,
     pub failure: BoundedBoxedStrategy<f64>,
     pub vote_duplication: BoundedBoxedStrategy<f64>,
@@ -66,7 +65,6 @@ impl Default for ScheduleOptionsStrategy {
         ScheduleOptionsStrategy {
             num_peers: Just(6).into(),
             num_observations: Just(1).into(),
-            local_step: Just(0.15).into(),
             recv_trans: Just(0.05).into(),
             failure: Just(0.0).into(),
             vote_duplication: Just(0.0).into(),
@@ -83,7 +81,6 @@ impl Strategy for ScheduleOptionsStrategy {
         let max_sched = ScheduleOptions {
             genesis_size: self.num_peers.max(),
             opaque_to_add: self.num_observations.max(),
-            prob_local_step: self.local_step.min(),
             prob_opaque: self.recv_trans.max(),
             prob_failure: self.failure.max(),
             prob_vote_duplication: self.vote_duplication.max(),
@@ -93,7 +90,6 @@ impl Strategy for ScheduleOptionsStrategy {
         let min_sched = ScheduleOptions {
             genesis_size: self.num_peers.min(),
             opaque_to_add: self.num_observations.min(),
-            prob_local_step: self.local_step.max(),
             prob_opaque: self.recv_trans.min(),
             prob_failure: self.failure.min(),
             prob_vote_duplication: self.vote_duplication.min(),
@@ -103,26 +99,32 @@ impl Strategy for ScheduleOptionsStrategy {
         // order is important here - the default implementation bisects the first value first, then
         // switches to the next, and the next - so the values should be sorted in a rough order of
         // "importance"
-        let (l_min, l_max) = (self.local_step.min(), self.local_step.max());
         (
             &self.num_peers,
             &self.num_observations,
             &self.failure,
             &self.vote_duplication,
             &self.recv_trans,
-            (&self.local_step).prop_map(move |l| l_max + l_min - l),
             &self.delay_distr,
         )
-            .prop_map(|(np, no, f, v, r, l, d)| ScheduleOptions {
-                genesis_size: np,
-                opaque_to_add: no,
-                prob_failure: f,
-                prob_vote_duplication: v,
-                prob_opaque: r,
-                prob_local_step: l,
-                delay_distr: d,
-                ..Default::default()
-            }).new_tree(runner)
+            .prop_map(
+                |(
+                    genesis_size,
+                    opaque_to_add,
+                    prob_failure,
+                    prob_vote_duplication,
+                    prob_opaque,
+                    delay_distr,
+                )| ScheduleOptions {
+                    genesis_size,
+                    opaque_to_add,
+                    prob_failure,
+                    prob_vote_duplication,
+                    prob_opaque,
+                    delay_distr,
+                    ..Default::default()
+                },
+            ).new_tree(runner)
             .map(|t| ScheduleOptionsValueTree {
                 max_sched,
                 min_sched,

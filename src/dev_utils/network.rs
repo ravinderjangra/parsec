@@ -418,17 +418,15 @@ impl Network {
         let mut pending_events: VecDeque<ScheduleEvent> = VecDeque::new();
 
         for event in events {
-            while !pending_events.is_empty() {
-                if let Some(pending_event) = pending_events.pop_front() {
-                    if !self.execute_event(
-                        rng,
-                        options,
-                        pending_event.clone(),
-                        &mut peer_removal_guard,
-                    )? {
-                        pending_events.push_front(pending_event);
-                        break;
-                    }
+            while let Some(pending_event) = pending_events.pop_front() {
+                if !self.execute_event(
+                    rng,
+                    options,
+                    pending_event.clone(),
+                    &mut peer_removal_guard,
+                )? {
+                    pending_events.push_front(pending_event);
+                    break;
                 }
             }
 
@@ -470,7 +468,7 @@ impl Network {
                         )
                     }).collect();
                 for node in &genesis_group {
-                    peer_removal_guard.record_new_voter(node.clone());
+                    peer_removal_guard.add_genesis_peer(node.clone());
                 }
                 self.peers = peers;
                 self.genesis = genesis_group;
@@ -488,6 +486,8 @@ impl Network {
                         self.consensus_mode,
                     ),
                 );
+
+                peer_removal_guard.add_peer(peer);
             }
             ScheduleEvent::RemovePeer(peer) => {
                 if peer_removal_guard.attempt_to_remove_peer(&peer) {
@@ -509,50 +509,40 @@ impl Network {
                 for peer in &present_peers {
                     self.peer_mut(&peer).make_votes();
                     self.handle_messages(&peer, global_step);
-                    self.peer_mut(&peer).poll();
+                    let first_block = self.peer_mut(&peer).poll();
                     self.check_unexpected_accusations(&peer)?;
 
-                    for block in self.peer(&peer).blocks_payloads() {
-                        match block {
-                            ParsecObservation::Remove { peer_id, .. } => {
+                    for block in &self.peer(&peer).blocks()[first_block..] {
+                        match *block.payload() {
+                            ParsecObservation::Remove { ref peer_id, .. } => {
                                 peer_removal_guard.record_consensus_on_remove_peer(peer_id);
                             }
-                            ParsecObservation::Add { peer_id, .. } => {
-                                peer_removal_guard.record_new_voter(peer_id.clone());
+                            ParsecObservation::Add { ref peer_id, .. } => {
+                                peer_removal_guard.record_consensus_on_add_peer(peer_id);
                             }
                             _ => (),
                         }
                     }
 
-                    if rng.gen::<f64>() < options.gossip_prob {
-                        let mut recipient = peer;
-                        while recipient == peer {
-                            recipient = unwrap!(rng.choose(&present_peers));
-                        }
-                        let req_delay = options.gen_delay(rng);
-                        let resp_delay = options.gen_delay(rng);
+                    if rng.gen::<f64>() < options.prob_gossip {
+                        let recipient = {
+                            let recipients: Vec<_> =
+                                self.peer(&peer).parsec.gossip_recipients().collect();
+                            rng.choose(&recipients).cloned().cloned()
+                        };
 
-                        match self.peer(&peer).parsec.create_gossip(Some(&recipient)) {
-                            Ok(request) => {
-                                self.send_message(
-                                    peer.clone(),
-                                    &recipient,
-                                    Message::Request(request, resp_delay),
-                                    global_step + req_delay,
-                                );
-                            }
-                            Err(e @ Error::InvalidPeerState { .. })
-                            | Err(e @ Error::InvalidSelfState { .. }) => {
-                                if self
-                                    .peer(&peer)
-                                    .parsec
-                                    .gossip_recipients()
-                                    .any(|peer_id| peer_id == recipient)
-                                {
-                                    panic!("Should be able to gossip {:?}", e);
-                                }
-                            }
-                            Err(e) => panic!("{:?}", e),
+                        if let Some(recipient) = recipient {
+                            let req_delay = options.gen_delay(rng);
+                            let resp_delay = options.gen_delay(rng);
+
+                            let request =
+                                unwrap!(self.peer(&peer).parsec.create_gossip(Some(&recipient)));
+                            self.send_message(
+                                peer.clone(),
+                                &recipient,
+                                Message::Request(request, resp_delay),
+                                global_step + req_delay,
+                            );
                         }
                     }
                 }
@@ -571,34 +561,119 @@ impl Network {
     }
 }
 
+// Helper struct that protects the test network from losing too many nodes.
 #[derive(Default)]
 struct PeerRemovalGuard {
-    voters: BTreeSet<PeerId>,
-    nodes_to_be_removed: BTreeSet<PeerId>,
+    peers: BTreeMap<PeerId, PeerRemovalState>,
+}
+
+enum PeerRemovalState {
+    // Peer is being added. The `usize` is the number of peers that consensused the add.
+    Adding(usize),
+    // Peer was added by at least the supermajority of the section.
+    Added,
+    // Peer is being removed. The `usize` is the number of peers that consensused the remove.
+    Removing(usize),
+    // Peer was removed by at least the supermajority of the section.
+    Removed,
 }
 
 impl PeerRemovalGuard {
-    fn record_new_voter(&mut self, voter: PeerId) {
-        let _ = self.voters.insert(voter);
+    fn num_active(&self) -> usize {
+        self.peers
+            .values()
+            .filter(|state| match state {
+                PeerRemovalState::Added | PeerRemovalState::Removing(..) => true,
+                _ => false,
+            }).count()
     }
 
-    fn record_consensus_on_remove_peer(&mut self, peer: &PeerId) {
-        let _ = self.nodes_to_be_removed.remove(peer);
-        let _ = self.voters.remove(peer);
+    fn num_removing(&self) -> usize {
+        self.peers
+            .values()
+            .filter(|state| {
+                if let PeerRemovalState::Removing(..) = *state {
+                    true
+                } else {
+                    false
+                }
+            }).count()
     }
 
-    fn attempt_to_remove_peer(&mut self, peer: &PeerId) -> bool {
-        if self.can_remove(peer) {
-            let _ = self.nodes_to_be_removed.insert(peer.clone());
-            true
+    fn add_genesis_peer(&mut self, peer_id: PeerId) {
+        let _ = self.peers.insert(peer_id, PeerRemovalState::Added);
+    }
+
+    fn add_peer(&mut self, peer_id: PeerId) {
+        let _ = self.peers.insert(peer_id, PeerRemovalState::Adding(0));
+    }
+
+    fn record_consensus_on_add_peer(&mut self, peer_id: &PeerId) {
+        let active = self.num_active();
+
+        if let Some(state) = self.peers.get_mut(peer_id) {
+            let add = if let PeerRemovalState::Adding(ref mut count) = *state {
+                *count += 1;
+                is_more_than_two_thirds(*count, active)
+            } else {
+                false
+            };
+
+            if add {
+                *state = PeerRemovalState::Added;
+            }
         } else {
-            false
+            panic!("record consensus on add {:?} failed: unknown peer", peer_id)
         }
     }
 
-    fn can_remove(&self, peer: &PeerId) -> bool {
-        let active_participants = self.voters.len() - self.nodes_to_be_removed.len();
-        is_more_than_two_thirds(active_participants, self.voters.len())
-            || self.nodes_to_be_removed.contains(&peer)
+    fn record_consensus_on_remove_peer(&mut self, peer_id: &PeerId) {
+        let active = self.num_active();
+
+        if let Some(state) = self.peers.get_mut(peer_id) {
+            let remove = match *state {
+                PeerRemovalState::Adding(..) | PeerRemovalState::Added => panic!(
+                    "record consensus on remove {:?} failed: not scheduled for removal",
+                    peer_id
+                ),
+                PeerRemovalState::Removing(ref mut count) => {
+                    *count += 1;
+                    is_more_than_two_thirds(*count, active)
+                }
+                PeerRemovalState::Removed => false,
+            };
+
+            if remove {
+                *state = PeerRemovalState::Removed;
+            }
+        } else {
+            panic!(
+                "record consensus on remove {:?} failed: unknown peer",
+                peer_id
+            )
+        }
+    }
+
+    fn attempt_to_remove_peer(&mut self, peer_id: &PeerId) -> bool {
+        let active = self.num_active();
+        let removing = self.num_removing();
+        let remaining = active - removing - 1;
+
+        if let Some(state) = self.peers.get_mut(peer_id) {
+            match *state {
+                PeerRemovalState::Adding(..) => false,
+                PeerRemovalState::Added => {
+                    if is_more_than_two_thirds(remaining, active) {
+                        *state = PeerRemovalState::Removing(0);
+                        true
+                    } else {
+                        false
+                    }
+                }
+                PeerRemovalState::Removing(..) | PeerRemovalState::Removed => true,
+            }
+        } else {
+            panic!("attempt to remove {:?} failed: unknown peer", peer_id)
+        }
     }
 }
