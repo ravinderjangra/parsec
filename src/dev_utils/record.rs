@@ -9,8 +9,8 @@
 use super::dot_parser::{parse_dot_file, ParsedContents};
 use gossip::{Event, Request, Response};
 use mock::{PeerId, Transaction};
-use observation::Observation;
-use parsec::{ConsensusMode, Parsec};
+use observation::{ConsensusMode, Observation};
+use parsec::Parsec;
 use std::collections::BTreeSet;
 use std::io;
 use std::path::Path;

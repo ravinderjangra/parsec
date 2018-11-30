@@ -48,22 +48,13 @@ pub enum Observation<T: NetworkEvent, P: PublicId> {
     OpaquePayload(T),
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
-pub(crate) struct ObservationHash(pub(crate) Hash);
-
-impl ObservationHash {
-    pub const ZERO: Self = ObservationHash(Hash::ZERO);
-}
-
-impl<'a, T: NetworkEvent, P: PublicId> From<&'a Observation<T, P>> for ObservationHash {
-    fn from(observation: &'a Observation<T, P>) -> Self {
-        ObservationHash(Hash::from(serialise(observation).as_slice()))
-    }
-}
-
-impl Debug for ObservationHash {
-    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
-        write!(formatter, "{:?}", self.0)
+impl<T: NetworkEvent, P: PublicId> Observation<T, P> {
+    pub(crate) fn is_opaque(&self) -> bool {
+        if let Observation::OpaquePayload(_) = *self {
+            true
+        } else {
+            false
+        }
     }
 }
 
@@ -193,6 +184,72 @@ impl<'a> Visitor<'a> for UnprovableMaliceVisitor {
     fn visit_unit<E: Error>(self) -> Result<Self::Value, E> {
         Ok(UnprovableMalice::Unspecified)
     }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+pub(crate) struct ObservationHash(pub(crate) Hash);
+
+impl ObservationHash {
+    pub const ZERO: Self = ObservationHash(Hash::ZERO);
+}
+
+impl<'a, T: NetworkEvent, P: PublicId> From<&'a Observation<T, P>> for ObservationHash {
+    fn from(observation: &'a Observation<T, P>) -> Self {
+        ObservationHash(Hash::from(serialise(observation).as_slice()))
+    }
+}
+
+impl Debug for ObservationHash {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "{:?}", self.0)
+    }
+}
+
+// Key to compare observations.
+#[serde(bound = "")]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize, Debug)]
+pub(crate) enum ObservationKey<P: PublicId> {
+    Single(ObservationHash, P),
+    Supermajority(ObservationHash),
+}
+
+impl<P: PublicId> ObservationKey<P> {
+    pub fn hash(&self) -> &ObservationHash {
+        match *self {
+            ObservationKey::Single(ref hash, _) => hash,
+            ObservationKey::Supermajority(ref hash) => hash,
+        }
+    }
+
+    pub fn matches(&self, other_hash: &ObservationHash, other_creator: &P) -> bool {
+        match *self {
+            ObservationKey::Single(ref hash, ref creator) => {
+                other_hash == hash && other_creator == creator
+            }
+            ObservationKey::Supermajority(ref hash) => other_hash == hash,
+        }
+    }
+
+    pub fn consensus_mode(&self) -> ConsensusMode {
+        match *self {
+            ObservationKey::Single(..) => ConsensusMode::Single,
+            ObservationKey::Supermajority(..) => ConsensusMode::Supermajority,
+        }
+    }
+}
+
+/// Number of votes necessary to reach consensus on an `OpaquePayload`.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ConsensusMode {
+    /// One vote is enough.
+    Single,
+    /// Supermajority (more than 2/3) is required.
+    Supermajority,
+}
+
+/// Returns whether `small` is more than two thirds of `large`.
+pub fn is_more_than_two_thirds(small: usize, large: usize) -> bool {
+    3 * small > 2 * large
 }
 
 #[cfg(test)]

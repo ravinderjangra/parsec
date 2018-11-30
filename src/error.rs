@@ -15,6 +15,8 @@ use std::result;
 pub enum Error {
     /// Payload of a `Vote` doesn't match the payload of a `Block`.
     MismatchedPayload,
+    /// Attempt to create a block with no votes.
+    MissingVotes,
     /// Failed to verify signature.
     SignatureFailure,
     /// Peer is not known to our node.
@@ -52,6 +54,7 @@ impl Display for Error {
                 f,
                 "The payload of the vote doesn't match the payload of targeted block."
             ),
+            Error::MissingVotes => write!(f, "Block cannot be created with no votes"),
             Error::SignatureFailure => write!(
                 f,
                 "The message or signature might be corrupted, or the signer is wrong."

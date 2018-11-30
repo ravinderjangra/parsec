@@ -8,7 +8,7 @@
 
 use dev_utils::network::Network;
 use maidsafe_utilities::SeededRng;
-use parsec::ConsensusMode;
+use observation::ConsensusMode;
 use rand::{Rng, SeedableRng, XorShiftRng};
 use std::fmt;
 
