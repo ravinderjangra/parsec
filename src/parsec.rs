@@ -38,10 +38,43 @@ type PendingAccusations<T, P> = Vec<(P, Malice<T, P>)>;
 type Accusations<T, P> = Vec<(P, Malice<T, P>)>;
 
 /// The main object which manages creating and receiving gossip about network events from peers, and
-/// which provides a sequence of consensused `Block`s by applying the PARSEC algorithm.
+/// which provides a sequence of consensused [Block](struct.Block.html)s by applying the PARSEC
+/// algorithm. A `Block`'s payload, described by the [Observation](enum.Observation.html) type, is
+/// called an "observation" or a "transaction".
 ///
-/// Most public functions return an error if called after the owning node has been removed, i.e.
-/// a block with payload `Observation::Remove(our_id)` has been made stable.
+/// The struct is generic with regards to two type arguments: one that represents a network event,
+/// and one that represents a peer ID on the network. This allows the consumer to customise both
+/// what constitutes a transaction that can get consensus, and the way peers are identified. The
+/// types have to implement [NetworkEvent](trait.NetworkEvent.html) and
+/// [SecretId](trait.SecretId.html) traits, respectively.
+///
+/// The `Parsec` struct exposes two constructors:
+///
+/// * [from_genesis](struct.Parsec.html#method.from_genesis), if the owning peer is a part of the
+/// genesis group, i.e. the initial group of peers that participate in the network startup
+/// * [from_existing](struct.Parsec.html#method.from_existing), if the owning peer is trying to
+/// join an already functioning network
+///
+/// Once the peer becomes a full member of the section,
+/// [gossip_recipients](struct.Parsec.html#method.gossip_recipients) will start to return potential
+/// partners for gossip. In order to initiate gossip exchange with a partner,
+/// [create_gossip](struct.Parsec.html#method.create_gossip) should be called.
+///
+/// Any messages of type [Request](struct.Request.html) or [Response](struct.Response.html)
+/// received by the network layer should be passed to
+/// [handle_request](struct.Parsec.html#method.handle_request) and
+/// [handle_response](struct.Parsec.html#method.handle_response), respectively.
+///
+/// If the owning peer needs to propose something to be consensused, it has to call the
+/// [vote_for](struct.Parsec.html#method.vote_for) method.
+///
+/// The [poll](struct.Parsec.html#method.poll) method is used to get the observations in the
+/// consensused order.
+///
+/// Most public methods return an error if called after the owning peer has been removed from the
+/// section, i.e. a block with payload `Observation::Remove(our_id)` has been made stable.
+///
+/// For more details, see the descriptions of methods below.
 pub struct Parsec<T: NetworkEvent, S: SecretId> {
     // The PeerInfo of other nodes.
     peer_list: PeerList<S>,
@@ -63,6 +96,12 @@ pub struct Parsec<T: NetworkEvent, S: SecretId> {
 
 impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     /// Creates a new `Parsec` for a peer with the given ID and genesis peer IDs (ours included).
+    ///
+    /// * `our_id` is the value that will identify the owning peer in the network.
+    /// * `genesis_group` is the set of public IDs of the peers that are present at the network
+    /// startup.
+    /// * `consensus_mode` determines how many votes are needed for an observation to become a
+    /// candidate for consensus. For more details, see [ConsensusMode](enum.ConsensusMode.html)
     pub fn from_genesis(
         our_id: S,
         genesis_group: &BTreeSet<S::PublicId>,
@@ -119,6 +158,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     /// Creates a new `Parsec` for a peer that is joining an existing section.
+    ///
+    /// * `our_id` is the value that will identify the owning peer in the network.
+    /// * `genesis_group` is the set of public IDs of the peers that were present at the section
+    /// startup.
+    /// * `section` is the set of public IDs of the peers that constitute the section at the time
+    /// of joining. They are the peers this `Parsec` instance will accept gossip from.
+    /// * `consensus_mode` determines how many votes are needed for an observation to become a
+    /// candidate for consensus. For more details, see [ConsensusMode](enum.ConsensusMode.html)
     pub fn from_existing(
         our_id: S,
         genesis_group: &BTreeSet<S::PublicId>,
@@ -205,12 +252,18 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
     }
 
-    /// Our public ID
+    /// Returns our public ID
     pub fn our_pub_id(&self) -> &S::PublicId {
         self.peer_list.our_pub_id()
     }
 
-    /// Adds a vote for `observation`.  Returns an error if we have already voted for this.
+    /// Inserts the owning peer's vote for `observation` into the gossip graph. The subsequent
+    /// gossip messages will spread the vote to other peers, eventually making it a candidate for
+    /// the next consensused block.
+    ///
+    /// Returns an error if the owning peer is not a full member of the section yet, if it has
+    /// already voted for this `observation`, or if adding a gossip event containing the vote to
+    /// the gossip graph failed.
     pub fn vote_for(&mut self, observation: Observation<T, S::PublicId>) -> Result<()> {
         debug!("{:?} voting for {:?}", self.our_pub_id(), observation);
 
@@ -232,16 +285,20 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         Ok(())
     }
 
-    /// Returns ids of peers who we can send gossips to. Calling `create_gossip` with a peer id
-    /// returned by this function is guaranteed to succeed (assuming no mutation happened in between).
+    /// Returns an iterator with the IDs of peers who the owning peer can send gossip messages to.
+    /// Calling `create_gossip` with a peer ID returned by this method is guaranteed to succeed
+    /// (assuming no section mutation happened in between).
     pub fn gossip_recipients(&self) -> impl Iterator<Item = &S::PublicId> {
         self.peer_list.gossip_recipient_ids()
     }
 
-    /// Creates a new message to be gossiped to a peer containing all gossip events this node thinks
-    /// that peer needs.  If `peer_id` is `None`, a message containing all known gossip events is
-    /// returned.  If `peer_id` is `Some` and the given peer is not an active node, an error is
-    /// returned.
+    /// Creates a new message to be gossipped to a peer, containing all gossip events this peer
+    /// thinks that peer needs. If `peer_id` is `None`, a message containing all known gossip
+    /// events is returned. If `peer_id` is `Some` and the given peer is not an active node, an
+    /// error is returned.
+    ///
+    /// * `peer_id`: the intended recipient of the gossip message
+    /// * returns a `Request` to be sent to the intended recipient
     pub fn create_gossip(&self, peer_id: Option<&S::PublicId>) -> Result<Request<T, S::PublicId>> {
         self.confirm_self_state(PeerState::SEND)?;
 
@@ -273,8 +330,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         Ok(Request::new(self.graph.iter().map(|e| e.inner()).collect()))
     }
 
-    /// Handles a received `Request` from `src` peer.  Returns a `Response` to be sent back to `src`
-    /// or `Err` if the request was not valid or if `src` has been removed already.
+    /// Handles a `Request` the owning peer received from the `src` peer.  Returns a `Response` to
+    /// be sent back to `src`, or `Err` if the request was not valid or if `src` has been removed
+    /// from the section already.
     pub fn handle_request(
         &mut self,
         src: &S::PublicId,
@@ -292,8 +350,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         self.events_to_gossip_to_peer(src).map(Response::new)
     }
 
-    /// Handles a received `Response` from `src` peer.  Returns `Err` if the response was not valid
-    /// or if `src` has been removed already.
+    /// Handles a `Response` the owning peer received from the `src` peer. Returns `Err` if the
+    /// response was not valid or if `src` has been removed from the section already.
     pub fn handle_response(
         &mut self,
         src: &S::PublicId,
@@ -310,22 +368,24 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         self.create_accusation_events()
     }
 
-    /// Steps the algorithm and returns the next stable block, if any.
+    /// Returns the next stable block, if any. The method might need to be called more than once
+    /// for the caller to get all the blocks that have been consensused. A `None` value means that
+    /// all the blocks consensused so far have already been returned.
     ///
-    /// Once we have been removed (i.e. a block with payload `Observation::Remove(our_id)` has been
-    /// made stable), then no further blocks will be enqueued.  So, once `poll()` returns such a
-    /// block, it will continue to return `None` forever.
+    /// Once the owning peer has been removed from the section (i.e. a block with payload
+    /// `Observation::Remove(our_id)` has been made stable), then no further blocks will be
+    /// enqueued. So, once `poll()` returns such a block, it will continue to return `None` forever.
     pub fn poll(&mut self) -> Option<Block<T, S::PublicId>> {
         self.consensused_blocks.pop_front()
     }
 
-    /// Check if we can vote (that is, we have reached a consensus on us being full member of the
-    /// section).
+    /// Check if the owning peer can vote (that is, it has reached a consensus on itself being a
+    /// full member of the section).
     pub fn can_vote(&self) -> bool {
         self.peer_list.peer_state(self.our_pub_id()).can_vote()
     }
 
-    /// Checks if the given `observation` has already been voted for by us.
+    /// Checks if the given `observation` has already been voted for by the owning peer.
     pub fn have_voted_for(&self, observation: &Observation<T, S::PublicId>) -> bool {
         // TODO: optimize by iterating only `peer_list.our_events`.
         self.graph.iter().any(|event| {
@@ -335,12 +395,15 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         })
     }
 
-    /// Check if there are any observation that have been voted for but not yet consensused.
+    /// Check if there are any observations that have been voted for but not yet consensused - i.e.
+    /// if there is a gossip event containing a vote for a payload that is not yet a part of a
+    /// stable block.
     pub fn has_unconsensused_observations(&self) -> bool {
         self.observations.values().any(|info| !info.consensused)
     }
 
-    /// Returns observations voted for by us which haven't been returned by `poll` yet.
+    /// Returns observations voted for by the owning peer which haven't been returned as a stable
+    /// block by `poll` yet.
     /// This includes observations that are either not yet consensused or that are already
     /// consensused, but not yet popped out of the consensus queue.
     ///
