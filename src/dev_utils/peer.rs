@@ -7,6 +7,8 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::Observation;
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
+use super::ParsedContents;
 use block::Block;
 use mock::{PeerId, Transaction};
 use observation::{ConsensusMode, Malice, Observation as ParsecObservation};
@@ -58,6 +60,19 @@ impl Peer {
             parsec: Parsec::from_existing(id, genesis_group, current_group, consensus_mode),
             blocks: vec![],
             status: PeerStatus::Pending,
+            votes_to_make: vec![],
+        }
+    }
+
+    #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
+    pub(crate) fn from_parsed_contents(contents: ParsedContents) -> Self {
+        let id = contents.our_id.clone();
+        let parsec = Parsec::from_parsed_contents(contents);
+        Self {
+            id,
+            parsec,
+            blocks: vec![],
+            status: PeerStatus::Active,
             votes_to_make: vec![],
         }
     }

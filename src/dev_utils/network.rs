@@ -6,6 +6,8 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
+use super::parse_test_dot_file;
 use super::peer::{Peer, PeerStatus};
 use super::schedule::{Schedule, ScheduleEvent, ScheduleOptions};
 use super::Observation;
@@ -101,6 +103,27 @@ impl Network {
         Network {
             genesis: genesis_group,
             peers,
+            msg_queue: BTreeMap::new(),
+            consensus_mode,
+        }
+    }
+
+    #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
+    pub fn from_graphs<I: IntoIterator<Item = &'static str>>(
+        consensus_mode: ConsensusMode,
+        genesis: BTreeSet<PeerId>,
+        names: I,
+    ) -> Self {
+        let mut peers = BTreeMap::new();
+        for name in names {
+            let filename = format!("{}.dot", name.to_lowercase());
+            let parsed_contents = parse_test_dot_file(&filename);
+            let id = parsed_contents.our_id.clone();
+            let _ = peers.insert(id, Peer::from_parsed_contents(parsed_contents));
+        }
+        Network {
+            peers,
+            genesis,
             msg_queue: BTreeMap::new(),
             consensus_mode,
         }
@@ -434,6 +457,10 @@ impl Network {
     ) -> Result<bool, ConsensusError> {
         match event {
             ScheduleEvent::Genesis(genesis_group) => {
+                if !self.peers.is_empty() {
+                    // if the peers are already initialised, we won't initialise them again
+                    return Ok(true);
+                }
                 let peers = genesis_group
                     .iter()
                     .map(|id| {

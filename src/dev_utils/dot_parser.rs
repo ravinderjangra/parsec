@@ -697,7 +697,7 @@ pub(crate) fn parse_dot_file<P: AsRef<Path>>(full_path: P) -> io::Result<ParsedC
 
 /// For use by functional/unit tests which provide a dot file for the test setup.  This put the test
 /// name as part of the path automatically.
-#[cfg(test)]
+#[cfg(any(test, feature = "testing"))]
 pub(crate) fn parse_test_dot_file(filename: &str) -> ParsedContents {
     use std::thread;
 
@@ -709,7 +709,7 @@ pub(crate) fn parse_test_dot_file(filename: &str) -> ParsedContents {
 
 /// For use by functional/unit tests which provide a dot file for the test setup.  This reads and
 /// parses the dot file as per `parse_dot_file()` above, with test name being part of the path.
-#[cfg(test)]
+#[cfg(any(test, feature = "testing"))]
 pub(crate) fn parse_dot_file_with_test_name(filename: &str, test_name: &str) -> ParsedContents {
     use std::path::PathBuf;
 

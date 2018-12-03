@@ -375,7 +375,13 @@ impl<P: PublicId> MetaElections<P> {
         self.current_election.initialise(peer_ids, hash);
     }
 
-    #[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
+    #[cfg(
+        any(
+            all(test, feature = "mock"),
+            feature = "dump-graphs",
+            feature = "testing"
+        )
+    )]
     pub fn current_meta_events(&self) -> &BTreeMap<EventIndex, MetaEvent<P>> {
         &self.current_election.meta_events
     }
