@@ -37,8 +37,10 @@ pub enum Error {
     },
     /// The given event is invalid or malformed.
     InvalidEvent,
-    /// This event's self-parent or other-parent is unknown to our node.
-    UnknownParent,
+    /// The event's self-parent is unknwon to our node.
+    UnknownSelfParent,
+    /// The event's other-parent is unknown to our node.
+    UnknownOtherParent,
     /// Our node has already voted for this network event.
     DuplicateVote,
     /// The peer sent a message to us before knowing we could handle it.
@@ -71,10 +73,12 @@ impl Display for Error {
                 required, actual
             ),
             Error::InvalidEvent => write!(f, "The given event is invalid or malformed."),
-            Error::UnknownParent => write!(
-                f,
-                "This event's self-parent or other-parent is unknown to this node."
-            ),
+            Error::UnknownSelfParent => {
+                write!(f, "The event's self-parent is unknown to this node.")
+            }
+            Error::UnknownOtherParent => {
+                write!(f, "The event's other-parent is unknown to this node.")
+            }
             Error::DuplicateVote => write!(f, "Our node has already voted for this network event."),
             Error::PrematureGossip => write!(
                 f,

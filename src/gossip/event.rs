@@ -519,7 +519,7 @@ fn get_parent<'a, T: NetworkEvent, P: PublicId>(
                 .and_then(|index| graph.get(index))
                 .ok_or_else(|| {
                     debug!("{:?} missing {} parent for {:?}", our_id, parent, content);
-                    Error::UnknownParent
+                    parent.to_unknown_error()
                 })?,
         ))
     } else {
@@ -541,6 +541,13 @@ impl Parent {
         match self {
             Parent::Self_ => content.self_parent(),
             Parent::Other => content.other_parent(),
+        }
+    }
+
+    fn to_unknown_error(self) -> Error {
+        match self {
+            Parent::Self_ => Error::UnknownSelfParent,
+            Parent::Other => Error::UnknownOtherParent,
         }
     }
 }
