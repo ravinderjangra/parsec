@@ -7,7 +7,7 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use block::Block;
-#[cfg(all(test, feature = "mock"))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 use dev_utils::ParsedContents;
 use dump_graph;
 use error::{Error, Result};
@@ -18,7 +18,7 @@ use gossip::{
 };
 use id::{PublicId, SecretId};
 use meta_voting::{MetaElectionHandle, MetaElections, MetaEvent, MetaEventBuilder, MetaVote, Step};
-#[cfg(all(test, feature = "mock"))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 use mock::{PeerId, Transaction};
 use network_event::NetworkEvent;
 #[cfg(feature = "malice-detection")]
@@ -2247,7 +2247,7 @@ impl<T: NetworkEvent, P: PublicId> ObservationInfo<T, P> {
 
 type ObservationWithKey<'a, T, P> = (&'a Observation<T, P>, ObservationKey<P>);
 
-#[cfg(all(test, feature = "mock"))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 impl Parsec<Transaction, PeerId> {
     pub(crate) fn from_parsed_contents(mut parsed_contents: ParsedContents) -> Self {
         let mut parsec = Parsec::empty(
