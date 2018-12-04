@@ -231,6 +231,49 @@ impl Network {
         }
     }
 
+    fn send_gossip<R: Rng>(
+        &mut self,
+        rng: &mut R,
+        options: &ScheduleOptions,
+        sender: &PeerId,
+        present_peers: &[PeerId],
+        step: usize,
+    ) {
+        let recipient = loop {
+            let recipient = unwrap!(rng.choose(present_peers));
+            if recipient != sender {
+                break recipient;
+            }
+        };
+        let valid = self
+            .peer(sender)
+            .parsec
+            .gossip_recipients()
+            .any(|valid_recipient| valid_recipient == recipient);
+        let result = self.peer(sender).parsec.create_gossip(Some(recipient));
+
+        if valid {
+            // Recipient is valid. `create_gossip` must have succeeded.
+            let request = unwrap!(result);
+            let req_delay = options.gen_delay(rng);
+            let resp_delay = options.gen_delay(rng);
+            self.send_message(
+                sender.clone(),
+                recipient,
+                Message::Request(request, resp_delay),
+                step + req_delay,
+            );
+        } else {
+            // Recipient is not valid. `create_gossip` must have failed.
+            match result {
+                Err(Error::InvalidSelfState { .. })
+                | Err(Error::InvalidPeerState { .. })
+                | Err(Error::UnknownPeer) => (),
+                x => panic!("Unexpected {:?}", x),
+            }
+        }
+    }
+
     fn check_consensus_broken(&self) -> Result<(), ConsensusError> {
         let mut block_order = BTreeMap::new();
         for peer in self.active_peers() {
@@ -503,12 +546,12 @@ impl Network {
                     return Ok(false);
                 }
             }
-            ScheduleEvent::LocalStep(global_step) => {
+            ScheduleEvent::LocalStep(step) => {
                 let present_peers: Vec<PeerId> =
                     self.present_peers().map(|peer| peer.id.clone()).collect();
                 for peer in &present_peers {
                     self.peer_mut(&peer).make_votes();
-                    self.handle_messages(&peer, global_step);
+                    self.handle_messages(&peer, step);
                     let first_block = self.peer_mut(&peer).poll();
                     self.check_unexpected_accusations(&peer)?;
 
@@ -525,25 +568,7 @@ impl Network {
                     }
 
                     if rng.gen::<f64>() < options.prob_gossip {
-                        let recipient = {
-                            let recipients: Vec<_> =
-                                self.peer(&peer).parsec.gossip_recipients().collect();
-                            rng.choose(&recipients).cloned().cloned()
-                        };
-
-                        if let Some(recipient) = recipient {
-                            let req_delay = options.gen_delay(rng);
-                            let resp_delay = options.gen_delay(rng);
-
-                            let request =
-                                unwrap!(self.peer(&peer).parsec.create_gossip(Some(&recipient)));
-                            self.send_message(
-                                peer.clone(),
-                                &recipient,
-                                Message::Request(request, resp_delay),
-                                global_step + req_delay,
-                            );
-                        }
+                        self.send_gossip(rng, options, peer, &present_peers, step);
                     }
                 }
             }
@@ -564,7 +589,7 @@ impl Network {
 // Helper struct that protects the test network from losing too many nodes.
 #[derive(Default)]
 struct PeerRemovalGuard {
-    peers: BTreeMap<PeerId, PeerRemovalState>,
+    states: BTreeMap<PeerId, PeerRemovalState>,
 }
 
 enum PeerRemovalState {
@@ -580,16 +605,16 @@ enum PeerRemovalState {
 
 impl PeerRemovalGuard {
     fn num_active(&self) -> usize {
-        self.peers
+        self.states
             .values()
             .filter(|state| match state {
                 PeerRemovalState::Added | PeerRemovalState::Removing(..) => true,
-                _ => false,
+                PeerRemovalState::Adding(..) | PeerRemovalState::Removed => false,
             }).count()
     }
 
     fn num_removing(&self) -> usize {
-        self.peers
+        self.states
             .values()
             .filter(|state| {
                 if let PeerRemovalState::Removing(..) = *state {
@@ -601,17 +626,17 @@ impl PeerRemovalGuard {
     }
 
     fn add_genesis_peer(&mut self, peer_id: PeerId) {
-        let _ = self.peers.insert(peer_id, PeerRemovalState::Added);
+        let _ = self.states.insert(peer_id, PeerRemovalState::Added);
     }
 
     fn add_peer(&mut self, peer_id: PeerId) {
-        let _ = self.peers.insert(peer_id, PeerRemovalState::Adding(0));
+        let _ = self.states.insert(peer_id, PeerRemovalState::Adding(0));
     }
 
     fn record_consensus_on_add_peer(&mut self, peer_id: &PeerId) {
         let active = self.num_active();
 
-        if let Some(state) = self.peers.get_mut(peer_id) {
+        if let Some(state) = self.states.get_mut(peer_id) {
             let add = if let PeerRemovalState::Adding(ref mut count) = *state {
                 *count += 1;
                 is_more_than_two_thirds(*count, active)
@@ -630,7 +655,7 @@ impl PeerRemovalGuard {
     fn record_consensus_on_remove_peer(&mut self, peer_id: &PeerId) {
         let active = self.num_active();
 
-        if let Some(state) = self.peers.get_mut(peer_id) {
+        if let Some(state) = self.states.get_mut(peer_id) {
             let remove = match *state {
                 PeerRemovalState::Adding(..) | PeerRemovalState::Added => panic!(
                     "record consensus on remove {:?} failed: not scheduled for removal",
@@ -659,7 +684,7 @@ impl PeerRemovalGuard {
         let removing = self.num_removing();
         let remaining = active - removing - 1;
 
-        if let Some(state) = self.peers.get_mut(peer_id) {
+        if let Some(state) = self.states.get_mut(peer_id) {
             match *state {
                 PeerRemovalState::Adding(..) => false,
                 PeerRemovalState::Added => {
