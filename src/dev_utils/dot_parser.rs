@@ -939,7 +939,7 @@ mod tests {
         let options = ScheduleOptions {
             genesis_size: 4,
             opaque_to_add: 5,
-            gossip_prob: 0.8,
+            prob_gossip: 0.1,
             ..Default::default()
         };
         let schedule = Schedule::new(&mut env, &options);

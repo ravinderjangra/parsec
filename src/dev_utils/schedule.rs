@@ -167,8 +167,6 @@ pub enum DelayDistribution {
 pub struct ScheduleOptions {
     /// Size of the genesis group
     pub genesis_size: usize,
-    /// Probability per global step that a node will be scheduled to execute a local step
-    pub prob_local_step: f64,
     /// Probabilitity per step that a random node will fail
     pub prob_failure: f64,
     /// Probability that a vote will get repeated
@@ -178,7 +176,7 @@ pub struct ScheduleOptions {
     /// The distribution of message delays
     pub delay_distr: DelayDistribution,
     /// The probability that a node will gossip during its local step
-    pub gossip_prob: f64,
+    pub prob_gossip: f64,
     /// When true, nodes will first insert all votes into the graph, then start gossiping
     pub votes_before_gossip: bool,
     /// Number of opaque observations to make
@@ -224,8 +222,6 @@ impl Default for ScheduleOptions {
         ScheduleOptions {
             // default genesis of 4 peers
             genesis_size: 4,
-            // local step on average every 6-7 steps - not too often
-            prob_local_step: 0.15,
             // no randomised failures
             prob_failure: 0.0,
             // no vote duplication
@@ -234,8 +230,8 @@ impl Default for ScheduleOptions {
             deterministic_failures: BTreeMap::new(),
             // randomised delays, 4 steps on average
             delay_distr: DelayDistribution::Poisson(4.0),
-            // gossip every other local step
-            gossip_prob: 0.5,
+            // gossip every so often
+            prob_gossip: 0.05,
             // vote while gossiping
             votes_before_gossip: false,
             // add 5 opaque observations
@@ -266,6 +262,7 @@ impl Default for ScheduleOptions {
     }
 }
 
+#[derive(Debug)]
 pub enum ObservationEvent {
     Opaque(Transaction),
     AddPeer(PeerId),
@@ -439,27 +436,23 @@ impl Schedule {
         }
     }
 
-    fn perform_step<R: Rng>(
-        rng: &mut R,
+    fn perform_step(
         step: usize,
         peers: &mut PeerStatuses,
         // mut required to be able to use the inner reference in a loop
         mut pending: Option<&mut PendingObservations>,
         schedule: &mut Vec<ScheduleEvent>,
-        options: &ScheduleOptions,
     ) {
-        // first, peers that get scheduled make observations and perform local steps
-        for peer in peers.active_peers() {
-            if rng.gen::<f64>() < options.prob_local_step {
-                // we do a local step for peer
-                // first, they need to make observations
-                if let Some(pending) = pending.as_mut() {
-                    for observation in pending.pop_at_step(peer, step) {
-                        schedule.push(ScheduleEvent::VoteFor(peer.clone(), observation));
-                    }
+        // First let the peers vote for scheduled observations...
+        if let Some(pending) = pending.as_mut() {
+            for peer in peers.active_peers() {
+                for observation in pending.pop_at_step(peer, step) {
+                    schedule.push(ScheduleEvent::VoteFor(peer.clone(), observation));
                 }
             }
         }
+
+        // ...then perform the local step.
         schedule.push(ScheduleEvent::LocalStep(step));
     }
 
@@ -606,29 +599,18 @@ impl Schedule {
                     }
                 }
             }
-            Self::perform_step(
-                &mut env.rng,
-                step,
-                &mut peers,
-                Some(&mut pending),
-                &mut schedule,
-                options,
-            );
+            Self::perform_step(step, &mut peers, Some(&mut pending), &mut schedule);
             step += 1;
         }
-        let n = peers.present_peers().count() as f64;
+
         // Gossip should theoretically complete in O(log N) steps
-        // But the number of local steps taken by each node depends on the probability
-        // of a local step - each node will take on avg [num steps]*[prob] local steps
-        // Thus, we divide log N by the probability.
         // The constant (adjustment_coeff) is for making the number big enough.
-        let adjustment_coeff = 200.0;
-        let additional_steps = (adjustment_coeff * n.ln() / options.prob_local_step) as usize;
-        // Schedule events could be delayed due to parsec status, hence we add this additional
-        // steps to allow those delayed events to be drained.
-        let drain_steps = n * 10.0;
-        for _ in 0..(additional_steps + drain_steps as usize) {
-            Self::perform_step(&mut env.rng, step, &mut peers, None, &mut schedule, options);
+        let n = peers.present_peers().count() as f64;
+        let adjustment_coeff = 750.0;
+        let additional_steps = (adjustment_coeff * n.ln()) as usize;
+
+        for _ in 0..additional_steps {
+            Self::perform_step(step, &mut peers, None, &mut schedule);
             step += 1;
         }
 

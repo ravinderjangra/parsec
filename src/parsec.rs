@@ -919,7 +919,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let prev_meta_event = self
             .meta_elections
             .meta_event(prev_election, event.event_index())?;
-        let payloads = prev_meta_event
+        let payloads: Vec<_> = prev_meta_event
             .interesting_content
             .iter()
             .filter(|payload| {
@@ -932,7 +932,15 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             }).cloned()
             .collect();
 
-        Some(payloads)
+        if payloads.is_empty() {
+            // The previous election has no interesting content on this event that is still
+            // interesting for the current election. We can't return empty vec, because there can
+            // be some content that wasn't interesting for the previous election but might be
+            // interesting for the current one.
+            None
+        } else {
+            Some(payloads)
+        }
     }
 
     // Returns true if `builder.event()` has an ancestor by a different creator that has `payload`

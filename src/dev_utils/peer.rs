@@ -97,11 +97,16 @@ impl Peer {
         }
     }
 
-    pub fn poll(&mut self) {
+    /// Returns the index of the first new block.
+    pub fn poll(&mut self) -> usize {
+        let first = self.blocks.len();
+
         while let Some(block) = self.parsec.poll() {
             self.make_active_if_added(&block);
             self.blocks.push(block);
         }
+
+        first
     }
 
     /// Returns self.blocks
