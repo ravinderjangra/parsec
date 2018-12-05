@@ -353,7 +353,7 @@ struct ParsedMetaElection {
     all_voters: BTreeSet<PeerId>,
     undecided_voters: BTreeSet<PeerId>,
     payload: Option<Observation<Transaction, PeerId>>,
-    start_index: usize,
+    unconsensused_events: BTreeSet<String>,
     observation_map: BTreeMap<ObservationKey<PeerId>, Observation<Transaction, PeerId>>,
     meta_events: BTreeMap<String, MetaEvent<PeerId>>,
 }
@@ -366,7 +366,7 @@ fn parse_meta_election() -> Parser<u8, (MetaElectionHandle, ParsedMetaElection)>
             + parse_all_voters()
             + parse_undecided_voters()
             + parse_payload().opt()
-            + parse_start_index().opt()
+            + parse_unconsensused_events()
             + parse_meta_events())
         .map(
             |(
@@ -378,7 +378,7 @@ fn parse_meta_election() -> Parser<u8, (MetaElectionHandle, ParsedMetaElection)>
                         ),
                         payload,
                     ),
-                    start_index,
+                    unconsensused_events,
                 ),
                 observation_map_and_meta_events,
             )| {
@@ -396,7 +396,7 @@ fn parse_meta_election() -> Parser<u8, (MetaElectionHandle, ParsedMetaElection)>
                     all_voters,
                     undecided_voters,
                     payload,
-                    start_index: start_index.unwrap_or(0),
+                    unconsensused_events,
                     observation_map,
                     meta_events,
                 }
@@ -490,8 +490,14 @@ fn parse_payload() -> Parser<u8, Observation<Transaction, PeerId>> {
     comment_prefix() * seq(b"payload: ") * parse_observation() - next_line()
 }
 
-fn parse_start_index() -> Parser<u8, usize> {
-    comment_prefix() * seq(b"start_index: ") * parse_usize() - next_line()
+fn parse_unconsensused_events() -> Parser<u8, BTreeSet<String>> {
+    let line = comment_prefix()
+        * seq(b"unconsensused_events: {")
+        * list(sym(b'"') * parse_event_id() - sym(b'"'), seq(b", "))
+        - seq(b"}")
+        - next_line();
+    line.opt()
+        .map(|ids| ids.into_iter().flat_map(|ids| ids).collect())
 }
 
 fn parse_observation() -> Parser<u8, Observation<Transaction, PeerId>> {
@@ -855,10 +861,15 @@ fn convert_to_meta_election(
             })
             .collect(),
         consensus_len: meta_election.consensus_len,
-        start_index: meta_election.start_index,
         payload_key: meta_election
             .payload
             .map(|payload| ObservationKey::Supermajority(ObservationHash::from(&payload))),
+        unconsensused_events: meta_election
+            .unconsensused_events
+            .into_iter()
+            .filter_map(|id| event_indices.get(&id))
+            .cloned()
+            .collect(),
     }
 }
 
