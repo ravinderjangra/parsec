@@ -98,8 +98,6 @@ pub enum Malice<T: NetworkEvent, P: PublicId> {
     MissingGenesis(EventHash),
     /// Event carries a vote for `Observation::Genesis` which doesn't correspond to what we know.
     IncorrectGenesis(EventHash),
-    /// Event carries other_parent older than first ancestor of self_parent.
-    StaleOtherParent(EventHash),
     /// More than one events having this event as its self_parent.
     Fork(EventHash),
     /// A node incorrectly accused other node of malice. Contains hash of the invalid Accusation

@@ -6,7 +6,9 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
+use error::{Error, Result};
 use gossip::event::Event;
+use gossip::event_hash::EventHash;
 use gossip::packed_event::PackedEvent;
 use id::PublicId;
 use network_event::NetworkEvent;
@@ -24,6 +26,10 @@ impl<T: NetworkEvent, P: PublicId> Request<T, P> {
             packed_events: events.into_iter().map(Event::pack).collect(),
         }
     }
+
+    pub(crate) fn hash_of_last_event_created_by(&self, src: &P) -> Result<Option<EventHash>> {
+        hash_of_last_event_created_by(src, &self.packed_events)
+    }
 }
 
 /// A gossip response message.
@@ -39,4 +45,25 @@ impl<T: NetworkEvent, P: PublicId> Response<T, P> {
             packed_events: events.into_iter().map(Event::pack).collect(),
         }
     }
+
+    pub(crate) fn hash_of_last_event_created_by(&self, src: &P) -> Result<Option<EventHash>> {
+        hash_of_last_event_created_by(src, &self.packed_events)
+    }
+}
+
+// Returns `Err(Error::InvalidMessage)` if `packed_events` is non-empty, but doesn't contain an
+// event created by `src`.
+fn hash_of_last_event_created_by<T: NetworkEvent, P: PublicId>(
+    src: &P,
+    packed_events: &[PackedEvent<T, P>],
+) -> Result<Option<EventHash>> {
+    if packed_events.is_empty() {
+        return Ok(None);
+    }
+    packed_events
+        .iter()
+        .rev()
+        .find(|packed_event| packed_event.content.creator == *src)
+        .ok_or_else(|| Error::InvalidMessage)
+        .map(|packed_event| Some(packed_event.compute_hash()))
 }

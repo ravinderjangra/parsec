@@ -235,8 +235,9 @@ fn add_peer() {
     assert_eq!(alice_snapshot, Snapshot::new(&alice));
 
     // Now add D_18, which should result in Alice adding Fred.
+    let d_18_hash = *d_18.hash();
     unwrap!(alice.add_event(d_18));
-    unwrap!(alice.create_sync_event(&PeerId::new("Eric"), true, &BTreeSet::new()));
+    unwrap!(alice.create_sync_event(&dave_id, true, &BTreeSet::new(), Some(d_18_hash)));
     assert!(
         alice
             .peer_list()
@@ -811,38 +812,6 @@ mod handle_malice {
     }
 
     #[test]
-    fn stale_other_parent() {
-        // Generated with RNG seed: [856368386, 135728199, 764559083, 3829746197].
-        //
-        // Carol will create event C_4 with other-parent as B_1, despite having C_3 with other-
-        // parent as B_2.
-        let carol = TestParsec::from_parsed_contents(parse_test_dot_file("carol.dot"));
-        let c_3_hash = *unwrap!(find_event_by_short_name(carol.graph(), "C_3")).hash();
-        let b_1_hash = *unwrap!(find_event_by_short_name(carol.graph(), "B_1")).hash();
-
-        let c_4 = Event::new_from_request(
-            c_3_hash,
-            b_1_hash,
-            carol.graph(),
-            carol.peer_list(),
-            &BTreeSet::new(),
-        );
-        let c_4_hash = *c_4.hash();
-
-        // Check that adding C_4 triggers an accusation by Alice, but that C_4 is still added
-        // to the graph.
-        let mut alice = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
-
-        let expected_accusations = vec![(
-            carol.our_pub_id().clone(),
-            Malice::StaleOtherParent(c_4_hash),
-        )];
-        unwrap!(alice.add_event(c_4));
-        assert_eq!(*alice.pending_accusations(), expected_accusations);
-        assert!(alice.graph().contains(&c_4_hash));
-    }
-
-    #[test]
     fn invalid_accusation() {
         // Generated with RNG seed: [935566334, 935694090, 88607029, 861330491].
         let mut alice_contents = parse_test_dot_file("alice.dot");
@@ -1180,11 +1149,8 @@ mod handle_malice {
 
     #[test]
     fn self_parent_by_different_creator() {
-        let test_folder = "functional_tests_handle_malice_stale_other_parent";
-        let carol = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(
-            "carol.dot",
-            test_folder,
-        ));
+        // Generated with RNG seed: [856368386, 135728199, 764559083, 3829746197].
+        let carol = TestParsec::from_parsed_contents(parse_test_dot_file("carol.dot"));
 
         // Carol creates an event with one of Bob's as the self-parent.
         let b_2_hash = *unwrap!(find_event_by_short_name(carol.graph(), "B_2")).hash();
@@ -1197,10 +1163,7 @@ mod handle_malice {
         let c_4_hash = *c_4.hash();
         let packed_c_4 = c_4.pack();
 
-        let mut alice = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(
-            "alice.dot",
-            test_folder,
-        ));
+        let mut alice = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
 
         // Try to add the event.
         assert_err!(Error::InvalidEvent, alice.add_event(c_4));
@@ -1263,7 +1226,7 @@ mod handle_malice {
         );
 
         assert_eq!(*offender, bob_id);
-        assert_eq!(event.hash(), b_2_hash);
+        assert_eq!(event.compute_hash(), b_2_hash);
 
         // B_2 should not have been inserted into Alice's graph
         assert!(!alice.graph().contains(&b_2_hash));

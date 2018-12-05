@@ -25,7 +25,7 @@ impl<'a, T: NetworkEvent, P: PublicId> Iterator for Ancestors<'a, T, P> {
         // events to visit next, we use a priority queue (implemented as a BTreeMap keyed by
         // `topological_index`) so the events are visited in reverse topological order (children
         // before parents). We also keep track of the events we already visited, to avoid returning
-        // single event more than once.
+        // a single event more than once.
 
         loop {
             let event = *self.queue.iter().rev().next()?;
