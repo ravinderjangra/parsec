@@ -149,10 +149,14 @@ impl<P: PublicId> MetaElections<P> {
     }
 
     pub fn all<'a>(&'a self) -> impl Iterator<Item = MetaElectionHandle> + 'a {
+        // NOTE: make sure we return the elections in reverse chronological order (newest first).
+        // Otherwise the optimization that tries to reuse interesting content from previous
+        // meta-elections (see `Parsec::previous_interesting_content`) might break the consensus.
         self.previous_elections
             .keys()
             .cloned()
             .chain(iter::once(MetaElectionHandle::CURRENT))
+            .rev()
     }
 
     /// Elections that were already decided by us, but not by the given peer.
@@ -251,13 +255,6 @@ impl<P: PublicId> MetaElections<P> {
         self.get(handle).map(|election| &election.all_voters)
     }
 
-    /// Number of voters participating in the given meta-election.
-    pub fn voter_count(&self, handle: MetaElectionHandle) -> usize {
-        self.get(handle)
-            .map(|election| election.all_voters.len())
-            .unwrap_or(0)
-    }
-
     pub fn consensus_history(&self) -> &[ObservationKey<P>] {
         &self.consensus_history
     }
@@ -295,6 +292,17 @@ impl<P: PublicId> MetaElections<P> {
         self.get(handle)
             .map(|election| election.is_already_interesting_content(creator, payload_key))
             .unwrap_or(false)
+    }
+
+    pub fn is_already_consensused(
+        &self,
+        handle: MetaElectionHandle,
+        payload_key: &ObservationKey<P>,
+    ) -> bool {
+        self.get(handle)
+            .map(|election| {
+                self.consensus_history()[..election.consensus_len].contains(payload_key)
+            }).unwrap_or(false)
     }
 
     /// Topological index of the first unconsensused payload-carying event for the given election.

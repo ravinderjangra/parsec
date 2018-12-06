@@ -738,6 +738,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 self.handle_peer_consensus(&creator, &payload_key);
             }
 
+            // Calculate new unconsensused events here, because `MetaElections` doesn't have access
+            // to the actual payloads, so can't tell which ones are consensused.
             let unconsensused_events = self.collect_unconsensused_events();
             let prev_election = self.meta_elections.new_election(
                 payload_key,
@@ -958,7 +960,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         {
             builder.set_interesting_content(payloads_keys);
             return;
-        }
+        };
 
         let peers_that_can_vote = self.voters(builder.election());
         let start_index = self.meta_elections.start_index(builder.election());
@@ -1009,10 +1011,11 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     ) -> Option<Vec<ObservationKey<S::PublicId>>> {
         let prev_election = self.meta_elections.preceding(election)?;
 
-        if self.meta_elections.voter_count(election)
-            != self.meta_elections.voter_count(prev_election)
-        {
-            // Membership change occurred. Can't reuse interesting content.
+        // If membership change occurred, we can't reuse the interesting content.
+        // Note: it's not enough to compare just the voter counts, because the preceding
+        // meta-election might not necessarily be the directly preceding one, but might be further
+        // in the past.
+        if self.meta_elections.voters(election) != self.meta_elections.voters(prev_election) {
             return None;
         }
 
@@ -1023,10 +1026,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .interesting_content
             .iter()
             .filter(|payload_key| {
-                if Some(*payload_key) == self.meta_elections.decided_payload_key(prev_election) {
-                    return false;
-                }
-
                 if self.meta_elections.is_already_interesting_content(
                     election,
                     event.creator(),
@@ -1035,20 +1034,19 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     return false;
                 }
 
+                if self
+                    .meta_elections
+                    .is_already_consensused(election, payload_key)
+                {
+                    return false;
+                }
+
                 true
             })
             .cloned()
             .collect();
 
-        if payloads.is_empty() {
-            // The previous election has no interesting content on this event that is still
-            // interesting for the current election. We can't return empty vec, because there can
-            // be some content that wasn't interesting for the previous election but might be
-            // interesting for the current one.
-            None
-        } else {
-            Some(payloads)
-        }
+        Some(payloads)
     }
 
     // Returns true if `builder.event()` has an ancestor by a different creator that has `payload`
