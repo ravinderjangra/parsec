@@ -965,7 +965,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let peers_that_can_vote = self.voters(builder.election());
         let start_index = self.meta_elections.start_index(builder.election());
 
-        let mut payload_set: BTreeSet<_> = self
+        let mut payloads: Vec<_> = self
             .unconsensused_events(builder.election())
             .map(|event| event.inner())
             .filter_map(|event| self.payload_key(event).map(|key| (event, key)))
@@ -981,26 +981,29 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     || event.sees_fork()
                         && self.has_interesting_ancestor(builder, payload_key, start_index)
             })
-            .map(|(_, payload_key)| payload_key)
+            .map(|(event, payload_key)| {
+                (
+                    if event.creator() == builder.event().creator() {
+                        event.index_by_creator()
+                    } else {
+                        usize::MAX
+                    },
+                    payload_key,
+                )
+            })
             .collect();
 
-        // The code above created a set of payloads that are interesting at this event.
-        // We will now sort the payloads in the order in which the creator voted for them.
-        let mut payload_vec = vec![];
-        for this_payload_key in self
-            .peer_list
-            .peer_events(builder.event().creator())
-            .filter_map(|hash| self.get_known_event(hash).ok())
-            .filter_map(|event| self.payload_key(&*event))
-        {
-            if payload_set.remove(&this_payload_key) {
-                payload_vec.push(this_payload_key);
-            }
-        }
-        // If any payloads are left in the set, it means that the creator hasn't voted for them -
-        // we will just append them at the end.
-        payload_vec.extend(payload_set);
-        builder.set_interesting_content(payload_vec);
+        // First, remove duplicates (preferring payloads voted for by the creator)...
+        payloads
+            .sort_by(|(l_index, l_key), (r_index, r_key)| (l_key, l_index).cmp(&(r_key, r_index)));
+        payloads.dedup_by(|(_, l_key), (_, r_key)| l_key == r_key);
+
+        // ...then sort the payloads in the order the creator voted for them, followed by the ones
+        // not voted for by the creator (if any).
+        payloads.sort();
+
+        let payloads = payloads.into_iter().map(|(_, key)| key).collect();
+        builder.set_interesting_content(payloads);
     }
 
     // Try to get interesting content of the given event from the previous meta-election.

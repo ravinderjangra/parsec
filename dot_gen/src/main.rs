@@ -145,7 +145,8 @@ fn main() {
 
                 Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
             },
-        ).seed([848_911_612, 2_362_592_349, 3_178_199_135, 2_458_552_022]);
+        )
+        .seed([848_911_612, 2_362_592_349, 3_178_199_135, 2_458_552_022]);
 
     let _ = scenarios
         .add(

@@ -302,7 +302,8 @@ impl<P: PublicId> MetaElections<P> {
         self.get(handle)
             .map(|election| {
                 self.consensus_history()[..election.consensus_len].contains(payload_key)
-            }).unwrap_or(false)
+            })
+            .unwrap_or(false)
     }
 
     /// Topological index of the first unconsensused payload-carying event for the given election.
