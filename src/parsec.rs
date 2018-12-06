@@ -1109,7 +1109,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 }
             }).cloned()
             .collect();
-
         builder.set_observees(observees);
     }
 
