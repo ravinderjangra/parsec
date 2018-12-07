@@ -33,10 +33,6 @@ use std::usize;
 #[cfg(feature = "malice-detection")]
 use vote::Vote;
 
-type PendingAccusations<T, P> = Vec<(P, Malice<T, P>)>;
-#[cfg(feature = "malice-detection")]
-type Accusations<T, P> = Vec<(P, Malice<T, P>)>;
-
 /// The main object which manages creating and receiving gossip about network events from peers, and
 /// which provides a sequence of consensused [Block](struct.Block.html)s by applying the PARSEC
 /// algorithm. A `Block`'s payload, described by the [Observation](enum.Observation.html) type, is
@@ -88,7 +84,7 @@ pub struct Parsec<T: NetworkEvent, S: SecretId> {
     meta_elections: MetaElections<S::PublicId>,
     consensus_mode: ConsensusMode,
     // Accusations to raise at the end of the processing of current gossip message.
-    pending_accusations: PendingAccusations<T, S::PublicId>,
+    pending_accusations: Accusations<T, S::PublicId>,
     // Peers we accused of unprovable malice.
     #[cfg(feature = "malice-detection")]
     unprovable_offenders: BTreeSet<S::PublicId>,
@@ -2298,6 +2294,8 @@ enum PostProcessAction {
     Restart(usize),
 }
 
+type Accusations<T, P> = Vec<(P, Malice<T, P>)>;
+
 #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 impl Parsec<Transaction, PeerId> {
     pub(crate) fn from_parsed_contents(mut parsed_contents: ParsedContents) -> Self {
@@ -2465,7 +2463,7 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
     }
 
     #[cfg(feature = "malice-detection")]
-    pub fn pending_accusations(&self) -> &PendingAccusations<T, S::PublicId> {
+    pub fn pending_accusations(&self) -> &Accusations<T, S::PublicId> {
         &self.0.pending_accusations
     }
 
