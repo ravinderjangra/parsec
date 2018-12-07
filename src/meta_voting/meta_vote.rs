@@ -280,7 +280,7 @@ impl MetaVote {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Serialize, Deserialize)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Serialize, Deserialize)]
 pub(crate) enum Step {
     ForcedTrue,
     ForcedFalse,

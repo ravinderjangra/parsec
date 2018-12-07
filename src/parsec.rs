@@ -1317,8 +1317,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             creator_event_index,
             peer_id,
             round,
-            &Step::GenuineFlip,
-        ).first()
+            Step::GenuineFlip,
+        ).next()
         .and_then(|meta_vote| meta_vote.aux_value)
     }
 
@@ -1367,41 +1367,33 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
     // Returns the meta votes for the given peer, created by `creator`, since the given round and
     // step.  Starts iterating down the creator's events starting from `creator_event_index`.
-    fn meta_votes_since_round_and_step(
-        &self,
+    fn meta_votes_since_round_and_step<'a>(
+        &'a self,
         election: MetaElectionHandle,
         creator: &S::PublicId,
         creator_event_index: usize,
         peer_id: &S::PublicId,
         round: usize,
-        step: &Step,
-    ) -> Vec<MetaVote> {
+        step: Step,
+    ) -> impl Iterator<Item = MetaVote> + 'a {
         let mut events = self.peer_list.events_by_index(creator, creator_event_index);
+        let event = events.next().and_then(|event| {
+            if events.next().is_some() {
+                // Fork
+                None
+            } else {
+                Some(event)
+            }
+        });
 
-        // Check whether it has at least one item
-        let event = if let Some(event) = events.next() {
-            event
-        } else {
-            return vec![];
-        };
-
-        if events.next().is_some() {
-            // Fork
-            return vec![];
-        }
-
-        self.meta_elections
-            .meta_votes(election, event)
+        event
+            .and_then(|event| self.meta_elections.meta_votes(election, event))
             .and_then(|meta_votes| meta_votes.get(peer_id))
-            .map(|meta_votes| {
-                meta_votes
-                    .iter()
-                    .filter(|meta_vote| {
-                        meta_vote.round > round
-                            || meta_vote.round == round && meta_vote.step >= *step
-                    }).cloned()
-                    .collect()
-            }).unwrap_or_else(|| vec![])
+            .into_iter()
+            .flat_map(|meta_votes| meta_votes)
+            .filter(move |meta_vote| {
+                meta_vote.round > round || meta_vote.round == round && meta_vote.step >= step
+            }).cloned()
     }
 
     // Returns the set of meta votes held by all peers other than the creator of `event` which are
@@ -1427,8 +1419,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                             *creator_event_index,
                             &peer_id,
                             0,
-                            &Step::ForcedTrue,
-                        )
+                            Step::ForcedTrue,
+                        ).collect()
                     })
             }).collect()
     }
