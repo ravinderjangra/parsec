@@ -672,7 +672,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
 
         self.initialise_membership_list(event_index);
-        self.process_event(event_index)?;
+        self.process_events(event_index.topological_index())?;
 
         if !our {
             #[cfg(feature = "malice-detection")]
@@ -682,9 +682,38 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         Ok(event_index)
     }
 
-    fn process_event(&mut self, event_index: EventIndex) -> Result<()> {
+    fn process_events(&mut self, mut start_index: usize) -> Result<()> {
+        let mut event_indices = Vec::new();
+
+        'outer: loop {
+            event_indices.clear();
+            event_indices.extend(
+                self.graph
+                    .iter_from(start_index)
+                    .map(|event| event.event_index()),
+            );
+
+            for event_index in event_indices.drain(..) {
+                match self.process_event(event_index)? {
+                    PostProcessAction::Restart(new_start_index)
+                        if new_start_index <= event_index.topological_index() =>
+                    {
+                        start_index = new_start_index;
+                        continue 'outer;
+                    }
+                    PostProcessAction::Restart(_) | PostProcessAction::Continue => (),
+                }
+            }
+
+            break;
+        }
+
+        Ok(())
+    }
+
+    fn process_event(&mut self, event_index: EventIndex) -> Result<PostProcessAction> {
         if self.peer_list.our_state() == PeerState::inactive() {
-            return Ok(());
+            return Ok(PostProcessAction::Continue);
         }
 
         let elections: Vec<_> = self.meta_elections.all().collect();
@@ -721,8 +750,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 .mark_as_decided(prev_election, self.peer_list.our_pub_id());
             self.meta_elections.mark_as_decided(prev_election, &creator);
 
-            let current_index = self.get_known_event(event_index)?.topological_index();
-            self.restart_consensus(start_index, current_index)?;
+            // Trigger reprocess.
+            self.meta_elections
+                .initialise_current_election(self.peer_list.all_ids());
+            return Ok(PostProcessAction::Restart(start_index));
         } else if creator != *self.our_pub_id() {
             let undecided: Vec<_> = self.meta_elections.undecided_by(&creator).collect();
             for election in undecided {
@@ -733,7 +764,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             }
         }
 
-        Ok(())
+        Ok(PostProcessAction::Continue)
     }
 
     fn output_consensus_info(&self, payload_key: &ObservationKey<S::PublicId>) {
@@ -902,6 +933,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 election,
                 event
             );
+
             let mut builder = MetaEvent::build(election, event);
 
             self.set_interesting_content(&mut builder);
@@ -1541,35 +1573,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .collect();
 
         Block::new(&votes)
-    }
-
-    fn restart_consensus(&mut self, start_index: usize, current_index: usize) -> Result<()> {
-        self.meta_elections
-            .initialise_current_election(self.peer_list.all_ids());
-
-        if current_index < start_index {
-            return Ok(());
-        }
-
-        // This makes sure that we only reprocess events between start_index and current_index,
-        // inclusive.
-        // `collect()` needed because the iterator returned by `iter_from()` borrows `self`
-        // immutably, which conflicts with `process_event`.
-        let indices: Vec<_> = self
-            .graph
-            .iter_from(start_index)
-            .take(current_index - start_index + 1)
-            .map(|event| event.event_index())
-            .collect();
-        for index in indices {
-            // This will reprocess events relevant to the new meta-election, but in the context of
-            // all active meta-elections. This is sometimes necessary, as restart_consensus can be
-            // called while events are being reprocessed and in such cases we could miss some
-            // events when creating meta-events.
-            self.process_event(index)?;
-        }
-
-        Ok(())
     }
 
     fn compute_next_meta_election_start_index(&self) -> usize {
@@ -2295,6 +2298,14 @@ impl<T: NetworkEvent, P: PublicId> ObservationInfo<T, P> {
 
 type ObservationWithKey<'a, T, P> = (&'a Observation<T, P>, ObservationKey<P>);
 
+// What to do after processing the current event.
+enum PostProcessAction {
+    // Continue with the next event (if any)
+    Continue,
+    // Restart processing events from the given index.
+    Restart(usize),
+}
+
 #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 impl Parsec<Transaction, PeerId> {
     pub(crate) fn from_parsed_contents(mut parsed_contents: ParsedContents) -> Self {
@@ -2473,9 +2484,7 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
 
     #[cfg(feature = "malice-detection")]
     pub fn restart_consensus(&mut self) -> Result<()> {
-        // `usize::MAX - 1` is somehow arbitrary upper bound that will make `restart_consensus`
-        // reprocess everything (`-1` is there to avoid panic due to arithmetic overflow).
-        self.0.restart_consensus(0, usize::MAX - 1)
+        self.0.process_events(0)
     }
 }
 
