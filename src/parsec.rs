@@ -679,17 +679,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     fn process_events(&mut self, mut start_index: usize) -> Result<()> {
-        let mut event_indices = Vec::new();
-
         'outer: loop {
-            event_indices.clear();
-            event_indices.extend(
-                self.graph
-                    .iter_from(start_index)
-                    .map(|event| event.event_index()),
-            );
-
-            for event_index in event_indices.drain(..) {
+            for event_index in self.graph.indices_from(start_index) {
                 match self.process_event(event_index)? {
                     PostProcessAction::Restart(new_start_index)
                         if new_start_index <= event_index.topological_index() =>
@@ -1371,7 +1362,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         peer_id: &S::PublicId,
         round: usize,
         step: Step,
-    ) -> impl Iterator<Item = MetaVote> + 'a {
+    ) -> impl Iterator<Item = &'a MetaVote> {
         let mut events = self.peer_list.events_by_index(creator, creator_event_index);
         let event = events.next().and_then(|event| {
             if events.next().is_some() {
@@ -1389,7 +1380,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .flat_map(|meta_votes| meta_votes)
             .filter(move |meta_vote| {
                 meta_vote.round > round || meta_vote.round == round && meta_vote.step >= step
-            }).cloned()
+            })
     }
 
     // Returns the set of meta votes held by all peers other than the creator of `event` which are
@@ -1416,7 +1407,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                             &peer_id,
                             0,
                             Step::ForcedTrue,
-                        ).collect()
+                        ).cloned()
+                        .collect()
                     })
             }).collect()
     }

@@ -93,11 +93,16 @@ impl<T: NetworkEvent, P: PublicId> Graph<T, P> {
     }
 
     /// Iterator over events in this graph starting at the given topological index.
-    pub fn iter_from(&self, start: usize) -> Iter<T, P> {
+    pub fn iter_from(&self, start_index: usize) -> Iter<T, P> {
         Iter {
             events: &self.events,
-            index: start,
+            index: start_index,
         }
+    }
+
+    /// Iterator over event indices starting at the given topological index.
+    pub fn indices_from(&self, start_index: usize) -> impl Iterator<Item = EventIndex> {
+        (start_index..self.events.len()).map(EventIndex)
     }
 
     /// Returns self-parent of the given event, if any.
