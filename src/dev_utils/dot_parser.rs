@@ -14,7 +14,7 @@ use meta_voting::{
 };
 use mock::{PeerId, Transaction};
 use observation::{Observation, ObservationHash, ObservationKey};
-use peer_list::{PeerList, PeerState};
+use peer_list::{PeerIndex, PeerList, PeerState};
 use pom::char_class::{alphanum, digit, hex_digit, multispace, space};
 use pom::parser::*;
 use pom::Result as PomResult;
@@ -355,7 +355,14 @@ struct ParsedMetaElection {
     payload: Option<Observation<Transaction, PeerId>>,
     unconsensused_events: BTreeSet<String>,
     observation_map: BTreeMap<ObservationKey<PeerId>, Observation<Transaction, PeerId>>,
-    meta_events: BTreeMap<String, MetaEvent<PeerId>>,
+    meta_events: BTreeMap<String, ParsedMetaEvent>,
+}
+
+#[derive(Debug)]
+struct ParsedMetaEvent {
+    observees: BTreeSet<PeerId>,
+    interesting_content: Vec<ObservationKey<PeerId>>,
+    meta_votes: BTreeMap<PeerId, Vec<MetaVote>>,
 }
 
 fn parse_meta_election() -> Parser<u8, (MetaElectionHandle, ParsedMetaElection)> {
@@ -553,7 +560,7 @@ fn parse_transaction() -> Parser<u8, String> {
     is_a(alphanum).repeat(1..).convert(String::from_utf8)
 }
 
-fn parse_meta_events() -> Parser<u8, BTreeMap<String, (ObservationMap, MetaEvent<PeerId>)>> {
+fn parse_meta_events() -> Parser<u8, BTreeMap<String, (ObservationMap, ParsedMetaEvent)>> {
     (comment_prefix()
         * seq(b"meta_events: {")
         * next_line()
@@ -564,20 +571,20 @@ fn parse_meta_events() -> Parser<u8, BTreeMap<String, (ObservationMap, MetaEvent
     .map(|v| v.into_iter().collect())
 }
 
-fn parse_single_meta_event() -> Parser<u8, (String, (ObservationMap, MetaEvent<PeerId>))> {
+fn parse_single_meta_event() -> Parser<u8, (String, (ObservationMap, ParsedMetaEvent))> {
     comment_prefix() * parse_event_id() - seq(b" -> {") - next_line() + parse_meta_event_content()
         - comment_prefix()
         - sym(b'}')
         - next_line()
 }
 
-fn parse_meta_event_content() -> Parser<u8, (ObservationMap, MetaEvent<PeerId>)> {
+fn parse_meta_event_content() -> Parser<u8, (ObservationMap, ParsedMetaEvent)> {
     (parse_observees() + parse_interesting_content() + parse_meta_votes().opt()).map(
         |((observees, observation_map), meta_votes)| {
             let interesting_content = observation_map.iter().map(|(key, _)| key.clone()).collect();
             (
                 observation_map,
-                MetaEvent {
+                ParsedMetaEvent {
                     observees,
                     interesting_content,
                     meta_votes: meta_votes.unwrap_or_else(BTreeMap::new),
@@ -776,18 +783,24 @@ fn convert_into_parsed_contents(result: ParsedFile) -> ParsedContents {
     } = result;
 
     let mut parsed_contents = ParsedContents::new(our_id.clone());
-    let mut event_hashes =
-        create_events(&mut graph.graph, graph.event_details, &mut parsed_contents);
 
     let peer_data = peer_list
         .0
         .into_iter()
         .map(|(id, data)| (id, (data.state, data.membership_list)))
         .collect();
-    let peer_list = PeerList::new_from_dot_input(our_id, &parsed_contents.graph, peer_data);
+    let peer_list_builder = PeerList::build_from_dot_input(our_id, peer_data);
 
-    parsed_contents.peer_list = peer_list;
-    parsed_contents.observation_map = meta_elections
+    let mut event_hashes = create_events(
+        &mut graph.graph,
+        graph.event_details,
+        &mut parsed_contents,
+        peer_list_builder.peer_list(),
+    );
+
+    let peer_list = peer_list_builder.finish(&parsed_contents.graph);
+
+    let observation_map = meta_elections
         .meta_elections
         .values()
         .flat_map(|meta_election| {
@@ -797,13 +810,18 @@ fn convert_into_parsed_contents(result: ParsedFile) -> ParsedContents {
                 .map(|(key, obs)| (key.clone(), obs.clone()))
         })
         .collect();
-    parsed_contents.meta_elections = convert_to_meta_elections(meta_elections, &mut event_hashes);
+    let meta_elections = convert_to_meta_elections(meta_elections, &mut event_hashes, &peer_list);
+
+    parsed_contents.peer_list = peer_list;
+    parsed_contents.observation_map = observation_map;
+    parsed_contents.meta_elections = meta_elections;
     parsed_contents
 }
 
 fn convert_to_meta_elections(
     meta_elections: ParsedMetaElections,
     event_indices: &mut BTreeMap<String, EventIndex>,
+    peer_list: &PeerList<PeerId>,
 ) -> MetaElections<PeerId> {
     let meta_elections_map = meta_elections
         .meta_elections
@@ -811,7 +829,7 @@ fn convert_to_meta_elections(
         .map(|(handle, election)| {
             (
                 handle,
-                convert_to_meta_election(handle, election, event_indices),
+                convert_to_meta_election(handle, election, event_indices, peer_list),
             )
         })
         .collect();
@@ -822,29 +840,29 @@ fn convert_to_meta_election(
     handle: MetaElectionHandle,
     meta_election: ParsedMetaElection,
     event_indices: &mut BTreeMap<String, EventIndex>,
+    peer_list: &PeerList<PeerId>,
 ) -> MetaElection<PeerId> {
     MetaElection {
         meta_events: meta_election
             .meta_events
             .into_iter()
             .map(|(ev_id, mev)| {
-                (
-                    *event_indices
-                        .entry(ev_id.clone())
-                        .or_insert_with(|| EventIndex::PHONY),
-                    mev,
-                )
+                let event_index = *event_indices
+                    .entry(ev_id.clone())
+                    .or_insert_with(|| EventIndex::PHONY);
+                let meta_event = convert_to_meta_event(mev, peer_list);
+                (event_index, meta_event)
             })
             .collect(),
-        round_hashes: meta_election.round_hashes,
-        all_voters: meta_election.all_voters,
-        undecided_voters: meta_election.undecided_voters,
+        round_hashes: convert_peer_id_map(meta_election.round_hashes, peer_list),
+        all_voters: convert_peer_id_set(meta_election.all_voters, peer_list),
+        undecided_voters: convert_peer_id_set(meta_election.undecided_voters, peer_list),
         interesting_events: meta_election
             .interesting_events
             .into_iter()
             .map(|(peer_id, events)| {
                 (
-                    peer_id,
+                    unwrap!(peer_list.get_index(&peer_id)),
                     events
                         .into_iter()
                         .map(|ev_id| {
@@ -873,10 +891,37 @@ fn convert_to_meta_election(
     }
 }
 
+fn convert_to_meta_event(
+    meta_event: ParsedMetaEvent,
+    peer_list: &PeerList<PeerId>,
+) -> MetaEvent<PeerId> {
+    MetaEvent {
+        observees: convert_peer_id_set(meta_event.observees, peer_list),
+        interesting_content: meta_event.interesting_content,
+        meta_votes: convert_peer_id_map(meta_event.meta_votes, peer_list),
+    }
+}
+
+fn convert_peer_id_set(ids: BTreeSet<PeerId>, peer_list: &PeerList<PeerId>) -> BTreeSet<PeerIndex> {
+    ids.into_iter()
+        .map(|id| unwrap!(peer_list.get_index(&id)))
+        .collect()
+}
+
+fn convert_peer_id_map<T>(
+    ids: BTreeMap<PeerId, T>,
+    peer_list: &PeerList<PeerId>,
+) -> BTreeMap<PeerIndex, T> {
+    ids.into_iter()
+        .map(|(id, value)| (unwrap!(peer_list.get_index(&id)), value))
+        .collect()
+}
+
 fn create_events(
     graph: &mut BTreeMap<String, ParsedEvent>,
     mut details: BTreeMap<String, EventDetails>,
     parsed_contents: &mut ParsedContents,
+    peer_list: &PeerList<PeerId>,
 ) -> BTreeMap<String, EventIndex> {
     let mut event_indices = BTreeMap::new();
 
@@ -911,6 +956,7 @@ fn create_events(
             other_parent,
             index_by_creator,
             next_event_details.last_ancestors.clone(),
+            peer_list,
         );
 
         let index = parsed_contents.graph.insert(next_event).event_index();
@@ -1001,7 +1047,11 @@ mod tests {
             let parsed = unwrap!(parse_dot_file(&dot_file_path));
             let actual_snapshot = (
                 GraphSnapshot::new(&parsed.graph),
-                MetaElectionsSnapshot::new(&parsed.meta_elections, &parsed.graph),
+                MetaElectionsSnapshot::new(
+                    &parsed.meta_elections,
+                    &parsed.graph,
+                    &parsed.peer_list,
+                ),
             );
 
             assert_eq!(actual_snapshot, expected_snapshot);

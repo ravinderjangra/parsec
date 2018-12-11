@@ -8,9 +8,11 @@
 
 mod membership_list;
 mod peer;
+mod peer_index;
 mod peer_state;
 
 pub(crate) use self::membership_list::MembershipListChange;
+pub(crate) use self::peer_index::PeerIndex;
 pub use self::peer_state::PeerState;
 #[cfg(all(test, feature = "mock"))]
 pub(crate) use self::snapshot::PeerListSnapshot;
@@ -27,7 +29,7 @@ use id::SecretId;
 #[cfg(any(test, feature = "testing"))]
 use mock::{PeerId, Transaction};
 use network_event::NetworkEvent;
-use std::collections::btree_map::{self, BTreeMap, Entry};
+use std::collections::btree_map::{BTreeMap, Entry};
 #[cfg(any(test, feature = "testing", feature = "malice-detection"))]
 use std::collections::BTreeSet;
 use std::fmt::{self, Debug, Formatter};
@@ -35,14 +37,20 @@ use std::iter;
 
 pub(crate) struct PeerList<S: SecretId> {
     our_id: S,
-    peers: BTreeMap<S::PublicId, Peer<S::PublicId>>,
+    our_peer: Peer<S::PublicId>,
+    peers: Vec<Peer<S::PublicId>>,
+    indices: BTreeMap<S::PublicId, PeerIndex>,
 }
 
 impl<S: SecretId> PeerList<S> {
     pub fn new(our_id: S) -> Self {
+        let our_peer = Peer::new(our_id.public_id().clone(), PeerState::inactive());
+
         PeerList {
             our_id,
-            peers: BTreeMap::new(),
+            our_peer,
+            peers: Vec::new(),
+            indices: BTreeMap::new(),
         }
     }
 
@@ -51,203 +59,234 @@ impl<S: SecretId> PeerList<S> {
     }
 
     pub fn our_pub_id(&self) -> &S::PublicId {
-        self.our_id.public_id()
+        &self.our_id.public_id()
     }
 
-    /// Returns all sorted peer_ids.
-    pub fn all_ids(&self) -> impl Iterator<Item = &S::PublicId> {
-        self.peers.keys()
+    pub fn get_index(&self, peer_id: &S::PublicId) -> Option<PeerIndex> {
+        if peer_id == self.our_id.public_id() {
+            Some(PeerIndex::OUR)
+        } else {
+            self.indices.get(peer_id).cloned()
+        }
     }
 
-    /// Returns ids of all peers that can vote.
-    pub fn voter_ids(&self) -> impl Iterator<Item = &S::PublicId> {
-        self.voters().map(|(id, _)| id)
+    pub fn contains(&self, peer_id: &S::PublicId) -> bool {
+        peer_id == self.our_id.public_id() || self.indices.contains_key(peer_id)
+    }
+
+    pub fn get(&self, index: PeerIndex) -> Option<&Peer<S::PublicId>> {
+        if index == PeerIndex::OUR {
+            Some(&self.our_peer)
+        } else {
+            self.peers.get(index.0 - 1)
+        }
+    }
+
+    pub fn get_known(&self, index: PeerIndex) -> Result<&Peer<S::PublicId>, Error> {
+        self.get(index).ok_or_else(|| {
+            log_or_panic!(
+                "{:?} does not have peer with index {:?}",
+                self.our_id.public_id(),
+                index
+            );
+            Error::UnknownPeer
+        })
+    }
+
+    fn get_known_mut(&mut self, index: PeerIndex) -> Option<&mut Peer<S::PublicId>> {
+        if index == PeerIndex::OUR {
+            Some(&mut self.our_peer)
+        } else if let Some(peer) = self.peers.get_mut(index.0 - 1) {
+            Some(peer)
+        } else {
+            log_or_panic!(
+                "{:?} does not have peer with index {:?}",
+                self.our_id.public_id(),
+                index
+            );
+            None
+        }
+    }
+
+    /// Returns an iterator of peers.
+    pub fn iter(&self) -> impl Iterator<Item = (PeerIndex, &Peer<S::PublicId>)> {
+        iter::once((PeerIndex::OUR, &self.our_peer)).chain(
+            self.peers
+                .iter()
+                .enumerate()
+                .map(|(index, peer)| (PeerIndex(index + 1), peer)),
+        )
+    }
+
+    /// Returns an iterator of peers that can vote.
+    pub fn voters(&self) -> impl Iterator<Item = (PeerIndex, &Peer<S::PublicId>)> {
+        self.iter().filter(|(_, peer)| peer.state.can_vote())
     }
 
     /// Returns an iterator of peers that we can send gossip to.
-    pub fn gossip_recipient_ids(&self) -> impl Iterator<Item = &S::PublicId> {
-        let ids = if self.our_state().can_send() {
-            let ids = self
-                .peers
+    pub fn gossip_recipients<'a>(
+        &'a self,
+    ) -> impl Iterator<Item = (PeerIndex, &Peer<S::PublicId>)> + 'a {
+        let iter = if self.our_peer.state.can_send() {
+            let iter = self
                 .iter()
-                .filter(move |(id, peer)| {
-                    *id != self.our_pub_id() && peer.state.can_vote() && peer.state.can_recv()
-                })
-                .map(|(id, _)| id);
-            Some(ids)
+                .skip(1)
+                .filter(|(_, peer)| peer.state.can_vote() && peer.state.can_recv());
+            Some(iter)
         } else {
             None
         };
 
-        ids.into_iter().flat_map(|ids| ids)
+        iter.into_iter().flat_map(|iter| iter)
     }
 
-    /// Returns an unsorted map of peer_id => Hash(peer_id).
-    pub fn peer_id_hashes(&self) -> impl Iterator<Item = (&S::PublicId, &Hash)> {
-        self.peers.iter().map(|(id, peer)| (id, peer.id_hash()))
+    /// Returns indices of all peers known to us.
+    pub fn all_indices(&self) -> impl Iterator<Item = PeerIndex> {
+        (0..=self.peers.len()).map(PeerIndex)
     }
 
-    /// Returns an iterator of peers.
-    pub fn iter(&self) -> btree_map::Iter<S::PublicId, Peer<S::PublicId>> {
-        self.peers.iter()
+    /// Return public ids of all peers.
+    pub fn all_ids(&self) -> impl Iterator<Item = (PeerIndex, &S::PublicId)> {
+        self.iter().map(|(index, peer)| (index, peer.id()))
     }
 
-    /// Returns an iterator of peers that can vote.
-    pub fn voters(&self) -> impl Iterator<Item = (&S::PublicId, &Peer<S::PublicId>)> {
-        self.peers.iter().filter(|(_, peer)| peer.state.can_vote())
+    /// Returns an unsorted map of peer index => Hash(peer_id).
+    pub fn all_id_hashes(&self) -> impl Iterator<Item = (PeerIndex, &Hash)> {
+        self.iter().map(|(index, peer)| (index, peer.id_hash()))
     }
 
-    pub fn has_peer(&self, peer_id: &S::PublicId) -> bool {
-        self.peers.contains_key(peer_id)
+    /// Returns indices of the peers that can vote.
+    pub fn voter_indices<'a>(&'a self) -> impl Iterator<Item = PeerIndex> + 'a {
+        self.voters().map(|(index, _)| index)
     }
 
-    pub fn peer_state(&self, peer_id: &S::PublicId) -> PeerState {
-        self.peers
-            .get(peer_id)
+    pub fn peer_state(&self, index: PeerIndex) -> PeerState {
+        self.get(index)
             .map(|peer| peer.state)
             .unwrap_or_else(PeerState::inactive)
     }
 
     pub fn our_state(&self) -> PeerState {
-        self.peer_state(self.our_id.public_id())
+        self.our_peer.state
     }
 
     /// Adds a peer in the given state into the map.
-    pub fn add_peer(&mut self, peer_id: S::PublicId, state: PeerState) {
-        let changed = match self.peers.entry(peer_id.clone()) {
+    pub fn add_peer(&mut self, peer_id: S::PublicId, state: PeerState) -> PeerIndex {
+        if peer_id == *self.our_id.public_id() {
+            log_or_panic!(
+                "{:?} already has self in the peer list",
+                self.our_id.public_id(),
+            );
+
+            return PeerIndex::OUR;
+        }
+
+        let (index, changed) = match self.indices.entry(peer_id) {
             Entry::Occupied(entry) => {
                 log_or_panic!(
                     "{:?} already has {:?} in the peer list",
                     self.our_id.public_id(),
                     entry.key()
                 );
-                false
+                (*entry.get(), false)
             }
             Entry::Vacant(entry) => {
-                let peer = Peer::new(entry.key(), state);
-                let _ = entry.insert(peer);
-                state.can_vote()
+                let index = PeerIndex(self.peers.len() + 1);
+                let peer = Peer::new(entry.key().clone(), state);
+
+                self.peers.push(peer);
+                let _ = entry.insert(index);
+
+                (index, state.can_vote())
             }
         };
 
         if changed {
-            if peer_id == *self.our_pub_id() {
-                let other_peer_ids: Vec<_> = self.peers.keys().cloned().collect();
-                for other_peer_id in other_peer_ids {
-                    self.record_our_membership_list_change(MembershipListChange::Add(other_peer_id))
-                }
-            } else {
-                self.record_our_membership_list_change(MembershipListChange::Add(peer_id))
-            }
+            self.record_our_membership_list_change(MembershipListChange::Add(index))
         }
+
+        index
     }
 
-    pub fn remove_peer(&mut self, peer_id: &S::PublicId) {
-        if let Some(peer) = self.peers.get_mut(peer_id) {
+    pub fn remove_peer(&mut self, index: PeerIndex) {
+        if let Some(peer) = self.get_known_mut(index) {
             peer.state = PeerState::inactive();
         } else {
-            debug!(
-                "{:?} tried to remove unknown peer {:?}",
-                self.our_id.public_id(),
-                peer_id
-            );
             return;
-        }
+        };
 
-        self.record_our_membership_list_change(MembershipListChange::Remove(peer_id.clone()))
+        self.record_our_membership_list_change(MembershipListChange::Remove(index))
     }
 
-    pub fn change_peer_state(&mut self, peer_id: &S::PublicId, state: PeerState) {
-        let changed = if let Some(peer) = self.peers.get_mut(peer_id) {
+    pub fn change_peer_state(&mut self, index: PeerIndex, state: PeerState) {
+        let changed = if let Some(peer) = self.get_known_mut(index) {
             let could_vote = peer.state.can_vote();
             peer.state |= state;
             peer.state.can_vote() && !could_vote
         } else {
-            log_or_panic!(
-                "{:?} tried to change state of unknown peer {:?}",
-                self.our_id.public_id(),
-                peer_id
-            );
             false
         };
 
         if changed {
-            self.record_our_membership_list_change(MembershipListChange::Add(peer_id.clone()))
+            self.record_our_membership_list_change(MembershipListChange::Add(index))
         }
     }
 
-    /// Add `other_peer_id` to `peer_id`'s membership list.
-    /// If `peer_id` is ourselves, this function does nothing to prevent redundancy (the `PeerList`
+    /// Add `other_peer_id` to the membership list of the peer at `index`.
+    /// If `index` refer to ourselves, this function does nothing to prevent redundancy (the `PeerList`
     /// itself is already our membership list).
-    pub fn add_to_peer_membership_list(
-        &mut self,
-        peer_id: &S::PublicId,
-        other_peer_id: S::PublicId,
-    ) {
-        self.change_peer_membership_list(peer_id, MembershipListChange::Add(other_peer_id))
+    pub fn add_to_peer_membership_list(&mut self, index: PeerIndex, other_peer_id: &S::PublicId) {
+        if let Some(other_index) = self.get_index(other_peer_id) {
+            self.change_peer_membership_list(index, MembershipListChange::Add(other_index))
+        }
     }
 
-    /// Remove `other_peer_id` from `peer_id`'s membership list.
+    /// Remove `other_peer_id` from the membership list of the peer at `index`.
     pub fn remove_from_peer_membership_list(
         &mut self,
-        peer_id: &S::PublicId,
-        other_peer_id: S::PublicId,
+        index: PeerIndex,
+        other_peer_id: &S::PublicId,
     ) {
-        self.change_peer_membership_list(peer_id, MembershipListChange::Remove(other_peer_id))
+        if let Some(other_index) = self.get_index(other_peer_id) {
+            self.change_peer_membership_list(index, MembershipListChange::Remove(other_index))
+        }
     }
 
-    pub fn change_peer_membership_list(
-        &mut self,
-        peer_id: &S::PublicId,
-        change: MembershipListChange<S::PublicId>,
-    ) {
-        if *peer_id == *self.our_id.public_id() {
+    pub fn change_peer_membership_list(&mut self, index: PeerIndex, change: MembershipListChange) {
+        if index == PeerIndex::OUR {
             return;
         }
 
-        if let Some(peer) = self.peers.get_mut(peer_id) {
+        if let Some(peer) = self.get_known_mut(index) {
             peer.change_membership_list(change)
-        } else {
-            log_or_panic!(
-                "{:?} tried to change membership list of unknown peer {:?}",
-                self.our_id.public_id(),
-                peer_id
-            )
         }
     }
 
-    /// Initialise the membership list of `peer_id`.
-    pub fn initialise_peer_membership_list<I>(&mut self, peer_id: &S::PublicId, membership_list: I)
+    /// Initialise the membership list of the peer at `index`.
+    pub fn initialise_peer_membership_list<I>(&mut self, index: PeerIndex, membership_list: I)
     where
-        I: IntoIterator<Item = S::PublicId>,
+        I: IntoIterator<Item = PeerIndex>,
     {
         // Do not populate our membership list as it would be redundant.
-        if *peer_id == *self.our_id.public_id() {
+        if index == PeerIndex::OUR {
             return;
         }
 
-        if let Some(peer) = self.peers.get_mut(peer_id) {
+        if let Some(peer) = self.get_known_mut(index) {
             let changes = membership_list
                 .into_iter()
-                .chain(iter::once(peer_id.clone()))
+                .chain(iter::once(index))
                 .map(MembershipListChange::Add);
 
             for change in changes {
                 peer.change_membership_list(change)
             }
-        } else {
-            log_or_panic!(
-                "{:?} tried to initialise membership list of unknown peer {:?}",
-                self.our_id.public_id(),
-                peer_id
-            )
         }
     }
 
     /// Returns whether the membership list of the given peer is already initialised.
-    pub fn is_peer_membership_list_initialised(&self, peer_id: &S::PublicId) -> bool {
-        self.peers
-            .get(peer_id)
+    pub fn is_peer_membership_list_initialised(&self, index: PeerIndex) -> bool {
+        self.get(index)
             .map_or(false, |peer| !peer.membership_list().is_empty())
     }
 
@@ -256,10 +295,10 @@ impl<S: SecretId> PeerList<S> {
     #[cfg(feature = "malice-detection")]
     pub fn peer_membership_list_snapshot_excluding_last_remove(
         &self,
-        peer_id: &S::PublicId,
+        peer_index: PeerIndex,
         event_index: usize,
-    ) -> Option<BTreeSet<S::PublicId>> {
-        let (mut list, changes) = self.peer_membership_list_and_changes(peer_id)?;
+    ) -> Option<BTreeSet<PeerIndex>> {
+        let (mut list, changes) = self.peer_membership_list_and_changes(peer_index)?;
 
         for (index, change) in changes.iter().rev() {
             if *index == event_index && !change.is_remove() {
@@ -277,9 +316,9 @@ impl<S: SecretId> PeerList<S> {
     /// Returns the history of changes to the membership list of the given peer.
     pub fn peer_membership_list_changes(
         &self,
-        peer_id: &S::PublicId,
-    ) -> &[(usize, MembershipListChange<S::PublicId>)] {
-        if let Some(peer) = self.peers.get(peer_id) {
+        index: PeerIndex,
+    ) -> &[(usize, MembershipListChange)] {
+        if let Some(peer) = self.get(index) {
             peer.membership_list_changes()
         } else {
             &[]
@@ -287,34 +326,31 @@ impl<S: SecretId> PeerList<S> {
     }
 
     /// Returns the index of the last event created by this peer. Returns `None` if cannot find.
-    pub fn last_event(&self, peer_id: &S::PublicId) -> Option<EventIndex> {
-        self.peers
-            .get(peer_id)
+    pub fn last_event(&self, peer_index: PeerIndex) -> Option<EventIndex> {
+        self.get(peer_index)
             .and_then(|peer| peer.events().rev().next())
     }
 
     /// Returns the indices of the events at the given index-by-creator.
     pub fn events_by_index<'a>(
         &'a self,
-        peer_id: &S::PublicId,
-        index: usize,
+        peer_index: PeerIndex,
+        index_by_creator: usize,
     ) -> impl Iterator<Item = EventIndex> + 'a {
-        self.peers
-            .get(peer_id)
+        self.get(peer_index)
             .into_iter()
-            .flat_map(move |peer| peer.events_by_index(index))
+            .flat_map(move |peer| peer.events_by_index(index_by_creator))
     }
 
     /// Returns the index of the last event gossiped to us by the given peer.
-    pub fn last_gossiped_event_by(&self, peer_id: &S::PublicId) -> Option<EventIndex> {
-        self.peers
-            .get(peer_id)
+    pub fn last_gossiped_event_by(&self, peer_index: PeerIndex) -> Option<EventIndex> {
+        self.get(peer_index)
             .and_then(|peer| peer.last_gossiped_event)
     }
 
     /// Record that the given peer gossiped to us the given event.
-    pub fn record_gossiped_event_by(&mut self, peer_id: &S::PublicId, event_index: EventIndex) {
-        if let Some(peer) = self.peers.get_mut(peer_id) {
+    pub fn record_gossiped_event_by(&mut self, index: PeerIndex, event_index: EventIndex) {
+        if let Some(peer) = self.get_known_mut(index) {
             if peer
                 .last_gossiped_event
                 .map(|current| current < event_index)
@@ -322,12 +358,6 @@ impl<S: SecretId> PeerList<S> {
             {
                 peer.last_gossiped_event = Some(event_index)
             }
-        } else {
-            log_or_panic!(
-                "{:?} tried to record gossiped event by unknown peer {:?}",
-                self.our_id.public_id(),
-                peer_id
-            )
         }
     }
 
@@ -335,46 +365,40 @@ impl<S: SecretId> PeerList<S> {
         &self,
         event: &Event<T, S::PublicId>,
     ) -> Result<(), Error> {
-        if let Some(peer) = self.peers.get(event.creator()) {
-            if *event.creator() == *self.our_id.public_id() || peer.state.can_send() {
-                Ok(())
-            } else {
-                Err(Error::InvalidPeerState {
-                    required: PeerState::SEND,
-                    actual: peer.state,
-                })
-            }
+        let peer = self.get(event.creator()).ok_or(Error::UnknownPeer)?;
+        if event.creator() == PeerIndex::OUR || peer.state.can_send() {
+            Ok(())
         } else {
-            Err(Error::UnknownPeer)
+            Err(Error::InvalidPeerState {
+                required: PeerState::SEND,
+                actual: peer.state,
+            })
         }
     }
 
-    /// Adds event created by the peer. Returns an error if the creator is not known, or if we
-    /// already held an event from this peer with this index, but that event's hash is different to
-    /// the one being added (in which case `peers` is left unmodified).
+    /// Adds event created by the peer.
     pub fn add_event<T: NetworkEvent>(&mut self, event: IndexedEventRef<T, S::PublicId>) {
-        if let Some(peer) = self.peers.get_mut(event.creator()) {
+        if let Some(peer) = self.get_known_mut(event.creator()) {
             peer.add_event(event.index_by_creator(), event.event_index())
         }
     }
 
     /// Removes last event from its creator.
     #[cfg(test)]
-    pub fn remove_last_event(&mut self, creator: &S::PublicId) -> Option<EventIndex> {
-        if let Some(peer) = self.peers.get_mut(creator) {
+    pub fn remove_last_event(&mut self, creator: PeerIndex) -> Option<EventIndex> {
+        if let Some(peer) = self.get_known_mut(creator) {
             peer.remove_last_event()
         } else {
             None
         }
     }
 
-    /// Hashes of events of the given creator, in insertion order.
+    /// Indices of events of the given creator, in insertion order.
     pub fn peer_events<'a>(
         &'a self,
-        peer_id: &S::PublicId,
+        peer_index: PeerIndex,
     ) -> impl DoubleEndedIterator<Item = EventIndex> + 'a {
-        self.peers
-            .get(peer_id)
+        self.get(peer_index)
             .into_iter()
             .flat_map(|peer| peer.events())
     }
@@ -382,23 +406,21 @@ impl<S: SecretId> PeerList<S> {
     /// Hashes of our events in insertion order.
     #[cfg(any(test, feature = "malice-detection"))]
     pub fn our_events<'a>(&'a self) -> impl DoubleEndedIterator<Item = EventIndex> + 'a {
-        self.peer_events(self.our_id.public_id())
+        self.peer_events(PeerIndex::OUR)
     }
 
-    fn record_our_membership_list_change(&mut self, change: MembershipListChange<S::PublicId>) {
-        if let Some(us) = self.peers.get_mut(self.our_id.public_id()) {
-            us.record_membership_list_change(change)
-        }
+    fn record_our_membership_list_change(&mut self, change: MembershipListChange) {
+        self.our_peer.record_membership_list_change(change)
     }
 
     #[cfg(feature = "malice-detection")]
     fn peer_membership_list_and_changes(
         &self,
-        peer_id: &S::PublicId,
-    ) -> Option<MembershipListWithChanges<S::PublicId>> {
-        let peer = self.peers.get(peer_id)?;
-        let list = if peer_id == self.our_pub_id() {
-            self.voter_ids().cloned().collect()
+        index: PeerIndex,
+    ) -> Option<MembershipListWithChanges> {
+        let peer = self.get(index)?;
+        let list = if index == PeerIndex::OUR {
+            self.voter_indices().collect()
         } else {
             peer.membership_list().clone()
         };
@@ -418,7 +440,7 @@ impl<S: SecretId> Debug for PeerList<S> {
             "PeerList{{ our_id: {:?}",
             self.our_id.public_id()
         )?;
-        for peer in &self.peers {
+        for peer in iter::once(&self.our_peer).chain(&self.peers) {
             writeln!(formatter, "    {:?},", peer)?;
         }
         write!(formatter, "}}")
@@ -427,20 +449,99 @@ impl<S: SecretId> Debug for PeerList<S> {
 
 #[cfg(any(test, feature = "testing"))]
 impl PeerList<PeerId> {
-    // Creates a new PeerList using the input parameters directly.
-    pub(super) fn new_from_dot_input(
+    // Creates a builder to build PeerList using the input parameters directly.
+    pub(super) fn build_from_dot_input(
         our_id: PeerId,
-        graph: &Graph<Transaction, PeerId>,
-        peer_data: BTreeMap<PeerId, (PeerState, BTreeSet<PeerId>)>,
-    ) -> Self {
-        let peers = peer_data
-            .into_iter()
-            .map(|(peer_id, (state, membership_list))| {
-                let peer = Peer::new_from_dot_input(&peer_id, state, membership_list, graph);
-                (peer_id, peer)
-            }).collect();
+        mut peer_data: BTreeMap<PeerId, (PeerState, BTreeSet<PeerId>)>,
+    ) -> Builder {
+        let (our_state, our_membership_list) = unwrap!(peer_data.remove(&our_id));
+        let our_peer = Peer::new(our_id.public_id().clone(), our_state);
 
-        PeerList { our_id, peers }
+        let mut membership_lists = vec![our_membership_list];
+        let mut peers = Vec::new();
+
+        for (id, (state, membership_list)) in peer_data {
+            peers.push(Peer::new(id, state));
+            membership_lists.push(membership_list);
+        }
+
+        let indices: BTreeMap<_, _> = peers
+            .iter()
+            .enumerate()
+            .map(|(index, peer)| (peer.id().clone(), PeerIndex(index + 1)))
+            .collect();
+
+        // Convert membership lists from sets of `PeerId` to sets of `PeerIndex`.
+        let membership_lists = {
+            let id_to_index = |id| {
+                if id == *our_id.public_id() {
+                    PeerIndex::OUR
+                } else {
+                    *unwrap!(indices.get(&id))
+                }
+            };
+
+            membership_lists
+                .into_iter()
+                .enumerate()
+                .map(|(index, id_list)| {
+                    id_list
+                        .into_iter()
+                        .map(id_to_index)
+                        .chain(iter::once(PeerIndex(index)))
+                        .collect()
+                })
+                .collect()
+        };
+
+        Builder {
+            peer_list: PeerList {
+                our_id,
+                our_peer,
+                peers,
+                indices,
+            },
+            membership_lists,
+        }
+    }
+
+    fn iter_mut(&mut self) -> impl Iterator<Item = (PeerIndex, &mut Peer<PeerId>)> {
+        iter::once((PeerIndex::OUR, &mut self.our_peer)).chain(
+            self.peers
+                .iter_mut()
+                .enumerate()
+                .map(|(index, peer)| (PeerIndex(index + 1), peer)),
+        )
+    }
+}
+
+#[cfg(any(test, feature = "testing"))]
+pub(crate) struct Builder {
+    peer_list: PeerList<PeerId>,
+    membership_lists: Vec<BTreeSet<PeerIndex>>,
+}
+
+#[cfg(any(test, feature = "testing"))]
+impl Builder {
+    pub fn peer_list(&self) -> &PeerList<PeerId> {
+        &self.peer_list
+    }
+
+    pub fn finish(mut self, graph: &Graph<Transaction, PeerId>) -> PeerList<PeerId> {
+        // Set peer events and apply the membership list changes.
+        for ((index, peer), membership_list) in self.peer_list.iter_mut().zip(self.membership_lists)
+        {
+            peer.events = graph
+                .iter()
+                .filter(|event| event.creator() == index)
+                .collect();
+
+            for other_index in membership_list {
+                peer.change_membership_list(MembershipListChange::Add(other_index));
+            }
+        }
+
+        self.peer_list
     }
 }
 
@@ -464,7 +565,7 @@ pub(crate) mod snapshot {
             PeerListSnapshot(
                 peer_list
                     .iter()
-                    .map(|(peer_id, peer)| {
+                    .map(|(_, peer)| {
                         let events = peer
                             .indexed_events()
                             .filter_map(|(index_by_creator, event_index)| {
@@ -474,7 +575,7 @@ pub(crate) mod snapshot {
                             })
                             .collect();
 
-                        (peer_id.clone(), (peer.state, events))
+                        (peer.id().clone(), (peer.state, events))
                     })
                     .collect(),
             )

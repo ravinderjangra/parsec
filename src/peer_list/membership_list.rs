@@ -6,27 +6,28 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
+use peer_list::PeerIndex;
 use std::collections::BTreeSet;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) enum MembershipListChange<P> {
-    Add(P),
-    Remove(P),
+pub(crate) enum MembershipListChange {
+    Add(PeerIndex),
+    Remove(PeerIndex),
 }
 
-impl<P: Clone + Ord> MembershipListChange<P> {
-    pub(super) fn apply(&self, peers: &mut BTreeSet<P>) -> bool {
+impl MembershipListChange {
+    pub(super) fn apply(&self, peers: &mut BTreeSet<PeerIndex>) -> bool {
         match *self {
-            MembershipListChange::Add(ref peer_id) => peers.insert(peer_id.clone()),
-            MembershipListChange::Remove(ref peer_id) => peers.remove(peer_id),
+            MembershipListChange::Add(index) => peers.insert(index),
+            MembershipListChange::Remove(index) => peers.remove(&index),
         }
     }
 
     #[cfg(feature = "malice-detection")]
-    pub(super) fn unapply(&self, peers: &mut BTreeSet<P>) -> bool {
+    pub(super) fn unapply(&self, peers: &mut BTreeSet<PeerIndex>) -> bool {
         match *self {
-            MembershipListChange::Add(ref peer_id) => peers.remove(peer_id),
-            MembershipListChange::Remove(ref peer_id) => peers.insert(peer_id.clone()),
+            MembershipListChange::Add(index) => peers.remove(&index),
+            MembershipListChange::Remove(index) => peers.insert(index),
         }
     }
 
@@ -40,5 +41,5 @@ impl<P: Clone + Ord> MembershipListChange<P> {
 }
 
 #[cfg(feature = "malice-detection")]
-pub(super) type MembershipListWithChanges<'a, P> =
-    (BTreeSet<P>, &'a [(usize, MembershipListChange<P>)]);
+pub(super) type MembershipListWithChanges<'a> =
+    (BTreeSet<PeerIndex>, &'a [(usize, MembershipListChange)]);

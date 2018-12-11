@@ -23,18 +23,10 @@ digraph GossipGraph {
     "B_0" -> "B_1" [minlen=1]
   }
 
-  style=invis
-  subgraph cluster_Carol {
-    label=Carol
-    Carol [style=invis]
-    "Carol" -> "C_0" [style=invis]
-  }
-
   {
     rank=same
     Alice [style=filled, color=white]
     Bob [style=filled, color=white]
-    Carol [style=filled, color=white]
   }
   Alice -> Bob [style=invis]
 
@@ -64,12 +56,6 @@ digraph GossipGraph {
 </table>>]
 /// cause: Observation(Genesis({Alice, Bob}))
 /// last_ancestors: {Bob: 1}
-
-  "C_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">C_0</td></tr>
-</table>>]
-/// cause: Initial
-/// last_ancestors: {Alice: 0}
 
 }
 

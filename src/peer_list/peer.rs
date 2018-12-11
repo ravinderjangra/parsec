@@ -7,32 +7,34 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::membership_list::MembershipListChange;
+use super::peer_index::PeerIndex;
 use super::peer_state::PeerState;
-use gossip::EventIndex;
-#[cfg(any(test, feature = "testing"))]
-use gossip::Graph;
+use gossip::{EventIndex, IndexedEventRef};
 use hash::Hash;
 use id::PublicId;
-#[cfg(any(test, feature = "testing"))]
-use mock::{PeerId, Transaction};
+use network_event::NetworkEvent;
 use serialise;
 use std::collections::BTreeSet;
-use std::iter;
+use std::iter::{self, FromIterator};
 
 #[derive(Debug)]
 pub(crate) struct Peer<P: PublicId> {
+    id: P,
     id_hash: Hash,
     pub(super) state: PeerState,
-    events: Events,
+    pub(super) events: Events,
     pub(super) last_gossiped_event: Option<EventIndex>,
-    membership_list: BTreeSet<P>,
-    membership_list_changes: Vec<(usize, MembershipListChange<P>)>,
+    membership_list: BTreeSet<PeerIndex>,
+    membership_list_changes: Vec<(usize, MembershipListChange)>,
 }
 
 impl<P: PublicId> Peer<P> {
-    pub(super) fn new(id: &P, state: PeerState) -> Self {
+    pub(super) fn new(id: P, state: PeerState) -> Self {
+        let id_hash = Hash::from(serialise(&id).as_slice());
+
         Self {
-            id_hash: Hash::from(serialise(id).as_slice()),
+            id,
+            id_hash,
             state,
             events: Events::new(),
             last_gossiped_event: None,
@@ -41,12 +43,16 @@ impl<P: PublicId> Peer<P> {
         }
     }
 
-    pub fn state(&self) -> PeerState {
-        self.state
+    pub fn id(&self) -> &P {
+        &self.id
     }
 
     pub fn id_hash(&self) -> &Hash {
         &self.id_hash
+    }
+
+    pub fn state(&self) -> PeerState {
+        self.state
     }
 
     pub fn events<'a>(&'a self) -> impl DoubleEndedIterator<Item = EventIndex> + 'a {
@@ -73,13 +79,13 @@ impl<P: PublicId> Peer<P> {
         self.events.remove_last()
     }
 
-    pub(super) fn change_membership_list(&mut self, change: MembershipListChange<P>) {
+    pub(super) fn change_membership_list(&mut self, change: MembershipListChange) {
         if change.apply(&mut self.membership_list) {
             self.record_membership_list_change(change);
         }
     }
 
-    pub(super) fn record_membership_list_change(&mut self, change: MembershipListChange<P>) {
+    pub(super) fn record_membership_list_change(&mut self, change: MembershipListChange) {
         let index = self
             .events
             .indexed()
@@ -90,47 +96,17 @@ impl<P: PublicId> Peer<P> {
         self.membership_list_changes.push((index, change));
     }
 
-    pub(crate) fn membership_list(&self) -> &BTreeSet<P> {
+    pub(crate) fn membership_list(&self) -> &BTreeSet<PeerIndex> {
         &self.membership_list
     }
 
-    pub(super) fn membership_list_changes(&self) -> &[(usize, MembershipListChange<P>)] {
+    pub(super) fn membership_list_changes(&self) -> &[(usize, MembershipListChange)] {
         &self.membership_list_changes
     }
 }
 
-#[cfg(any(test, feature = "testing"))]
-impl Peer<PeerId> {
-    pub(super) fn new_from_dot_input(
-        peer_id: &PeerId,
-        state: PeerState,
-        membership_list: BTreeSet<PeerId>,
-        graph: &Graph<Transaction, PeerId>,
-    ) -> Self {
-        let mut events = Events::new();
-        for event in graph {
-            if event.creator() == peer_id {
-                events.add(event.index_by_creator(), event.event_index());
-            }
-        }
-
-        let mut peer = Self::new(&peer_id, state);
-        peer.events = events;
-
-        for change in membership_list
-            .into_iter()
-            .chain(iter::once(peer_id.clone()))
-            .map(MembershipListChange::Add)
-        {
-            peer.change_membership_list(change)
-        }
-
-        peer
-    }
-}
-
 #[derive(Debug)]
-struct Events(Vec<Slot>);
+pub(super) struct Events(Vec<Slot>);
 
 impl Events {
     fn new() -> Self {
@@ -182,6 +158,24 @@ impl Events {
             .get(index_by_creator)
             .into_iter()
             .flat_map(|slot| slot.iter())
+    }
+}
+
+impl<'a, T, P> FromIterator<IndexedEventRef<'a, T, P>> for Events
+where
+    T: NetworkEvent + 'a,
+    P: PublicId + 'a,
+{
+    fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = IndexedEventRef<'a, T, P>>,
+    {
+        let mut events = Self::new();
+        for event in iter {
+            events.add(event.index_by_creator(), event.event_index());
+        }
+
+        events
     }
 }
 

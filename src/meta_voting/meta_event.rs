@@ -7,22 +7,22 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::meta_elections::MetaElectionHandle;
-use super::meta_vote::{MetaVote, MetaVotes};
+use super::meta_vote::MetaVote;
 use gossip::IndexedEventRef;
 use id::PublicId;
 use network_event::NetworkEvent;
 use observation::ObservationKey;
-use std::collections::BTreeSet;
+use peer_list::PeerIndex;
+use std::collections::{BTreeMap, BTreeSet};
 
-#[serde(bound = "")]
-#[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub(crate) struct MetaEvent<P: PublicId> {
     // The set of peers for which this event can strongly-see an event by that peer which carries a
     // valid block.  If there are a supermajority of peers here, this event is an "observer".
-    pub observees: BTreeSet<P>,
+    pub observees: BTreeSet<PeerIndex>,
     // Hashes of payloads of all the votes deemed interesting by this event.
     pub interesting_content: Vec<ObservationKey<P>>,
-    pub meta_votes: MetaVotes<P>,
+    pub meta_votes: BTreeMap<PeerIndex, Vec<MetaVote>>,
 }
 
 impl<P: PublicId> MetaEvent<P> {
@@ -36,7 +36,7 @@ impl<P: PublicId> MetaEvent<P> {
             meta_event: MetaEvent {
                 observees: BTreeSet::new(),
                 interesting_content: Vec::new(),
-                meta_votes: MetaVotes::new(),
+                meta_votes: BTreeMap::new(),
             },
         }
     }
@@ -61,11 +61,11 @@ impl<'a, T: NetworkEvent + 'a, P: PublicId + 'a> MetaEventBuilder<'a, T, P> {
         self.meta_event.observees.len()
     }
 
-    pub fn has_observee(&self, peer_id: &P) -> bool {
-        self.meta_event.observees.contains(peer_id)
+    pub fn has_observee(&self, peer_index: PeerIndex) -> bool {
+        self.meta_event.observees.contains(&peer_index)
     }
 
-    pub fn set_observees(&mut self, observees: BTreeSet<P>) {
+    pub fn set_observees(&mut self, observees: BTreeSet<PeerIndex>) {
         self.meta_event.observees = observees;
     }
 
@@ -73,11 +73,53 @@ impl<'a, T: NetworkEvent + 'a, P: PublicId + 'a> MetaEventBuilder<'a, T, P> {
         self.meta_event.interesting_content = content;
     }
 
-    pub fn add_meta_votes(&mut self, peer_id: P, votes: Vec<MetaVote>) {
-        let _ = self.meta_event.meta_votes.insert(peer_id, votes);
+    pub fn add_meta_votes(&mut self, peer_index: PeerIndex, votes: Vec<MetaVote>) {
+        let _ = self.meta_event.meta_votes.insert(peer_index, votes);
     }
 
     pub fn finish(self) -> MetaEvent<P> {
         self.meta_event
     }
+}
+
+#[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
+pub(crate) mod snapshot {
+    use super::*;
+    use id::SecretId;
+    use peer_list::PeerList;
+
+    #[serde(bound = "")]
+    #[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]
+    pub(crate) struct MetaEventSnapshot<P: PublicId> {
+        observees: BTreeSet<P>,
+        interesting_content: Vec<ObservationKey<P>>,
+        meta_votes: BTreeMap<P, Vec<MetaVote>>,
+    }
+
+    impl<P: PublicId> MetaEventSnapshot<P> {
+        pub fn new<S>(meta_event: &MetaEvent<P>, peer_list: &PeerList<S>) -> Self
+        where
+            S: SecretId<PublicId = P>,
+        {
+            Self {
+                observees: meta_event
+                    .observees
+                    .iter()
+                    .filter_map(|index| peer_list.get(*index))
+                    .map(|peer| peer.id().clone())
+                    .collect(),
+                interesting_content: meta_event.interesting_content.clone(),
+                meta_votes: meta_event
+                    .meta_votes
+                    .iter()
+                    .filter_map(|(peer_index, votes)| {
+                        peer_list
+                            .get(*peer_index)
+                            .map(|peer| (peer.id().clone(), votes.clone()))
+                    })
+                    .collect(),
+            }
+        }
+    }
+
 }
