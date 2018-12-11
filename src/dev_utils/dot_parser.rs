@@ -526,7 +526,7 @@ fn parse_add_or_remove_without_related_info() -> Parser<u8, (PeerId, Vec<u8>)> {
 
 fn parse_opaque() -> Parser<u8, Observation<Transaction, PeerId>> {
     (seq(b"OpaquePayload(") * parse_transaction() - seq(b")"))
-        .map(|s| Transaction::new(&s))
+        .map(Transaction::new)
         .map(Observation::OpaquePayload)
 }
 

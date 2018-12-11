@@ -140,8 +140,8 @@ impl SecretId for PeerId {
 pub struct Transaction(String);
 
 impl Transaction {
-    pub fn new(id: &str) -> Self {
-        Transaction(id.to_string())
+    pub fn new<T: Into<String>>(id: T) -> Self {
+        Transaction(id.into())
     }
 }
 

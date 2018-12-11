@@ -458,28 +458,21 @@ impl Network {
             events,
         } = schedule;
         let mut peer_removal_guard = PeerRemovalGuard::default();
-        let mut pending_events: VecDeque<ScheduleEvent> = VecDeque::new();
+        let mut queue: VecDeque<_> = events.into_iter().collect();
+        let mut retry = Vec::new();
 
-        for event in events {
-            while let Some(pending_event) = pending_events.pop_front() {
-                if !self.execute_event(
-                    rng,
-                    options,
-                    pending_event.clone(),
-                    &mut peer_removal_guard,
-                )? {
-                    pending_events.push_front(pending_event);
+        while let Some(event) = queue.pop_front() {
+            if self.execute_event(rng, options, event.clone(), &mut peer_removal_guard)? {
+                for event in retry.drain(..).rev() {
+                    queue.push_front(event)
+                }
+
+                self.check_consensus_broken()?;
+                if self.consensus_complete(&peers, max_observations) {
                     break;
                 }
-            }
-
-            if !self.execute_event(rng, options, event.clone(), &mut peer_removal_guard)? {
-                pending_events.push_back(event);
-            }
-
-            self.check_consensus_broken()?;
-            if self.consensus_complete(&peers, max_observations) {
-                break;
+            } else {
+                retry.push(event);
             }
         }
 
@@ -573,6 +566,12 @@ impl Network {
                 }
             }
             ScheduleEvent::VoteFor(peer, observation) => {
+                // Skip voting by removed/failed peers.
+                match self.peer(&peer).status {
+                    PeerStatus::Active | PeerStatus::Pending => (),
+                    PeerStatus::Removed | PeerStatus::Failed => return Ok(true),
+                }
+
                 if let ParsecObservation::Remove { ref peer_id, .. } = observation {
                     if !peer_removal_guard.attempt_to_remove_peer(&peer_id) {
                         return Ok(false);
@@ -592,6 +591,7 @@ struct PeerRemovalGuard {
     states: BTreeMap<PeerId, PeerRemovalState>,
 }
 
+#[derive(Debug)]
 enum PeerRemovalState {
     // Peer is being added. The `usize` is the number of peers that consensused the add.
     Adding(usize),

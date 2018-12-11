@@ -87,6 +87,7 @@ pub struct PendingObservations {
     max_delay: usize,
     p_delay: f64,
     queues: BTreeMap<PeerId, BTreeMap<usize, Vec<Observation>>>,
+    opaque_vote_counts: BTreeMap<PeerId, usize>,
 }
 
 impl PendingObservations {
@@ -96,6 +97,7 @@ impl PendingObservations {
             max_delay: opts.max_observation_delay,
             p_delay: opts.p_observation_delay,
             queues: BTreeMap::new(),
+            opaque_vote_counts: BTreeMap::new(),
         }
     }
 
@@ -120,6 +122,10 @@ impl PendingObservations {
                 + binomial(rng, self.max_delay - self.min_delay, self.p_delay);
             let step_observations = observations.entry(tgt_step).or_insert_with(Vec::new);
             step_observations.push(observation.clone());
+
+            if observation.is_opaque() {
+                *self.opaque_vote_counts.entry(peer.clone()).or_insert(0) += 1
+            }
         }
     }
 
@@ -145,13 +151,7 @@ impl PendingObservations {
 
     /// Number of `OpaquePayload` observations scheduled to be made by the given peer.
     pub fn num_opaque_observations(&self, peer: &PeerId) -> usize {
-        if let Some(queues) = self.queues.get(peer) {
-            queues.values().fold(0, |sum, queue| {
-                sum + queue.iter().filter(|obs| obs.is_opaque()).count()
-            })
-        } else {
-            0
-        }
+        self.opaque_vote_counts.get(peer).cloned().unwrap_or(0)
     }
 }
 
@@ -318,22 +318,22 @@ impl ObservationSchedule {
             < options.opaque_to_add + options.peers_to_add + options.peers_to_remove
         {
             if opaque_count < options.opaque_to_add && rng.gen::<f64>() < options.prob_opaque {
-                schedule.push((step, ObservationEvent::Opaque(rng.gen())));
+                schedule.push((
+                    step,
+                    ObservationEvent::Opaque(Transaction::new(opaque_count.to_string())),
+                ));
                 num_observations += 1;
                 opaque_count += 1;
             }
-            if added_peers < options.peers_to_add
-                && rng.gen::<f64>() < options.prob_add
-                && peers.can_mutate(step)
-            {
+            if added_peers < options.peers_to_add && rng.gen::<f64>() < options.prob_add {
                 let next_id = PeerId::new(names_iter.next().unwrap());
-                peers.add_peer(next_id.clone(), step);
+                peers.add_peer(next_id.clone());
                 schedule.push((step, ObservationEvent::AddPeer(next_id)));
                 num_observations += 1;
                 added_peers += 1;
             }
             if removed_peers < options.peers_to_remove && rng.gen::<f64>() < options.prob_remove {
-                if let Some(id) = peers.remove_random_peer(rng, options.min_peers, step) {
+                if let Some(id) = peers.remove_random_peer(rng, options.min_peers) {
                     schedule.push((step, ObservationEvent::RemovePeer(id)));
                     num_observations += 1;
                     removed_peers += 1;
@@ -342,7 +342,7 @@ impl ObservationSchedule {
 
             // generate a random failure
             if rng.gen::<f64>() < options.prob_failure {
-                if let Some(id) = peers.fail_random_peer(rng, options.min_peers, step) {
+                if let Some(id) = peers.fail_random_peer(rng, options.min_peers) {
                     schedule.push((step, ObservationEvent::Fail(id)));
                 }
             }
@@ -354,7 +354,7 @@ impl ObservationSchedule {
                 .unwrap_or(0);
 
             for _ in 0..num_deterministic_fails {
-                if let Some(id) = peers.fail_random_peer(rng, options.min_peers, step) {
+                if let Some(id) = peers.fail_random_peer(rng, options.min_peers) {
                     schedule.push((step, ObservationEvent::Fail(id)));
                 }
             }
@@ -445,7 +445,7 @@ impl Schedule {
     ) {
         // First let the peers vote for scheduled observations...
         if let Some(pending) = pending.as_mut() {
-            for peer in peers.active_peers() {
+            for peer in peers.all_peers() {
                 for observation in pending.pop_at_step(peer, step) {
                     schedule.push(ScheduleEvent::VoteFor(peer.clone(), observation));
                 }
@@ -475,7 +475,6 @@ impl Schedule {
 
         // the +1 below is to account for genesis
         let max_observations = obs_schedule.count_observations() + 1;
-        let mut min_observations = max_observations;
 
         let mut peers = PeerStatuses::new(&obs_schedule.genesis);
         let mut step = 0;
@@ -495,7 +494,7 @@ impl Schedule {
             for obs in opaque_transactions {
                 pending.peers_make_observation(
                     &mut env.rng,
-                    peers.active_peers(),
+                    peers.all_peers(),
                     sampling,
                     step,
                     &obs,
@@ -504,7 +503,7 @@ impl Schedule {
             }
         }
 
-        while !obs_schedule.schedule.is_empty() || !pending.queues_empty(peers.active_peers()) {
+        while !obs_schedule.schedule.is_empty() || !pending.queues_empty(peers.all_peers()) {
             let obs_for_step = obs_schedule.for_step(step);
             for observation in obs_for_step {
                 match observation {
@@ -514,10 +513,10 @@ impl Schedule {
                             related_info: vec![],
                         };
 
-                        peers.add_peer(new_peer.clone(), step);
+                        peers.add_peer(new_peer.clone());
                         pending.peers_make_observation(
                             &mut env.rng,
-                            peers.active_peers(),
+                            peers.all_peers(),
                             options.transparent_voters,
                             step,
                             &observation,
@@ -559,16 +558,10 @@ impl Schedule {
                             related_info: vec![],
                         };
 
-                        // The peer is going to be voted for removal. They might not get a chance to
-                        // vote for their remaining scheduled observations.
-                        if env.network.consensus_mode() == ConsensusMode::Single {
-                            min_observations -= pending.num_opaque_observations(&peer);
-                        }
-
                         peers.remove_peer(&peer);
                         pending.peers_make_observation(
                             &mut env.rng,
-                            peers.active_peers(),
+                            peers.all_peers(),
                             options.transparent_voters,
                             step,
                             &observation,
@@ -586,7 +579,7 @@ impl Schedule {
 
                         pending.peers_make_observation(
                             &mut env.rng,
-                            peers.active_peers(),
+                            peers.all_peers(),
                             sampling,
                             step,
                             &observation,
@@ -606,13 +599,24 @@ impl Schedule {
         // Gossip should theoretically complete in O(log N) steps
         // The constant (adjustment_coeff) is for making the number big enough.
         let n = peers.present_peers().count() as f64;
-        let adjustment_coeff = 750.0;
+        let adjustment_coeff = 5000.0;
         let additional_steps = (adjustment_coeff * n.ln()) as usize;
 
         for _ in 0..additional_steps {
             Self::perform_step(step, &mut peers, None, &mut schedule);
             step += 1;
         }
+
+        // Peers scheduled for removal / failure might not get a chance to vote for their scheduled
+        // observations.
+        let min_observations = if env.network.consensus_mode() == ConsensusMode::Single {
+            max_observations - peers
+                .inactive_peers()
+                .map(|peer| pending.num_opaque_observations(peer))
+                .sum::<usize>()
+        } else {
+            max_observations
+        };
 
         let result = Schedule {
             peers: peers.into(),
