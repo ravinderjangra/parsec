@@ -8,11 +8,10 @@
 
 use super::meta_vote::MetaVote;
 use crate::observation::is_more_than_two_thirds;
-use std::iter;
 
 // This is used to collect the meta votes of other events relating to a single (binary) meta vote at
 // a given round and step.
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub(crate) struct MetaVoteCounts {
     pub estimates_true: usize,
     pub estimates_false: usize,
@@ -27,8 +26,13 @@ pub(crate) struct MetaVoteCounts {
 impl MetaVoteCounts {
     // Construct a `MetaVoteCounts` by collecting details from all meta votes which are for the
     // given `parent`'s `round` and `step`.  These results will include info from our own `parent`
-    // meta vote.
-    pub fn new(parent: &MetaVote, others: &[Vec<MetaVote>], total_peers: usize) -> Self {
+    // meta vote, if `is_voter` is true.
+    pub fn new(
+        parent: &MetaVote,
+        others: &[Vec<MetaVote>],
+        total_peers: usize,
+        is_voter: bool,
+    ) -> Self {
         let mut counts = MetaVoteCounts::default();
         counts.total_peers = total_peers;
         for vote in others
@@ -39,7 +43,7 @@ impl MetaVoteCounts {
                     .filter(|vote| vote.round == parent.round && vote.step == parent.step)
                     .last()
             })
-            .chain(iter::once(parent))
+            .chain(if is_voter { Some(parent) } else { None })
         {
             if vote.estimates.contains(true) {
                 counts.estimates_true += 1;
@@ -76,5 +80,18 @@ impl MetaVoteCounts {
 
     pub fn at_least_one_third(&self, count: usize) -> bool {
         3 * count >= self.total_peers
+    }
+
+    pub fn check_exceeding(&self) {
+        let is_exceeding = self.estimates_true > self.total_peers
+            || self.estimates_false > self.total_peers
+            || self.bin_values_true > self.total_peers
+            || self.bin_values_false > self.total_peers
+            || self.aux_values_true > self.total_peers
+            || self.aux_values_false > self.total_peers;
+
+        if is_exceeding {
+            log_or_panic!("Having count exceeding total peers {:?}", self);
+        }
     }
 }
