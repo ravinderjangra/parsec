@@ -9,20 +9,24 @@
 use super::membership_list::MembershipListChange;
 use super::peer_state::PeerState;
 use gossip::EventIndex;
+#[cfg(any(test, feature = "testing"))]
+use gossip::Graph;
 use hash::Hash;
 use id::PublicId;
+#[cfg(any(test, feature = "testing"))]
+use mock::{PeerId, Transaction};
 use serialise;
 use std::collections::BTreeSet;
 use std::iter;
 
 #[derive(Debug)]
 pub(crate) struct Peer<P: PublicId> {
-    pub(super) id_hash: Hash,
+    id_hash: Hash,
     pub(super) state: PeerState,
-    pub(super) events: Events,
+    events: Events,
     pub(super) last_gossiped_event: Option<EventIndex>,
-    pub(super) membership_list: BTreeSet<P>,
-    pub(super) membership_list_changes: Vec<(usize, MembershipListChange<P>)>,
+    membership_list: BTreeSet<P>,
+    membership_list_changes: Vec<(usize, MembershipListChange<P>)>,
 }
 
 impl<P: PublicId> Peer<P> {
@@ -39,6 +43,10 @@ impl<P: PublicId> Peer<P> {
 
     pub fn state(&self) -> PeerState {
         self.state
+    }
+
+    pub fn id_hash(&self) -> &Hash {
+        &self.id_hash
     }
 
     pub fn events<'a>(&'a self) -> impl DoubleEndedIterator<Item = EventIndex> + 'a {
@@ -85,17 +93,51 @@ impl<P: PublicId> Peer<P> {
     pub(crate) fn membership_list(&self) -> &BTreeSet<P> {
         &self.membership_list
     }
+
+    pub(super) fn membership_list_changes(&self) -> &[(usize, MembershipListChange<P>)] {
+        &self.membership_list_changes
+    }
+}
+
+#[cfg(any(test, feature = "testing"))]
+impl Peer<PeerId> {
+    pub(super) fn new_from_dot_input(
+        peer_id: &PeerId,
+        state: PeerState,
+        membership_list: BTreeSet<PeerId>,
+        graph: &Graph<Transaction, PeerId>,
+    ) -> Self {
+        let mut events = Events::new();
+        for event in graph {
+            if event.creator() == peer_id {
+                events.add(event.index_by_creator(), event.event_index());
+            }
+        }
+
+        let mut peer = Self::new(&peer_id, state);
+        peer.events = events;
+
+        for change in membership_list
+            .into_iter()
+            .chain(iter::once(peer_id.clone()))
+            .map(MembershipListChange::Add)
+        {
+            peer.change_membership_list(change)
+        }
+
+        peer
+    }
 }
 
 #[derive(Debug)]
-pub(super) struct Events(Vec<Slot>);
+struct Events(Vec<Slot>);
 
 impl Events {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Events(Vec::new())
     }
 
-    pub fn add(&mut self, index_by_creator: usize, event_index: EventIndex) {
+    fn add(&mut self, index_by_creator: usize, event_index: EventIndex) {
         if let Some(slot) = self.0.get_mut(index_by_creator) {
             slot.add(event_index);
             return;

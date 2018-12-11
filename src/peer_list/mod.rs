@@ -17,8 +17,6 @@ pub(crate) use self::snapshot::PeerListSnapshot;
 
 #[cfg(feature = "malice-detection")]
 use self::membership_list::MembershipListWithChanges;
-#[cfg(any(test, feature = "testing"))]
-use self::peer::Events;
 use self::peer::Peer;
 use error::Error;
 #[cfg(any(test, feature = "testing"))]
@@ -86,7 +84,7 @@ impl<S: SecretId> PeerList<S> {
 
     /// Returns an unsorted map of peer_id => Hash(peer_id).
     pub fn peer_id_hashes(&self) -> impl Iterator<Item = (&S::PublicId, &Hash)> {
-        self.peers.iter().map(|(id, peer)| (id, &peer.id_hash))
+        self.peers.iter().map(|(id, peer)| (id, peer.id_hash()))
     }
 
     /// Returns an iterator of peers.
@@ -282,7 +280,7 @@ impl<S: SecretId> PeerList<S> {
         peer_id: &S::PublicId,
     ) -> &[(usize, MembershipListChange<S::PublicId>)] {
         if let Some(peer) = self.peers.get(peer_id) {
-            &peer.membership_list_changes
+            peer.membership_list_changes()
         } else {
             &[]
         }
@@ -402,13 +400,13 @@ impl<S: SecretId> PeerList<S> {
         let list = if peer_id == self.our_pub_id() {
             self.voter_ids().cloned().collect()
         } else {
-            peer.membership_list.clone()
+            peer.membership_list().clone()
         };
 
         if list.is_empty() {
             None
         } else {
-            Some((list, &peer.membership_list_changes))
+            Some((list, peer.membership_list_changes()))
         }
     }
 }
@@ -435,35 +433,12 @@ impl PeerList<PeerId> {
         graph: &Graph<Transaction, PeerId>,
         peer_data: BTreeMap<PeerId, (PeerState, BTreeSet<PeerId>)>,
     ) -> Self {
-        let mut peers = BTreeMap::new();
-        let peer_ids: BTreeSet<_> = peer_data.keys().cloned().collect();
-
-        for (peer_id, (state, membership_list)) in peer_data {
-            let mut events = Events::new();
-            for event in graph {
-                if *event.creator() == peer_id {
-                    events.add(event.index_by_creator(), event.event_index());
-                } else if !peer_ids.contains(event.creator()) {
-                    debug!(
-                        "peer_data list doesn't contain the creator of event {:?}",
-                        *event
-                    );
-                }
-            }
-
-            let mut peer = Peer::new(&peer_id, state);
-            peer.events = events;
-
-            for change in membership_list
-                .into_iter()
-                .chain(iter::once(peer_id.clone()))
-                .map(MembershipListChange::Add)
-            {
-                peer.change_membership_list(change)
-            }
-
-            let _ = peers.insert(peer_id, peer);
-        }
+        let peers = peer_data
+            .into_iter()
+            .map(|(peer_id, (state, membership_list))| {
+                let peer = Peer::new_from_dot_input(&peer_id, state, membership_list, graph);
+                (peer_id, peer)
+            }).collect();
 
         PeerList { our_id, peers }
     }
