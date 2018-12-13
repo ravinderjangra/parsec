@@ -14,7 +14,6 @@ use hash::Hash;
 use id::PublicId;
 use network_event::NetworkEvent;
 use serialise;
-use std::collections::BTreeSet;
 use std::iter::{self, FromIterator};
 
 #[derive(Debug)]
@@ -38,7 +37,7 @@ impl<P: PublicId> Peer<P> {
             state,
             events: Events::new(),
             last_gossiped_event: None,
-            membership_list: BTreeSet::new(),
+            membership_list: PeerIndexSet::default(),
             membership_list_changes: Vec::new(),
         }
     }

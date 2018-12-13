@@ -24,7 +24,8 @@ use observation::ObservationHash;
 use peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
 use serialise;
 use std::cmp;
-use std::collections::{BTreeMap, BTreeSet};
+#[cfg(any(test, feature = "testing"))]
+use std::collections::BTreeMap;
 use std::fmt::{self, Debug, Formatter};
 #[cfg(feature = "dump-graphs")]
 use std::io::{self, Write};
@@ -88,13 +89,18 @@ impl<T: NetworkEvent, P: PublicId> Event<T, P> {
             Cause::Observation { self_parent, vote },
             graph,
             peer_list,
-            &BTreeSet::new(),
+            &PeerIndexSet::default(),
         )
     }
 
     // Creates an initial event.  This is the first event by its creator in the graph.
     pub fn new_initial<S: SecretId<PublicId = P>>(peer_list: &PeerList<S>) -> Self {
-        Self::new(Cause::Initial, &Graph::new(), peer_list, &BTreeSet::new())
+        Self::new(
+            Cause::Initial,
+            &Graph::new(),
+            peer_list,
+            &PeerIndexSet::default(),
+        )
     }
 
     // Creates an event from a `PackedEvent`.
@@ -420,7 +426,7 @@ impl Event<Transaction, PeerId> {
             creator,
             index_by_creator,
             last_ancestors,
-            forking_peers: BTreeSet::new(),
+            forking_peers: PeerIndexSet::default(),
             payload_hash,
         };
 
@@ -597,7 +603,7 @@ fn index_by_creator_and_last_ancestors<T: NetworkEvent, S: SecretId>(
         )
     } else {
         // Initial event
-        (0, BTreeMap::new())
+        (0, PeerIndexMap::default())
     };
 
     if let Some(other_parent) = other_parent {
@@ -622,7 +628,7 @@ fn join_forking_peers<T: NetworkEvent, P: PublicId>(
     other_parent: Option<&Event<T, P>>,
     prev_forking_peers: &PeerIndexSet,
 ) -> PeerIndexSet {
-    let mut forking_peers = BTreeSet::new();
+    let mut forking_peers = PeerIndexSet::default();
     forking_peers.extend(
         self_parent
             .into_iter()
@@ -704,7 +710,6 @@ mod tests {
     use mock::{PeerId, Transaction};
     use observation::Observation;
     use peer_list::{PeerList, PeerState};
-    use std::collections::BTreeSet;
 
     struct PeerListAndEvent {
         peer_list: PeerList<PeerId>,
@@ -853,7 +858,7 @@ mod tests {
             bob_initial_hash,
             &events,
             &alice.peer_list,
-            &BTreeSet::new(),
+            &PeerIndexSet::default(),
         );
 
         assert_eq!(
@@ -880,7 +885,7 @@ mod tests {
             bob_initial_hash,
             &events,
             &alice.peer_list,
-            &BTreeSet::new(),
+            &PeerIndexSet::default(),
         );
     }
 
@@ -897,7 +902,7 @@ mod tests {
             bob_initial_hash,
             &events,
             &alice.peer_list,
-            &BTreeSet::new(),
+            &PeerIndexSet::default(),
         );
     }
 
@@ -912,7 +917,7 @@ mod tests {
             bob_initial_hash,
             &events,
             &alice.peer_list,
-            &BTreeSet::new(),
+            &PeerIndexSet::default(),
         );
 
         assert_eq!(
@@ -947,7 +952,7 @@ mod tests {
             packed_event.clone(),
             &graph,
             &alice.peer_list,
-            &BTreeSet::new(),
+            &PeerIndexSet::default(),
         )) {
             UnpackedEvent::New(event) => event,
             UnpackedEvent::Known(_) => panic!("Unexpected known event"),
@@ -962,7 +967,7 @@ mod tests {
             packed_event,
             &graph,
             &alice.peer_list,
-            &BTreeSet::new()
+            &PeerIndexSet::default()
         )) {
             UnpackedEvent::New(_) => panic!("Unexpected new event"),
             UnpackedEvent::Known(_) => (),
@@ -992,7 +997,7 @@ mod tests {
             packed_event,
             &graph,
             &alice.peer_list,
-            &BTreeSet::new()
+            &PeerIndexSet::default()
         ));
         if let Error::SignatureFailure = error {
         } else {

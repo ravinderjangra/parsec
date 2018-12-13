@@ -69,10 +69,10 @@ impl MetaElection {
     ) -> Self {
         MetaElection {
             meta_events: BTreeMap::new(),
-            round_hashes: BTreeMap::new(),
+            round_hashes: PeerIndexMap::default(),
             all_voters: voters.clone(),
             undecided_voters: voters,
-            interesting_events: BTreeMap::new(),
+            interesting_events: PeerIndexMap::default(),
             consensus_len,
             payload_key: None,
             unconsensused_events,

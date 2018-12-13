@@ -16,7 +16,7 @@ use mock::{self, PeerId, Transaction};
 use network_event::NetworkEvent;
 use observation::Observation;
 use parsec::TestParsec;
-use peer_list::{MembershipListChange, PeerListSnapshot, PeerState};
+use peer_list::{MembershipListChange, PeerIndexSet, PeerListSnapshot, PeerState};
 use std::collections::BTreeSet;
 
 macro_rules! assert_err {
@@ -222,23 +222,29 @@ fn add_peer() {
     let eric_index = unwrap!(alice.peer_list().get_index(&eric_id));
 
     let event_index = 18;
-    let mut alice_membership_list_for_dave = vec![
+    let mut expected_alice_membership_list_for_dave = vec![
         (event_index, MembershipListChange::Add(alice_index)),
         (event_index, MembershipListChange::Add(bob_index)),
         (event_index, MembershipListChange::Add(carol_index)),
         (event_index, MembershipListChange::Add(dave_index)),
         (event_index, MembershipListChange::Add(eric_index)),
     ];
+    expected_alice_membership_list_for_dave.sort();
+
     assert!(!alice
         .peer_list()
         .all_ids()
         .any(|(_, peer_id)| *peer_id == fred_id));
+
+    let mut actual_alice_membership_list_for_dave = alice
+        .peer_list()
+        .peer_membership_list_changes(dave_index)
+        .to_vec();
+    actual_alice_membership_list_for_dave.sort();
+
     assert_eq!(
-        alice
-            .peer_list()
-            .peer_membership_list_changes(dave_index)
-            .to_vec(),
-        alice_membership_list_for_dave
+        actual_alice_membership_list_for_dave,
+        expected_alice_membership_list_for_dave
     );
 
     let alice_snapshot = Snapshot::new(&alice);
@@ -250,19 +256,25 @@ fn add_peer() {
     // Now add D_18, which should result in Alice adding Fred.
     let d_18_hash = *d_18.hash();
     unwrap!(alice.add_event(d_18));
-    unwrap!(alice.create_sync_event(&dave_id, true, &BTreeSet::new(), Some(d_18_hash)));
+    unwrap!(alice.create_sync_event(&dave_id, true, &PeerIndexSet::default(), Some(d_18_hash)));
     assert!(alice
         .peer_list()
         .all_ids()
         .any(|(_, peer_id)| *peer_id == fred_id));
     let fred_index = unwrap!(alice.peer_list().get_index(&fred_id));
-    alice_membership_list_for_dave.push((18, MembershipListChange::Add(fred_index)));
+
+    expected_alice_membership_list_for_dave.push((18, MembershipListChange::Add(fred_index)));
+    expected_alice_membership_list_for_dave.sort();
+
+    let mut actual_alice_membership_list_for_dave = alice
+        .peer_list()
+        .peer_membership_list_changes(dave_index)
+        .to_vec();
+    actual_alice_membership_list_for_dave.sort();
+
     assert_eq!(
-        alice
-            .peer_list()
-            .peer_membership_list_changes(dave_index)
-            .to_vec(),
-        alice_membership_list_for_dave
+        actual_alice_membership_list_for_dave,
+        expected_alice_membership_list_for_dave,
     );
 
     // Construct Fred's Parsec instance.
@@ -1226,7 +1238,7 @@ mod handle_malice {
             b_0_hash,
             &bob_contents.graph,
             &bob_contents.peer_list,
-            &BTreeSet::new(),
+            &PeerIndexSet::default(),
         );
         let b_2_hash = *b_2.hash();
 

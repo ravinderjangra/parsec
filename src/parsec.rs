@@ -249,7 +249,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             consensus_mode,
             pending_accusations: vec![],
             #[cfg(feature = "malice-detection")]
-            unprovable_offenders: BTreeSet::new(),
+            unprovable_offenders: PeerIndexSet::default(),
         }
     }
 
@@ -570,7 +570,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         self.confirm_self_state(PeerState::RECV)?;
         self.confirm_peer_state(src_index, PeerState::SEND)?;
 
-        let mut forking_peers = BTreeSet::new();
+        let mut forking_peers = PeerIndexSet::default();
         let mut known = Vec::new();
 
         // Among the packed_events, Keep track of each peer's earliest events' self_parent, as we
@@ -2378,7 +2378,11 @@ type Accusations<T, P> = Vec<(PeerIndex, Malice<T, P>)>;
 impl Parsec<Transaction, PeerId> {
     pub(crate) fn from_parsed_contents(mut parsed_contents: ParsedContents) -> Self {
         let peer_list = PeerList::new(parsed_contents.our_id);
-        let mut parsec = Parsec::empty(peer_list, BTreeSet::new(), ConsensusMode::Supermajority);
+        let mut parsec = Parsec::empty(
+            peer_list,
+            PeerIndexSet::default(),
+            ConsensusMode::Supermajority,
+        );
 
         // Populate `observations` cache using `interesting_content`, to support partial graphs...
         for meta_event in parsed_contents
@@ -2530,9 +2534,12 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
 
     #[cfg(feature = "malice-detection")]
     pub fn unpack_and_add_event(&mut self, event: PackedEvent<T, S::PublicId>) -> Result<()> {
-        if let UnpackedEvent::New(event) =
-            Event::unpack(event, &self.0.graph, &self.0.peer_list, &BTreeSet::new())?
-        {
+        if let UnpackedEvent::New(event) = Event::unpack(
+            event,
+            &self.0.graph,
+            &self.0.peer_list,
+            &PeerIndexSet::default(),
+        )? {
             let _ = self.0.add_event(event)?;
         }
 

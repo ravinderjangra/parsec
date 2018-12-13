@@ -8,7 +8,7 @@
 
 use peer_list::{PeerIndex, PeerIndexSet};
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd)]
 pub(crate) enum MembershipListChange {
     Add(PeerIndex),
     Remove(PeerIndex),

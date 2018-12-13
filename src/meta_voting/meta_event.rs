@@ -13,7 +13,6 @@ use id::PublicId;
 use network_event::NetworkEvent;
 use observation::ObservationKey;
 use peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet};
-use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub(crate) struct MetaEvent {
@@ -34,9 +33,9 @@ impl MetaEvent {
             election,
             event,
             meta_event: MetaEvent {
-                observees: BTreeSet::new(),
+                observees: PeerIndexSet::default(),
                 interesting_content: Vec::new(),
-                meta_votes: BTreeMap::new(),
+                meta_votes: PeerIndexMap::default(),
             },
         }
     }
@@ -88,6 +87,7 @@ pub(crate) mod snapshot {
     use id::SecretId;
     use observation::snapshot::ObservationKeySnapshot;
     use peer_list::PeerList;
+    use std::collections::{BTreeMap, BTreeSet};
 
     #[serde(bound = "")]
     #[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]

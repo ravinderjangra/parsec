@@ -688,7 +688,7 @@ impl ParsedContents {
     /// Create empty `ParsedContents`.
     pub fn new(our_id: PeerId) -> Self {
         let peer_list = PeerList::new(our_id.clone());
-        let meta_elections = MetaElections::new(BTreeSet::new());
+        let meta_elections = MetaElections::new(PeerIndexSet::default());
 
         ParsedContents {
             our_id,
