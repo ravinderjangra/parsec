@@ -21,7 +21,7 @@ use mock::{PeerId, Transaction};
 use network_event::NetworkEvent;
 use observation::Observation;
 use observation::ObservationHash;
-use peer_list::{PeerIndex, PeerList};
+use peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
 use serialise;
 use std::cmp;
 use std::collections::{BTreeMap, BTreeSet};
@@ -44,7 +44,7 @@ impl<T: NetworkEvent, P: PublicId> Event<T, P> {
         other_parent: EventHash,
         graph: &Graph<T, P>,
         peer_list: &PeerList<S>,
-        forking_peers: &BTreeSet<PeerIndex>,
+        forking_peers: &PeerIndexSet,
     ) -> Self {
         Self::new(
             Cause::Request {
@@ -63,7 +63,7 @@ impl<T: NetworkEvent, P: PublicId> Event<T, P> {
         other_parent: EventHash,
         graph: &Graph<T, P>,
         peer_list: &PeerList<S>,
-        forking_peers: &BTreeSet<PeerIndex>,
+        forking_peers: &PeerIndexSet,
     ) -> Self {
         Self::new(
             Cause::Response {
@@ -108,7 +108,7 @@ impl<T: NetworkEvent, P: PublicId> Event<T, P> {
         packed_event: PackedEvent<T, P>,
         graph: &Graph<T, P>,
         peer_list: &PeerList<S>,
-        forking_peers: &BTreeSet<PeerIndex>,
+        forking_peers: &PeerIndexSet,
     ) -> Result<UnpackedEvent<T, P>, Error> {
         let hash = compute_event_hash_and_verify_signature(
             &packed_event.content,
@@ -252,7 +252,7 @@ impl<T: NetworkEvent, P: PublicId> Event<T, P> {
         self.cache.index_by_creator
     }
 
-    pub fn last_ancestors(&self) -> &BTreeMap<PeerIndex, usize> {
+    pub fn last_ancestors(&self) -> &PeerIndexMap<usize> {
         &self.cache.last_ancestors
     }
 
@@ -298,7 +298,7 @@ impl<T: NetworkEvent, P: PublicId> Event<T, P> {
         cause: Cause<T, P>,
         graph: &Graph<T, P>,
         peer_list: &PeerList<S>,
-        forking_peers: &BTreeSet<PeerIndex>,
+        forking_peers: &PeerIndexSet,
     ) -> Self {
         let content = Content {
             creator: peer_list.our_id().public_id().clone(),
@@ -471,9 +471,9 @@ struct Cache {
     // Index of this event relative to other events by the same creator.
     index_by_creator: usize,
     // Index of each peer's latest event that is an ancestor of this event.
-    last_ancestors: BTreeMap<PeerIndex, usize>,
+    last_ancestors: PeerIndexMap<usize>,
     // Peers with a fork having both sides seen by this event.
-    forking_peers: BTreeSet<PeerIndex>,
+    forking_peers: PeerIndexSet,
     // Hash of the payload
     payload_hash: Option<ObservationHash>,
 }
@@ -485,7 +485,7 @@ impl Cache {
         self_parent: Option<IndexedEventRef<T, S::PublicId>>,
         other_parent: Option<IndexedEventRef<T, S::PublicId>>,
         creator: PeerIndex,
-        forking_peers: &BTreeSet<PeerIndex>,
+        forking_peers: &PeerIndexSet,
         peer_list: &PeerList<S>,
     ) -> Self {
         let (index_by_creator, last_ancestors) = index_by_creator_and_last_ancestors(
@@ -589,7 +589,7 @@ fn index_by_creator_and_last_ancestors<T: NetworkEvent, S: SecretId>(
     self_parent: Option<&Event<T, S::PublicId>>,
     other_parent: Option<&Event<T, S::PublicId>>,
     peer_list: &PeerList<S>,
-) -> (usize, BTreeMap<PeerIndex, usize>) {
+) -> (usize, PeerIndexMap<usize>) {
     let (index_by_creator, mut last_ancestors) = if let Some(self_parent) = self_parent {
         (
             self_parent.index_by_creator() + 1,
@@ -620,8 +620,8 @@ fn index_by_creator_and_last_ancestors<T: NetworkEvent, S: SecretId>(
 fn join_forking_peers<T: NetworkEvent, P: PublicId>(
     self_parent: Option<&Event<T, P>>,
     other_parent: Option<&Event<T, P>>,
-    prev_forking_peers: &BTreeSet<PeerIndex>,
-) -> BTreeSet<PeerIndex> {
+    prev_forking_peers: &PeerIndexSet,
+) -> PeerIndexSet {
     let mut forking_peers = BTreeSet::new();
     forking_peers.extend(
         self_parent

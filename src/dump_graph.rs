@@ -65,7 +65,7 @@ mod detail {
     use meta_voting::{MetaElections, MetaElectionsSnapshot, MetaEvent, MetaVote};
     use network_event::NetworkEvent;
     use observation::{Observation, ObservationHash};
-    use peer_list::{PeerIndex, PeerList};
+    use peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
     use rand::{self, Rng};
     use serialise;
     use std::cell::RefCell;
@@ -254,7 +254,7 @@ mod detail {
 
     fn dump_meta_votes<S: SecretId>(
         peer_list: &PeerList<S>,
-        meta_votes: &BTreeMap<PeerIndex, Vec<MetaVote>>,
+        meta_votes: &PeerIndexMap<Vec<MetaVote>>,
         comment: bool,
     ) -> Vec<String> {
         let mut lines = vec![];
@@ -862,7 +862,7 @@ mod detail {
     }
 
     fn convert_peer_index_set<'a, 'b, S>(
-        input: &'a BTreeSet<PeerIndex>,
+        input: &'a PeerIndexSet,
         peer_list: &'b PeerList<S>,
     ) -> BTreeSet<&'b S::PublicId>
     where
@@ -875,7 +875,7 @@ mod detail {
     }
 
     fn convert_peer_index_map<'a, 'b, S, T>(
-        input: &'a BTreeMap<PeerIndex, T>,
+        input: &'a PeerIndexMap<T>,
         peer_list: &'b PeerList<S>,
     ) -> BTreeMap<&'b S::PublicId, &'a T>
     where

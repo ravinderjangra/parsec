@@ -24,7 +24,7 @@ use network_event::NetworkEvent;
 #[cfg(feature = "malice-detection")]
 use observation::UnprovableMalice;
 use observation::{is_more_than_two_thirds, ConsensusMode, Malice, Observation, ObservationKey};
-use peer_list::{PeerIndex, PeerList, PeerState};
+use peer_list::{PeerIndex, PeerIndexSet, PeerList, PeerState};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::mem;
 #[cfg(all(test, feature = "mock"))]
@@ -87,7 +87,7 @@ pub struct Parsec<T: NetworkEvent, S: SecretId> {
     pending_accusations: Accusations<T, S::PublicId>,
     // Peers we accused of unprovable malice.
     #[cfg(feature = "malice-detection")]
-    unprovable_offenders: BTreeSet<PeerIndex>,
+    unprovable_offenders: PeerIndexSet,
 }
 
 impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
@@ -108,7 +108,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
 
         let mut peer_list = PeerList::new(our_id);
-        let genesis_indices: BTreeSet<_> = genesis_group
+        let genesis_indices: PeerIndexSet = genesis_group
             .iter()
             .map(|peer_id| {
                 if peer_id == peer_list.our_pub_id() {
@@ -198,7 +198,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         peer_list.change_peer_state(PeerIndex::OUR, PeerState::RECV);
 
         // Add the genesis group.
-        let genesis_indices: BTreeSet<_> = genesis_group
+        let genesis_indices: PeerIndexSet = genesis_group
             .iter()
             .map(|peer_id| peer_list.add_peer(peer_id.clone(), PeerState::VOTE | PeerState::SEND))
             .collect();
@@ -235,7 +235,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     // Construct empty `Parsec` with no peers (except us) and no gossip events.
     fn empty(
         peer_list: PeerList<S>,
-        genesis_group: BTreeSet<PeerIndex>,
+        genesis_group: PeerIndexSet,
         consensus_mode: ConsensusMode,
     ) -> Self {
         dump_graph::init();
@@ -566,7 +566,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         &mut self,
         src_index: PeerIndex,
         packed_events: Vec<PackedEvent<T, S::PublicId>>,
-    ) -> Result<BTreeSet<PeerIndex>> {
+    ) -> Result<PeerIndexSet> {
         self.confirm_self_state(PeerState::RECV)?;
         self.confirm_peer_state(src_index, PeerState::SEND)?;
 
@@ -1089,7 +1089,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     fn is_interesting_payload(
         &self,
         builder: &MetaEventBuilder<T, S::PublicId>,
-        peers_that_can_vote: &BTreeSet<PeerIndex>,
+        peers_that_can_vote: &PeerIndexSet,
         payload_key: &ObservationKey,
     ) -> bool {
         let num_peers_that_did_vote = self.num_creators_of_ancestors_carrying_payload(
@@ -1115,7 +1115,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     // Number of unique peers that created at least one ancestor of the given event.
     fn num_creators_of_ancestors(
         &self,
-        peers_that_can_vote: &BTreeSet<PeerIndex>,
+        peers_that_can_vote: &PeerIndexSet,
         event: &Event<T, S::PublicId>,
     ) -> usize {
         event
@@ -1130,7 +1130,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     fn num_creators_of_ancestors_carrying_payload(
         &self,
         election: MetaElectionHandle,
-        peers_that_can_vote: &BTreeSet<PeerIndex>,
+        peers_that_can_vote: &PeerIndexSet,
         event: &Event<T, S::PublicId>,
         payload_key: &ObservationKey,
     ) -> usize {
@@ -1245,7 +1245,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     fn toss_coins(
         &self,
         election: MetaElectionHandle,
-        voters: &BTreeSet<PeerIndex>,
+        voters: &PeerIndexSet,
         peer_index: PeerIndex,
         parent_votes: &[MetaVote],
         event: IndexedEventRef<T, S::PublicId>,
@@ -1262,7 +1262,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     fn toss_coin(
         &self,
         election: MetaElectionHandle,
-        voters: &BTreeSet<PeerIndex>,
+        voters: &PeerIndexSet,
         peer_index: PeerIndex,
         parent_vote: &MetaVote,
         event: IndexedEventRef<T, S::PublicId>,
@@ -1428,7 +1428,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     fn collect_other_meta_votes(
         &self,
         election: MetaElectionHandle,
-        voters: &BTreeSet<PeerIndex>,
+        voters: &PeerIndexSet,
         peer_index: PeerIndex,
         event: &Event<T, S::PublicId>,
     ) -> Vec<Vec<MetaVote>> {
@@ -1505,7 +1505,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     // List of voters for the given meta-election.
-    fn voters(&self, election: MetaElectionHandle) -> BTreeSet<PeerIndex> {
+    fn voters(&self, election: MetaElectionHandle) -> PeerIndexSet {
         self.meta_elections
             .voters(election)
             .cloned()
@@ -1681,7 +1681,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         &mut self,
         src_index: PeerIndex,
         is_request: bool,
-        forking_peers: &BTreeSet<PeerIndex>,
+        forking_peers: &PeerIndexSet,
         opt_other_parent: Option<EventHash>,
     ) -> Result<()> {
         let self_parent = self
@@ -2515,7 +2515,7 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         &mut self,
         src: &S::PublicId,
         is_request: bool,
-        forking_peers: &BTreeSet<PeerIndex>,
+        forking_peers: &PeerIndexSet,
         other_parent: Option<EventHash>,
     ) -> Result<()> {
         let src_index = unwrap!(self.0.peer_list.get_index(src));

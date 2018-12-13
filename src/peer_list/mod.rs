@@ -12,7 +12,7 @@ mod peer_index;
 mod peer_state;
 
 pub(crate) use self::membership_list::MembershipListChange;
-pub(crate) use self::peer_index::PeerIndex;
+pub(crate) use self::peer_index::{PeerIndex, PeerIndexMap, PeerIndexSet};
 pub use self::peer_state::PeerState;
 #[cfg(all(test, feature = "mock"))]
 pub(crate) use self::snapshot::PeerListSnapshot;
@@ -30,7 +30,7 @@ use id::SecretId;
 use mock::{PeerId, Transaction};
 use network_event::NetworkEvent;
 use std::collections::btree_map::{BTreeMap, Entry};
-#[cfg(any(test, feature = "testing", feature = "malice-detection"))]
+#[cfg(any(test, feature = "testing"))]
 use std::collections::BTreeSet;
 use std::fmt::{self, Debug, Formatter};
 use std::iter;
@@ -297,7 +297,7 @@ impl<S: SecretId> PeerList<S> {
         &self,
         peer_index: PeerIndex,
         event_index: usize,
-    ) -> Option<BTreeSet<PeerIndex>> {
+    ) -> Option<PeerIndexSet> {
         let (mut list, changes) = self.peer_membership_list_and_changes(peer_index)?;
 
         for (index, change) in changes.iter().rev() {
@@ -518,7 +518,7 @@ impl PeerList<PeerId> {
 #[cfg(any(test, feature = "testing"))]
 pub(crate) struct Builder {
     peer_list: PeerList<PeerId>,
-    membership_lists: Vec<BTreeSet<PeerIndex>>,
+    membership_lists: Vec<PeerIndexSet>,
 }
 
 #[cfg(any(test, feature = "testing"))]

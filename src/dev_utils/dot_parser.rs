@@ -14,7 +14,7 @@ use meta_voting::{
 };
 use mock::{PeerId, Transaction};
 use observation::{Observation, ObservationHash, ObservationKey};
-use peer_list::{PeerIndex, PeerList, PeerState};
+use peer_list::{PeerIndexMap, PeerIndexSet, PeerList, PeerState};
 use pom::char_class::{alphanum, digit, hex_digit, multispace, space};
 use pom::parser::*;
 use pom::Result as PomResult;
@@ -899,7 +899,7 @@ fn convert_to_meta_event(meta_event: ParsedMetaEvent, peer_list: &PeerList<PeerI
     }
 }
 
-fn convert_peer_id_set(ids: BTreeSet<PeerId>, peer_list: &PeerList<PeerId>) -> BTreeSet<PeerIndex> {
+fn convert_peer_id_set(ids: BTreeSet<PeerId>, peer_list: &PeerList<PeerId>) -> PeerIndexSet {
     ids.into_iter()
         .map(|id| unwrap!(peer_list.get_index(&id)))
         .collect()
@@ -908,7 +908,7 @@ fn convert_peer_id_set(ids: BTreeSet<PeerId>, peer_list: &PeerList<PeerId>) -> B
 fn convert_peer_id_map<T>(
     ids: BTreeMap<PeerId, T>,
     peer_list: &PeerList<PeerId>,
-) -> BTreeMap<PeerIndex, T> {
+) -> PeerIndexMap<T> {
     ids.into_iter()
         .map(|(id, value)| (unwrap!(peer_list.get_index(&id)), value))
         .collect()

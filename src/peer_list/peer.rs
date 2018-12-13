@@ -7,7 +7,7 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::membership_list::MembershipListChange;
-use super::peer_index::PeerIndex;
+use super::peer_index::PeerIndexSet;
 use super::peer_state::PeerState;
 use gossip::{EventIndex, IndexedEventRef};
 use hash::Hash;
@@ -24,7 +24,7 @@ pub(crate) struct Peer<P: PublicId> {
     pub(super) state: PeerState,
     pub(super) events: Events,
     pub(super) last_gossiped_event: Option<EventIndex>,
-    membership_list: BTreeSet<PeerIndex>,
+    membership_list: PeerIndexSet,
     membership_list_changes: Vec<(usize, MembershipListChange)>,
 }
 
@@ -96,7 +96,7 @@ impl<P: PublicId> Peer<P> {
         self.membership_list_changes.push((index, change));
     }
 
-    pub(crate) fn membership_list(&self) -> &BTreeSet<PeerIndex> {
+    pub(crate) fn membership_list(&self) -> &PeerIndexSet {
         &self.membership_list
     }
 

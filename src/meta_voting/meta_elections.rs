@@ -11,7 +11,7 @@ use super::meta_vote::MetaVote;
 use gossip::EventIndex;
 use id::PublicId;
 use observation::{ObservationHash, ObservationKey};
-use peer_list::PeerIndex;
+use peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet};
 use round_hash::RoundHash;
 use std::collections::{btree_map::Entry, BTreeMap, BTreeSet, VecDeque};
 use std::fmt::{self, Debug};
@@ -45,14 +45,14 @@ pub(crate) struct MetaElection {
     pub(crate) meta_events: BTreeMap<EventIndex, MetaEvent>,
     // The "round hash" for each set of meta votes.  They are held in sequence in the `Vec`, i.e.
     // the one for round `x` is held at index `x`.
-    pub(crate) round_hashes: BTreeMap<PeerIndex, Vec<RoundHash>>,
+    pub(crate) round_hashes: PeerIndexMap<Vec<RoundHash>>,
     // Set of peers participating in this meta-election, i.e. all voters at the time this
     // meta-election has been created.
-    pub(crate) all_voters: BTreeSet<PeerIndex>,
+    pub(crate) all_voters: PeerIndexSet,
     // Set of peers which we haven't yet detected deciding this meta-election.
-    pub(crate) undecided_voters: BTreeSet<PeerIndex>,
+    pub(crate) undecided_voters: PeerIndexSet,
     // The indices of events for each peer that have a non-empty set of `interesting_content`.
-    pub(crate) interesting_events: BTreeMap<PeerIndex, VecDeque<EventIndex>>,
+    pub(crate) interesting_events: PeerIndexMap<VecDeque<EventIndex>>,
     // Length of `MetaElections::consensus_history` at the time this meta-election was created.
     pub(crate) consensus_len: usize,
     // Key of the payload decided by this meta-election.
@@ -63,7 +63,7 @@ pub(crate) struct MetaElection {
 
 impl MetaElection {
     fn new(
-        voters: BTreeSet<PeerIndex>,
+        voters: PeerIndexSet,
         consensus_len: usize,
         unconsensused_events: BTreeSet<EventIndex>,
     ) -> Self {
@@ -130,7 +130,7 @@ pub(crate) struct MetaElections {
 }
 
 impl MetaElections {
-    pub fn new(voters: BTreeSet<PeerIndex>) -> Self {
+    pub fn new(voters: PeerIndexSet) -> Self {
         MetaElections {
             next_index: 0,
             current_election: MetaElection::new(voters, 0, BTreeSet::new()),
@@ -239,7 +239,7 @@ impl MetaElections {
         &self,
         handle: MetaElectionHandle,
         event_index: EventIndex,
-    ) -> Option<&BTreeMap<PeerIndex, Vec<MetaVote>>> {
+    ) -> Option<&PeerIndexMap<Vec<MetaVote>>> {
         self.get(handle)
             .and_then(|election| election.meta_events.get(&event_index))
             .map(|meta_event| &meta_event.meta_votes)
@@ -261,7 +261,7 @@ impl MetaElections {
     }
 
     /// List of voters participating in the given meta-election.
-    pub fn voters(&self, handle: MetaElectionHandle) -> Option<&BTreeSet<PeerIndex>> {
+    pub fn voters(&self, handle: MetaElectionHandle) -> Option<&PeerIndexSet> {
         self.get(handle).map(|election| &election.all_voters)
     }
 
@@ -331,7 +331,7 @@ impl MetaElections {
     pub fn new_election(
         &mut self,
         payload_key: ObservationKey,
-        voters: BTreeSet<PeerIndex>,
+        voters: PeerIndexSet,
         unconsensused_events: BTreeSet<EventIndex>,
     ) -> MetaElectionHandle {
         self.consensus_history.push(payload_key.clone());
