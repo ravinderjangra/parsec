@@ -16,17 +16,17 @@ use peer_list::PeerIndex;
 use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Clone, Eq, PartialEq, Debug)]
-pub(crate) struct MetaEvent<P: PublicId> {
+pub(crate) struct MetaEvent {
     // The set of peers for which this event can strongly-see an event by that peer which carries a
     // valid block.  If there are a supermajority of peers here, this event is an "observer".
     pub observees: BTreeSet<PeerIndex>,
     // Hashes of payloads of all the votes deemed interesting by this event.
-    pub interesting_content: Vec<ObservationKey<P>>,
+    pub interesting_content: Vec<ObservationKey>,
     pub meta_votes: BTreeMap<PeerIndex, Vec<MetaVote>>,
 }
 
-impl<P: PublicId> MetaEvent<P> {
-    pub fn build<T: NetworkEvent>(
+impl MetaEvent {
+    pub fn build<T: NetworkEvent, P: PublicId>(
         election: MetaElectionHandle,
         event: IndexedEventRef<T, P>,
     ) -> MetaEventBuilder<T, P> {
@@ -45,7 +45,7 @@ impl<P: PublicId> MetaEvent<P> {
 pub(crate) struct MetaEventBuilder<'a, T: NetworkEvent + 'a, P: PublicId + 'a> {
     election: MetaElectionHandle,
     event: IndexedEventRef<'a, T, P>,
-    meta_event: MetaEvent<P>,
+    meta_event: MetaEvent,
 }
 
 impl<'a, T: NetworkEvent + 'a, P: PublicId + 'a> MetaEventBuilder<'a, T, P> {
@@ -69,7 +69,7 @@ impl<'a, T: NetworkEvent + 'a, P: PublicId + 'a> MetaEventBuilder<'a, T, P> {
         self.meta_event.observees = observees;
     }
 
-    pub fn set_interesting_content(&mut self, content: Vec<ObservationKey<P>>) {
+    pub fn set_interesting_content(&mut self, content: Vec<ObservationKey>) {
         self.meta_event.interesting_content = content;
     }
 
@@ -77,7 +77,7 @@ impl<'a, T: NetworkEvent + 'a, P: PublicId + 'a> MetaEventBuilder<'a, T, P> {
         let _ = self.meta_event.meta_votes.insert(peer_index, votes);
     }
 
-    pub fn finish(self) -> MetaEvent<P> {
+    pub fn finish(self) -> MetaEvent {
         self.meta_event
     }
 }
@@ -86,18 +86,19 @@ impl<'a, T: NetworkEvent + 'a, P: PublicId + 'a> MetaEventBuilder<'a, T, P> {
 pub(crate) mod snapshot {
     use super::*;
     use id::SecretId;
+    use observation::snapshot::ObservationKeySnapshot;
     use peer_list::PeerList;
 
     #[serde(bound = "")]
     #[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]
     pub(crate) struct MetaEventSnapshot<P: PublicId> {
         observees: BTreeSet<P>,
-        interesting_content: Vec<ObservationKey<P>>,
+        interesting_content: Vec<ObservationKeySnapshot<P>>,
         meta_votes: BTreeMap<P, Vec<MetaVote>>,
     }
 
     impl<P: PublicId> MetaEventSnapshot<P> {
-        pub fn new<S>(meta_event: &MetaEvent<P>, peer_list: &PeerList<S>) -> Self
+        pub fn new<S>(meta_event: &MetaEvent, peer_list: &PeerList<S>) -> Self
         where
             S: SecretId<PublicId = P>,
         {
@@ -108,7 +109,11 @@ pub(crate) mod snapshot {
                     .filter_map(|index| peer_list.get(*index))
                     .map(|peer| peer.id().clone())
                     .collect(),
-                interesting_content: meta_event.interesting_content.clone(),
+                interesting_content: meta_event
+                    .interesting_content
+                    .iter()
+                    .filter_map(|key| ObservationKeySnapshot::new(key, peer_list))
+                    .collect(),
                 meta_votes: meta_event
                     .meta_votes
                     .iter()

@@ -77,11 +77,11 @@ pub struct Parsec<T: NetworkEvent, S: SecretId> {
     // The Gossip graph.
     graph: Graph<T, S::PublicId>,
     // Information about observations stored in the graph, mapped to their hashes.
-    observations: BTreeMap<ObservationKey<S::PublicId>, ObservationInfo<T, S::PublicId>>,
+    observations: BTreeMap<ObservationKey, ObservationInfo<T, S::PublicId>>,
     // Consensused network events that have not been returned via `poll()` yet.
     consensused_blocks: VecDeque<Block<T, S::PublicId>>,
     // The map of meta votes of the events on each consensus block.
-    meta_elections: MetaElections<S::PublicId>,
+    meta_elections: MetaElections,
     consensus_mode: ConsensusMode,
     // Accusations to raise at the end of the processing of current gossip message.
     pending_accusations: Accusations<T, S::PublicId>,
@@ -783,7 +783,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         Ok(PostProcessAction::Continue)
     }
 
-    fn output_consensus_info(&self, payload_key: &ObservationKey<S::PublicId>) {
+    fn output_consensus_info(&self, payload_key: &ObservationKey) {
         dump_graph::to_file(
             self.our_pub_id(),
             &self.graph,
@@ -808,7 +808,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         )
     }
 
-    fn mark_observation_as_consensused(&mut self, payload_key: &ObservationKey<S::PublicId>) {
+    fn mark_observation_as_consensused(&mut self, payload_key: &ObservationKey) {
         if let Some(info) = self.observations.get_mut(payload_key) {
             info.consensused = true;
         } else {
@@ -821,7 +821,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     /// Handles consensus reached by us.
-    fn handle_self_consensus(&mut self, payload_key: &ObservationKey<S::PublicId>) {
+    fn handle_self_consensus(&mut self, payload_key: &ObservationKey) {
         match self
             .observations
             .get(payload_key)
@@ -895,11 +895,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     // Handle consensus reached by other peer.
-    fn handle_peer_consensus(
-        &mut self,
-        peer_index: PeerIndex,
-        payload_key: &ObservationKey<S::PublicId>,
-    ) {
+    fn handle_peer_consensus(&mut self, peer_index: PeerIndex, payload_key: &ObservationKey) {
         let payload = self
             .observations
             .get(payload_key)
@@ -1027,7 +1023,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         &self,
         election: MetaElectionHandle,
         event: IndexedEventRef<T, S::PublicId>,
-    ) -> Option<Vec<ObservationKey<S::PublicId>>> {
+    ) -> Option<Vec<ObservationKey>> {
         let prev_election = self.meta_elections.preceding(election)?;
 
         // If membership change occurred, we can't reuse the interesting content.
@@ -1073,7 +1069,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     fn has_interesting_ancestor(
         &self,
         builder: &MetaEventBuilder<T, S::PublicId>,
-        payload_key: &ObservationKey<S::PublicId>,
+        payload_key: &ObservationKey,
         start_index: usize,
     ) -> bool {
         self.graph
@@ -1094,7 +1090,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         &self,
         builder: &MetaEventBuilder<T, S::PublicId>,
         peers_that_can_vote: &BTreeSet<PeerIndex>,
-        payload_key: &ObservationKey<S::PublicId>,
+        payload_key: &ObservationKey,
     ) -> bool {
         let num_peers_that_did_vote = self.num_creators_of_ancestors_carrying_payload(
             builder.election(),
@@ -1136,7 +1132,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         election: MetaElectionHandle,
         peers_that_can_vote: &BTreeSet<PeerIndex>,
         event: &Event<T, S::PublicId>,
-        payload_key: &ObservationKey<S::PublicId>,
+        payload_key: &ObservationKey,
     ) -> usize {
         peers_that_can_vote
             .iter()
@@ -1148,7 +1144,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                         that_event.payload_hash().map(|hash| (that_event, hash))
                     })
                     .any(|(that_event, that_payload_hash)| {
-                        payload_key.matches(that_payload_hash, that_event.creator_id())
+                        payload_key.matches(that_payload_hash, that_event.creator())
                             && event.sees(that_event)
                     })
             })
@@ -1398,15 +1394,15 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
     // Returns the meta votes for the given peer, created by `creator`, since the given round and
     // step.  Starts iterating down the creator's events starting from `creator_event_index`.
-    fn meta_votes_since_round_and_step<'a>(
-        &'a self,
+    fn meta_votes_since_round_and_step(
+        &self,
         election: MetaElectionHandle,
         creator: PeerIndex,
         creator_event_index: usize,
         peer_index: PeerIndex,
         round: usize,
         step: Step,
-    ) -> impl Iterator<Item = &'a MetaVote> {
+    ) -> impl Iterator<Item = &MetaVote> {
         let mut events = self.peer_list.events_by_index(creator, creator_event_index);
         let event = events.next().and_then(|event| {
             if events.next().is_some() {
@@ -1543,7 +1539,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         &self,
         election: MetaElectionHandle,
         event_index: EventIndex,
-    ) -> Option<ObservationKey<S::PublicId>> {
+    ) -> Option<ObservationKey> {
         let last_meta_votes = self.meta_elections.meta_votes(election, event_index)?;
 
         let decided_meta_votes = last_meta_votes
@@ -1569,7 +1565,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         &self,
         election: MetaElectionHandle,
         decided_meta_votes: I,
-    ) -> Option<ObservationKey<S::PublicId>>
+    ) -> Option<ObservationKey>
     where
         I: IntoIterator<Item = (PeerIndex, bool)>,
     {
@@ -1588,7 +1584,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         // IMPORTANT: We must sort this in consistent order, so when the tie breaking rule kicks in,
         // the outcome is the same for everyone.
-        payloads.sort();
+        payloads.sort_by(|a, b| a.hash().cmp(b.hash()));
 
         payloads
             .iter()
@@ -1606,10 +1602,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .cloned()
     }
 
-    fn create_block(
-        &self,
-        payload_key: &ObservationKey<S::PublicId>,
-    ) -> Result<Block<T, S::PublicId>> {
+    fn create_block(&self, payload_key: &ObservationKey) -> Result<Block<T, S::PublicId>> {
         let voters = self.voters(MetaElectionHandle::CURRENT);
         let votes = self
             .graph
@@ -1621,7 +1614,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     .vote_with_payload_hash()
                     .map(|(vote, hash)| (event, vote, hash))
             })
-            .filter(|(event, _, hash)| payload_key.matches(hash, event.creator_id()))
+            .filter(|(event, _, hash)| payload_key.matches(hash, event.creator()))
             .map(|(event, vote, _)| (event.creator_id().clone(), vote.clone()))
             .collect();
 
@@ -1629,10 +1622,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     // Collects still unconsensused event from the current meta-election.
-    fn collect_unconsensused_events(
-        &self,
-        decided_key: &ObservationKey<S::PublicId>,
-    ) -> BTreeSet<EventIndex> {
+    fn collect_unconsensused_events(&self, decided_key: &ObservationKey) -> BTreeSet<EventIndex> {
         self.meta_elections
             .unconsensused_events(MetaElectionHandle::CURRENT)
             .filter(|event_index| {
@@ -1805,7 +1795,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         Ok(())
     }
 
-    fn payload_key(&self, event: &Event<T, S::PublicId>) -> Option<ObservationKey<S::PublicId>> {
+    fn payload_key(&self, event: &Event<T, S::PublicId>) -> Option<ObservationKey> {
         self.payload_with_key(event).map(|(_, key)| key)
     }
 
@@ -1821,7 +1811,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         };
         let key = match mode {
             ConsensusMode::Supermajority => ObservationKey::Supermajority(*hash),
-            ConsensusMode::Single => ObservationKey::Single(*hash, event.creator_id().clone()),
+            ConsensusMode::Single => ObservationKey::Single(*hash, event.creator()),
         };
 
         Some((payload, key))
@@ -2372,7 +2362,7 @@ impl<T: NetworkEvent, P: PublicId> ObservationInfo<T, P> {
     }
 }
 
-type ObservationWithKey<'a, T, P> = (&'a Observation<T, P>, ObservationKey<P>);
+type ObservationWithKey<'a, T, P> = (&'a Observation<T, P>, ObservationKey);
 
 // What to do after processing the current event.
 enum PostProcessAction {
@@ -2484,7 +2474,7 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         &self.0.peer_list
     }
 
-    pub fn meta_elections(&self) -> &MetaElections<S::PublicId> {
+    pub fn meta_elections(&self) -> &MetaElections {
         &self.0.meta_elections
     }
 

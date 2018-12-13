@@ -33,7 +33,7 @@ pub(crate) fn init() {
 pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
     owner_id: &S::PublicId,
     gossip_graph: &Graph<T, S::PublicId>,
-    meta_elections: &MetaElections<S::PublicId>,
+    meta_elections: &MetaElections,
     peer_list: &PeerList<S>,
     observations: BTreeMap<&ObservationHash, &Observation<T, S::PublicId>>,
 ) {
@@ -49,7 +49,7 @@ pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
 pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
     _: &S::PublicId,
     _: &Graph<T, S::PublicId>,
-    _: &MetaElections<S::PublicId>,
+    _: &MetaElections,
     _: &PeerList<S>,
     _: BTreeMap<&ObservationHash, &Observation<T, S::PublicId>>,
 ) {
@@ -120,7 +120,7 @@ mod detail {
         mut file_path: PathBuf,
         gossip_graph: &Graph<T, S::PublicId>,
         peer_list: &PeerList<S>,
-        meta_elections: &MetaElections<S::PublicId>,
+        meta_elections: &MetaElections,
     ) {
         if let Some("dev_utils::dot_parser::tests::dot_parser") = thread::current().name() {
             let snapshot = (
@@ -142,7 +142,7 @@ mod detail {
     pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
         owner_id: &S::PublicId,
         gossip_graph: &Graph<T, S::PublicId>,
-        meta_elections: &MetaElections<S::PublicId>,
+        meta_elections: &MetaElections,
         peer_list: &PeerList<S>,
         observations: BTreeMap<&ObservationHash, &Observation<T, S::PublicId>>,
     ) {
@@ -304,7 +304,7 @@ mod detail {
     struct DotWriter<'a, T: NetworkEvent + 'a, S: SecretId + 'a> {
         file: BufWriter<File>,
         gossip_graph: &'a Graph<T, S::PublicId>,
-        meta_elections: &'a MetaElections<S::PublicId>,
+        meta_elections: &'a MetaElections,
         peer_list: &'a PeerList<S>,
         observations: BTreeMap<&'a ObservationHash, &'a Observation<T, S::PublicId>>,
         indent: usize,
@@ -316,7 +316,7 @@ mod detail {
         fn new(
             file_path: &Path,
             gossip_graph: &'a Graph<T, S::PublicId>,
-            meta_elections: &'a MetaElections<S::PublicId>,
+            meta_elections: &'a MetaElections,
             peer_list: &'a PeerList<S>,
             observations: BTreeMap<&'a ObservationHash, &'a Observation<T, S::PublicId>>,
         ) -> io::Result<Self> {
@@ -795,7 +795,7 @@ mod detail {
     impl EventAttributes {
         fn new<T: NetworkEvent, S: SecretId>(
             event: &Event<T, S::PublicId>,
-            opt_meta_event: Option<&MetaEvent<S::PublicId>>,
+            opt_meta_event: Option<&MetaEvent>,
             observations_map: &BTreeMap<&ObservationHash, &Observation<T, S::PublicId>>,
             peer_list: &PeerList<S>,
         ) -> Self {
