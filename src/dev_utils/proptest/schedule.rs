@@ -56,7 +56,8 @@ where
     let boxed_str = prop_oneof![
         cnst.prop_map(DelayDistribution::Constant),
         poisson.prop_map(DelayDistribution::Poisson),
-    ].boxed();
+    ]
+    .boxed();
     BoundedBoxedStrategy::from_boxed(boxed_str, min, max)
 }
 
@@ -124,7 +125,8 @@ impl Strategy for ScheduleOptionsStrategy {
                     delay_distr,
                     ..Default::default()
                 },
-            ).new_tree(runner)
+            )
+            .new_tree(runner)
             .map(|t| ScheduleOptionsValueTree {
                 max_sched,
                 min_sched,

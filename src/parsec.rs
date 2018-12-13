@@ -385,9 +385,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     pub fn have_voted_for(&self, observation: &Observation<T, S::PublicId>) -> bool {
         // TODO: optimize by iterating only `peer_list.our_events`.
         self.graph.iter().any(|event| {
-            event.creator() == self.our_pub_id() && event
-                .vote()
-                .map_or(false, |voted| voted.payload() == observation)
+            event.creator() == self.our_pub_id()
+                && event
+                    .vote()
+                    .map_or(false, |voted| voted.payload() == observation)
         })
     }
 
@@ -411,10 +412,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
     fn our_consensused_observations(&self) -> impl Iterator<Item = &Observation<T, S::PublicId>> {
         self.observations.values().filter_map(move |info| {
-            if info.created_by_us && info.consensused && self
-                .consensused_blocks
-                .iter()
-                .any(|block| block.payload() == &info.observation)
+            if info.created_by_us
+                && info.consensused
+                && self
+                    .consensused_blocks
+                    .iter()
+                    .any(|block| block.payload() == &info.observation)
             {
                 Some(&info.observation)
             } else {
@@ -838,7 +841,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                         *id != *peer_id &&
                         // And excluding us.
                         *id != *self.our_pub_id()
-            }).all(|(_, peer)| {
+            })
+            .all(|(_, peer)| {
                 // Peers that can receive, which implies they've already sent us at least
                 // one message which implies they've already reached consensus on adding us.
                 peer.state().can_recv()
@@ -959,11 +963,13 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     builder.event().creator(),
                     payload_key,
                 )
-            }).filter(|(event, payload_key)| {
+            })
+            .filter(|(event, payload_key)| {
                 self.is_interesting_payload(builder, &peers_that_can_vote, payload_key, start_index)
                     || event.sees_fork()
                         && self.has_interesting_ancestor(builder, payload_key, start_index)
-            }).map(|(_, payload_key)| payload_key)
+            })
+            .map(|(_, payload_key)| payload_key)
             .collect();
 
         // The code above created a set of payloads that are interesting at this event.
@@ -1013,7 +1019,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     event.creator(),
                     payload,
                 )
-            }).cloned()
+            })
+            .cloned()
             .collect();
 
         if payloads.is_empty() {
@@ -1107,11 +1114,13 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     .map(|that_event| that_event.inner())
                     .filter_map(|that_event| {
                         that_event.payload_hash().map(|hash| (that_event, hash))
-                    }).any(|(that_event, that_payload_hash)| {
+                    })
+                    .any(|(that_event, that_payload_hash)| {
                         payload_key.matches(that_payload_hash, that_event.creator())
                             && event.sees(that_event)
                     })
-            }).count()
+            })
+            .count()
     }
 
     fn set_observees(&self, builder: &mut MetaEventBuilder<T, S::PublicId>) {
@@ -1126,7 +1135,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 } else {
                     None
                 }
-            }).cloned()
+            })
+            .cloned()
             .collect();
         builder.set_observees(observees);
     }
@@ -1140,7 +1150,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .and_then(|parent_hash| {
                 self.meta_elections
                     .meta_votes(builder.election(), parent_hash)
-            }).and_then(|parent_meta_votes| {
+            })
+            .and_then(|parent_meta_votes| {
                 if !parent_meta_votes.is_empty() {
                     Some(parent_meta_votes)
                 } else {
@@ -1305,7 +1316,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             peer_id,
             round,
             Step::GenuineFlip,
-        ).next()
+        )
+        .next()
         .and_then(|meta_vote| meta_vote.aux_value)
     }
 
@@ -1407,10 +1419,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                             &peer_id,
                             0,
                             Step::ForcedTrue,
-                        ).cloned()
+                        )
+                        .cloned()
                         .collect()
                     })
-            }).collect()
+            })
+            .collect()
     }
 
     // Initialise the membership list of the creator of the given event to the same membership list
@@ -1451,7 +1465,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                         .events_by_index(other_parent_creator, *index)
                         .filter_map(|hash| self.get_known_event(hash).ok())
                         .any(|other_event| event.sees(other_event))
-                }).map(|(_, change)| change.clone())
+                })
+                .map(|(_, change)| change.clone())
                 .collect();
             (event.creator().clone(), changes)
         };
@@ -1517,7 +1532,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 } else {
                     None
                 }
-            }).collect();
+            })
+            .collect();
 
         payloads
             .iter()
@@ -1531,7 +1547,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     .filter(|payload_carried| rhs_payload == payload_carried)
                     .count();
                 lhs_count.cmp(&rhs_count)
-            }).cloned()
+            })
+            .cloned()
     }
 
     fn create_block(
@@ -1548,7 +1565,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 event
                     .vote_with_payload_hash()
                     .map(|(vote, hash)| (vote, hash, event.creator()))
-            }).filter(|(_, hash, creator)| payload_key.matches(hash, creator))
+            })
+            .filter(|(_, hash, creator)| payload_key.matches(hash, creator))
             .map(|(vote, _, creator)| (creator.clone(), vote.clone()))
             .collect();
 
@@ -1565,7 +1583,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     .and_then(|payload_key| self.observations.get(&payload_key))
                     .map(|info| !info.consensused)
                     .unwrap_or(false)
-            }).map(|indexed_event| indexed_event.topological_index())
+            })
+            .map(|indexed_event| indexed_event.topological_index())
             .next()
             .unwrap_or_else(|| self.graph.len())
     }
@@ -1589,7 +1608,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     }
                 }
                 false
-            }).count()
+            })
+            .count()
     }
 
     // Returns whether event X can strongly see the event Y during the evaluation of the given
@@ -1845,10 +1865,11 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         // - the creator is not member of the genesis group, or
         // - the self-parent of the event is not initial event
-        if !genesis_group.contains(event.creator()) || self
-            .graph
-            .self_parent(event)
-            .map_or(true, |self_parent| !self_parent.is_initial())
+        if !genesis_group.contains(event.creator())
+            || self
+                .graph
+                .self_parent(event)
+                .map_or(true, |self_parent| !self_parent.is_initial())
         {
             self.accuse(
                 event.creator().clone(),
@@ -1932,11 +1953,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             Some(&Observation::Accusation {
                 ref offender,
                 ref malice,
-            })
-                if malice.is_provable() =>
-            {
-                (offender, malice)
-            }
+            }) if malice.is_provable() => (offender, malice),
             _ => return,
         };
 
@@ -1967,7 +1984,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 } else {
                     None
                 }
-            }).any(|our_accusation| their_accusation == our_accusation);
+            })
+            .any(|our_accusation| their_accusation == our_accusation);
         if found {
             return;
         }
@@ -2074,7 +2092,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     Some((offender.clone(), malice.clone()))
                 }
                 _ => None,
-            }).collect()
+            })
+            .collect()
     }
 
     fn malicious_event_is_ancestor_of_this_event(
@@ -2120,7 +2139,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 .map(|malicious_event| {
                     self.graph.is_descendant(event, malicious_event)
                         && event.is_forking_peer(malicious_event.creator())
-                }).unwrap_or(false),
+                })
+                .unwrap_or(false),
             Malice::OtherParentBySameCreator(packed_event)
             | Malice::SelfParentByDifferentCreator(packed_event) => self
                 .graph
@@ -2215,7 +2235,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 } else {
                     None
                 }
-            }).next()
+            })
+            .next()
             .unwrap_or_else(|| self.peer_list.voter_ids().collect())
     }
 

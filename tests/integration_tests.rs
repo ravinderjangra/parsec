@@ -246,10 +246,9 @@ fn add_many_peers() {
 
     let schedule = Schedule::new(&mut env, &options);
 
-    unwrap!(
-        env.network
-            .execute_schedule(&mut env.rng, schedule, &options)
-    );
+    unwrap!(env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options));
 }
 
 #[test]
@@ -274,10 +273,9 @@ fn add_few_peers_and_vote() {
     let options = ScheduleOptions::default();
     let schedule = Schedule::from_observation_schedule(&mut env, &options, obs_schedule);
 
-    unwrap!(
-        env.network
-            .execute_schedule(&mut env.rng, schedule, &options)
-    );
+    unwrap!(env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options));
 }
 
 #[test]
@@ -292,10 +290,9 @@ fn add_many_peers_and_vote() {
 
     let schedule = Schedule::new(&mut env, &options);
 
-    unwrap!(
-        env.network
-            .execute_schedule(&mut env.rng, schedule, &options)
-    );
+    unwrap!(env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options));
 }
 
 #[test]
@@ -382,10 +379,9 @@ fn consensus_mode_single() {
     };
     let schedule = Schedule::new(&mut env, &options);
 
-    unwrap!(
-        env.network
-            .execute_schedule(&mut env.rng, schedule, &options)
-    );
+    unwrap!(env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options));
 }
 
 #[test]
@@ -442,10 +438,9 @@ fn extensive_dynamic_membership() {
     let options = ScheduleOptions::default();
     let schedule = Schedule::from_observation_schedule(&mut env, &options, obs_schedule);
 
-    unwrap!(
-        env.network
-            .execute_schedule(&mut env.rng, schedule, &options)
-    );
+    unwrap!(env
+        .network
+        .execute_schedule(&mut env.rng, schedule, &options));
 }
 
 // This test encounters performance problems when malice-detection is enabled, hence we only

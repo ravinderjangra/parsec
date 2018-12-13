@@ -63,7 +63,8 @@ impl<S: SecretId> PeerList<S> {
                 .iter()
                 .filter(move |(id, peer)| {
                     *id != self.our_pub_id() && peer.state.can_vote() && peer.state.can_recv()
-                }).map(|(id, _)| id);
+                })
+                .map(|(id, _)| id);
             Some(ids)
         } else {
             None
@@ -758,10 +759,12 @@ pub(crate) mod snapshot {
                                 graph
                                     .get(event_index)
                                     .map(|event| (index_by_creator, *event.hash()))
-                            }).collect();
+                            })
+                            .collect();
 
                         (peer_id.clone(), (peer.state, events))
-                    }).collect(),
+                    })
+                    .collect(),
             )
         }
     }

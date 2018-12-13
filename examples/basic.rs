@@ -47,7 +47,7 @@
     box_pointers,
     missing_copy_implementations,
     missing_debug_implementations,
-    variant_size_differences,
+    variant_size_differences
 )]
 
 #[macro_use]
@@ -554,21 +554,22 @@ impl Environment {
     }
 
     fn phase_complete(&self) -> bool {
-        self.current_round >= self.params.max_rounds || self.peers.iter().all(|peer| {
-            if let Some(ref new_peer_id) = self.current_new_peer {
-                if !peer.has_added(new_peer_id) {
-                    return false;
+        self.current_round >= self.params.max_rounds
+            || self.peers.iter().all(|peer| {
+                if let Some(ref new_peer_id) = self.current_new_peer {
+                    if !peer.has_added(new_peer_id) {
+                        return false;
+                    }
                 }
-            }
 
-            for removed_peer_id in &self.current_remove_peers {
-                if !peer.has_removed(removed_peer_id) {
-                    return false;
+                for removed_peer_id in &self.current_remove_peers {
+                    if !peer.has_removed(removed_peer_id) {
+                        return false;
+                    }
                 }
-            }
 
-            true
-        })
+                true
+            })
     }
 
     fn get_receiver_and_message(
@@ -622,11 +623,9 @@ impl Environment {
                 .parsec
                 .handle_request(&sender_id, request)
             {
-                unwrap!(
-                    self.peers[sender_index]
-                        .parsec
-                        .handle_response(&receiver_id, response)
-                );
+                unwrap!(self.peers[sender_index]
+                    .parsec
+                    .handle_response(&receiver_id, response));
             }
 
             let peer = &mut self.peers[sender_index];

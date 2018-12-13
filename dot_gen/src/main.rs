@@ -159,7 +159,8 @@ fn main() {
                     },
                 )
             },
-        ).file("Alice", "alice.dot")
+        )
+        .file("Alice", "alice.dot")
         .file("Bob", "bob.dot")
         .file("Carol", "carol.dot");
 
@@ -173,7 +174,8 @@ fn main() {
                     ..Default::default()
                 },
             )
-        }).file("Alice", "minimal.dot");
+        })
+        .file("Alice", "minimal.dot");
 
     let _ = scenarios
         .add("benches", |env| {
@@ -185,7 +187,8 @@ fn main() {
                     ..Default::default()
                 },
             )
-        }).file("Alice", "static.dot");
+        })
+        .file("Alice", "static.dot");
 
     let _ = scenarios
         .add("benches", |env| {
@@ -198,7 +201,8 @@ fn main() {
                     ..Default::default()
                 },
             )
-        }).file("Alice", "dynamic.dot");
+        })
+        .file("Alice", "dynamic.dot");
 
     // Do not edit below this line.
     // -------------------------------------------------------------------------
@@ -364,20 +368,23 @@ fn run(mut scenarios: Scenarios) {
                 .help("Run all scenarios matching this name")
                 .required_unless("all")
                 .required_unless("list"),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("all")
                 .short("a")
                 .long("all")
                 .help("Run all scenarios")
                 .conflicts_with("name"),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("list")
                 .short("l")
                 .long("list")
                 .help("List all scenarios")
                 .conflicts_with("name")
                 .conflicts_with("all"),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("existing")
                 .short("e")
                 .long("existing")
@@ -385,12 +392,14 @@ fn run(mut scenarios: Scenarios) {
                 .possible_values(&["overwrite", "skip", "fail"])
                 .help("What to do with existing destination files")
                 .conflicts_with("list"),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("force")
                 .short("f")
                 .help("Same as --existing=overwrite")
                 .conflicts_with("list"),
-        ).get_matches();
+        )
+        .get_matches();
 
     check_root_dir();
 

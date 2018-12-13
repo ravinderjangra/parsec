@@ -249,9 +249,11 @@ fn parse_event_id() -> Parser<u8, String> {
 }
 
 fn parse_event_details() -> Parser<u8, BTreeMap<String, EventDetails>> {
-    seq(b"/// ===== details of events") * next_line() * parse_single_event_detail()
-        .repeat(1..)
-        .map(|details| details.into_iter().collect())
+    seq(b"/// ===== details of events")
+        * next_line()
+        * parse_single_event_detail()
+            .repeat(1..)
+            .map(|details| details.into_iter().collect())
 }
 
 #[derive(Debug)]
@@ -268,7 +270,8 @@ fn parse_single_event_detail() -> Parser<u8, (String, EventDetails)> {
     (spaces() * sym(b'"') * parse_event_id() - seq(b"\" ") - skip_brackets() - next_line()
         + parse_cause()
         + parse_last_ancestors()
-        - next_line()).map(|((id, cause), last_ancestors)| {
+        - next_line())
+    .map(|((id, cause), last_ancestors)| {
         (
             id,
             EventDetails {
@@ -291,13 +294,18 @@ fn parse_cause() -> Parser<u8, CauseInput> {
 }
 
 fn parse_last_ancestors() -> Parser<u8, BTreeMap<PeerId, usize>> {
-    (comment_prefix() * seq(b"last_ancestors: {") * list(
-        parse_peer_id() - seq(b": ") + is_a(digit)
-            .repeat(1..)
-            .convert(String::from_utf8)
-            .convert(|s| usize::from_str(&s)),
-        seq(b", "),
-    ) - next_line()).map(|v| v.into_iter().collect())
+    (comment_prefix()
+        * seq(b"last_ancestors: {")
+        * list(
+            parse_peer_id() - seq(b": ")
+                + is_a(digit)
+                    .repeat(1..)
+                    .convert(String::from_utf8)
+                    .convert(|s| usize::from_str(&s)),
+            seq(b", "),
+        )
+        - next_line())
+    .map(|v| v.into_iter().collect())
 }
 
 #[derive(Debug)]
@@ -307,14 +315,12 @@ struct ParsedMetaElections {
 }
 
 fn parse_meta_elections() -> Parser<u8, ParsedMetaElections> {
-    (seq(b"/// ===== meta-elections =====")
-     * next_line()
-     * parse_consensus_history()
-     + parse_meta_election().repeat(0..))
-        .map(|(consensus_history, meta_elections)| ParsedMetaElections {
-            consensus_history,
-            meta_elections: meta_elections.into_iter().collect()
-        })
+    (seq(b"/// ===== meta-elections =====") * next_line() * parse_consensus_history()
+        + parse_meta_election().repeat(0..))
+    .map(|(consensus_history, meta_elections)| ParsedMetaElections {
+        consensus_history,
+        meta_elections: meta_elections.into_iter().collect(),
+    })
 }
 
 fn parse_consensus_history() -> Parser<u8, Vec<ObservationKey<PeerId>>> {
@@ -361,7 +367,8 @@ fn parse_meta_election() -> Parser<u8, (MetaElectionHandle, ParsedMetaElection)>
             + parse_undecided_voters()
             + parse_payload().opt()
             + parse_start_index().opt()
-            + parse_meta_events()).map(
+            + parse_meta_events())
+        .map(
             |(
                 (
                     (
@@ -400,11 +407,12 @@ fn parse_meta_election() -> Parser<u8, (MetaElectionHandle, ParsedMetaElection)>
 fn parse_meta_election_handle() -> Parser<u8, MetaElectionHandle> {
     comment_prefix()
         * seq(b"MetaElectionHandle(")
-        * (seq(b"CURRENT").map(|_| MetaElectionHandle::CURRENT) | is_a(digit)
-            .repeat(1..)
-            .convert(String::from_utf8)
-            .convert(|s| usize::from_str(&s))
-            .map(MetaElectionHandle))
+        * (seq(b"CURRENT").map(|_| MetaElectionHandle::CURRENT)
+            | is_a(digit)
+                .repeat(1..)
+                .convert(String::from_utf8)
+                .convert(|s| usize::from_str(&s))
+                .map(MetaElectionHandle))
         - sym(b')')
         - next_line()
 }
@@ -420,7 +428,8 @@ fn parse_round_hashes() -> Parser<u8, BTreeMap<PeerId, Vec<RoundHash>>> {
         * parse_round_hashes_for_peer().repeat(0..)
         - comment_prefix()
         - seq(b"}")
-        - next_line()).map(|v| v.into_iter().collect())
+        - next_line())
+    .map(|v| v.into_iter().collect())
 }
 
 fn parse_round_hashes_for_peer() -> Parser<u8, (PeerId, Vec<RoundHash>)> {
@@ -428,7 +437,8 @@ fn parse_round_hashes_for_peer() -> Parser<u8, (PeerId, Vec<RoundHash>)> {
         + parse_single_round_hash().repeat(0..)
         - comment_prefix()
         - sym(b']')
-        - next_line()).map(|(id, hashes)| {
+        - next_line())
+    .map(|(id, hashes)| {
         let round_hashes = hashes
             .into_iter()
             .map(|hash| RoundHash::new_with_round(&id, ObservationHash(hash.1), hash.0))
@@ -457,7 +467,8 @@ fn parse_interesting_events() -> Parser<u8, BTreeMap<PeerId, Vec<String>>> {
         * parse_interesting_events_for_peer().repeat(0..)
         - comment_prefix()
         - sym(b'}')
-        - next_line()).map(|v| v.into_iter().collect())
+        - next_line())
+    .map(|v| v.into_iter().collect())
 }
 
 fn parse_interesting_events_for_peer() -> Parser<u8, (PeerId, Vec<String>)> {
@@ -492,17 +503,19 @@ fn parse_genesis() -> Parser<u8, Observation<Transaction, PeerId>> {
 }
 
 fn parse_add() -> Parser<u8, Observation<Transaction, PeerId>> {
-    seq(b"Add") * parse_add_or_remove().map(|(peer_id, related_info)| Observation::Add {
-        peer_id,
-        related_info,
-    })
+    seq(b"Add")
+        * parse_add_or_remove().map(|(peer_id, related_info)| Observation::Add {
+            peer_id,
+            related_info,
+        })
 }
 
 fn parse_remove() -> Parser<u8, Observation<Transaction, PeerId>> {
-    seq(b"Remove") * parse_add_or_remove().map(|(peer_id, related_info)| Observation::Remove {
-        peer_id,
-        related_info,
-    })
+    seq(b"Remove")
+        * parse_add_or_remove().map(|(peer_id, related_info)| Observation::Remove {
+            peer_id,
+            related_info,
+        })
 }
 
 fn parse_add_or_remove() -> Parser<u8, (PeerId, Vec<u8>)> {
@@ -541,7 +554,8 @@ fn parse_meta_events() -> Parser<u8, BTreeMap<String, (ObservationMap, MetaEvent
         * parse_single_meta_event().repeat(1..)
         - comment_prefix()
         - sym(b'}')
-        - next_line()).map(|v| v.into_iter().collect())
+        - next_line())
+    .map(|v| v.into_iter().collect())
 }
 
 fn parse_single_meta_event() -> Parser<u8, (String, (ObservationMap, MetaEvent<PeerId>))> {
@@ -573,7 +587,8 @@ fn parse_observees() -> Parser<u8, BTreeSet<PeerId>> {
 
 fn parse_interesting_content() -> Parser<u8, ObservationMap> {
     (comment_prefix() * seq(b"interesting_content: [") * list(parse_observation(), seq(b", "))
-        - next_line()).map(|observations| {
+        - next_line())
+    .map(|observations| {
         observations
             .into_iter()
             .map(|payload| {
@@ -581,7 +596,8 @@ fn parse_interesting_content() -> Parser<u8, ObservationMap> {
                     ObservationKey::Supermajority(ObservationHash::from(&payload)),
                     payload,
                 )
-            }).collect()
+            })
+            .collect()
     })
 }
 
@@ -593,7 +609,8 @@ fn parse_meta_votes() -> Parser<u8, BTreeMap<PeerId, Vec<MetaVote>>> {
         * parse_peer_meta_votes().repeat(0..)
         - comment_prefix()
         - sym(b'}')
-        - next_line()).map(|v| v.into_iter().collect())
+        - next_line())
+    .map(|v| v.into_iter().collect())
 }
 
 fn parse_peer_meta_votes() -> Parser<u8, (PeerId, Vec<MetaVote>)> {
@@ -614,7 +631,8 @@ fn parse_meta_vote() -> Parser<u8, MetaVote> {
         - spaces()
         + parse_opt_bool()
         - spaces()
-        + parse_opt_bool()).map(|(((((round, step), est), bin), aux), dec)| MetaVote {
+        + parse_opt_bool())
+    .map(|(((((round, step), est), bin), aux), dec)| MetaVote {
         round,
         step: match step {
             0 => Step::ForcedTrue,
@@ -771,7 +789,8 @@ fn convert_into_parsed_contents(result: ParsedFile) -> ParsedContents {
                 .observation_map
                 .iter()
                 .map(|(key, obs)| (key.clone(), obs.clone()))
-        }).collect();
+        })
+        .collect();
     parsed_contents.meta_elections = convert_to_meta_elections(meta_elections, &mut event_hashes);
     parsed_contents
 }
@@ -788,7 +807,8 @@ fn convert_to_meta_elections(
                 handle,
                 convert_to_meta_election(handle, election, event_indices),
             )
-        }).collect();
+        })
+        .collect();
     MetaElections::from_map_and_history(meta_elections_map, meta_elections.consensus_history)
 }
 
@@ -808,7 +828,8 @@ fn convert_to_meta_election(
                         .or_insert_with(|| EventIndex::PHONY),
                     mev,
                 )
-            }).collect(),
+            })
+            .collect(),
         round_hashes: meta_election.round_hashes,
         all_voters: meta_election.all_voters,
         undecided_voters: meta_election.undecided_voters,
@@ -828,9 +849,11 @@ fn convert_to_meta_election(
                                 ev_id,
                                 handle
                             )
-                        }).collect(),
+                        })
+                        .collect(),
                 )
-            }).collect(),
+            })
+            .collect(),
         consensus_len: meta_election.consensus_len,
         start_index: meta_election.start_index,
         payload_key: meta_election
@@ -898,21 +921,21 @@ fn next_topological_event(
     graph: &mut BTreeMap<String, ParsedEvent>,
     indices: &BTreeMap<String, EventIndex>,
 ) -> (String, ParsedEvent) {
-    let next_key = unwrap!(
-        graph
-            .iter()
-            .filter(|&(_, ref event)| event
-                .self_parent
+    let next_key = unwrap!(graph
+        .iter()
+        .filter(|&(_, ref event)| event
+            .self_parent
+            .as_ref()
+            .map(|ev_id| indices.contains_key(ev_id))
+            .unwrap_or(true)
+            && event
+                .other_parent
                 .as_ref()
                 .map(|ev_id| indices.contains_key(ev_id))
-                .unwrap_or(true)
-                && event
-                    .other_parent
-                    .as_ref()
-                    .map(|ev_id| indices.contains_key(ev_id))
-                    .unwrap_or(true)).map(|(key, _)| key)
-            .next()
-    ).clone();
+                .unwrap_or(true))
+        .map(|(key, _)| key)
+        .next())
+    .clone();
     let ev = unwrap!(graph.remove(&next_key));
     (next_key, ev)
 }
@@ -944,10 +967,9 @@ mod tests {
         };
         let schedule = Schedule::new(&mut env, &options);
 
-        unwrap!(
-            env.network
-                .execute_schedule(&mut env.rng, schedule, &options)
-        );
+        unwrap!(env
+            .network
+            .execute_schedule(&mut env.rng, schedule, &options));
 
         let mut num_of_files = 0u8;
         let entries = DIR.with(|dir| unwrap!(fs::read_dir(dir)));

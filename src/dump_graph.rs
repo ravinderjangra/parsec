@@ -91,25 +91,27 @@ mod detail {
         static ref ROOT_DIR: PathBuf = { ROOT_DIR_PREFIX.join(&*ROOT_DIR_SUFFIX) };
     }
 
-    thread_local!(/// The directory to which test data is dumped
-    pub static DIR: PathBuf = {
-        let dir = match thread::current().name() {
-            Some(thread_name) if thread_name != "main" => {
-                ROOT_DIR.join(thread_name.replace("::", "_"))
+    thread_local!(
+        /// The directory to which test data is dumped
+        pub static DIR: PathBuf = {
+            let dir = match thread::current().name() {
+                Some(thread_name) if thread_name != "main" => {
+                    ROOT_DIR.join(thread_name.replace("::", "_"))
+                }
+                _ => ROOT_DIR.clone(),
+            };
+            if let Err(error) = fs::create_dir_all(&dir) {
+                println!(
+                    "Failed to create folder {} for dot files: {:?}",
+                    dir.display(),
+                    error
+                );
+            } else {
+                println!("Writing dot files in {}", dir.display());
             }
-            _ => ROOT_DIR.clone(),
+            dir
         };
-        if let Err(error) = fs::create_dir_all(&dir) {
-            println!(
-                "Failed to create folder {} for dot files: {:?}",
-                dir.display(),
-                error
-            );
-        } else {
-            println!("Writing dot files in {}", dir.display());
-        }
-        dir
-    };);
+    );
 
     thread_local!(static DUMP_COUNTS: RefCell<BTreeMap<String, usize>> =
         RefCell::new(BTreeMap::new()));
@@ -698,7 +700,8 @@ mod detail {
                             let short_name_and_mev = (event.short_name(), mev);
                             (creator_and_index, short_name_and_mev)
                         })
-                    }).collect::<BTreeMap<_, _>>();
+                    })
+                    .collect::<BTreeMap<_, _>>();
 
                 for (short_name, mev) in meta_events.values() {
                     lines.push(format!(
