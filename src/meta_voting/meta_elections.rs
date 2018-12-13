@@ -307,12 +307,11 @@ impl<P: PublicId> MetaElections<P> {
     }
 
     /// Topological index of the first unconsensused payload-carrying event for the given election.
-    pub fn start_index(&self, handle: MetaElectionHandle) -> usize {
+    pub fn start_index(&self, handle: MetaElectionHandle) -> Option<usize> {
         // `unconsensused_events` are already sorted topologically, so just return the first one.
         self.get(handle)
             .and_then(|election| election.unconsensused_events.iter().next())
             .map(|event_index| event_index.topological_index())
-            .unwrap_or(0)
     }
 
     /// Creates new election and returns handle of the previous election.

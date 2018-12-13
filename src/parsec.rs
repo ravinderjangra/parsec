@@ -528,7 +528,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         // If self-parent is earlier in history than the start of the meta-election, it won't have
         // a meta-event; but it also means that it wasn't an observer, so this event is
-        if self.meta_elections.start_index(builder.election()) > self_parent.topological_index() {
+        if self.start_index(builder.election()) > self_parent.topological_index() {
             return true;
         }
 
@@ -754,7 +754,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             // Trigger reprocess.
             self.meta_elections
                 .initialise_current_election(self.peer_list.all_ids());
-            let start_index = self.meta_elections.start_index(MetaElectionHandle::CURRENT);
+            let start_index = self.start_index(MetaElectionHandle::CURRENT);
             return Ok(PostProcessAction::Restart(start_index));
         } else if creator != *self.our_pub_id() {
             let undecided: Vec<_> = self.meta_elections.undecided_by(&creator).collect();
@@ -963,7 +963,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         };
 
         let peers_that_can_vote = self.voters(builder.election());
-        let start_index = self.meta_elections.start_index(builder.election());
+        let start_index = self.start_index(builder.election());
 
         let mut payloads: Vec<_> = self
             .unconsensused_events(builder.election())
@@ -1515,6 +1515,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         self.meta_elections
             .unconsensused_events(election)
             .filter_map(move |index| self.get_known_event(index).ok())
+    }
+
+    fn start_index(&self, election: MetaElectionHandle) -> usize {
+        self.meta_elections
+            .start_index(election)
+            .unwrap_or_else(|| self.graph.len())
     }
 
     fn compute_consensus(
