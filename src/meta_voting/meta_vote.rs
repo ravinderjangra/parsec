@@ -211,20 +211,24 @@ impl MetaVote {
 
     fn calculate_new_decision(meta_vote: &mut MetaVote, counts: &MetaVoteCounts) {
         let opt_decision = match meta_vote.step {
-            Step::ForcedTrue => if meta_vote.bin_values.contains(true)
-                && counts.is_supermajority(counts.aux_values_true)
-            {
-                Some(true)
-            } else {
-                counts.decision
-            },
-            Step::ForcedFalse => if meta_vote.bin_values.contains(false)
-                && counts.is_supermajority(counts.aux_values_false)
-            {
-                Some(false)
-            } else {
-                counts.decision
-            },
+            Step::ForcedTrue => {
+                if meta_vote.bin_values.contains(true)
+                    && counts.is_supermajority(counts.aux_values_true)
+                {
+                    Some(true)
+                } else {
+                    counts.decision
+                }
+            }
+            Step::ForcedFalse => {
+                if meta_vote.bin_values.contains(false)
+                    && counts.is_supermajority(counts.aux_values_false)
+                {
+                    Some(false)
+                } else {
+                    counts.decision
+                }
+            }
             Step::GenuineFlip => counts.decision,
         };
         if let Some(decision) = opt_decision {

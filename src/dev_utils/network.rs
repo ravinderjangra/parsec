@@ -99,7 +99,8 @@ impl Network {
                     id.clone(),
                     Peer::from_genesis(id.clone(), &genesis_group, consensus_mode),
                 )
-            }).collect();
+            })
+            .collect();
         Network {
             genesis: genesis_group,
             peers,
@@ -221,11 +222,10 @@ impl Network {
                         Err(Error::UnknownPeer) | Err(Error::InvalidPeerState { .. }) => (),
                         Err(e) => panic!("{:?}", e),
                     },
-                    Message::Response(resp) => unwrap!(
-                        self.peer_mut(peer)
-                            .parsec
-                            .handle_response(&entry.sender, resp)
-                    ),
+                    Message::Response(resp) => unwrap!(self
+                        .peer_mut(peer)
+                        .parsec
+                        .handle_response(&entry.sender, resp)),
                 }
             }
         }
@@ -326,7 +326,8 @@ impl Network {
             expected_peers,
             num_expected_observations,
             num_expected_observations,
-        ).is_ok()
+        )
+        .is_ok()
     }
 
     /// Checks whether there is a right number of blocks and the blocks are in an agreeing order
@@ -502,7 +503,8 @@ impl Network {
                             id.clone(),
                             Peer::from_genesis(id.clone(), &genesis_group, self.consensus_mode),
                         )
-                    }).collect();
+                    })
+                    .collect();
                 for node in &genesis_group {
                     peer_removal_guard.add_genesis_peer(node.clone());
                 }
@@ -610,7 +612,8 @@ impl PeerRemovalGuard {
             .filter(|state| match state {
                 PeerRemovalState::Added | PeerRemovalState::Removing(..) => true,
                 PeerRemovalState::Adding(..) | PeerRemovalState::Removed => false,
-            }).count()
+            })
+            .count()
     }
 
     fn num_removing(&self) -> usize {
@@ -622,7 +625,8 @@ impl PeerRemovalGuard {
                 } else {
                     false
                 }
-            }).count()
+            })
+            .count()
     }
 
     fn add_genesis_peer(&mut self, peer_id: PeerId) {

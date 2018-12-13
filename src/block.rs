@@ -38,7 +38,8 @@ impl<T: NetworkEvent, P: PublicId> Block<T, P> {
                 } else {
                     Err(Error::MismatchedPayload)
                 }
-            }).collect();
+            })
+            .collect();
         let proofs = proofs?;
 
         Ok(Self { payload, proofs })

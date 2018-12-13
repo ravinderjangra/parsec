@@ -396,7 +396,8 @@ impl ObservationSchedule {
             .filter(|&(_, ref event)| match *event {
                 ObservationEvent::Fail(_) => false,
                 _ => true,
-            }).count()
+            })
+            .count()
     }
 }
 
@@ -465,7 +466,7 @@ impl Schedule {
     ///
     /// The `let_and_return` clippy lint is allowed since it is actually necessary to create the
     /// `result` variable so the result can be saved when the `dump-graphs` feature is used.
-    #[cfg_attr(feature = "cargo-clippy", allow(let_and_return))]
+    #[allow(clippy::let_and_return)]
     pub fn from_observation_schedule(
         env: &mut Environment,
         options: &ScheduleOptions,
@@ -610,10 +611,11 @@ impl Schedule {
         // Peers scheduled for removal / failure might not get a chance to vote for their scheduled
         // observations.
         let min_observations = if env.network.consensus_mode() == ConsensusMode::Single {
-            max_observations - peers
-                .inactive_peers()
-                .map(|peer| pending.num_opaque_observations(peer))
-                .sum::<usize>()
+            max_observations
+                - peers
+                    .inactive_peers()
+                    .map(|peer| pending.num_opaque_observations(peer))
+                    .sum::<usize>()
         } else {
             max_observations
         };

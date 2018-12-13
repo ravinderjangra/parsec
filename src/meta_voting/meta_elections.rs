@@ -84,7 +84,8 @@ impl<P: PublicId> MetaElection<P> {
             .map(|peer_id| {
                 let round_hash = RoundHash::new(peer_id, initial_hash);
                 (peer_id.clone(), vec![round_hash])
-            }).collect();
+            })
+            .collect();
 
         // Clearing these caches is needed to be able to reprocess the whole graph outside of
         // consensus, which we sometimes need in tests.
@@ -375,13 +376,11 @@ impl<P: PublicId> MetaElections<P> {
         self.current_election.initialise(peer_ids, hash);
     }
 
-    #[cfg(
-        any(
-            all(test, feature = "mock"),
-            feature = "dump-graphs",
-            feature = "testing"
-        )
-    )]
+    #[cfg(any(
+        all(test, feature = "mock"),
+        feature = "dump-graphs",
+        feature = "testing"
+    ))]
     pub fn current_meta_events(&self) -> &BTreeMap<EventIndex, MetaEvent<P>> {
         &self.current_election.meta_events
     }
@@ -471,7 +470,8 @@ pub(crate) mod snapshot {
                         .get(*index)
                         .map(|event| *event.hash())
                         .map(|hash| (hash, meta_event.clone()))
-                }).collect();
+                })
+                .collect();
 
             let interesting_events = meta_election
                 .interesting_events
@@ -482,7 +482,8 @@ pub(crate) mod snapshot {
                         .filter_map(|index| graph.get(*index).map(|event| *event.hash()))
                         .collect();
                     (peer_id.clone(), hashes)
-                }).collect();
+                })
+                .collect();
 
             MetaElectionSnapshot {
                 meta_events,

@@ -38,7 +38,8 @@ impl MetaVoteCounts {
                     .iter()
                     .filter(|vote| vote.round == parent.round && vote.step == parent.step)
                     .last()
-            }).chain(iter::once(parent))
+            })
+            .chain(iter::once(parent))
         {
             if vote.estimates.contains(true) {
                 counts.estimates_true += 1;

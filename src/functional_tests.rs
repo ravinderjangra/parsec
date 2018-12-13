@@ -214,12 +214,10 @@ fn add_peer() {
         (event_index, MembershipListChange::Add(dave_id.clone())),
         (event_index, MembershipListChange::Add(eric_id)),
     ];
-    assert!(
-        !alice
-            .peer_list()
-            .all_ids()
-            .any(|peer_id| *peer_id == fred_id)
-    );
+    assert!(!alice
+        .peer_list()
+        .all_ids()
+        .any(|peer_id| *peer_id == fred_id));
     assert_eq!(
         alice
             .peer_list()
@@ -238,12 +236,10 @@ fn add_peer() {
     let d_18_hash = *d_18.hash();
     unwrap!(alice.add_event(d_18));
     unwrap!(alice.create_sync_event(&dave_id, true, &BTreeSet::new(), Some(d_18_hash)));
-    assert!(
-        alice
-            .peer_list()
-            .all_ids()
-            .any(|peer_id| *peer_id == fred_id)
-    );
+    assert!(alice
+        .peer_list()
+        .all_ids()
+        .any(|peer_id| *peer_id == fred_id));
     alice_membership_list_for_dave.push((18, MembershipListChange::Add(fred_id.clone())));
     assert_eq!(
         alice
@@ -294,12 +290,10 @@ fn remove_peer() {
     let mut alice_membership_list_for_alice =
         vec![(event_index, MembershipListChange::Add(alice_id.clone()))];
 
-    assert!(
-        alice
-            .peer_list()
-            .all_ids()
-            .any(|peer_id| *peer_id == eric_id)
-    );
+    assert!(alice
+        .peer_list()
+        .all_ids()
+        .any(|peer_id| *peer_id == eric_id));
     assert_ne!(
         alice.peer_list().peer_state(&eric_id),
         PeerState::inactive()
@@ -344,9 +338,9 @@ fn remove_peer() {
 
     // Eric can no longer gossip to anyone.
     assert_err!(
-            Error::InvalidSelfState { .. },
-            eric.create_gossip(Some(&PeerId::new("Alice")))
-        );
+        Error::InvalidSelfState { .. },
+        eric.create_gossip(Some(&PeerId::new("Alice")))
+    );
 }
 
 #[test]
@@ -564,16 +558,15 @@ mod handle_malice {
         unwrap!(alice.handle_request(&dave_id, request));
 
         // Verify that Alice detected the malice and accused Dave.
-        let (offender, hash) = unwrap!(
-            our_votes(&alice)
-                .filter_map(|payload| match *payload {
-                    Observation::Accusation {
-                        ref offender,
-                        malice: Malice::UnexpectedGenesis(hash),
-                    } => Some((offender.clone(), hash)),
-                    _ => None,
-                }).next()
-        );
+        let (offender, hash) = unwrap!(our_votes(&alice)
+            .filter_map(|payload| match *payload {
+                Observation::Accusation {
+                    ref offender,
+                    malice: Malice::UnexpectedGenesis(hash),
+                } => Some((offender.clone(), hash)),
+                _ => None,
+            })
+            .next());
 
         assert_eq!(offender, dave_id);
         assert_eq!(hash, d_2_hash);
@@ -620,16 +613,15 @@ mod handle_malice {
         unwrap!(alice.handle_request(&eric_id, request));
 
         // Verify that Alice detected the malice and accused Eric.
-        let (offender, hash) = unwrap!(
-            our_votes(&alice)
-                .filter_map(|payload| match *payload {
-                    Observation::Accusation {
-                        ref offender,
-                        malice: Malice::UnexpectedGenesis(hash),
-                    } => Some((offender.clone(), hash)),
-                    _ => None,
-                }).next()
-        );
+        let (offender, hash) = unwrap!(our_votes(&alice)
+            .filter_map(|payload| match *payload {
+                Observation::Accusation {
+                    ref offender,
+                    malice: Malice::UnexpectedGenesis(hash),
+                } => Some((offender.clone(), hash)),
+                _ => None,
+            })
+            .next());
 
         assert_eq!(offender, eric_id);
         assert_eq!(hash, e_1_hash);
@@ -703,16 +695,15 @@ mod handle_malice {
         assert!(dave.graph().contains(&a_1_hash));
 
         // Verify that Dave detected and accused Alice for malice.
-        let (offender, hash) = unwrap!(
-            our_votes(&dave)
-                .filter_map(|payload| match payload {
-                    Observation::Accusation {
-                        ref offender,
-                        malice: Malice::MissingGenesis(hash),
-                    } => Some((offender, hash)),
-                    _ => None,
-                }).next()
-        );
+        let (offender, hash) = unwrap!(our_votes(&dave)
+            .filter_map(|payload| match payload {
+                Observation::Accusation {
+                    ref offender,
+                    malice: Malice::MissingGenesis(hash),
+                } => Some((offender, hash)),
+                _ => None,
+            })
+            .next());
         assert_eq!(*offender, alice_id);
         assert_eq!(*hash, a_1_hash);
     }
@@ -748,16 +739,15 @@ mod handle_malice {
         assert!(!dave.graph().contains(&a_1_hash));
 
         // Verify that Dave detected and accused Alice for malice.
-        let (offender, hash) = unwrap!(
-            our_votes(&dave)
-                .filter_map(|payload| match payload {
-                    Observation::Accusation {
-                        ref offender,
-                        malice: Malice::IncorrectGenesis(hash),
-                    } => Some((offender, hash)),
-                    _ => None,
-                }).next()
-        );
+        let (offender, hash) = unwrap!(our_votes(&dave)
+            .filter_map(|payload| match payload {
+                Observation::Accusation {
+                    ref offender,
+                    malice: Malice::IncorrectGenesis(hash),
+                } => Some((offender, hash)),
+                _ => None,
+            })
+            .next());
         assert_eq!(*offender, alice_id);
         assert_eq!(*hash, a_1_hash);
     }
@@ -844,16 +834,15 @@ mod handle_malice {
         assert!(carol.graph().contains(&a_5_hash));
 
         // Verify that Carol detected malice and accused Alice of it.
-        let (offender, hash) = unwrap!(
-            our_votes(&carol)
-                .filter_map(|payload| match payload {
-                    Observation::Accusation {
-                        ref offender,
-                        malice: Malice::InvalidAccusation(hash),
-                    } => Some((offender, hash)),
-                    _ => None,
-                }).next()
-        );
+        let (offender, hash) = unwrap!(our_votes(&carol)
+            .filter_map(|payload| match payload {
+                Observation::Accusation {
+                    ref offender,
+                    malice: Malice::InvalidAccusation(hash),
+                } => Some((offender, hash)),
+                _ => None,
+            })
+            .next());
         assert_eq!(offender, alice.our_pub_id());
         assert_eq!(*hash, a_5_hash);
     }
@@ -891,7 +880,8 @@ mod handle_malice {
         let c_0_index = unwrap!(find_event_by_short_name(
             &alice_parsed_contents.graph,
             "C_0"
-        )).event_index();
+        ))
+        .event_index();
 
         let (a_2_index, a_2_hash) = {
             let ie = unwrap!(find_event_by_short_name(
@@ -904,7 +894,8 @@ mod handle_malice {
         let b_2_index = unwrap!(find_event_by_short_name(
             &alice_parsed_contents.graph,
             "B_2"
-        )).event_index();
+        ))
+        .event_index();
 
         // Carol is marked as active peer so that Bob's peer_list will accept C_0, but Carol is
         // not part of the membership_list
@@ -967,16 +958,15 @@ mod handle_malice {
         suspect: &PeerId,
         event_hash: &EventHash,
     ) {
-        let (offender, hash) = unwrap!(
-            our_votes(accuser)
-                .filter_map(|payload| match payload {
-                    Observation::Accusation {
-                        ref offender,
-                        malice: Malice::Unprovable(UnprovableMalice::Accomplice(hash)),
-                    } => Some((offender, hash)),
-                    _ => None,
-                }).next()
-        );
+        let (offender, hash) = unwrap!(our_votes(accuser)
+            .filter_map(|payload| match payload {
+                Observation::Accusation {
+                    ref offender,
+                    malice: Malice::Unprovable(UnprovableMalice::Accomplice(hash)),
+                } => Some((offender, hash)),
+                _ => None,
+            })
+            .next());
         assert_eq!(offender, suspect);
         assert_eq!(hash, event_hash);
     }
@@ -1013,16 +1003,15 @@ mod handle_malice {
 
         // Verify that Carol detected malice and accused Alice of `InvalidAccusation` and Bob of
         // `Accomplice`.
-        let (offender, hash) = unwrap!(
-            our_votes(&carol)
-                .filter_map(|payload| match payload {
-                    Observation::Accusation {
-                        ref offender,
-                        malice: Malice::InvalidAccusation(hash),
-                    } => Some((offender, hash)),
-                    _ => None,
-                }).next()
-        );
+        let (offender, hash) = unwrap!(our_votes(&carol)
+            .filter_map(|payload| match payload {
+                Observation::Accusation {
+                    ref offender,
+                    malice: Malice::InvalidAccusation(hash),
+                } => Some((offender, hash)),
+                _ => None,
+            })
+            .next());
         assert_eq!(offender, alice.our_pub_id());
         assert_eq!(*hash, invalid_accusation);
 
@@ -1133,16 +1122,15 @@ mod handle_malice {
         assert!(dave.graph().contains(&a_4_bob_hash));
 
         // Verify that Dave detected malice and accused Alice of it.
-        let (offender, hash) = unwrap!(
-            our_votes(&dave)
-                .filter_map(|payload| match payload {
-                    Observation::Accusation {
-                        ref offender,
-                        malice: Malice::Fork(hash),
-                    } => Some((offender, hash)),
-                    _ => None,
-                }).next()
-        );
+        let (offender, hash) = unwrap!(our_votes(&dave)
+            .filter_map(|payload| match payload {
+                Observation::Accusation {
+                    ref offender,
+                    malice: Malice::Fork(hash),
+                } => Some((offender, hash)),
+                _ => None,
+            })
+            .next());
         assert_eq!(offender, &PeerId::new("Alice"));
         assert_eq!(*hash, a_3_hash);
     }
@@ -1214,16 +1202,15 @@ mod handle_malice {
         assert_err!(Error::InvalidEvent, alice.unpack_and_add_event(b_2.pack()));
 
         // Alice should raise accusation against Bob
-        let (offender, event) = unwrap!(
-            our_votes(&alice)
-                .filter_map(|payload| match payload {
-                    Observation::Accusation {
-                        ref offender,
-                        malice: Malice::OtherParentBySameCreator(event),
-                    } => Some((offender, event)),
-                    _ => None,
-                }).next()
-        );
+        let (offender, event) = unwrap!(our_votes(&alice)
+            .filter_map(|payload| match payload {
+                Observation::Accusation {
+                    ref offender,
+                    malice: Malice::OtherParentBySameCreator(event),
+                } => Some((offender, event)),
+                _ => None,
+            })
+            .next());
 
         assert_eq!(*offender, bob_id);
         assert_eq!(event.compute_hash(), b_2_hash);
@@ -1246,12 +1233,10 @@ mod handle_malice {
 
         let alice_id = PeerId::new("Alice");
         let fred_id = PeerId::new("Fred");
-        assert!(
-            !alice
-                .peer_list()
-                .all_ids()
-                .any(|peer_id| *peer_id == fred_id)
-        );
+        assert!(!alice
+            .peer_list()
+            .all_ids()
+            .any(|peer_id| *peer_id == fred_id));
 
         let alice_snapshot = Snapshot::new(&alice);
 
@@ -1266,12 +1251,10 @@ mod handle_malice {
         let mut fred = TestParsec::from_existing(fred_id.clone(), &genesis_group, &genesis_group);
 
         // Check that Fred has no events that Alice has
-        assert!(
-            alice
-                .graph()
-                .iter()
-                .all(|ev| !fred.graph().contains(ev.inner().hash()))
-        );
+        assert!(alice
+            .graph()
+            .iter()
+            .all(|ev| !fred.graph().contains(ev.inner().hash())));
 
         // Now Alice will prematurely gossip to Fred
         let request = unwrap!(alice.create_gossip(Some(&fred_id)));
@@ -1281,11 +1264,9 @@ mod handle_malice {
         assert_err!(Error::PrematureGossip, result);
 
         // Check that Fred has all the events that Alice has
-        assert!(
-            alice
-                .graph()
-                .iter()
-                .all(|ev| fred.graph().contains(ev.inner().hash()))
-        );
+        assert!(alice
+            .graph()
+            .iter()
+            .all(|ev| fred.graph().contains(ev.inner().hash())));
     }
 }
