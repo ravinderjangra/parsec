@@ -8,6 +8,7 @@
 
 use super::meta_event::MetaEvent;
 use super::meta_vote::MetaVote;
+use fnv::FnvHashMap;
 use gossip::EventIndex;
 use id::PublicId;
 use observation::{ObservationHash, ObservationKey};
@@ -42,7 +43,7 @@ impl Debug for MetaElectionHandle {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct MetaElection {
-    pub(crate) meta_events: BTreeMap<EventIndex, MetaEvent>,
+    pub(crate) meta_events: FnvHashMap<EventIndex, MetaEvent>,
     // The "round hash" for each set of meta votes.  They are held in sequence in the `Vec`, i.e.
     // the one for round `x` is held at index `x`.
     pub(crate) round_hashes: PeerIndexMap<Vec<RoundHash>>,
@@ -68,7 +69,7 @@ impl MetaElection {
         unconsensused_events: BTreeSet<EventIndex>,
     ) -> Self {
         MetaElection {
-            meta_events: BTreeMap::new(),
+            meta_events: FnvHashMap::default(),
             round_hashes: PeerIndexMap::default(),
             all_voters: voters.clone(),
             undecided_voters: voters,
@@ -399,7 +400,7 @@ impl MetaElections {
         feature = "dump-graphs",
         feature = "testing"
     ))]
-    pub fn current_meta_events(&self) -> &BTreeMap<EventIndex, MetaEvent> {
+    pub fn current_meta_events(&self) -> &FnvHashMap<EventIndex, MetaEvent> {
         &self.current_election.meta_events
     }
 
