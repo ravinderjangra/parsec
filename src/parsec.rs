@@ -731,6 +731,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 Err(Error::MissingVotes) => (),
                 Err(error) => return Err(error),
             }
+
             self.mark_observation_as_consensused(&payload_key);
 
             self.handle_self_consensus(&payload_key);
@@ -740,7 +741,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
             // Calculate new unconsensused events here, because `MetaElections` doesn't have access
             // to the actual payloads, so can't tell which ones are consensused.
-            let unconsensused_events = self.collect_unconsensused_events();
+            let unconsensused_events = self.collect_unconsensused_events(&payload_key);
             let prev_election = self.meta_elections.new_election(
                 payload_key,
                 self.peer_list.voter_ids().cloned().collect(),
@@ -1605,15 +1606,17 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     // Collects still unconsensused event from the current meta-election.
-    fn collect_unconsensused_events(&self) -> BTreeSet<EventIndex> {
+    fn collect_unconsensused_events(
+        &self,
+        decided_key: &ObservationKey<S::PublicId>,
+    ) -> BTreeSet<EventIndex> {
         self.meta_elections
             .unconsensused_events(MetaElectionHandle::CURRENT)
             .filter(|event_index| {
                 self.get_known_event(*event_index)
                     .ok()
                     .and_then(|event| self.payload_key(&*event))
-                    .and_then(|payload_key| self.observations.get(&payload_key))
-                    .map(|info| !info.consensused)
+                    .map(|payload_key| payload_key != *decided_key)
                     .unwrap_or(false)
             })
             .collect()
