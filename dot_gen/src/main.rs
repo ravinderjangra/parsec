@@ -134,17 +134,19 @@ fn main() {
         },
     );
 
-    let _ = scenarios.add(
-        "functional_tests::handle_malice_genesis_event_creator_not_genesis_member",
-        |env| {
-            let obs = ObservationSchedule {
-                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
-                schedule: vec![(0, AddPeer(PeerId::new("Eric")))],
-            };
+    let _ = scenarios
+        .add(
+            "functional_tests::handle_malice_genesis_event_creator_not_genesis_member",
+            |env| {
+                let obs = ObservationSchedule {
+                    genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                    schedule: vec![(0, AddPeer(PeerId::new("Eric")))],
+                };
 
-            Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
-        },
-    );
+                Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+            },
+        )
+        .seed([848_911_612, 2_362_592_349, 3_178_199_135, 2_458_552_022]);
 
     let _ = scenarios
         .add(
@@ -246,9 +248,13 @@ impl Scenario {
     }
 
     fn matches(&self, pattern: &str) -> bool {
-        self.files
-            .values()
-            .any(|file| format!("{}/{}", self.name, file).contains(pattern))
+        if self.files.is_empty() {
+            self.name.contains(pattern)
+        } else {
+            self.files
+                .values()
+                .any(|file| format!("{}/{}", self.name, file).contains(pattern))
+        }
     }
 
     fn run(&mut self, mode: Mode) {
@@ -432,11 +438,17 @@ fn run(mut scenarios: Scenarios) {
     }
 
     if let Some(name) = matches.value_of("name") {
+        let mut matched = false;
         for scenario in scenarios
             .iter_mut()
             .filter(|scenario| scenario.matches(name))
         {
+            matched = true;
             scenario.run(mode);
+        }
+
+        if !matched {
+            println!("No scenario matching {:?} found", name);
         }
     }
 }

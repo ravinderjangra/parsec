@@ -528,7 +528,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         // If self-parent is earlier in history than the start of the meta-election, it won't have
         // a meta-event; but it also means that it wasn't an observer, so this event is
-        if self.meta_elections.start_index(builder.election()) > self_parent.topological_index() {
+        if self.start_index(builder.election()) > self_parent.topological_index() {
             return true;
         }
 
@@ -649,15 +649,20 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         self.peer_list.confirm_can_add_event(&event)?;
 
-        if let Some((payload, payload_key)) = self.payload_with_key(&event) {
-            let info = self
-                .observations
-                .entry(payload_key)
-                .or_insert_with(|| ObservationInfo::new(payload.clone()));
-            if our {
-                info.created_by_us = true;
-            }
-        }
+        let has_unconsensused_payload =
+            if let Some((payload, payload_key)) = self.payload_with_key(&event) {
+                let info = self
+                    .observations
+                    .entry(payload_key)
+                    .or_insert_with(|| ObservationInfo::new(payload.clone()));
+                if our {
+                    info.created_by_us = true;
+                }
+
+                !info.consensused
+            } else {
+                false
+            };
 
         let is_initial = event.is_initial();
         let event_index = {
@@ -665,6 +670,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             self.peer_list.add_event(event);
             event.event_index()
         };
+
+        if has_unconsensused_payload {
+            self.meta_elections.add_unconsensused_event(event_index);
+        }
 
         if is_initial {
             return Ok(event_index);
@@ -722,6 +731,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 Err(Error::MissingVotes) => (),
                 Err(error) => return Err(error),
             }
+
             self.mark_observation_as_consensused(&payload_key);
 
             self.handle_self_consensus(&payload_key);
@@ -729,11 +739,13 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 self.handle_peer_consensus(&creator, &payload_key);
             }
 
-            let start_index = self.compute_next_meta_election_start_index();
+            // Calculate new unconsensused events here, because `MetaElections` doesn't have access
+            // to the actual payloads, so can't tell which ones are consensused.
+            let unconsensused_events = self.collect_unconsensused_events(&payload_key);
             let prev_election = self.meta_elections.new_election(
                 payload_key,
                 self.peer_list.voter_ids().cloned().collect(),
-                start_index,
+                unconsensused_events,
             );
 
             self.meta_elections
@@ -743,6 +755,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             // Trigger reprocess.
             self.meta_elections
                 .initialise_current_election(self.peer_list.all_ids());
+            let start_index = self.start_index(MetaElectionHandle::CURRENT);
             return Ok(PostProcessAction::Restart(start_index));
         } else if creator != *self.our_pub_id() {
             let undecided: Vec<_> = self.meta_elections.undecided_by(&creator).collect();
@@ -948,47 +961,50 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         {
             builder.set_interesting_content(payloads_keys);
             return;
-        }
+        };
 
         let peers_that_can_vote = self.voters(builder.election());
-        let start_index = self.meta_elections.start_index(builder.election());
+        let start_index = self.start_index(builder.election());
 
-        let mut payload_set: BTreeSet<_> = self
-            .graph
-            .iter_from(start_index)
-            .filter_map(|event| self.payload_key(&*event).map(|key| (event, key)))
+        let mut payloads: Vec<_> = self
+            .unconsensused_events(builder.election())
+            .map(|event| event.inner())
+            .filter_map(|event| self.payload_key(event).map(|key| (event, key)))
             .filter(|(_, payload_key)| {
-                self.meta_elections.is_interesting_content_candidate(
+                !self.meta_elections.is_already_interesting_content(
                     builder.election(),
                     builder.event().creator(),
                     payload_key,
                 )
             })
             .filter(|(event, payload_key)| {
-                self.is_interesting_payload(builder, &peers_that_can_vote, payload_key, start_index)
+                self.is_interesting_payload(builder, &peers_that_can_vote, payload_key)
                     || event.sees_fork()
                         && self.has_interesting_ancestor(builder, payload_key, start_index)
             })
-            .map(|(_, payload_key)| payload_key)
+            .map(|(event, payload_key)| {
+                (
+                    if event.creator() == builder.event().creator() {
+                        event.index_by_creator()
+                    } else {
+                        usize::MAX
+                    },
+                    payload_key,
+                )
+            })
             .collect();
 
-        // The code above created a set of payloads that are interesting at this event.
-        // We will now sort the payloads in the order in which the creator voted for them.
-        let mut payload_vec = vec![];
-        for this_payload_key in self
-            .peer_list
-            .peer_events(builder.event().creator())
-            .filter_map(|hash| self.get_known_event(hash).ok())
-            .filter_map(|event| self.payload_key(&*event))
-        {
-            if payload_set.remove(&this_payload_key) {
-                payload_vec.push(this_payload_key);
-            }
-        }
-        // If any payloads are left in the set, it means that the creator hasn't voted for them -
-        // we will just append them at the end.
-        payload_vec.extend(payload_set);
-        builder.set_interesting_content(payload_vec);
+        // First, remove duplicates (preferring payloads voted for by the creator)...
+        payloads
+            .sort_by(|(l_index, l_key), (r_index, r_key)| (l_key, l_index).cmp(&(r_key, r_index)));
+        payloads.dedup_by(|(_, l_key), (_, r_key)| l_key == r_key);
+
+        // ...then sort the payloads in the order the creator voted for them, followed by the ones
+        // not voted for by the creator (if any).
+        payloads.sort();
+
+        let payloads = payloads.into_iter().map(|(_, key)| key).collect();
+        builder.set_interesting_content(payloads);
     }
 
     // Try to get interesting content of the given event from the previous meta-election.
@@ -999,10 +1015,11 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     ) -> Option<Vec<ObservationKey<S::PublicId>>> {
         let prev_election = self.meta_elections.preceding(election)?;
 
-        if self.meta_elections.voter_count(election)
-            != self.meta_elections.voter_count(prev_election)
-        {
-            // Membership change occurred. Can't reuse interesting content.
+        // If membership change occurred, we can't reuse the interesting content.
+        // Note: it's not enough to compare just the voter counts, because the preceding
+        // meta-election might not necessarily be the directly preceding one, but might be further
+        // in the past.
+        if self.meta_elections.voters(election) != self.meta_elections.voters(prev_election) {
             return None;
         }
 
@@ -1012,26 +1029,28 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let payloads: Vec<_> = prev_meta_event
             .interesting_content
             .iter()
-            .filter(|payload| {
-                // Filter payloads that are still interesting.
-                self.meta_elections.is_interesting_content_candidate(
+            .filter(|payload_key| {
+                if self.meta_elections.is_already_interesting_content(
                     election,
                     event.creator(),
-                    payload,
-                )
+                    payload_key,
+                ) {
+                    return false;
+                }
+
+                if self
+                    .meta_elections
+                    .is_already_consensused(election, payload_key)
+                {
+                    return false;
+                }
+
+                true
             })
             .cloned()
             .collect();
 
-        if payloads.is_empty() {
-            // The previous election has no interesting content on this event that is still
-            // interesting for the current election. We can't return empty vec, because there can
-            // be some content that wasn't interesting for the previous election but might be
-            // interesting for the current one.
-            None
-        } else {
-            Some(payloads)
-        }
+        Some(payloads)
     }
 
     // Returns true if `builder.event()` has an ancestor by a different creator that has `payload`
@@ -1061,13 +1080,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         builder: &MetaEventBuilder<T, S::PublicId>,
         peers_that_can_vote: &BTreeSet<S::PublicId>,
         payload_key: &ObservationKey<S::PublicId>,
-        start_index: usize,
     ) -> bool {
         let num_peers_that_did_vote = self.num_creators_of_ancestors_carrying_payload(
+            builder.election(),
             peers_that_can_vote,
             &*builder.event(),
             payload_key,
-            start_index,
         );
 
         match payload_key.consensus_mode() {
@@ -1100,18 +1118,17 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     // given payload.
     fn num_creators_of_ancestors_carrying_payload(
         &self,
+        election: MetaElectionHandle,
         peers_that_can_vote: &BTreeSet<S::PublicId>,
         event: &Event<T, S::PublicId>,
         payload_key: &ObservationKey<S::PublicId>,
-        start_index: usize,
     ) -> usize {
         peers_that_can_vote
             .iter()
             .filter(|peer_id| {
-                self.graph
-                    .iter_from(start_index)
-                    .filter(|that_event| that_event.creator() == *peer_id)
+                self.unconsensused_events(election)
                     .map(|that_event| that_event.inner())
+                    .filter(|that_event| that_event.creator() == *peer_id)
                     .filter_map(|that_event| {
                         that_event.payload_hash().map(|hash| (that_event, hash))
                     })
@@ -1492,6 +1509,21 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .unwrap_or_else(|| self.peer_list.voters().count())
     }
 
+    fn unconsensused_events(
+        &self,
+        election: MetaElectionHandle,
+    ) -> impl Iterator<Item = IndexedEventRef<T, S::PublicId>> {
+        self.meta_elections
+            .unconsensused_events(election)
+            .filter_map(move |index| self.get_known_event(index).ok())
+    }
+
+    fn start_index(&self, election: MetaElectionHandle) -> usize {
+        self.meta_elections
+            .start_index(election)
+            .unwrap_or_else(|| self.graph.len())
+    }
+
     fn compute_consensus(
         &self,
         election: MetaElectionHandle,
@@ -1573,20 +1605,21 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         Block::new(&votes)
     }
 
-    fn compute_next_meta_election_start_index(&self) -> usize {
-        // Find the topological index of the first event that carries unconsensused payload.
-        let previous = self.meta_elections.start_index(MetaElectionHandle::CURRENT);
-        self.graph
-            .iter_from(previous)
-            .filter(|event| {
-                self.payload_key(event)
-                    .and_then(|payload_key| self.observations.get(&payload_key))
-                    .map(|info| !info.consensused)
+    // Collects still unconsensused event from the current meta-election.
+    fn collect_unconsensused_events(
+        &self,
+        decided_key: &ObservationKey<S::PublicId>,
+    ) -> BTreeSet<EventIndex> {
+        self.meta_elections
+            .unconsensused_events(MetaElectionHandle::CURRENT)
+            .filter(|event_index| {
+                self.get_known_event(*event_index)
+                    .ok()
+                    .and_then(|event| self.payload_key(&*event))
+                    .map(|payload_key| payload_key != *decided_key)
                     .unwrap_or(false)
             })
-            .map(|indexed_event| indexed_event.topological_index())
-            .next()
-            .unwrap_or_else(|| self.graph.len())
+            .collect()
     }
 
     // Returns the number of peers that created events which are seen by event X (descendant) and

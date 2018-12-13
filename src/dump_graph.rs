@@ -70,7 +70,7 @@ mod detail {
     use serialise;
     use std::cell::RefCell;
     use std::cmp;
-    use std::collections::BTreeMap;
+    use std::collections::{BTreeMap, BTreeSet};
     use std::env;
     use std::fmt::{self, Debug};
     use std::fs::{self, File};
@@ -674,12 +674,18 @@ mod detail {
                     }
                 }
 
-                // write start index
+                // write unconsensused events
+                let unconsensused_events: BTreeSet<_> = election
+                    .unconsensused_events
+                    .iter()
+                    .filter_map(|index| self.gossip_graph.get(*index))
+                    .map(|event| event.short_name())
+                    .collect();
                 lines.push(format!(
-                    "{}{}start_index: {}",
+                    "{}{}unconsensused_events: {:?}",
                     Self::COMMENT,
                     self.indentation(),
-                    election.start_index
+                    unconsensused_events
                 ));
 
                 // write meta-events

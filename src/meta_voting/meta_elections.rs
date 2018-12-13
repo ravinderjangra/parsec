@@ -56,12 +56,16 @@ pub(crate) struct MetaElection<P: PublicId> {
     pub(crate) consensus_len: usize,
     // Key of the payload decided by this meta-election.
     pub(crate) payload_key: Option<ObservationKey<P>>,
-    // Topological index of the first event processed in this meta-election.
-    pub(crate) start_index: usize,
+    // Set of all events that carry a payload that hasn't yet been consensused.
+    pub(crate) unconsensused_events: BTreeSet<EventIndex>,
 }
 
 impl<P: PublicId> MetaElection<P> {
-    fn new(voters: BTreeSet<P>, consensus_len: usize, start_index: usize) -> Self {
+    fn new(
+        voters: BTreeSet<P>,
+        consensus_len: usize,
+        unconsensused_events: BTreeSet<EventIndex>,
+    ) -> Self {
         MetaElection {
             meta_events: BTreeMap::new(),
             round_hashes: BTreeMap::new(),
@@ -70,7 +74,7 @@ impl<P: PublicId> MetaElection<P> {
             interesting_events: BTreeMap::new(),
             consensus_len,
             payload_key: None,
-            start_index,
+            unconsensused_events,
         }
     }
 
@@ -124,7 +128,7 @@ impl<P: PublicId> MetaElections<P> {
     pub fn new(voters: BTreeSet<P>) -> Self {
         MetaElections {
             next_index: 0,
-            current_election: MetaElection::new(voters, 0, 0),
+            current_election: MetaElection::new(voters, 0, BTreeSet::new()),
             previous_elections: BTreeMap::new(),
             consensus_history: Vec::new(),
         }
@@ -145,10 +149,14 @@ impl<P: PublicId> MetaElections<P> {
     }
 
     pub fn all<'a>(&'a self) -> impl Iterator<Item = MetaElectionHandle> + 'a {
+        // NOTE: make sure we return the elections in reverse chronological order (newest first).
+        // Otherwise the optimization that tries to reuse interesting content from previous
+        // meta-elections (see `Parsec::previous_interesting_content`) might break the consensus.
         self.previous_elections
             .keys()
             .cloned()
             .chain(iter::once(MetaElectionHandle::CURRENT))
+            .rev()
     }
 
     /// Elections that were already decided by us, but not by the given peer.
@@ -247,13 +255,6 @@ impl<P: PublicId> MetaElections<P> {
         self.get(handle).map(|election| &election.all_voters)
     }
 
-    /// Number of voters participating in the given meta-election.
-    pub fn voter_count(&self, handle: MetaElectionHandle) -> usize {
-        self.get(handle)
-            .map(|election| election.all_voters.len())
-            .unwrap_or(0)
-    }
-
     pub fn consensus_history(&self) -> &[ObservationKey<P>] {
         &self.consensus_history
     }
@@ -282,31 +283,35 @@ impl<P: PublicId> MetaElections<P> {
         meta_event.interesting_content.first()
     }
 
-    /// Is the given payload candidate for being interesting from the point of view of an event by
-    /// the given creator?
-    pub fn is_interesting_content_candidate(
+    pub fn is_already_interesting_content(
         &self,
         handle: MetaElectionHandle,
         creator: &P,
         payload_key: &ObservationKey<P>,
     ) -> bool {
-        let election = if let Some(election) = self.get(handle) {
-            election
-        } else {
-            return false;
-        };
-
-        // Already interesting?
-        if election.is_already_interesting_content(creator, payload_key) {
-            return false;
-        }
-
-        // Already consensused?
-        !self.consensus_history()[..election.consensus_len].contains(payload_key)
+        self.get(handle)
+            .map(|election| election.is_already_interesting_content(creator, payload_key))
+            .unwrap_or(false)
     }
 
-    pub fn start_index(&self, handle: MetaElectionHandle) -> usize {
-        self.get(handle).map(|e| e.start_index).unwrap_or(0)
+    pub fn is_already_consensused(
+        &self,
+        handle: MetaElectionHandle,
+        payload_key: &ObservationKey<P>,
+    ) -> bool {
+        self.get(handle)
+            .map(|election| {
+                self.consensus_history()[..election.consensus_len].contains(payload_key)
+            })
+            .unwrap_or(false)
+    }
+
+    /// Topological index of the first unconsensused payload-carrying event for the given election.
+    pub fn start_index(&self, handle: MetaElectionHandle) -> Option<usize> {
+        // `unconsensused_events` are already sorted topologically, so just return the first one.
+        self.get(handle)
+            .and_then(|election| election.unconsensused_events.iter().next())
+            .map(|event_index| event_index.topological_index())
     }
 
     /// Creates new election and returns handle of the previous election.
@@ -314,11 +319,11 @@ impl<P: PublicId> MetaElections<P> {
         &mut self,
         payload_key: ObservationKey<P>,
         voters: BTreeSet<P>,
-        start_index: usize,
+        unconsensused_events: BTreeSet<EventIndex>,
     ) -> MetaElectionHandle {
         self.consensus_history.push(payload_key.clone());
 
-        let new = MetaElection::new(voters, self.consensus_history.len(), start_index);
+        let new = MetaElection::new(voters, self.consensus_history.len(), unconsensused_events);
 
         let mut previous = mem::replace(&mut self.current_election, new);
         previous.payload_key = Some(payload_key);
@@ -383,6 +388,22 @@ impl<P: PublicId> MetaElections<P> {
     ))]
     pub fn current_meta_events(&self) -> &BTreeMap<EventIndex, MetaEvent<P>> {
         &self.current_election.meta_events
+    }
+
+    pub fn add_unconsensused_event(&mut self, event_index: EventIndex) {
+        let _ = self
+            .current_election
+            .unconsensused_events
+            .insert(event_index);
+    }
+
+    pub fn unconsensused_events<'a>(
+        &'a self,
+        handle: MetaElectionHandle,
+    ) -> impl Iterator<Item = EventIndex> + 'a {
+        self.get(handle)
+            .into_iter()
+            .flat_map(|election| election.unconsensused_events.iter().cloned())
     }
 
     pub(crate) fn get(&self, handle: MetaElectionHandle) -> Option<&MetaElection<P>> {
