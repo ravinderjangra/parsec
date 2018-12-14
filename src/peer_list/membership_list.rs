@@ -18,14 +18,14 @@ impl MembershipListChange {
     pub(super) fn apply(&self, peers: &mut PeerIndexSet) -> bool {
         match *self {
             MembershipListChange::Add(index) => peers.insert(index),
-            MembershipListChange::Remove(index) => peers.remove(&index),
+            MembershipListChange::Remove(index) => peers.remove(index),
         }
     }
 
     #[cfg(feature = "malice-detection")]
     pub(super) fn unapply(&self, peers: &mut PeerIndexSet) -> bool {
         match *self {
-            MembershipListChange::Add(index) => peers.remove(&index),
+            MembershipListChange::Add(index) => peers.remove(index),
             MembershipListChange::Remove(index) => peers.insert(index),
         }
     }

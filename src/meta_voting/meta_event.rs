@@ -60,7 +60,7 @@ impl<'a, P: PublicId + 'a> MetaEventBuilder<'a, P> {
     }
 
     pub fn has_observee(&self, peer_index: PeerIndex) -> bool {
-        self.meta_event.observees.contains(&peer_index)
+        self.meta_event.observees.contains(peer_index)
     }
 
     pub fn set_observees(&mut self, observees: PeerIndexSet) {
@@ -105,7 +105,7 @@ pub(crate) mod snapshot {
                 observees: meta_event
                     .observees
                     .iter()
-                    .filter_map(|index| peer_list.get(*index))
+                    .filter_map(|index| peer_list.get(index))
                     .map(|peer| peer.id().clone())
                     .collect(),
                 interesting_content: meta_event
@@ -118,7 +118,7 @@ pub(crate) mod snapshot {
                     .iter()
                     .filter_map(|(peer_index, votes)| {
                         peer_list
-                            .get(*peer_index)
+                            .get(peer_index)
                             .map(|peer| (peer.id().clone(), votes.clone()))
                     })
                     .collect(),
