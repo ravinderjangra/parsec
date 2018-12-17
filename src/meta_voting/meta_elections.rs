@@ -405,10 +405,11 @@ impl MetaElections {
     }
 
     pub fn add_unconsensused_event(&mut self, event_index: EventIndex) {
-        let _ = self
-            .current_election
-            .unconsensused_events
-            .insert(event_index);
+        for election in
+            iter::once(&mut self.current_election).chain(self.previous_elections.values_mut())
+        {
+            let _ = election.unconsensused_events.insert(event_index);
+        }
     }
 
     pub fn unconsensused_events<'a>(
