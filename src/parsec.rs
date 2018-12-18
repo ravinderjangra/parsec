@@ -2202,10 +2202,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let accomplice_accusations_we_can_act_on = self
             .candidate_accomplice_accusations
             .iter()
-            .filter(|(index, creator, _, _, _)| {
+            .filter(|(index, accomplice_accusation)| {
                 self.graph
                     .iter_from(index.topological_index() + 1)
-                    .filter(|event| event.creator() == *creator)
+                    .filter(|event| event.creator() == accomplice_accusation.creator)
                     .any(|event| {
                         event
                             .payload()
@@ -2219,26 +2219,20 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .cloned()
             .collect::<CandidateAccompliceAccusations<_, _>>();
 
-        for (index, creator, malice, against, starting_index) in
-            accomplice_accusations_we_can_act_on
-        {
+        for (index, accomplice) in accomplice_accusations_we_can_act_on {
             let can_still_detect_accomplice = self
-                .detect_accomplice_for_our_accusations(current, starting_index)?
+                .detect_accomplice_for_our_accusations(current, accomplice.starting_index)?
                 .iter()
-                .any(|(_, mal)| mal == &against);
+                .any(|(_, mal)| mal == &accomplice.against);
 
             if can_still_detect_accomplice {
                 // Repoint the malice event to the event where we're actually certain
                 let current = *self.get_known_event(current)?.hash();
-                self.accuse(creator, Malice::Accomplice(current));
+                self.accuse(accomplice.creator, Malice::Accomplice(current));
             }
-            let _ = self.candidate_accomplice_accusations.remove(&(
-                index,
-                creator,
-                malice,
-                against,
-                starting_index,
-            ));
+            let _ = self
+                .candidate_accomplice_accusations
+                .remove(&(index, accomplice));
         }
         Ok(())
     }
@@ -2261,10 +2255,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         for (_, malice) in self.detect_accomplice_for_our_accusations(event, starting_index)? {
             let _ = self.candidate_accomplice_accusations.insert((
                 event,
-                creator,
-                Malice::Accomplice(event_hash),
-                malice,
-                starting_index,
+                CandidateAccompliceAccusation {
+                    creator,
+                    accusation: Malice::Accomplice(event_hash),
+                    against: malice,
+                    starting_index,
+                },
             ));
         }
 
@@ -2380,14 +2376,21 @@ enum PostProcessAction {
 }
 
 type Accusations<T, P> = Vec<(PeerIndex, Malice<T, P>)>;
+
 #[cfg(feature = "malice-detection")]
-type CandidateAccompliceAccusations<T, P> = BTreeSet<(
-    EventIndex,
-    PeerIndex,
-    Malice<T, P>,
-    Malice<T, P>,
-    EventIndex,
-)>;
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
+struct CandidateAccompliceAccusation<T: NetworkEvent, P: PublicId> {
+    creator: PeerIndex,
+    accusation: Malice<T, P>,
+    against: Malice<T, P>,
+    // The start of the range where source accusations are considered. This is purely a performance
+    // optimisation.
+    starting_index: EventIndex,
+}
+
+#[cfg(feature = "malice-detection")]
+type CandidateAccompliceAccusations<T, P> =
+    BTreeSet<(EventIndex, CandidateAccompliceAccusation<T, P>)>;
 
 #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 impl Parsec<Transaction, PeerId> {
