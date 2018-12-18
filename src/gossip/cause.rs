@@ -8,37 +8,41 @@
 
 #[cfg(any(test, feature = "testing"))]
 use super::event::CauseInput;
-use super::event_hash::EventHash;
-use id::PublicId;
+use super::{
+    event_context::{EventContextMut, EventContextRef},
+    event_hash::EventHash,
+    graph::{EventIndex, Graph},
+};
+use error::Error;
+use id::{PublicId, SecretId};
 #[cfg(any(test, feature = "testing"))]
 use mock::{PeerId, Transaction};
 use network_event::NetworkEvent;
-use std::fmt::{self, Display, Formatter};
-use vote::Vote;
+use observation::ObservationInfo;
+#[cfg(any(test, feature = "testing"))]
+use observation::{ConsensusMode, ObservationStore};
+use peer_list::PeerIndex;
+use serde::{Deserialize, Serialize};
+use std::fmt::{self, Debug, Display, Formatter};
+use vote::{Vote, VoteKey};
 
-#[serde(bound = "")]
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub(super) enum Cause<T: NetworkEvent, P: PublicId> {
-    // Hashes are the latest `Event` of own and the peer which sent the request.
-    Request {
-        self_parent: EventHash,
-        other_parent: EventHash,
-    },
-    // Hashes are the latest `Event` of own and the peer which sent the response.
-    Response {
-        self_parent: EventHash,
-        other_parent: EventHash,
-    },
-    // Hash of our latest `Event`. Vote for a single network event of type `T`.
-    Observation {
-        self_parent: EventHash,
-        vote: Vote<T, P>,
-    },
+#[serde(bound(
+    serialize = "V: Serialize, E: Serialize",
+    deserialize = "V: Deserialize<'de>, E: Deserialize<'de>"
+))]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Serialize, Deserialize)]
+pub(super) enum Cause<V, E> {
+    // Identifiers of the latest `Event`s of own and the peer which sent the request.
+    Request { self_parent: E, other_parent: E },
+    // Identifiers of the latest `Event`s of own and the peer which sent the response.
+    Response { self_parent: E, other_parent: E },
+    // Identifier of our latest `Event`. Vote for a single network event.
+    Observation { self_parent: E, vote: V },
     // Initial empty `Event` of this peer.
     Initial,
 }
 
-impl<T: NetworkEvent, P: PublicId> Display for Cause<T, P> {
+impl<V: Debug, E> Display for Cause<V, E> {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         write!(
             formatter,
@@ -46,18 +50,92 @@ impl<T: NetworkEvent, P: PublicId> Display for Cause<T, P> {
             match &self {
                 Cause::Request { .. } => "Request".to_string(),
                 Cause::Response { .. } => "Response".to_string(),
-                Cause::Observation { vote, .. } => format!("Observation({:?})", vote.payload()),
+                Cause::Observation { vote, .. } => format!("Observation({:?})", vote),
                 Cause::Initial => "Initial".to_string(),
             }
         )
     }
 }
 
+impl<P: PublicId> Cause<VoteKey<P>, EventIndex> {
+    #[allow(clippy::needless_pass_by_value)]
+    pub(crate) fn unpack<T: NetworkEvent, S: SecretId<PublicId = P>>(
+        packed_cause: Cause<Vote<T, P>, EventHash>,
+        creator: PeerIndex,
+        ctx: EventContextMut<T, S>,
+    ) -> Result<Self, Error> {
+        let cause = match packed_cause {
+            Cause::Request {
+                ref self_parent,
+                ref other_parent,
+            } => Cause::Request {
+                self_parent: self_parent_index(ctx.graph, self_parent)?,
+                other_parent: other_parent_index(ctx.graph, other_parent)?,
+            },
+            Cause::Response {
+                ref self_parent,
+                ref other_parent,
+            } => Cause::Response {
+                self_parent: self_parent_index(ctx.graph, self_parent)?,
+                other_parent: other_parent_index(ctx.graph, other_parent)?,
+            },
+            Cause::Observation { self_parent, vote } => {
+                let self_parent = self_parent_index(ctx.graph, &self_parent)?;
+
+                let (vote_key, observation) = VoteKey::new(vote, creator, ctx.consensus_mode);
+                let _ = ctx
+                    .observations
+                    .entry(*vote_key.payload_key())
+                    .or_insert_with(|| ObservationInfo::new(observation));
+
+                Cause::Observation {
+                    self_parent,
+                    vote: vote_key,
+                }
+            }
+            Cause::Initial => Cause::Initial,
+        };
+
+        Ok(cause)
+    }
+
+    pub(crate) fn pack<T: NetworkEvent, S: SecretId<PublicId = P>>(
+        &self,
+        ctx: EventContextRef<T, S>,
+    ) -> Result<Cause<Vote<T, P>, EventHash>, Error> {
+        let cause = match *self {
+            Cause::Request {
+                self_parent,
+                other_parent,
+            } => Cause::Request {
+                self_parent: self_parent_hash(ctx.graph, self_parent)?,
+                other_parent: other_parent_hash(ctx.graph, other_parent)?,
+            },
+            Cause::Response {
+                self_parent,
+                other_parent,
+            } => Cause::Response {
+                self_parent: self_parent_hash(ctx.graph, self_parent)?,
+                other_parent: other_parent_hash(ctx.graph, other_parent)?,
+            },
+            Cause::Observation {
+                self_parent,
+                ref vote,
+            } => Cause::Observation {
+                self_parent: self_parent_hash(ctx.graph, self_parent)?,
+                vote: vote.resolve(ctx.observations)?,
+            },
+            Cause::Initial => Cause::Initial,
+        };
+        Ok(cause)
+    }
+}
+
 #[cfg(any(test, feature = "testing"))]
-impl Cause<Transaction, PeerId> {
+impl Cause<Vote<Transaction, PeerId>, EventHash> {
     pub(crate) fn new_from_dot_input(
         input: CauseInput,
-        creator: &PeerId,
+        creator_id: &PeerId,
         self_parent: Option<EventHash>,
         other_parent: Option<EventHash>,
     ) -> Self {
@@ -78,8 +156,83 @@ impl Cause<Transaction, PeerId> {
             },
             CauseInput::Observation(observation) => Cause::Observation {
                 self_parent,
-                vote: Vote::new(creator, observation),
+                vote: Vote::new(creator_id, observation),
             },
         }
     }
+}
+
+#[cfg(any(test, feature = "testing"))]
+impl Cause<VoteKey<PeerId>, EventIndex> {
+    pub(crate) fn unpack_from_dot_input(
+        packed_cause: Cause<Vote<Transaction, PeerId>, EventHash>,
+        creator: PeerIndex,
+        self_parent: Option<EventIndex>,
+        other_parent: Option<EventIndex>,
+        observations: &mut ObservationStore<Transaction, PeerId>,
+    ) -> Self {
+        let self_parent = self_parent.unwrap_or(EventIndex::PHONY);
+        let other_parent = other_parent.unwrap_or(EventIndex::PHONY);
+
+        match packed_cause {
+            Cause::Initial => Cause::Initial,
+            Cause::Request { .. } => Cause::Request {
+                self_parent,
+                other_parent,
+            },
+            Cause::Response { .. } => Cause::Response {
+                self_parent,
+                other_parent,
+            },
+            Cause::Observation { vote, .. } => {
+                let (vote_key, observation) =
+                    VoteKey::new(vote, creator, ConsensusMode::Supermajority);
+                let _ = observations
+                    .entry(*vote_key.payload_key())
+                    .or_insert_with(|| ObservationInfo::new(observation));
+
+                Cause::Observation {
+                    vote: vote_key,
+                    self_parent,
+                }
+            }
+        }
+    }
+}
+
+pub(super) fn self_parent_hash<P: PublicId>(
+    graph: &Graph<P>,
+    index: EventIndex,
+) -> Result<EventHash, Error> {
+    graph
+        .get(index)
+        .map(|event| *event.hash())
+        .ok_or(Error::UnknownSelfParent)
+}
+
+pub(super) fn other_parent_hash<P: PublicId>(
+    graph: &Graph<P>,
+    index: EventIndex,
+) -> Result<EventHash, Error> {
+    graph
+        .get(index)
+        .map(|event| *event.hash())
+        .ok_or(Error::UnknownOtherParent)
+}
+
+fn self_parent_index<P: PublicId>(graph: &Graph<P>, hash: &EventHash) -> Result<EventIndex, Error> {
+    graph.get_index(hash).ok_or_else(|| {
+        debug!("unknown self-parent with hash {:?}", hash);
+        Error::UnknownSelfParent
+    })
+}
+
+fn other_parent_index<P: PublicId>(
+    graph: &Graph<P>,
+    hash: &EventHash,
+) -> Result<EventIndex, Error> {
+    graph.get_index(hash).ok_or_else(|| {
+        debug!("unknown other-parent with hash {:?}", hash);
+        Error::UnknownOtherParent
+    })
 }

@@ -12,7 +12,6 @@ use super::peer_state::PeerState;
 use gossip::{EventIndex, IndexedEventRef};
 use hash::Hash;
 use id::PublicId;
-use network_event::NetworkEvent;
 use serialise;
 use std::iter::{self, FromIterator};
 
@@ -73,7 +72,7 @@ impl<P: PublicId> Peer<P> {
         self.events.add(index_by_creator, event_index);
     }
 
-    #[cfg(test)]
+    #[cfg(all(test, feature = "mock"))]
     pub(super) fn remove_last_event(&mut self) -> Option<EventIndex> {
         self.events.remove_last()
     }
@@ -125,7 +124,7 @@ impl Events {
         self.0.push(Slot::new(event_index))
     }
 
-    #[cfg(test)]
+    #[cfg(all(test, feature = "mock"))]
     fn remove_last(&mut self) -> Option<EventIndex> {
         if let Some(slot) = self.0.last_mut() {
             if let Some(index) = slot.rest.pop() {
@@ -160,14 +159,13 @@ impl Events {
     }
 }
 
-impl<'a, T, P> FromIterator<IndexedEventRef<'a, T, P>> for Events
+impl<'a, P> FromIterator<IndexedEventRef<'a, P>> for Events
 where
-    T: NetworkEvent + 'a,
     P: PublicId + 'a,
 {
     fn from_iter<I>(iter: I) -> Self
     where
-        I: IntoIterator<Item = IndexedEventRef<'a, T, P>>,
+        I: IntoIterator<Item = IndexedEventRef<'a, P>>,
     {
         let mut events = Self::new();
         for event in iter {

@@ -15,6 +15,8 @@ use std::result;
 pub enum Error {
     /// Payload of a `Vote` doesn't match the payload of a `Block`.
     MismatchedPayload,
+    /// Payload hash doesn't correspond to any payload known to us.
+    UnknownPayload,
     /// Attempt to create a block with no votes.
     MissingVotes,
     /// Failed to verify signature.
@@ -58,6 +60,10 @@ impl Display for Error {
             Error::MismatchedPayload => write!(
                 f,
                 "The payload of the vote doesn't match the payload of targeted block."
+            ),
+            Error::UnknownPayload => write!(
+                f,
+                "The payload hash doesn't correspond to any payload known to our node."
             ),
             Error::MissingVotes => write!(f, "Block cannot be created with no votes"),
             Error::SignatureFailure => write!(

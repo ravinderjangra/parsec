@@ -13,12 +13,13 @@ use id::PublicId;
 use network_event::NetworkEvent;
 use serialise;
 use std::fmt::{self, Debug, Formatter};
+use vote::Vote;
 
 /// Packed event contains only content and signature.
 #[serde(bound = "")]
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct PackedEvent<T: NetworkEvent, P: PublicId> {
-    pub(super) content: Content<T, P>,
+    pub(super) content: Content<Vote<T, P>, EventHash, P>,
     pub(super) signature: P::Signature,
 }
 

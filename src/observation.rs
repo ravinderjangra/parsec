@@ -14,7 +14,7 @@ use peer_list::PeerIndex;
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 use serialise;
 use std::cmp::Ordering;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::error::Error;
 use std::fmt::{self, Debug, Formatter};
 
@@ -204,14 +204,42 @@ impl Debug for ObservationHash {
     }
 }
 
+// Container for observation with its metadata.
+#[derive(Debug)]
+pub(crate) struct ObservationInfo<T: NetworkEvent, P: PublicId> {
+    pub(crate) observation: Observation<T, P>,
+    pub(crate) consensused: bool,
+    pub(crate) created_by_us: bool,
+}
+
+impl<T: NetworkEvent, P: PublicId> ObservationInfo<T, P> {
+    pub fn new(observation: Observation<T, P>) -> Self {
+        Self {
+            observation,
+            consensused: false,
+            created_by_us: false,
+        }
+    }
+}
+
+// Storage for observations
+pub(crate) type ObservationStore<T, P> = BTreeMap<ObservationKey, ObservationInfo<T, P>>;
+
 // Key to compare observations.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
+#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Debug)]
 pub(crate) enum ObservationKey {
     Single(ObservationHash, PeerIndex),
     Supermajority(ObservationHash),
 }
 
 impl ObservationKey {
+    pub fn new(hash: ObservationHash, creator: PeerIndex, consensus_mode: ConsensusMode) -> Self {
+        match consensus_mode {
+            ConsensusMode::Single => ObservationKey::Single(hash, creator),
+            ConsensusMode::Supermajority => ObservationKey::Supermajority(hash),
+        }
+    }
+
     pub fn hash(&self) -> &ObservationHash {
         match *self {
             ObservationKey::Single(ref hash, _) => hash,
@@ -243,6 +271,16 @@ pub enum ConsensusMode {
     Single,
     /// Supermajority (more than 2/3) is required.
     Supermajority,
+}
+
+impl ConsensusMode {
+    pub(crate) fn of<T: NetworkEvent, P: PublicId>(self, observation: &Observation<T, P>) -> Self {
+        if observation.is_opaque() {
+            self
+        } else {
+            ConsensusMode::Supermajority
+        }
+    }
 }
 
 /// Returns whether `small` is more than two thirds of `large`.

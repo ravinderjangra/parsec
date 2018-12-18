@@ -335,7 +335,7 @@ impl MetaElections {
         voters: PeerIndexSet,
         unconsensused_events: BTreeSet<EventIndex>,
     ) -> MetaElectionHandle {
-        self.consensus_history.push(payload_key.clone());
+        self.consensus_history.push(payload_key);
 
         let new = MetaElection::new(voters, self.consensus_history.len(), unconsensused_events);
 
@@ -395,11 +395,7 @@ impl MetaElections {
         self.current_election.initialise(peer_ids, hash);
     }
 
-    #[cfg(any(
-        all(test, feature = "mock"),
-        feature = "dump-graphs",
-        feature = "testing"
-    ))]
+    #[cfg(feature = "dump-graphs")]
     pub fn current_meta_events(&self) -> &FnvHashMap<EventIndex, MetaEvent> {
         &self.current_election.meta_events
     }
@@ -482,7 +478,6 @@ pub(crate) mod snapshot {
     use super::*;
     use gossip::{EventHash, Graph};
     use id::SecretId;
-    use network_event::NetworkEvent;
     use observation::snapshot::ObservationKeySnapshot;
     use peer_list::PeerList;
 
@@ -491,13 +486,12 @@ pub(crate) mod snapshot {
     pub(crate) struct MetaElectionsSnapshot<P: PublicId>(Vec<MetaElectionSnapshot<P>>);
 
     impl<P: PublicId> MetaElectionsSnapshot<P> {
-        pub fn new<T, S>(
+        pub fn new<S>(
             meta_elections: &MetaElections,
-            graph: &Graph<T, P>,
+            graph: &Graph<P>,
             peer_list: &PeerList<S>,
         ) -> Self
         where
-            T: NetworkEvent,
             S: SecretId<PublicId = P>,
         {
             MetaElectionsSnapshot(
@@ -522,13 +516,12 @@ pub(crate) mod snapshot {
     }
 
     impl<P: PublicId> MetaElectionSnapshot<P> {
-        pub fn new<T, S>(
+        pub fn new<S>(
             meta_election: &MetaElection,
-            graph: &Graph<T, P>,
+            graph: &Graph<P>,
             peer_list: &PeerList<S>,
         ) -> Self
         where
-            T: NetworkEvent,
             S: SecretId<PublicId = P>,
         {
             let meta_events = meta_election

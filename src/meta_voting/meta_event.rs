@@ -10,7 +10,6 @@ use super::meta_elections::MetaElectionHandle;
 use super::meta_vote::MetaVote;
 use gossip::IndexedEventRef;
 use id::PublicId;
-use network_event::NetworkEvent;
 use observation::ObservationKey;
 use peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet};
 
@@ -25,10 +24,10 @@ pub(crate) struct MetaEvent {
 }
 
 impl MetaEvent {
-    pub fn build<T: NetworkEvent, P: PublicId>(
+    pub fn build<P: PublicId>(
         election: MetaElectionHandle,
-        event: IndexedEventRef<T, P>,
-    ) -> MetaEventBuilder<T, P> {
+        event: IndexedEventRef<P>,
+    ) -> MetaEventBuilder<P> {
         MetaEventBuilder {
             election,
             event,
@@ -41,18 +40,18 @@ impl MetaEvent {
     }
 }
 
-pub(crate) struct MetaEventBuilder<'a, T: NetworkEvent + 'a, P: PublicId + 'a> {
+pub(crate) struct MetaEventBuilder<'a, P: PublicId + 'a> {
     election: MetaElectionHandle,
-    event: IndexedEventRef<'a, T, P>,
+    event: IndexedEventRef<'a, P>,
     meta_event: MetaEvent,
 }
 
-impl<'a, T: NetworkEvent + 'a, P: PublicId + 'a> MetaEventBuilder<'a, T, P> {
+impl<'a, P: PublicId + 'a> MetaEventBuilder<'a, P> {
     pub fn election(&self) -> MetaElectionHandle {
         self.election
     }
 
-    pub fn event(&self) -> IndexedEventRef<'a, T, P> {
+    pub fn event(&self) -> IndexedEventRef<'a, P> {
         self.event
     }
 

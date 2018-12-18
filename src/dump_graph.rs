@@ -32,7 +32,7 @@ pub(crate) fn init() {
 #[cfg(feature = "dump-graphs")]
 pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
     owner_id: &S::PublicId,
-    gossip_graph: &Graph<T, S::PublicId>,
+    gossip_graph: &Graph<S::PublicId>,
     meta_elections: &MetaElections,
     peer_list: &PeerList<S>,
     observations: BTreeMap<&ObservationHash, &Observation<T, S::PublicId>>,
@@ -48,7 +48,7 @@ pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
 #[cfg(not(feature = "dump-graphs"))]
 pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
     _: &S::PublicId,
-    _: &Graph<T, S::PublicId>,
+    _: &Graph<S::PublicId>,
     _: &MetaElections,
     _: &PeerList<S>,
     _: BTreeMap<&ObservationHash, &Observation<T, S::PublicId>>,
@@ -78,7 +78,6 @@ mod detail {
     use std::path::{Path, PathBuf};
     use std::process::Command;
     use std::thread;
-    use vote::Vote;
 
     lazy_static! {
         static ref ROOT_DIR_PREFIX: PathBuf = { env::temp_dir().join("parsec_graphs") };
@@ -116,9 +115,9 @@ mod detail {
     thread_local!(static DUMP_COUNTS: RefCell<BTreeMap<String, usize>> =
         RefCell::new(BTreeMap::new()));
 
-    fn catch_dump<T: NetworkEvent, S: SecretId>(
+    fn catch_dump<S: SecretId>(
         mut file_path: PathBuf,
-        gossip_graph: &Graph<T, S::PublicId>,
+        gossip_graph: &Graph<S::PublicId>,
         peer_list: &PeerList<S>,
         meta_elections: &MetaElections,
     ) {
@@ -141,7 +140,7 @@ mod detail {
 
     pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
         owner_id: &S::PublicId,
-        gossip_graph: &Graph<T, S::PublicId>,
+        gossip_graph: &Graph<S::PublicId>,
         meta_elections: &MetaElections,
         peer_list: &PeerList<S>,
         observations: BTreeMap<&ObservationHash, &Observation<T, S::PublicId>>,
@@ -183,9 +182,9 @@ mod detail {
         let _ = force_symlink_dir(&*ROOT_DIR, ROOT_DIR_PREFIX.join("latest"));
     }
 
-    fn parent_pos<T: NetworkEvent, P: PublicId>(
+    fn parent_pos<P: PublicId>(
         index: usize,
-        parent: Option<IndexedEventRef<T, P>>,
+        parent: Option<IndexedEventRef<P>>,
         positions: &BTreeMap<EventHash, usize>,
     ) -> Option<usize> {
         if let Some(parent_hash) = parent.map(|e| e.inner().hash()) {
@@ -303,7 +302,7 @@ mod detail {
 
     struct DotWriter<'a, T: NetworkEvent + 'a, S: SecretId + 'a> {
         file: BufWriter<File>,
-        gossip_graph: &'a Graph<T, S::PublicId>,
+        gossip_graph: &'a Graph<S::PublicId>,
         meta_elections: &'a MetaElections,
         peer_list: &'a PeerList<S>,
         observations: BTreeMap<&'a ObservationHash, &'a Observation<T, S::PublicId>>,
@@ -315,7 +314,7 @@ mod detail {
 
         fn new(
             file_path: &Path,
-            gossip_graph: &'a Graph<T, S::PublicId>,
+            gossip_graph: &'a Graph<S::PublicId>,
             meta_elections: &'a MetaElections,
             peer_list: &'a PeerList<S>,
             observations: BTreeMap<&'a ObservationHash, &'a Observation<T, S::PublicId>>,
@@ -343,7 +342,9 @@ mod detail {
         }
 
         fn index_to_short_name(&self, index: EventIndex) -> Option<String> {
-            self.gossip_graph.get(index).map(|event| event.short_name())
+            self.gossip_graph
+                .get(index)
+                .map(|event| event.short_name().to_string())
         }
 
         fn writeln(&mut self, args: fmt::Arguments) -> io::Result<()> {
@@ -794,7 +795,7 @@ mod detail {
 
     impl EventAttributes {
         fn new<T: NetworkEvent, S: SecretId>(
-            event: &Event<T, S::PublicId>,
+            event: &Event<S::PublicId>,
             opt_meta_event: Option<&MetaEvent>,
             observations_map: &BTreeMap<&ObservationHash, &Observation<T, S::PublicId>>,
             peer_list: &PeerList<S>,
@@ -802,7 +803,7 @@ mod detail {
             let mut attr = EventAttributes {
                 fillcolor: "fillcolor=white",
                 is_rectangle: false,
-                label: event.short_name(),
+                label: event.short_name().to_string(),
             };
 
             attr.label = format!(
@@ -812,7 +813,10 @@ mod detail {
                 attr.label
             );
 
-            if let Some(event_payload) = event.vote().map(Vote::payload) {
+            if let Some(event_payload) = event
+                .payload_key()
+                .and_then(|key| observations_map.get(key.hash()))
+            {
                 attr.label = format!(
                     "{}<tr><td colspan=\"6\">{:?}</td></tr>\n",
                     attr.label, event_payload
