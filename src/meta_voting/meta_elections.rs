@@ -405,6 +405,22 @@ impl MetaElections {
     }
 
     pub fn add_unconsensused_event(&mut self, event_index: EventIndex) {
+        // We need to add the new event to all ongoing meta-elections, not just the current one.
+        // If we only added it to the current one, the `previous_interesting_content` method in
+        // `Parsec` might give incorrect results, possibly leading to broken consensus. Consider
+        // this example:
+        //
+        // 1. We decide the current meta-election (let's call it M), thus freezing it's
+        //    `unconsensused_events`.
+        // 2. We keep adding new meta-events to meta-election M, because we are still evaluating
+        //    it from the point of view of other peers.
+        // 3. Some time later, we add an event that carries an observation X. This event is NOT
+        //    added to the `unconsensused_events` of meta-election M.
+        // 4. So from that point on, no meta-event created for meta-election M will ever have X
+        //    among its interesting content.
+        // 5. So `previous_interesting_content` is now broken, because it might return `Some` of
+        //    a `Vec` that doesn't contain X, event though it either should have, or it should have
+        //    returned `None`
         for election in
             iter::once(&mut self.current_election).chain(self.previous_elections.values_mut())
         {
