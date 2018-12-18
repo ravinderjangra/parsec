@@ -10,6 +10,7 @@ use gossip::{EventHash, PackedEvent};
 use hash::Hash;
 use id::PublicId;
 use network_event::NetworkEvent;
+use peer_list::PeerIndex;
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 use serialise;
 use std::cmp::Ordering;
@@ -204,14 +205,13 @@ impl Debug for ObservationHash {
 }
 
 // Key to compare observations.
-#[serde(bound = "")]
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize, Debug)]
-pub(crate) enum ObservationKey<P: PublicId> {
-    Single(ObservationHash, P),
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
+pub(crate) enum ObservationKey {
+    Single(ObservationHash, PeerIndex),
     Supermajority(ObservationHash),
 }
 
-impl<P: PublicId> ObservationKey<P> {
+impl ObservationKey {
     pub fn hash(&self) -> &ObservationHash {
         match *self {
             ObservationKey::Single(ref hash, _) => hash,
@@ -219,9 +219,9 @@ impl<P: PublicId> ObservationKey<P> {
         }
     }
 
-    pub fn matches(&self, other_hash: &ObservationHash, other_creator: &P) -> bool {
+    pub fn matches(&self, other_hash: &ObservationHash, other_creator: PeerIndex) -> bool {
         match *self {
-            ObservationKey::Single(ref hash, ref creator) => {
+            ObservationKey::Single(ref hash, creator) => {
                 other_hash == hash && other_creator == creator
             }
             ObservationKey::Supermajority(ref hash) => other_hash == hash,
@@ -248,6 +248,37 @@ pub enum ConsensusMode {
 /// Returns whether `small` is more than two thirds of `large`.
 pub fn is_more_than_two_thirds(small: usize, large: usize) -> bool {
     3 * small > 2 * large
+}
+
+#[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
+pub(crate) mod snapshot {
+    use super::*;
+    use id::SecretId;
+    use peer_list::PeerList;
+
+    #[serde(bound = "")]
+    #[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]
+    pub(crate) enum ObservationKeySnapshot<P: PublicId> {
+        Supermajority(ObservationHash),
+        Single(ObservationHash, P),
+    }
+
+    impl<P: PublicId> ObservationKeySnapshot<P> {
+        pub fn new<S>(key: &ObservationKey, peer_list: &PeerList<S>) -> Option<Self>
+        where
+            S: SecretId<PublicId = P>,
+        {
+            match *key {
+                ObservationKey::Supermajority(hash) => {
+                    Some(ObservationKeySnapshot::Supermajority(hash))
+                }
+                ObservationKey::Single(hash, peer_index) => peer_list
+                    .get(peer_index)
+                    .map(|peer| peer.id().clone())
+                    .map(|peer_id| ObservationKeySnapshot::Single(hash, peer_id)),
+            }
+        }
+    }
 }
 
 #[cfg(test)]

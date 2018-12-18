@@ -2,6 +2,7 @@
 /// peer_list: {
 ///   Alice; PeerState(VOTE|SEND|RECV); peers: {Alice, Bob}
 ///   Bob; PeerState(VOTE|SEND|RECV); peers: {Alice, Bob}
+///   Carol; PeerState(); peers: {}
 /// }
 digraph GossipGraph {
   splines=false

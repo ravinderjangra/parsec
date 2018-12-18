@@ -11,6 +11,7 @@ use gossip::{Event, Request, Response};
 use mock::{PeerId, Transaction};
 use observation::{ConsensusMode, Observation};
 use parsec::Parsec;
+use peer_list::PeerIndex;
 use std::collections::BTreeSet;
 use std::io;
 use std::path::Path;
@@ -73,18 +74,18 @@ impl From<ParsedContents> for Record {
             if event.topological_index() == 0 {
                 // Skip the initial event
                 assert!(event.is_initial());
-                assert_eq!(*event.creator(), contents.our_id);
+                assert_eq!(event.creator(), PeerIndex::OUR);
                 continue;
             }
 
             if event.topological_index() == 1 {
                 // Skip the genesis event
                 assert!(extract_genesis_group(&*event).is_some());
-                assert_eq!(*event.creator(), contents.our_id);
+                assert_eq!(event.creator(), PeerIndex::OUR);
                 continue;
             }
 
-            if *event.creator() == contents.our_id {
+            if event.creator() == PeerIndex::OUR {
                 if let Some(observation) = event.vote().map(Vote::payload) {
                     known[event.topological_index()] = true;
 
@@ -109,7 +110,7 @@ impl From<ParsedContents> for Record {
                         *event
                     );
 
-                    let src = other_parent.creator().clone();
+                    let src = other_parent.creator_id().clone();
 
                     let mut events_to_gossip = Vec::new();
                     for event in contents.graph.ancestors(other_parent) {

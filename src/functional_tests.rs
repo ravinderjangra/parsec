@@ -16,7 +16,7 @@ use mock::{self, PeerId, Transaction};
 use network_event::NetworkEvent;
 use observation::Observation;
 use parsec::TestParsec;
-use peer_list::{MembershipListChange, PeerListSnapshot, PeerState};
+use peer_list::{MembershipListChange, PeerIndexSet, PeerListSnapshot, PeerState};
 use std::collections::BTreeSet;
 
 macro_rules! assert_err {
@@ -55,7 +55,11 @@ impl Snapshot {
         Snapshot {
             peer_list: PeerListSnapshot::new(parsec.peer_list(), parsec.graph()),
             events: GraphSnapshot::new(parsec.graph()),
-            meta_elections: MetaElectionsSnapshot::new(parsec.meta_elections(), parsec.graph()),
+            meta_elections: MetaElectionsSnapshot::new(
+                parsec.meta_elections(),
+                parsec.graph(),
+                parsec.peer_list(),
+            ),
             consensused_blocks: parsec.consensused_blocks().cloned().collect(),
         }
     }
@@ -79,7 +83,7 @@ fn from_existing() {
     // Only the initial event should be in the gossip graph.
     assert_eq!(parsec.graph().len(), 1);
     let event = nth_event(parsec.graph(), 0);
-    assert_eq!(*event.creator(), our_id);
+    assert_eq!(*event.creator_id(), our_id);
     assert!(event.is_initial());
 }
 
@@ -145,10 +149,10 @@ fn from_genesis() {
     // initial event + genesis_observation
     assert_eq!(parsec.graph().len(), 2);
     let initial_event = nth_event(parsec.graph(), 0);
-    assert_eq!(*initial_event.creator(), our_id);
+    assert_eq!(*initial_event.creator_id(), our_id);
     assert!(initial_event.is_initial());
     let genesis_observation = nth_event(parsec.graph(), 1);
-    assert_eq!(*genesis_observation.creator(), our_id);
+    assert_eq!(*genesis_observation.creator_id(), our_id);
     match &genesis_observation.vote() {
         Some(vote) => {
             assert_eq!(*vote.payload(), Observation::Genesis(peers));
@@ -198,7 +202,11 @@ fn add_peer() {
     let d_18 = unwrap!(parsed_contents.remove_last_event());
 
     let mut alice = TestParsec::from_parsed_contents(parsed_contents);
-    let genesis_group: BTreeSet<_> = alice.peer_list().all_ids().cloned().collect();
+    let genesis_group: BTreeSet<_> = alice
+        .peer_list()
+        .all_ids()
+        .map(|(_, id)| id.clone())
+        .collect();
 
     let alice_id = PeerId::new("Alice");
     let bob_id = PeerId::new("Bob");
@@ -206,47 +214,67 @@ fn add_peer() {
     let dave_id = PeerId::new("Dave");
     let eric_id = PeerId::new("Eric");
     let fred_id = PeerId::new("Fred");
+
+    let alice_index = unwrap!(alice.peer_list().get_index(&alice_id));
+    let bob_index = unwrap!(alice.peer_list().get_index(&bob_id));
+    let carol_index = unwrap!(alice.peer_list().get_index(&carol_id));
+    let dave_index = unwrap!(alice.peer_list().get_index(&dave_id));
+    let eric_index = unwrap!(alice.peer_list().get_index(&eric_id));
+
     let event_index = 18;
-    let mut alice_membership_list_for_dave = vec![
-        (event_index, MembershipListChange::Add(alice_id.clone())),
-        (event_index, MembershipListChange::Add(bob_id)),
-        (event_index, MembershipListChange::Add(carol_id)),
-        (event_index, MembershipListChange::Add(dave_id.clone())),
-        (event_index, MembershipListChange::Add(eric_id)),
+    let mut expected_alice_membership_list_for_dave = vec![
+        (event_index, MembershipListChange::Add(alice_index)),
+        (event_index, MembershipListChange::Add(bob_index)),
+        (event_index, MembershipListChange::Add(carol_index)),
+        (event_index, MembershipListChange::Add(dave_index)),
+        (event_index, MembershipListChange::Add(eric_index)),
     ];
+    expected_alice_membership_list_for_dave.sort();
+
     assert!(!alice
         .peer_list()
         .all_ids()
-        .any(|peer_id| *peer_id == fred_id));
+        .any(|(_, peer_id)| *peer_id == fred_id));
+
+    let mut actual_alice_membership_list_for_dave = alice
+        .peer_list()
+        .peer_membership_list_changes(dave_index)
+        .to_vec();
+    actual_alice_membership_list_for_dave.sort();
+
     assert_eq!(
-        alice
-            .peer_list()
-            .peer_membership_list_changes(&dave_id)
-            .to_vec(),
-        alice_membership_list_for_dave
+        actual_alice_membership_list_for_dave,
+        expected_alice_membership_list_for_dave
     );
 
     let alice_snapshot = Snapshot::new(&alice);
 
     // Try calling `create_gossip()` for a peer which doesn't exist yet.
-    assert_err!(Error::InvalidPeerState { .. }, alice.create_gossip(Some(&fred_id)));
+    assert_err!(Error::UnknownPeer, alice.create_gossip(Some(&fred_id)));
     assert_eq!(alice_snapshot, Snapshot::new(&alice));
 
     // Now add D_18, which should result in Alice adding Fred.
     let d_18_hash = *d_18.hash();
     unwrap!(alice.add_event(d_18));
-    unwrap!(alice.create_sync_event(&dave_id, true, &BTreeSet::new(), Some(d_18_hash)));
+    unwrap!(alice.create_sync_event(&dave_id, true, &PeerIndexSet::default(), Some(d_18_hash)));
     assert!(alice
         .peer_list()
         .all_ids()
-        .any(|peer_id| *peer_id == fred_id));
-    alice_membership_list_for_dave.push((18, MembershipListChange::Add(fred_id.clone())));
+        .any(|(_, peer_id)| *peer_id == fred_id));
+    let fred_index = unwrap!(alice.peer_list().get_index(&fred_id));
+
+    expected_alice_membership_list_for_dave.push((18, MembershipListChange::Add(fred_index)));
+    expected_alice_membership_list_for_dave.sort();
+
+    let mut actual_alice_membership_list_for_dave = alice
+        .peer_list()
+        .peer_membership_list_changes(dave_index)
+        .to_vec();
+    actual_alice_membership_list_for_dave.sort();
+
     assert_eq!(
-        alice
-            .peer_list()
-            .peer_membership_list_changes(&dave_id)
-            .to_vec(),
-        alice_membership_list_for_dave
+        actual_alice_membership_list_for_dave,
+        expected_alice_membership_list_for_dave,
     );
 
     // Construct Fred's Parsec instance.
@@ -285,23 +313,27 @@ fn remove_peer() {
 
     let mut alice = TestParsec::from_parsed_contents(parsed_contents);
     let alice_id = PeerId::new("Alice");
+    let alice_index = unwrap!(alice.peer_list().get_index(&alice_id));
+
     let eric_id = PeerId::new("Eric");
+    let eric_index = unwrap!(alice.peer_list().get_index(&eric_id));
+
     let event_index = 0;
     let mut alice_membership_list_for_alice =
-        vec![(event_index, MembershipListChange::Add(alice_id.clone()))];
+        vec![(event_index, MembershipListChange::Add(alice_index))];
 
     assert!(alice
         .peer_list()
         .all_ids()
-        .any(|peer_id| *peer_id == eric_id));
+        .any(|(_, peer_id)| *peer_id == eric_id));
     assert_ne!(
-        alice.peer_list().peer_state(&eric_id),
+        alice.peer_list().peer_state(eric_index),
         PeerState::inactive()
     );
     assert_eq!(
         alice
             .peer_list()
-            .peer_membership_list_changes(&alice_id)
+            .peer_membership_list_changes(alice_index)
             .to_vec(),
         alice_membership_list_for_alice
     );
@@ -309,15 +341,14 @@ fn remove_peer() {
     // Add event now which shall result in Alice removing Eric.
     unwrap!(alice.add_event(a_last));
     assert_eq!(
-        alice.peer_list().peer_state(&eric_id),
+        alice.peer_list().peer_state(eric_index),
         PeerState::inactive()
     );
-    alice_membership_list_for_alice
-        .push((event_index, MembershipListChange::Remove(eric_id.clone())));
+    alice_membership_list_for_alice.push((event_index, MembershipListChange::Remove(eric_index)));
     assert_eq!(
         alice
             .peer_list()
-            .peer_membership_list_changes(&alice_id)
+            .peer_membership_list_changes(alice_index)
             .to_vec(),
         alice_membership_list_for_alice
     );
@@ -326,7 +357,11 @@ fn remove_peer() {
     assert_err!(Error::InvalidPeerState { .. }, alice.create_gossip(Some(&eric_id)));
 
     // Construct Eric's parsec instance.
-    let mut section: BTreeSet<_> = alice.peer_list().all_ids().cloned().collect();
+    let mut section: BTreeSet<_> = alice
+        .peer_list()
+        .all_ids()
+        .map(|(_, id)| id.clone())
+        .collect();
     let _ = section.remove(&eric_id);
     let mut eric = TestParsec::<Transaction, _>::from_existing(eric_id.clone(), &section, &section);
 
@@ -481,8 +516,7 @@ mod handle_malice {
     use mock::Transaction;
     use observation::Malice;
     use observation::UnprovableMalice;
-    use peer_list::PeerList;
-    use peer_list::PeerState;
+    use peer_list::{PeerIndex, PeerList, PeerState};
     use std::collections::BTreeMap;
 
     // Returns iterator over all votes cast by the given node.
@@ -502,13 +536,20 @@ mod handle_malice {
         peer_list: &mut PeerList<S>,
         genesis: &BTreeSet<S::PublicId>,
     ) {
-        for peer_id in genesis {
-            if peer_list.has_peer(peer_id) {
-                continue;
-            }
+        let indices: BTreeSet<_> = genesis
+            .iter()
+            .filter_map(|peer_id| {
+                if let Some(index) = peer_list.get_index(peer_id) {
+                    peer_list.change_peer_state(index, PeerState::active());
+                    None
+                } else {
+                    Some(peer_list.add_peer(peer_id.clone(), PeerState::active()))
+                }
+            })
+            .collect();
 
-            peer_list.add_peer(peer_id.clone(), PeerState::active());
-            peer_list.initialise_peer_membership_list(peer_id, genesis.iter().cloned());
+        for peer_index in &indices {
+            peer_list.initialise_peer_membership_list(*peer_index, indices.iter().cloned());
         }
     }
 
@@ -517,7 +558,11 @@ mod handle_malice {
         // Generated with RNG seed: [926181213, 2524489310, 392196615, 406869071].
         let alice_contents = parse_test_dot_file("alice.dot");
         let alice_id = alice_contents.peer_list.our_id().clone();
-        let genesis: BTreeSet<_> = alice_contents.peer_list.all_ids().cloned().collect();
+        let genesis: BTreeSet<_> = alice_contents
+            .peer_list
+            .all_ids()
+            .map(|(_, id)| id.clone())
+            .collect();
         let mut alice = TestParsec::from_parsed_contents(alice_contents);
 
         // Simulate Dave creating unexpected genesis.
@@ -526,7 +571,7 @@ mod handle_malice {
 
         dave_contents
             .peer_list
-            .add_peer(dave_id.clone(), PeerState::active());
+            .change_peer_state(PeerIndex::OUR, PeerState::active());
         add_genesis_group(&mut dave_contents.peer_list, &genesis);
 
         let d_0 = Event::<Transaction, _>::new_initial(&dave_contents.peer_list);
@@ -577,7 +622,11 @@ mod handle_malice {
         // Generated with RNG seed: [848911612, 2362592349, 3178199135, 2458552022].
         let alice_contents = parse_test_dot_file("alice.dot");
         let alice_id = alice_contents.peer_list.our_id().clone();
-        let genesis: BTreeSet<_> = alice_contents.peer_list.all_ids().cloned().collect();
+        let genesis: BTreeSet<_> = alice_contents
+            .peer_list
+            .all_ids()
+            .map(|(_, id)| id.clone())
+            .collect();
 
         let mut alice = TestParsec::from_parsed_contents(alice_contents);
 
@@ -590,7 +639,7 @@ mod handle_malice {
 
         eric_contents
             .peer_list
-            .add_peer(eric_id.clone(), PeerState::active());
+            .change_peer_state(PeerIndex::OUR, PeerState::active());
         add_genesis_group(&mut eric_contents.peer_list, &genesis);
 
         let e_0 = Event::<Transaction, _>::new_initial(&eric_contents.peer_list);
@@ -785,9 +834,11 @@ mod handle_malice {
         let mut alice = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
         let carols_valid_vote_hash =
             *unwrap!(find_event_by_short_name(alice.graph(), "C_4")).hash();
-        unwrap!(alice.add_event(first_duplicate_clone));
+        unwrap!(alice.unpack_and_add_event(first_duplicate_clone.pack()));
+
+        let carol_index = unwrap!(alice.peer_list().get_index(carol.our_pub_id()));
         let expected_accusations = vec![(
-            carol.our_pub_id().clone(),
+            carol_index,
             Malice::DuplicateVote(carols_valid_vote_hash, first_duplicate_hash),
         )];
         assert_eq!(*alice.pending_accusations(), expected_accusations);
@@ -796,7 +847,7 @@ mod handle_malice {
         // Check that the second one doesn't trigger any further accusation, but is also added
         // to the graph.
         let second_duplicate_hash = *second_duplicate.hash();
-        unwrap!(alice.add_event(second_duplicate));
+        unwrap!(alice.unpack_and_add_event(second_duplicate.pack()));
         assert_eq!(*alice.pending_accusations(), expected_accusations);
         assert!(alice.graph().contains(&second_duplicate_hash));
     }
@@ -858,19 +909,21 @@ mod handle_malice {
         // Verify peer lists
         let alice_id = PeerId::new("Alice");
         let bob_id = PeerId::new("Bob");
+        let carol_id = PeerId::new("Carol");
         let mut alice_peer_list = PeerList::new(alice_id.clone());
-        alice_peer_list.add_peer(alice_id.clone(), PeerState::active());
-        alice_peer_list.add_peer(bob_id.clone(), PeerState::active());
+        alice_peer_list.change_peer_state(PeerIndex::OUR, PeerState::active());
+        let _ = alice_peer_list.add_peer(bob_id.clone(), PeerState::active());
+        let _ = alice_peer_list.add_peer(carol_id, PeerState::active());
         assert_eq!(
-            alice.peer_list().peer_id_hashes().collect::<Vec<_>>(),
-            alice_peer_list.peer_id_hashes().collect::<Vec<_>>()
+            alice.peer_list().all_id_hashes().collect::<Vec<_>>(),
+            alice_peer_list.all_id_hashes().collect::<Vec<_>>()
         );
         let mut bob_peer_list = PeerList::new(bob_id.clone());
-        bob_peer_list.add_peer(alice_id.clone(), PeerState::active());
-        bob_peer_list.add_peer(bob_id.clone(), PeerState::active());
+        bob_peer_list.change_peer_state(PeerIndex::OUR, PeerState::active());
+        let _ = bob_peer_list.add_peer(alice_id.clone(), PeerState::active());
         assert_eq!(
-            bob.peer_list().peer_id_hashes().collect::<Vec<_>>(),
-            bob_peer_list.peer_id_hashes().collect::<Vec<_>>()
+            bob.peer_list().all_id_hashes().collect::<Vec<_>>(),
+            bob_peer_list.all_id_hashes().collect::<Vec<_>>()
         );
 
         // Read the dot file again so we have a set of events we can manually add to Bob instead
@@ -911,19 +964,16 @@ mod handle_malice {
         // A_2 has C_0 from Carol as other parent as Carol has gossiped to Alice. Carol is
         // however not part of the section and Alice should not have accepted it.
         let a_2 = unwrap!(alice_events.remove(&a_2_index));
-        unwrap!(bob.add_event(a_2));
+        unwrap!(bob.unpack_and_add_event(a_2.pack()));
 
         // B_2 is the sync event created by Bob when he receives A_2 from Alice.
         let b_2 = unwrap!(alice_events.remove(&b_2_index));
-        unwrap!(bob.add_event(b_2));
+        unwrap!(bob.unpack_and_add_event(b_2.pack()));
 
         // Bob should now have seen that Alice in A_2 incorrectly reported gossip from Carol.
         // Check that this triggers an accusation
-        let expected_accusations = (
-            alice.our_pub_id().clone(),
-            Malice::InvalidGossipCreator(a_2_hash),
-        );
-
+        let alice_index = unwrap!(bob.peer_list().get_index(alice.our_pub_id()));
+        let expected_accusations = (alice_index, Malice::InvalidGossipCreator(a_2_hash));
         assert!(bob.pending_accusations().contains(&expected_accusations));
         assert!(bob.graph().contains(&a_2_hash));
     }
@@ -1154,7 +1204,10 @@ mod handle_malice {
         let mut alice = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
 
         // Try to add the event.
-        assert_err!(Error::InvalidEvent, alice.add_event(c_4));
+        assert_err!(
+            Error::InvalidEvent,
+            alice.unpack_and_add_event(packed_c_4.clone())
+        );
 
         // The invalid event should trigger an accusation vote to be raised immediately, and the
         // invalid event should not be added to the graph.
@@ -1185,7 +1238,7 @@ mod handle_malice {
             b_0_hash,
             &bob_contents.graph,
             &bob_contents.peer_list,
-            &BTreeSet::new(),
+            &PeerIndexSet::default(),
         );
         let b_2_hash = *b_2.hash();
 
@@ -1229,19 +1282,23 @@ mod handle_malice {
         let _d_18 = unwrap!(parsed_contents.remove_last_event());
 
         let mut alice = TestParsec::from_parsed_contents(parsed_contents);
-        let genesis_group: BTreeSet<_> = alice.peer_list().all_ids().cloned().collect();
+        let genesis_group: BTreeSet<_> = alice
+            .peer_list()
+            .all_ids()
+            .map(|(_, id)| id.clone())
+            .collect();
 
         let alice_id = PeerId::new("Alice");
         let fred_id = PeerId::new("Fred");
         assert!(!alice
             .peer_list()
             .all_ids()
-            .any(|peer_id| *peer_id == fred_id));
+            .any(|(_, peer_id)| *peer_id == fred_id));
 
         let alice_snapshot = Snapshot::new(&alice);
 
         // Try calling `create_gossip()` for a peer which doesn't exist yet.
-        assert_err!(Error::InvalidPeerState { .. }, alice.create_gossip(Some(&fred_id)));
+        assert_err!(Error::UnknownPeer, alice.create_gossip(Some(&fred_id)));
         assert_eq!(alice_snapshot, Snapshot::new(&alice));
 
         // We'll modify Alice's peer list to allow her to create gossip for Fred

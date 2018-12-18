@@ -11,8 +11,6 @@ use super::meta_vote_counts::MetaVoteCounts;
 use std::collections::BTreeMap;
 use std::fmt::{self, Debug, Formatter};
 
-pub(crate) type MetaVotes<P> = BTreeMap<P, Vec<MetaVote>>;
-
 // This holds the state of a (binary) meta vote about which we're trying to achieve consensus.
 #[derive(Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) struct MetaVote {
