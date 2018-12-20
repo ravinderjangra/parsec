@@ -1081,6 +1081,7 @@ mod tests {
 
             let mut dot_file_path = entry.path();
             assert!(dot_file_path.set_extension("dot"));
+
             let parsed = unwrap!(parse_dot_file(&dot_file_path));
             let actual_snapshot = (
                 GraphSnapshot::new(&parsed.graph),

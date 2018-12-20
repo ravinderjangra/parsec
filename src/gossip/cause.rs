@@ -18,12 +18,15 @@ use id::{PublicId, SecretId};
 #[cfg(any(test, feature = "testing"))]
 use mock::{PeerId, Transaction};
 use network_event::NetworkEvent;
-use observation::ObservationInfo;
 #[cfg(any(test, feature = "testing"))]
-use observation::{ConsensusMode, ObservationStore};
+use observation::ConsensusMode;
+use observation::ObservationInfo;
+#[cfg(any(test, feature = "dump-graphs", feature = "testing"))]
+use observation::ObservationStore;
 use peer_list::PeerIndex;
 use serde::{Deserialize, Serialize};
-use std::fmt::{self, Debug, Display, Formatter};
+#[cfg(feature = "dump-graphs")]
+use std::fmt::{self, Display, Formatter};
 use vote::{Vote, VoteKey};
 
 #[serde(bound(
@@ -40,21 +43,6 @@ pub(super) enum Cause<V, E> {
     Observation { self_parent: E, vote: V },
     // Initial empty `Event` of this peer.
     Initial,
-}
-
-impl<V: Debug, E> Display for Cause<V, E> {
-    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
-        write!(
-            formatter,
-            "{}",
-            match &self {
-                Cause::Request { .. } => "Request".to_string(),
-                Cause::Response { .. } => "Response".to_string(),
-                Cause::Observation { vote, .. } => format!("Observation({:?})", vote),
-                Cause::Initial => "Initial".to_string(),
-            }
-        )
-    }
 }
 
 impl<P: PublicId> Cause<VoteKey<P>, EventIndex> {
@@ -129,6 +117,19 @@ impl<P: PublicId> Cause<VoteKey<P>, EventIndex> {
         };
         Ok(cause)
     }
+
+    /// Returns an object that implements Display for printing the payload instead of just the
+    /// payload key.
+    #[cfg(feature = "dump-graphs")]
+    pub(crate) fn display<'a, 'b, T: NetworkEvent>(
+        &'a self,
+        observations: &'b ObservationStore<T, P>,
+    ) -> CauseDisplay<'a, 'b, T, P> {
+        CauseDisplay {
+            cause: self,
+            observations,
+        }
+    }
 }
 
 #[cfg(any(test, feature = "testing"))]
@@ -196,6 +197,34 @@ impl Cause<VoteKey<PeerId>, EventIndex> {
                     self_parent,
                 }
             }
+        }
+    }
+}
+
+#[cfg(feature = "dump-graphs")]
+pub(crate) struct CauseDisplay<'a, 'b, T: NetworkEvent, P: PublicId> {
+    cause: &'a Cause<VoteKey<P>, EventIndex>,
+    observations: &'b ObservationStore<T, P>,
+}
+
+#[cfg(feature = "dump-graphs")]
+impl<'a, 'b, T: NetworkEvent, P: PublicId> Display for CauseDisplay<'a, 'b, T, P> {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self.cause {
+            Cause::Request { .. } => write!(f, "Request"),
+            Cause::Response { .. } => write!(f, "Response"),
+            Cause::Observation { ref vote, .. } => {
+                if let Some(observation) = self
+                    .observations
+                    .get(vote.payload_key())
+                    .map(|info| &info.observation)
+                {
+                    write!(f, "Observation({:?})", observation)
+                } else {
+                    write!(f, "Observation(?)")
+                }
+            }
+            Cause::Initial => write!(f, "Initial"),
         }
     }
 }

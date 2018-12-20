@@ -784,10 +784,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             &self.graph,
             &self.meta_elections,
             &self.peer_list,
-            self.observations
-                .iter()
-                .map(|(key, info)| (key.hash(), &info.observation))
-                .collect(),
+            &self.observations,
         );
 
         let payload = self
@@ -2389,10 +2386,7 @@ impl<T: NetworkEvent, S: SecretId> Drop for Parsec<T, S> {
                 &self.graph,
                 &self.meta_elections,
                 &self.peer_list,
-                self.observations
-                    .iter()
-                    .map(|(key, info)| (key.hash(), &info.observation))
-                    .collect(),
+                &self.observations,
             );
         }
     }

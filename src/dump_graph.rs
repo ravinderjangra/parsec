@@ -10,9 +10,8 @@ use gossip::Graph;
 use id::SecretId;
 use meta_voting::MetaElections;
 use network_event::NetworkEvent;
-use observation::{Observation, ObservationHash};
+use observation::ObservationStore;
 use peer_list::PeerList;
-use std::collections::BTreeMap;
 
 /// Use this to initialise the folder into which the dot files will be dumped.  This allows the
 /// folder's path to be displayed at the start of a run, rather than at the arbitrary point when
@@ -35,7 +34,7 @@ pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
     gossip_graph: &Graph<S::PublicId>,
     meta_elections: &MetaElections,
     peer_list: &PeerList<S>,
-    observations: BTreeMap<&ObservationHash, &Observation<T, S::PublicId>>,
+    observations: &ObservationStore<T, S::PublicId>,
 ) {
     detail::to_file(
         owner_id,
@@ -51,7 +50,7 @@ pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
     _: &Graph<S::PublicId>,
     _: &MetaElections,
     _: &PeerList<S>,
-    _: BTreeMap<&ObservationHash, &Observation<T, S::PublicId>>,
+    _: &ObservationStore<T, S::PublicId>,
 ) {
 }
 
@@ -64,7 +63,7 @@ mod detail {
     use id::{PublicId, SecretId};
     use meta_voting::{MetaElections, MetaElectionsSnapshot, MetaEvent, MetaVote};
     use network_event::NetworkEvent;
-    use observation::{Observation, ObservationHash};
+    use observation::ObservationStore;
     use peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
     use rand::{self, Rng};
     use serialise;
@@ -143,7 +142,7 @@ mod detail {
         gossip_graph: &Graph<S::PublicId>,
         meta_elections: &MetaElections,
         peer_list: &PeerList<S>,
-        observations: BTreeMap<&ObservationHash, &Observation<T, S::PublicId>>,
+        observations: &ObservationStore<T, S::PublicId>,
     ) {
         let id = format!("{:?}", owner_id);
         let call_count = DUMP_COUNTS.with(|counts| {
@@ -305,7 +304,7 @@ mod detail {
         gossip_graph: &'a Graph<S::PublicId>,
         meta_elections: &'a MetaElections,
         peer_list: &'a PeerList<S>,
-        observations: BTreeMap<&'a ObservationHash, &'a Observation<T, S::PublicId>>,
+        observations: &'a ObservationStore<T, S::PublicId>,
         indent: usize,
     }
 
@@ -317,7 +316,7 @@ mod detail {
             gossip_graph: &'a Graph<S::PublicId>,
             meta_elections: &'a MetaElections,
             peer_list: &'a PeerList<S>,
-            observations: BTreeMap<&'a ObservationHash, &'a Observation<T, S::PublicId>>,
+            observations: &'a ObservationStore<T, S::PublicId>,
         ) -> io::Result<Self> {
             File::create(&file_path).map(|file| DotWriter {
                 file: BufWriter::new(file),
@@ -554,7 +553,7 @@ mod detail {
                     let attr = EventAttributes::new(
                         event.inner(),
                         current_meta_events.get(&event_index),
-                        &self.observations,
+                        self.observations,
                         &self.peer_list,
                     );
                     self.writeln(format_args!(
@@ -563,7 +562,7 @@ mod detail {
                         attr.to_string()
                     ))?;
 
-                    event.write_cause_to_dot_format(&mut self.file)?;
+                    event.write_cause_to_dot_format(&mut self.file, &self.observations)?;
 
                     let last_ancestors =
                         convert_peer_index_map(event.last_ancestors(), &self.peer_list);
@@ -687,7 +686,11 @@ mod detail {
 
                 // write payload
                 if let Some(ref payload_key) = election.payload_key {
-                    if let Some(payload) = self.observations.get(payload_key.hash()) {
+                    if let Some(payload) = self
+                        .observations
+                        .get(payload_key)
+                        .map(|info| &info.observation)
+                    {
                         lines.push(format!(
                             "{}{}payload: {:?}",
                             Self::COMMENT,
@@ -750,8 +753,7 @@ mod detail {
                     let interesting_content = mev
                         .interesting_content
                         .iter()
-                        .map(|obs_key| unwrap!(self.observations.get(obs_key.hash())))
-                        .cloned()
+                        .map(|obs_key| unwrap!(self.observations.get(obs_key)).observation.clone())
                         .collect::<Vec<_>>();
                     lines.push(format!(
                         "{}{}interesting_content: {:?}",
@@ -797,7 +799,7 @@ mod detail {
         fn new<T: NetworkEvent, S: SecretId>(
             event: &Event<S::PublicId>,
             opt_meta_event: Option<&MetaEvent>,
-            observations_map: &BTreeMap<&ObservationHash, &Observation<T, S::PublicId>>,
+            observations: &ObservationStore<T, S::PublicId>,
             peer_list: &PeerList<S>,
         ) -> Self {
             let mut attr = EventAttributes {
@@ -815,7 +817,8 @@ mod detail {
 
             if let Some(event_payload) = event
                 .payload_key()
-                .and_then(|key| observations_map.get(key.hash()))
+                .and_then(|key| observations.get(key))
+                .map(|info| &info.observation)
             {
                 attr.label = format!(
                     "{}<tr><td colspan=\"6\">{:?}</td></tr>\n",
@@ -830,7 +833,7 @@ mod detail {
                     let interesting_content = meta_event
                         .interesting_content
                         .iter()
-                        .map(|obs_key| unwrap!(observations_map.get(obs_key.hash())))
+                        .map(|obs_key| &unwrap!(observations.get(obs_key)).observation)
                         .collect::<Vec<_>>();
                     attr.label = format!(
                         "{}<tr><td colspan=\"6\">{:?}</td></tr>",

@@ -348,8 +348,16 @@ impl<P: PublicId> Event<P> {
     }
 
     #[cfg(feature = "dump-graphs")]
-    pub fn write_cause_to_dot_format(&self, writer: &mut Write) -> io::Result<()> {
-        writeln!(writer, "/// cause: {}", self.content.cause)
+    pub fn write_cause_to_dot_format<T: NetworkEvent>(
+        &self,
+        writer: &mut Write,
+        observations: &ObservationStore<T, P>,
+    ) -> io::Result<()> {
+        writeln!(
+            writer,
+            "/// cause: {}",
+            self.content.cause.display(observations)
+        )
     }
 }
 
@@ -369,7 +377,7 @@ impl<P: PublicId> Debug for Event<P> {
         write!(formatter, " {}", self.short_name())?;
 
         write!(formatter, " {:?}", self.hash())?;
-        write!(formatter, ", {}", self.content.cause)?;
+        write!(formatter, ", {:?}", self.content.cause)?;
         write!(
             formatter,
             ", self_parent: {:?}, other_parent: {:?}",
@@ -645,7 +653,7 @@ impl Display for ShortName {
 
 impl Debug for ShortName {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        Display::fmt(self, f)
+        write!(f, "\"{}\"", self)
     }
 }
 
