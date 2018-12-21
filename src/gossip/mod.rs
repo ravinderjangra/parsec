@@ -9,6 +9,7 @@
 mod cause;
 mod content;
 mod event;
+mod event_context;
 mod event_hash;
 mod graph;
 mod messages;
@@ -21,6 +22,7 @@ pub(super) use self::event::CauseInput;
 #[cfg(feature = "malice-detection")]
 pub(super) use self::event::LastAncestor;
 pub(super) use self::event::{Event, UnpackedEvent};
+pub(super) use self::event_context::{EventContextMut, EventContextRef};
 pub use self::event_hash::EventHash;
 #[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
 pub(super) use self::graph::snapshot::GraphSnapshot;

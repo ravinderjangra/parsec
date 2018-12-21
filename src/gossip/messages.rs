@@ -7,7 +7,6 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use error::{Error, Result};
-use gossip::event::Event;
 use gossip::event_hash::EventHash;
 use gossip::packed_event::PackedEvent;
 use id::PublicId;
@@ -21,10 +20,8 @@ pub struct Request<T: NetworkEvent, P: PublicId> {
 }
 
 impl<T: NetworkEvent, P: PublicId> Request<T, P> {
-    pub(crate) fn new(events: Vec<&Event<T, P>>) -> Self {
-        Self {
-            packed_events: events.into_iter().map(Event::pack).collect(),
-        }
+    pub(crate) fn new(packed_events: Vec<PackedEvent<T, P>>) -> Self {
+        Self { packed_events }
     }
 
     pub(crate) fn hash_of_last_event_created_by(&self, src: &P) -> Result<Option<EventHash>> {
@@ -40,10 +37,8 @@ pub struct Response<T: NetworkEvent, P: PublicId> {
 }
 
 impl<T: NetworkEvent, P: PublicId> Response<T, P> {
-    pub(crate) fn new(events: Vec<&Event<T, P>>) -> Self {
-        Self {
-            packed_events: events.into_iter().map(Event::pack).collect(),
-        }
+    pub(crate) fn new(packed_events: Vec<PackedEvent<T, P>>) -> Self {
+        Self { packed_events }
     }
 
     pub(crate) fn hash_of_last_event_created_by(&self, src: &P) -> Result<Option<EventHash>> {

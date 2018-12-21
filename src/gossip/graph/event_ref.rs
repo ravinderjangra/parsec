@@ -9,21 +9,20 @@
 use super::super::event::Event;
 use super::event_index::EventIndex;
 use id::PublicId;
-use network_event::NetworkEvent;
 use std::cmp::{Ord, Ordering, PartialOrd};
 use std::ops::Deref;
 
 /// Reference to `Event` together with its index.
 #[derive(Clone, Debug)]
-pub(crate) struct IndexedEventRef<'a, T: NetworkEvent + 'a, P: PublicId + 'a> {
+pub(crate) struct IndexedEventRef<'a, P: PublicId + 'a> {
     pub(super) index: EventIndex,
-    pub(super) event: &'a Event<T, P>,
+    pub(super) event: &'a Event<P>,
 }
 
 // Note: for some reason #[derive(Copy)] doesn't work.
-impl<'a, T: NetworkEvent, P: PublicId> Copy for IndexedEventRef<'a, T, P> {}
+impl<'a, P: PublicId> Copy for IndexedEventRef<'a, P> {}
 
-impl<'a, T: NetworkEvent, P: PublicId> IndexedEventRef<'a, T, P> {
+impl<'a, P: PublicId> IndexedEventRef<'a, P> {
     pub fn event_index(&self) -> EventIndex {
         self.index
     }
@@ -34,40 +33,40 @@ impl<'a, T: NetworkEvent, P: PublicId> IndexedEventRef<'a, T, P> {
 
     /// Returns reference to the inner `Event`. Note this is not the same as `Deref::deref`,
     /// because the lifetime is different ('a vs 'self).
-    pub fn inner(&self) -> &'a Event<T, P> {
+    pub fn inner(&self) -> &'a Event<P> {
         self.event
     }
 }
 
-impl<'a, T: NetworkEvent, P: PublicId> Deref for IndexedEventRef<'a, T, P> {
-    type Target = Event<T, P>;
+impl<'a, P: PublicId> Deref for IndexedEventRef<'a, P> {
+    type Target = Event<P>;
 
     fn deref(&self) -> &Self::Target {
         self.event
     }
 }
 
-impl<'a, T: NetworkEvent, P: PublicId> AsRef<Event<T, P>> for IndexedEventRef<'a, T, P> {
-    fn as_ref(&self) -> &Event<T, P> {
+impl<'a, P: PublicId> AsRef<Event<P>> for IndexedEventRef<'a, P> {
+    fn as_ref(&self) -> &Event<P> {
         self.event
     }
 }
 
-impl<'a, T: NetworkEvent, P: PublicId> PartialEq for IndexedEventRef<'a, T, P> {
+impl<'a, P: PublicId> PartialEq for IndexedEventRef<'a, P> {
     fn eq(&self, other: &Self) -> bool {
         self.index == other.index
     }
 }
 
-impl<'a, T: NetworkEvent, P: PublicId> Eq for IndexedEventRef<'a, T, P> {}
+impl<'a, P: PublicId> Eq for IndexedEventRef<'a, P> {}
 
-impl<'a, T: NetworkEvent, P: PublicId> PartialOrd for IndexedEventRef<'a, T, P> {
+impl<'a, P: PublicId> PartialOrd for IndexedEventRef<'a, P> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.index.partial_cmp(&other.index)
     }
 }
 
-impl<'a, T: NetworkEvent, P: PublicId> Ord for IndexedEventRef<'a, T, P> {
+impl<'a, P: PublicId> Ord for IndexedEventRef<'a, P> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.index.cmp(&other.index)
     }

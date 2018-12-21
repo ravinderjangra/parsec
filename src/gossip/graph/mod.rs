@@ -16,18 +16,17 @@ pub(crate) use self::event_ref::IndexedEventRef;
 
 use super::{event::Event, event_hash::EventHash};
 use id::PublicId;
-use network_event::NetworkEvent;
 use std::collections::btree_map::{BTreeMap, Entry};
 use std::collections::BTreeSet;
 
 /// The gossip graph.
 #[derive(Eq, PartialEq, Debug)]
-pub(crate) struct Graph<T: NetworkEvent, P: PublicId> {
-    events: Vec<Event<T, P>>,
+pub(crate) struct Graph<P: PublicId> {
+    events: Vec<Event<P>>,
     indices: BTreeMap<EventHash, EventIndex>,
 }
 
-impl<T: NetworkEvent, P: PublicId> Default for Graph<T, P> {
+impl<P: PublicId> Default for Graph<P> {
     fn default() -> Self {
         Self {
             events: Vec::new(),
@@ -36,7 +35,7 @@ impl<T: NetworkEvent, P: PublicId> Default for Graph<T, P> {
     }
 }
 
-impl<T: NetworkEvent, P: PublicId> Graph<T, P> {
+impl<P: PublicId> Graph<P> {
     pub fn new() -> Self {
         Self::default()
     }
@@ -55,7 +54,7 @@ impl<T: NetworkEvent, P: PublicId> Graph<T, P> {
     /// Returns `IndexedEventRef` to the newly inserted event.
     /// If the event was already present in the graph, does not overwrite it, just returns an
     /// `IndexedEventRef` to it.
-    pub fn insert(&mut self, event: Event<T, P>) -> IndexedEventRef<T, P> {
+    pub fn insert(&mut self, event: Event<P>) -> IndexedEventRef<P> {
         let index = match self.indices.entry(*event.hash()) {
             Entry::Occupied(entry) => *entry.get(),
             Entry::Vacant(entry) => {
@@ -76,7 +75,7 @@ impl<T: NetworkEvent, P: PublicId> Graph<T, P> {
     }
 
     /// Gets `Event` with the given `index`, if it exists.
-    pub fn get(&self, index: EventIndex) -> Option<IndexedEventRef<T, P>> {
+    pub fn get(&self, index: EventIndex) -> Option<IndexedEventRef<P>> {
         self.events
             .get(index.0)
             .map(|event| IndexedEventRef { index, event })
@@ -88,12 +87,12 @@ impl<T: NetworkEvent, P: PublicId> Graph<T, P> {
     }
 
     /// Iterator over all events in this graph. Yields `IndexedEventRef`s.
-    pub fn iter(&self) -> Iter<T, P> {
+    pub fn iter(&self) -> Iter<P> {
         self.iter_from(0)
     }
 
     /// Iterator over events in this graph starting at the given topological index.
-    pub fn iter_from(&self, start_index: usize) -> Iter<T, P> {
+    pub fn iter_from(&self, start_index: usize) -> Iter<P> {
         Iter {
             events: &self.events,
             index: start_index,
@@ -106,7 +105,7 @@ impl<T: NetworkEvent, P: PublicId> Graph<T, P> {
     }
 
     /// Returns self-parent of the given event, if any.
-    pub fn self_parent<E: AsRef<Event<T, P>>>(&self, event: E) -> Option<IndexedEventRef<T, P>> {
+    pub fn self_parent<E: AsRef<Event<P>>>(&self, event: E) -> Option<IndexedEventRef<P>> {
         event
             .as_ref()
             .self_parent()
@@ -114,7 +113,7 @@ impl<T: NetworkEvent, P: PublicId> Graph<T, P> {
     }
 
     /// Returns other-parent of the given event, if any.
-    pub fn other_parent<E: AsRef<Event<T, P>>>(&self, event: E) -> Option<IndexedEventRef<T, P>> {
+    pub fn other_parent<E: AsRef<Event<P>>>(&self, event: E) -> Option<IndexedEventRef<P>> {
         event
             .as_ref()
             .other_parent()
@@ -123,7 +122,7 @@ impl<T: NetworkEvent, P: PublicId> Graph<T, P> {
 
     /// Iterator over all ancestors of the given event (including itself) in reverse topological
     /// order.
-    pub fn ancestors<'a>(&'a self, event: IndexedEventRef<'a, T, P>) -> Ancestors<'a, T, P> {
+    pub fn ancestors<'a>(&'a self, event: IndexedEventRef<'a, P>) -> Ancestors<'a, P> {
         let mut queue = BTreeSet::new();
         let _ = queue.insert(event);
 
@@ -135,7 +134,7 @@ impl<T: NetworkEvent, P: PublicId> Graph<T, P> {
     }
 
     /// Returns whether `x` is descendant of `y`.
-    pub fn is_descendant(&self, x: IndexedEventRef<T, P>, y: IndexedEventRef<T, P>) -> bool {
+    pub fn is_descendant(&self, x: IndexedEventRef<P>, y: IndexedEventRef<P>) -> bool {
         x.is_descendant_of(y).unwrap_or_else(|| {
             self.ancestors(x)
                 .take_while(|e| e.topological_index() >= y.topological_index())
@@ -145,17 +144,17 @@ impl<T: NetworkEvent, P: PublicId> Graph<T, P> {
 }
 
 #[cfg(test)]
-impl<T: NetworkEvent, P: PublicId> Graph<T, P> {
+impl<P: PublicId> Graph<P> {
     /// Remove the topologically last event.
-    pub fn remove_last(&mut self) -> Option<(EventIndex, Event<T, P>)> {
+    pub fn remove_last(&mut self) -> Option<(EventIndex, Event<P>)> {
         let event = self.events.pop()?;
         let _ = self.indices.remove(event.hash());
         Some((EventIndex(self.events.len()), event))
     }
 }
 
-impl<T: NetworkEvent, P: PublicId> IntoIterator for Graph<T, P> {
-    type IntoIter = IntoIter<T, P>;
+impl<P: PublicId> IntoIterator for Graph<P> {
+    type IntoIter = IntoIter<P>;
     type Item = <Self::IntoIter as Iterator>::Item;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -166,13 +165,13 @@ impl<T: NetworkEvent, P: PublicId> IntoIterator for Graph<T, P> {
     }
 }
 
-pub(crate) struct IntoIter<T: NetworkEvent, P: PublicId> {
-    events: Vec<Event<T, P>>,
+pub(crate) struct IntoIter<P: PublicId> {
+    events: Vec<Event<P>>,
     index: usize,
 }
 
-impl<T: NetworkEvent, P: PublicId> Iterator for IntoIter<T, P> {
-    type Item = (EventIndex, Event<T, P>);
+impl<P: PublicId> Iterator for IntoIter<P> {
+    type Item = (EventIndex, Event<P>);
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(event) = self.events.pop() {
@@ -185,8 +184,8 @@ impl<T: NetworkEvent, P: PublicId> Iterator for IntoIter<T, P> {
     }
 }
 
-impl<'a, T: NetworkEvent, P: PublicId> IntoIterator for &'a Graph<T, P> {
-    type IntoIter = Iter<'a, T, P>;
+impl<'a, P: PublicId> IntoIterator for &'a Graph<P> {
+    type IntoIter = Iter<'a, P>;
     type Item = <Self::IntoIter as Iterator>::Item;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -197,13 +196,13 @@ impl<'a, T: NetworkEvent, P: PublicId> IntoIterator for &'a Graph<T, P> {
     }
 }
 
-pub(crate) struct Iter<'a, T: NetworkEvent + 'a, P: PublicId + 'a> {
-    events: &'a [Event<T, P>],
+pub(crate) struct Iter<'a, P: PublicId + 'a> {
+    events: &'a [Event<P>],
     index: usize,
 }
 
-impl<'a, T: NetworkEvent, P: PublicId> Iterator for Iter<'a, T, P> {
-    type Item = IndexedEventRef<'a, T, P>;
+impl<'a, P: PublicId> Iterator for Iter<'a, P> {
+    type Item = IndexedEventRef<'a, P>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let event = self.events.get(self.index)?;
@@ -226,7 +225,7 @@ pub(crate) mod snapshot {
     pub(crate) struct GraphSnapshot(BTreeSet<EventHash>);
 
     impl GraphSnapshot {
-        pub fn new<T: NetworkEvent, P: PublicId>(graph: &Graph<T, P>) -> Self {
+        pub fn new<P: PublicId>(graph: &Graph<P>) -> Self {
             GraphSnapshot(graph.iter().map(|event| *event.hash()).collect())
         }
     }
@@ -253,7 +252,7 @@ mod tests {
         let mut actual_indices = Vec::new();
 
         for event in graph.ancestors(event) {
-            actual_names.push(event.short_name());
+            actual_names.push(event.short_name().to_string());
             actual_indices.push(event.event_index());
         }
 

@@ -6,7 +6,7 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
+#[cfg(feature = "testing")]
 use super::parse_test_dot_file;
 use super::peer::{Peer, PeerStatus};
 use super::schedule::{Schedule, ScheduleEvent, ScheduleOptions};
@@ -109,7 +109,7 @@ impl Network {
         }
     }
 
-    #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
+    #[cfg(feature = "testing")]
     pub fn from_graphs<I: IntoIterator<Item = &'static str>>(
         consensus_mode: ConsensusMode,
         genesis: BTreeSet<PeerId>,

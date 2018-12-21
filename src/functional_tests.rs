@@ -13,7 +13,6 @@ use gossip::{Event, Graph, GraphSnapshot};
 use id::PublicId;
 use meta_voting::MetaElectionsSnapshot;
 use mock::{self, PeerId, Transaction};
-use network_event::NetworkEvent;
 use observation::Observation;
 use parsec::TestParsec;
 use peer_list::{MembershipListChange, PeerIndexSet, PeerListSnapshot, PeerState};
@@ -65,7 +64,7 @@ impl Snapshot {
     }
 }
 
-fn nth_event<T: NetworkEvent, P: PublicId>(graph: &Graph<T, P>, n: usize) -> &Event<T, P> {
+fn nth_event<P: PublicId>(graph: &Graph<P>, n: usize) -> &Event<P> {
     unwrap!(graph.iter_from(n).next()).inner()
 }
 
@@ -83,7 +82,7 @@ fn from_existing() {
     // Only the initial event should be in the gossip graph.
     assert_eq!(parsec.graph().len(), 1);
     let event = nth_event(parsec.graph(), 0);
-    assert_eq!(*event.creator_id(), our_id);
+    assert_eq!(*parsec.event_creator_id(&event), our_id);
     assert!(event.is_initial());
 }
 
@@ -149,13 +148,13 @@ fn from_genesis() {
     // initial event + genesis_observation
     assert_eq!(parsec.graph().len(), 2);
     let initial_event = nth_event(parsec.graph(), 0);
-    assert_eq!(*initial_event.creator_id(), our_id);
+    assert_eq!(*parsec.event_creator_id(&initial_event), our_id);
     assert!(initial_event.is_initial());
     let genesis_observation = nth_event(parsec.graph(), 1);
-    assert_eq!(*genesis_observation.creator_id(), our_id);
-    match &genesis_observation.vote() {
-        Some(vote) => {
-            assert_eq!(*vote.payload(), Observation::Genesis(peers));
+    assert_eq!(*parsec.event_creator_id(&genesis_observation), our_id);
+    match parsec.event_payload(&genesis_observation) {
+        Some(payload) => {
+            assert_eq!(*payload, Observation::Genesis(peers));
         }
         None => panic!("Expected observation, but event carried no vote"),
     }
@@ -459,23 +458,22 @@ fn gossip_after_fork() {
     let a_1_index = unwrap!(alice.peer_list().our_events().next());
     let a_1_hash = *unwrap!(alice.graph().get(a_1_index)).hash();
 
-    let a_2 = Event::new_from_observation(
-        a_1_hash,
+    let a_2 = unwrap!(Event::new_from_observation(
+        a_1_index,
         Observation::OpaquePayload(Transaction::new("one")),
-        alice.graph(),
-        alice.peer_list(),
-    );
+        alice.event_context_mut()
+    ));
     let a_2_hash = *a_2.hash();
-    unwrap!(alice.add_event(a_2));
+    let a_2_index = unwrap!(alice.add_event(a_2));
 
-    let a_3 = Event::new_from_observation(
-        a_2_hash,
+    let a_3 = unwrap!(Event::new_from_observation(
+        a_2_index,
         Observation::OpaquePayload(Transaction::new("two")),
-        alice.graph(),
-        alice.peer_list(),
-    );
+        alice.event_context_mut(),
+    ));
     let a_3_hash = *a_3.hash();
-    unwrap!(alice.add_event(a_3));
+    let a_3_packed = alice.pack_event(&a_3);
+    unwrap!(alice.unpack_and_add_event(a_3_packed));
 
     let mut bob = TestParsec::from_genesis(bob_id.clone(), &genesis_group);
 
@@ -490,12 +488,11 @@ fn gossip_after_fork() {
     assert!(bob.graph().contains(&a_3_hash));
 
     // Alice creates a fork.
-    let a_2_fork = Event::new_from_observation(
-        a_1_hash,
+    let a_2_fork = unwrap!(Event::new_from_observation(
+        a_1_index,
         Observation::OpaquePayload(Transaction::new("two-fork")),
-        alice.graph(),
-        alice.peer_list(),
-    );
+        alice.event_context_mut(),
+    ));
     let a_2_fork_hash = *a_2_fork.hash();
     unwrap!(alice.add_event(a_2_fork));
 
@@ -514,6 +511,7 @@ mod handle_malice {
     use gossip::{find_event_by_short_name, Event, EventHash};
     use id::SecretId;
     use mock::Transaction;
+    use network_event::NetworkEvent;
     use observation::Malice;
     use peer_list::{PeerIndex, PeerList, PeerState};
     use std::collections::BTreeMap;
@@ -526,8 +524,7 @@ mod handle_malice {
             .peer_list()
             .our_events()
             .filter_map(move |index| parsec.graph().get(index))
-            .filter_map(|event| event.inner().vote())
-            .map(|vote| vote.payload())
+            .filter_map(move |event| parsec.event_payload(event.inner()))
     }
 
     // Add the peers to the `PeerList` as the genesis group.
@@ -573,27 +570,23 @@ mod handle_malice {
             .change_peer_state(PeerIndex::OUR, PeerState::active());
         add_genesis_group(&mut dave_contents.peer_list, &genesis);
 
-        let d_0 = Event::<Transaction, _>::new_initial(&dave_contents.peer_list);
-        let d_0_hash = *d_0.hash();
-        dave_contents.add_event(d_0);
+        let d_0 = Event::new_initial(dave_contents.event_context());
+        let d_0_index = dave_contents.add_event(d_0);
 
-        let d_1 = Event::<Transaction, _>::new_from_observation(
-            d_0_hash,
+        let d_1 = unwrap!(Event::new_from_observation(
+            d_0_index,
             Observation::OpaquePayload(Transaction::new("dave's malicious vote")),
-            &dave_contents.graph,
-            &dave_contents.peer_list,
-        );
-        let d_1_hash = *d_1.hash();
-        dave_contents.add_event(d_1);
+            dave_contents.event_context_mut()
+        ));
+        let d_1_index = dave_contents.add_event(d_1);
 
-        let d_2 = Event::<Transaction, _>::new_from_observation(
-            d_1_hash,
+        let d_2 = unwrap!(Event::new_from_observation(
+            d_1_index,
             Observation::Genesis(genesis),
-            &dave_contents.graph,
-            &dave_contents.peer_list,
-        );
+            dave_contents.event_context_mut()
+        ));
         let d_2_hash = *d_2.hash();
-        dave_contents.add_event(d_2);
+        let _ = dave_contents.add_event(d_2);
 
         let dave = TestParsec::from_parsed_contents(dave_contents);
 
@@ -641,18 +634,16 @@ mod handle_malice {
             .change_peer_state(PeerIndex::OUR, PeerState::active());
         add_genesis_group(&mut eric_contents.peer_list, &genesis);
 
-        let e_0 = Event::<Transaction, _>::new_initial(&eric_contents.peer_list);
-        let e_0_hash = *e_0.hash();
-        eric_contents.add_event(e_0);
+        let e_0 = Event::new_initial(eric_contents.event_context());
+        let e_0_index = eric_contents.add_event(e_0);
 
-        let e_1 = Event::<Transaction, _>::new_from_observation(
-            e_0_hash,
+        let e_1 = unwrap!(Event::new_from_observation(
+            e_0_index,
             Observation::Genesis(genesis),
-            &eric_contents.graph,
-            &eric_contents.peer_list,
-        );
+            eric_contents.event_context_mut()
+        ));
         let e_1_hash = *e_1.hash();
-        eric_contents.add_event(e_1);
+        let _ = eric_contents.add_event(e_1);
 
         let eric = TestParsec::from_parsed_contents(eric_contents);
 
@@ -683,26 +674,23 @@ mod handle_malice {
         let mut result = ParsedContents::new(id);
         add_genesis_group(&mut result.peer_list, genesis);
 
-        let ev_0 = Event::<Transaction, _>::new_initial(&result.peer_list);
-        let ev_0_hash = *ev_0.hash();
-        result.add_event(ev_0);
+        let ev_0 = Event::new_initial(result.event_context());
+        let ev_0_index = result.add_event(ev_0);
         let ev_1 = if let Some(obs_1) = second_event {
-            Event::<Transaction, _>::new_from_observation(
-                ev_0_hash,
+            unwrap!(Event::new_from_observation(
+                ev_0_index,
                 obs_1,
-                &result.graph,
-                &result.peer_list,
-            )
+                result.event_context_mut()
+            ))
         } else {
-            Event::<Transaction, _>::new_from_observation(
-                ev_0_hash,
+            unwrap!(Event::new_from_observation(
+                ev_0_index,
                 Observation::Genesis(genesis.clone()),
-                &result.graph,
-                &result.peer_list,
-            )
+                result.event_context_mut()
+            ))
         };
 
-        result.add_event(ev_1);
+        let _ = result.add_event(ev_1);
         result
     }
 
@@ -807,33 +795,35 @@ mod handle_malice {
         // Carol has already voted for "ABCD".  Create two new duplicate votes by Carol for this
         // opaque payload.
         let mut carol = TestParsec::from_parsed_contents(parse_test_dot_file("carol.dot"));
-        let first_duplicate = Event::new_from_observation(
-            carol.our_last_event_hash(),
+
+        let first_duplicate = unwrap!(Event::new_from_observation(
+            carol.our_last_event_index(),
             Observation::OpaquePayload(Transaction::new("ABCD")),
-            carol.graph(),
-            carol.peer_list(),
-        );
-        let first_duplicate_clone = Event::new_from_observation(
-            carol.our_last_event_hash(),
+            carol.event_context_mut()
+        ));
+
+        let first_duplicate_clone = unwrap!(Event::new_from_observation(
+            carol.our_last_event_index(),
             Observation::OpaquePayload(Transaction::new("ABCD")),
-            carol.graph(),
-            carol.peer_list(),
-        );
+            carol.event_context_mut()
+        ));
+        let first_duplicate_clone_packed = carol.pack_event(&first_duplicate_clone);
+
         let first_duplicate_hash = *first_duplicate.hash();
-        unwrap!(carol.add_event(first_duplicate));
-        let second_duplicate = Event::new_from_observation(
-            first_duplicate_hash,
+        let first_duplicate_index = unwrap!(carol.add_event(first_duplicate));
+        let second_duplicate = unwrap!(Event::new_from_observation(
+            first_duplicate_index,
             Observation::OpaquePayload(Transaction::new("ABCD")),
-            carol.graph(),
-            carol.peer_list(),
-        );
+            carol.event_context_mut()
+        ));
+        let second_duplicate_packed = carol.pack_event(&second_duplicate);
 
         // Check that the first duplicate triggers an accusation by Alice, but that the
         // duplicate is still added to the graph.
         let mut alice = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
         let carols_valid_vote_hash =
             *unwrap!(find_event_by_short_name(alice.graph(), "C_4")).hash();
-        unwrap!(alice.unpack_and_add_event(first_duplicate_clone.pack()));
+        unwrap!(alice.unpack_and_add_event(first_duplicate_clone_packed));
 
         let carol_index = unwrap!(alice.peer_list().get_index(carol.our_pub_id()));
         let expected_accusations = vec![(
@@ -846,7 +836,7 @@ mod handle_malice {
         // Check that the second one doesn't trigger any further accusation, but is also added
         // to the graph.
         let second_duplicate_hash = *second_duplicate.hash();
-        unwrap!(alice.unpack_and_add_event(second_duplicate.pack()));
+        unwrap!(alice.unpack_and_add_event(second_duplicate_packed));
         assert_eq!(*alice.pending_accusations(), expected_accusations);
         assert!(alice.graph().contains(&second_duplicate_hash));
     }
@@ -856,21 +846,21 @@ mod handle_malice {
         // Generated with RNG seed: [935566334, 935694090, 88607029, 861330491].
         let mut alice_contents = parse_test_dot_file("alice.dot");
 
-        let a_4_hash = *unwrap!(find_event_by_short_name(&alice_contents.graph, "A_4")).hash();
+        let a_4_index =
+            unwrap!(find_event_by_short_name(&alice_contents.graph, "A_4")).event_index();
         let d_1_hash = *unwrap!(find_event_by_short_name(&alice_contents.graph, "D_1")).hash();
 
         // Create an invalid accusation from Alice
-        let a_5 = Event::<Transaction, _>::new_from_observation(
-            a_4_hash,
+        let a_5 = unwrap!(Event::new_from_observation(
+            a_4_index,
             Observation::Accusation {
                 offender: PeerId::new("Dave"),
                 malice: Malice::Fork(d_1_hash),
             },
-            &alice_contents.graph,
-            &alice_contents.peer_list,
-        );
+            alice_contents.event_context_mut()
+        ));
         let a_5_hash = *a_5.hash();
-        alice_contents.add_event(a_5);
+        let _ = alice_contents.add_event(a_5);
         let alice = TestParsec::from_parsed_contents(alice_contents);
         assert!(alice.graph().contains(&a_5_hash));
 
@@ -963,11 +953,13 @@ mod handle_malice {
         // A_2 has C_0 from Carol as other parent as Carol has gossiped to Alice. Carol is
         // however not part of the section and Alice should not have accepted it.
         let a_2 = unwrap!(alice_events.remove(&a_2_index));
-        unwrap!(bob.unpack_and_add_event(a_2.pack()));
+        let a_2_packed = alice.pack_event(&a_2);
+        unwrap!(bob.unpack_and_add_event(a_2_packed));
 
         // B_2 is the sync event created by Bob when he receives A_2 from Alice.
         let b_2 = unwrap!(alice_events.remove(&b_2_index));
-        unwrap!(bob.unpack_and_add_event(b_2.pack()));
+        let b_2_packed = alice.pack_event(&b_2);
+        unwrap!(bob.unpack_and_add_event(b_2_packed));
 
         // Bob should now have seen that Alice in A_2 incorrectly reported gossip from Carol.
         // Check that this triggers an accusation
@@ -982,21 +974,21 @@ mod handle_malice {
         let mut alice_contents =
             parse_dot_file_with_test_name("alice.dot", "functional_tests_handle_malice_accomplice");
 
-        let a_26_hash = *unwrap!(find_event_by_short_name(&alice_contents.graph, "A_26")).hash();
+        let a_26_index =
+            unwrap!(find_event_by_short_name(&alice_contents.graph, "A_26")).event_index();
         let d_1_hash = *unwrap!(find_event_by_short_name(&alice_contents.graph, "D_1")).hash();
 
         // Create an invalid accusation from Alice
-        let a_27 = Event::<Transaction, _>::new_from_observation(
-            a_26_hash,
+        let a_27 = unwrap!(Event::new_from_observation(
+            a_26_index,
             Observation::Accusation {
                 offender: PeerId::new("Dave"),
                 malice: Malice::Fork(d_1_hash),
             },
-            &alice_contents.graph,
-            &alice_contents.peer_list,
-        );
+            alice_contents.event_context_mut()
+        ));
         let a_27_hash = *a_27.hash();
-        alice_contents.add_event(a_27);
+        let _ = alice_contents.add_event(a_27);
         let alice = TestParsec::from_parsed_contents(alice_contents);
         assert!(alice.graph().contains(&a_27_hash));
         (a_27_hash, alice)
@@ -1063,13 +1055,12 @@ mod handle_malice {
 
         // Bob adds another event which he then sends to Carol, who now becomes sure that Bob
         // didn't create the accusation he should have.
-        let b_30_hash = *unwrap!(find_event_by_short_name(bob.graph(), "B_30")).hash();
-        let b_31_replacement = Event::<Transaction, _>::new_from_observation(
-            b_30_hash,
+        let b_30_index = unwrap!(find_event_by_short_name(bob.graph(), "B_30")).event_index();
+        let b_31_replacement = unwrap!(Event::new_from_observation(
+            b_30_index,
             Observation::OpaquePayload(Transaction::new("ABCD")),
-            bob.graph(),
-            bob.peer_list(),
-        );
+            bob.event_context_mut(),
+        ));
         let b_31_hash = *b_31_replacement.hash();
         unwrap!(bob.add_event(b_31_replacement));
         let message = unwrap!(bob.create_gossip(Some(&PeerId::new("Carol"))));
@@ -1141,13 +1132,12 @@ mod handle_malice {
 
         // Bob adds another event which he then sends to Carol, who now becomes sure that Bob
         // didn't create the accusation he should have.
-        let b_30_hash = *unwrap!(find_event_by_short_name(bob.graph(), "B_30")).hash();
-        let b_31_replacement = Event::<Transaction, _>::new_from_observation(
-            b_30_hash,
+        let b_30_index = unwrap!(find_event_by_short_name(bob.graph(), "B_30")).event_index();
+        let b_31_replacement = unwrap!(Event::new_from_observation(
+            b_30_index,
             Observation::OpaquePayload(Transaction::new("ABCD")),
-            bob.graph(),
-            bob.peer_list(),
-        );
+            bob.event_context_mut(),
+        ));
         let b_31_hash = *b_31_replacement.hash();
         unwrap!(bob.add_event(b_31_replacement));
         let message = unwrap!(bob.create_gossip(Some(&PeerId::new("Carol"))));
@@ -1220,15 +1210,14 @@ mod handle_malice {
         // Then replace the sync event with one against B_30, effectively hiding Bob's accusation.
         let (_, _a_28) = unwrap!(alice.remove_last_event());
         let (_, _b_31) = unwrap!(alice.remove_last_event());
-        let b_30_hash = *unwrap!(find_event_by_short_name(alice.graph(), "B_30")).hash();
-        let a_27_hash = *unwrap!(find_event_by_short_name(alice.graph(), "A_27")).hash();
-        let a_28_replacement = Event::new_from_request(
-            a_27_hash,
-            b_30_hash,
-            &alice.graph(),
-            &alice.peer_list(),
+        let b_30_index = unwrap!(find_event_by_short_name(alice.graph(), "B_30")).event_index();
+        let a_27_index = unwrap!(find_event_by_short_name(alice.graph(), "A_27")).event_index();
+        let a_28_replacement = unwrap!(Event::new_from_request(
+            a_27_index,
+            b_30_index,
             &PeerIndexSet::default(),
-        );
+            alice.event_context()
+        ));
         unwrap!(alice.add_event(a_28_replacement));
 
         let mut carol = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(
@@ -1310,25 +1299,24 @@ mod handle_malice {
     #[test]
     fn self_parent_by_different_creator() {
         // Generated with RNG seed: [856368386, 135728199, 764559083, 3829746197].
-        let carol = TestParsec::from_parsed_contents(parse_test_dot_file("carol.dot"));
+        let mut carol = TestParsec::from_parsed_contents(parse_test_dot_file("carol.dot"));
 
         // Carol creates an event with one of Bob's as the self-parent.
-        let b_2_hash = *unwrap!(find_event_by_short_name(carol.graph(), "B_2")).hash();
-        let c_4 = Event::new_from_observation(
-            b_2_hash,
+        let b_2_index = unwrap!(find_event_by_short_name(carol.graph(), "B_2")).event_index();
+        let c_4 = unwrap!(Event::new_from_observation(
+            b_2_index,
             Observation::OpaquePayload(Transaction::new("ABCD")),
-            carol.graph(),
-            carol.peer_list(),
-        );
+            carol.event_context_mut()
+        ));
         let c_4_hash = *c_4.hash();
-        let packed_c_4 = c_4.pack();
+        let c_4_packed = carol.pack_event(&c_4);
 
         let mut alice = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
 
         // Try to add the event.
         assert_err!(
             Error::InvalidEvent,
-            alice.unpack_and_add_event(packed_c_4.clone())
+            alice.unpack_and_add_event(c_4_packed.clone())
         );
 
         // The invalid event should trigger an accusation vote to be raised immediately, and the
@@ -1336,10 +1324,10 @@ mod handle_malice {
         let a_2 = unwrap!(find_event_by_short_name(alice.graph(), "A_2"));
         let expected_observation = Observation::Accusation {
             offender: carol.our_pub_id().clone(),
-            malice: Malice::SelfParentByDifferentCreator(Box::new(packed_c_4)),
+            malice: Malice::SelfParentByDifferentCreator(Box::new(c_4_packed)),
         };
 
-        assert_eq!(*unwrap!(a_2.vote()).payload(), expected_observation);
+        assert_eq!(*unwrap!(alice.event_payload(&a_2)), expected_observation);
         assert!(!alice.graph().contains(&c_4_hash));
     }
 
@@ -1352,17 +1340,26 @@ mod handle_malice {
         let mut alice = initialise_parsec(alice_id, &genesis, None);
         let mut bob_contents = initialise_parsed_contents(bob_id.clone(), &genesis, None);
 
-        let b_0_hash = *unwrap!(find_event_by_short_name(&bob_contents.graph, "b_0")).hash();
-        let b_1_hash = *unwrap!(find_event_by_short_name(&bob_contents.graph, "b_1")).hash();
+        let (b_0_packed, b_0_index, b_0_hash) = {
+            let e = unwrap!(find_event_by_short_name(&bob_contents.graph, "b_0"));
+            let packed = unwrap!(e.pack(bob_contents.event_context()));
+            (packed, e.event_index(), *e.hash())
+        };
 
-        let b_2 = Event::new_from_request(
-            b_1_hash,
-            b_0_hash,
-            &bob_contents.graph,
-            &bob_contents.peer_list,
+        let (b_1_packed, b_1_index, b_1_hash) = {
+            let e = unwrap!(find_event_by_short_name(&bob_contents.graph, "b_1"));
+            let packed = unwrap!(e.pack(bob_contents.event_context()));
+            (packed, e.event_index(), *e.hash())
+        };
+
+        let b_2 = unwrap!(Event::new_from_request(
+            b_1_index,
+            b_0_index,
             &PeerIndexSet::default(),
-        );
+            bob_contents.event_context()
+        ));
         let b_2_hash = *b_2.hash();
+        let b_2_packed = unwrap!(b_2.pack(bob_contents.event_context()));
 
         let b_1 = unwrap!(bob_contents.remove_last_event());
         assert_eq!(*b_1.hash(), b_1_hash);
@@ -1370,11 +1367,11 @@ mod handle_malice {
         let b_0 = unwrap!(bob_contents.remove_last_event());
         assert_eq!(*b_0.hash(), b_0_hash);
 
-        unwrap!(alice.unpack_and_add_event(b_0.pack()));
-        unwrap!(alice.unpack_and_add_event(b_1.pack()));
+        unwrap!(alice.unpack_and_add_event(b_0_packed));
+        unwrap!(alice.unpack_and_add_event(b_1_packed));
 
         // This should fail, as B_2 has other-parent by the same creator.
-        assert_err!(Error::InvalidEvent, alice.unpack_and_add_event(b_2.pack()));
+        assert_err!(Error::InvalidEvent, alice.unpack_and_add_event(b_2_packed));
 
         // Alice should raise accusation against Bob
         let (offender, event) = unwrap!(our_votes(&alice)

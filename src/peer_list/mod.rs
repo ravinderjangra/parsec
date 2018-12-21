@@ -27,8 +27,7 @@ use gossip::{Event, EventIndex, IndexedEventRef};
 use hash::Hash;
 use id::SecretId;
 #[cfg(any(test, feature = "testing"))]
-use mock::{PeerId, Transaction};
-use network_event::NetworkEvent;
+use mock::PeerId;
 use std::collections::btree_map::{BTreeMap, Entry};
 #[cfg(any(test, feature = "testing"))]
 use std::collections::BTreeSet;
@@ -138,11 +137,6 @@ impl<S: SecretId> PeerList<S> {
         };
 
         iter.into_iter().flat_map(|iter| iter)
-    }
-
-    /// Returns indices of all peers known to us.
-    pub fn all_indices(&self) -> impl Iterator<Item = PeerIndex> {
-        (0..=self.peers.len()).map(PeerIndex)
     }
 
     /// Return public ids of all peers.
@@ -343,6 +337,7 @@ impl<S: SecretId> PeerList<S> {
     }
 
     /// Returns the index of the last event gossiped to us by the given peer.
+    #[cfg(feature = "malice-detection")]
     pub fn last_gossiped_event_by(&self, peer_index: PeerIndex) -> Option<EventIndex> {
         self.get(peer_index)
             .and_then(|peer| peer.last_gossiped_event)
@@ -361,10 +356,7 @@ impl<S: SecretId> PeerList<S> {
         }
     }
 
-    pub fn confirm_can_add_event<T: NetworkEvent>(
-        &self,
-        event: &Event<T, S::PublicId>,
-    ) -> Result<(), Error> {
+    pub fn confirm_can_add_event(&self, event: &Event<S::PublicId>) -> Result<(), Error> {
         let peer = self.get(event.creator()).ok_or(Error::UnknownPeer)?;
         if event.creator() == PeerIndex::OUR || peer.state.can_send() {
             Ok(())
@@ -377,14 +369,14 @@ impl<S: SecretId> PeerList<S> {
     }
 
     /// Adds event created by the peer.
-    pub fn add_event<T: NetworkEvent>(&mut self, event: IndexedEventRef<T, S::PublicId>) {
+    pub fn add_event(&mut self, event: IndexedEventRef<S::PublicId>) {
         if let Some(peer) = self.get_known_mut(event.creator()) {
             peer.add_event(event.index_by_creator(), event.event_index())
         }
     }
 
     /// Removes last event from its creator.
-    #[cfg(test)]
+    #[cfg(all(test, feature = "mock"))]
     pub fn remove_last_event(&mut self, creator: PeerIndex) -> Option<EventIndex> {
         if let Some(peer) = self.get_known_mut(creator) {
             peer.remove_last_event()
@@ -394,6 +386,11 @@ impl<S: SecretId> PeerList<S> {
     }
 
     /// Indices of events of the given creator, in insertion order.
+    #[cfg(any(
+        all(test, feature = "mock"),
+        feature = "dump-graphs",
+        feature = "malice-detection"
+    ))]
     pub fn peer_events<'a>(
         &'a self,
         peer_index: PeerIndex,
@@ -404,7 +401,7 @@ impl<S: SecretId> PeerList<S> {
     }
 
     /// Hashes of our events in insertion order.
-    #[cfg(any(test, feature = "malice-detection"))]
+    #[cfg(any(all(test, feature = "mock"), feature = "malice-detection"))]
     pub fn our_events<'a>(&'a self) -> impl DoubleEndedIterator<Item = EventIndex> + 'a {
         self.peer_events(PeerIndex::OUR)
     }
@@ -527,7 +524,7 @@ impl Builder {
         &self.peer_list
     }
 
-    pub fn finish(mut self, graph: &Graph<Transaction, PeerId>) -> PeerList<PeerId> {
+    pub fn finish(mut self, graph: &Graph<PeerId>) -> PeerList<PeerId> {
         // Set peer events and apply the membership list changes.
         for ((index, peer), membership_list) in self.peer_list.iter_mut().zip(self.membership_lists)
         {
@@ -558,10 +555,7 @@ pub(crate) mod snapshot {
 
     #[cfg(feature = "mock")]
     impl<P: PublicId> PeerListSnapshot<P> {
-        pub fn new<T: NetworkEvent, S: SecretId<PublicId = P>>(
-            peer_list: &PeerList<S>,
-            graph: &Graph<T, P>,
-        ) -> Self {
+        pub fn new<S: SecretId<PublicId = P>>(peer_list: &PeerList<S>, graph: &Graph<P>) -> Self {
             PeerListSnapshot(
                 peer_list
                     .iter()

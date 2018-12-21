@@ -7,13 +7,25 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use gossip::{CauseInput, Event, EventIndex, Graph, IndexedEventRef};
+#[cfg(any(
+    all(test, feature = "malice-detection", feature = "mock"),
+    feature = "testing"
+))]
+use gossip::{EventContextMut, EventContextRef};
 use hash::Hash;
 use hash::HASH_LEN;
 use meta_voting::{
     BoolSet, MetaElection, MetaElectionHandle, MetaElections, MetaEvent, MetaVote, Step,
 };
 use mock::{PeerId, Transaction};
-use observation::{Observation, ObservationHash, ObservationKey};
+#[cfg(any(
+    all(test, feature = "malice-detection", feature = "mock"),
+    feature = "testing"
+))]
+use observation::ConsensusMode;
+use observation::{
+    Observation, ObservationHash, ObservationInfo, ObservationKey, ObservationStore,
+};
 use peer_list::{PeerIndexMap, PeerIndexSet, PeerList, PeerState};
 use pom::char_class::{alphanum, digit, hex_digit, multispace, space};
 use pom::parser::*;
@@ -581,7 +593,7 @@ fn parse_single_meta_event() -> Parser<u8, (String, (ObservationMap, ParsedMetaE
 fn parse_meta_event_content() -> Parser<u8, (ObservationMap, ParsedMetaEvent)> {
     (parse_observees() + parse_interesting_content() + parse_meta_votes().opt()).map(
         |((observees, observation_map), meta_votes)| {
-            let interesting_content = observation_map.iter().map(|(key, _)| key.clone()).collect();
+            let interesting_content = observation_map.iter().map(|(key, _)| *key).collect();
             (
                 observation_map,
                 ParsedMetaEvent {
@@ -678,10 +690,10 @@ fn parse_end() -> Parser<u8, ()> {
 /// The event graph and associated info that were parsed from the dumped dot file.
 pub(crate) struct ParsedContents {
     pub our_id: PeerId,
-    pub graph: Graph<Transaction, PeerId>,
+    pub graph: Graph<PeerId>,
     pub meta_elections: MetaElections,
     pub peer_list: PeerList<PeerId>,
-    pub observation_map: BTreeMap<ObservationKey, Observation<Transaction, PeerId>>,
+    pub observations: ObservationStore<Transaction, PeerId>,
 }
 
 impl ParsedContents {
@@ -695,15 +707,15 @@ impl ParsedContents {
             graph: Graph::new(),
             meta_elections,
             peer_list,
-            observation_map: BTreeMap::new(),
+            observations: ObservationStore::new(),
         }
     }
 }
 
-#[cfg(all(test, feature = "mock"))]
 impl ParsedContents {
     /// Remove and return the last (newest) event from the `ParsedContents`, if any.
-    pub fn remove_last_event(&mut self) -> Option<Event<Transaction, PeerId>> {
+    #[cfg(all(test, feature = "mock"))]
+    pub fn remove_last_event(&mut self) -> Option<Event<PeerId>> {
         let (index_0, event) = self.graph.remove_last()?;
         let index_1 = self.peer_list.remove_last_event(event.creator());
         assert_eq!(Some(index_0), index_1);
@@ -711,12 +723,38 @@ impl ParsedContents {
         Some(event)
     }
 
-    #[cfg(feature = "malice-detection")]
+    #[cfg(all(feature = "malice-detection", feature = "mock"))]
     /// Insert event into the `ParsedContents`. Note this does not perform any validations whatsoever,
     /// so this is useful for simulating all kinds of invalid or malicious situations.
-    pub fn add_event(&mut self, event: Event<Transaction, PeerId>) {
+    pub fn add_event(&mut self, event: Event<PeerId>) -> EventIndex {
         let indexed_event = self.graph.insert(event);
         self.peer_list.add_event(indexed_event);
+        indexed_event.event_index()
+    }
+
+    #[cfg(any(
+        all(test, feature = "malice-detection", feature = "mock"),
+        feature = "testing"
+    ))]
+    pub fn event_context(&self) -> EventContextRef<Transaction, PeerId> {
+        EventContextRef {
+            graph: &self.graph,
+            peer_list: &self.peer_list,
+            observations: &self.observations,
+        }
+    }
+
+    #[cfg(any(
+        all(test, feature = "malice-detection", feature = "mock"),
+        feature = "testing"
+    ))]
+    pub fn event_context_mut(&mut self) -> EventContextMut<Transaction, PeerId> {
+        EventContextMut {
+            graph: &self.graph,
+            peer_list: &self.peer_list,
+            observations: &mut self.observations,
+            consensus_mode: ConsensusMode::Supermajority,
+        }
     }
 }
 
@@ -728,7 +766,6 @@ pub(crate) fn parse_dot_file<P: AsRef<Path>>(full_path: P) -> io::Result<ParsedC
 
 /// For use by functional/unit tests which provide a dot file for the test setup.  This put the test
 /// name as part of the path automatically.
-#[cfg(any(test, feature = "testing"))]
 pub(crate) fn parse_test_dot_file(filename: &str) -> ParsedContents {
     use std::thread;
 
@@ -740,7 +777,7 @@ pub(crate) fn parse_test_dot_file(filename: &str) -> ParsedContents {
 
 /// For use by functional/unit tests which provide a dot file for the test setup.  This reads and
 /// parses the dot file as per `parse_dot_file()` above, with test name being part of the path.
-#[cfg(any(test, feature = "testing"))]
+#[cfg(any(test, feature = "mock"))]
 pub(crate) fn parse_dot_file_with_test_name(filename: &str, test_name: &str) -> ParsedContents {
     use std::path::PathBuf;
 
@@ -800,20 +837,22 @@ fn convert_into_parsed_contents(result: ParsedFile) -> ParsedContents {
 
     let peer_list = peer_list_builder.finish(&parsed_contents.graph);
 
-    let observation_map = meta_elections
-        .meta_elections
-        .values()
-        .flat_map(|meta_election| {
-            meta_election
-                .observation_map
-                .iter()
-                .map(|(key, obs)| (key.clone(), obs.clone()))
-        })
-        .collect();
+    parsed_contents
+        .observations
+        .extend(
+            meta_elections
+                .meta_elections
+                .values()
+                .flat_map(|meta_election| {
+                    meta_election
+                        .observation_map
+                        .iter()
+                        .map(|(key, obs)| (*key, ObservationInfo::new(obs.clone())))
+                }),
+        );
     let meta_elections = convert_to_meta_elections(meta_elections, &mut event_hashes, &peer_list);
 
     parsed_contents.peer_list = peer_list;
-    parsed_contents.observation_map = observation_map;
     parsed_contents.meta_elections = meta_elections;
     parsed_contents
 }
@@ -954,6 +993,7 @@ fn create_events(
             index_by_creator,
             next_event_details.last_ancestors.clone(),
             peer_list,
+            &mut parsed_contents.observations,
         );
 
         let index = parsed_contents.graph.insert(next_event).event_index();
@@ -964,10 +1004,10 @@ fn create_events(
 }
 
 fn get_event_by_id<'a>(
-    graph: &'a Graph<Transaction, PeerId>,
+    graph: &'a Graph<PeerId>,
     indices: &BTreeMap<String, EventIndex>,
     id: &str,
-) -> Option<IndexedEventRef<'a, Transaction, PeerId>> {
+) -> Option<IndexedEventRef<'a, PeerId>> {
     indices.get(id).cloned().and_then(|index| graph.get(index))
 }
 
@@ -1041,6 +1081,7 @@ mod tests {
 
             let mut dot_file_path = entry.path();
             assert!(dot_file_path.set_extension("dot"));
+
             let parsed = unwrap!(parse_dot_file(&dot_file_path));
             let actual_snapshot = (
                 GraphSnapshot::new(&parsed.graph),

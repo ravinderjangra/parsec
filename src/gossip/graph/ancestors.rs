@@ -8,17 +8,16 @@
 
 use super::{Graph, IndexedEventRef};
 use id::PublicId;
-use network_event::NetworkEvent;
 use std::collections::BTreeSet;
 
-pub(crate) struct Ancestors<'a, T: NetworkEvent + 'a, P: PublicId + 'a> {
-    pub(super) graph: &'a Graph<T, P>,
-    pub(super) queue: BTreeSet<IndexedEventRef<'a, T, P>>,
+pub(crate) struct Ancestors<'a, P: PublicId + 'a> {
+    pub(super) graph: &'a Graph<P>,
+    pub(super) queue: BTreeSet<IndexedEventRef<'a, P>>,
     pub(super) visited: Vec<bool>, // TODO: replace with bitset, for space efficiency
 }
 
-impl<'a, T: NetworkEvent, P: PublicId> Iterator for Ancestors<'a, T, P> {
-    type Item = IndexedEventRef<'a, T, P>;
+impl<'a, P: PublicId> Iterator for Ancestors<'a, P> {
+    type Item = IndexedEventRef<'a, P>;
 
     fn next(&mut self) -> Option<Self::Item> {
         // This is a modified breadth-first search: Instead of using a simple queue to track the
