@@ -972,6 +972,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let mut payloads: Vec<_> = self
             .unconsensused_events(builder.election())
             .map(|event| event.inner())
+            .filter(|event| builder.event().sees(event))
             .filter_map(|event| event.payload_key().map(|key| (event, key)))
             .filter(|(_, payload_key)| {
                 !self.meta_elections.is_already_interesting_content(
