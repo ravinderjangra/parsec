@@ -11,11 +11,11 @@ use super::parse_test_dot_file;
 use super::peer::{Peer, PeerStatus};
 use super::schedule::{Schedule, ScheduleEvent, ScheduleOptions};
 use super::Observation;
-use block::Block;
-use error::Error;
-use gossip::{Request, Response};
-use mock::{PeerId, Transaction};
-use observation::{
+use crate::block::Block;
+use crate::error::Error;
+use crate::gossip::{Request, Response};
+use crate::mock::{PeerId, Transaction};
+use crate::observation::{
     is_more_than_two_thirds, ConsensusMode, Malice, Observation as ParsecObservation,
 };
 use rand::Rng;

@@ -6,7 +6,7 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use peer_list::PeerState;
+use crate::peer_list::PeerState;
 use std::fmt::{self, Display, Formatter};
 use std::result;
 

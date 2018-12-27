@@ -16,22 +16,22 @@ use super::{
     graph::{EventIndex, Graph},
     packed_event::PackedEvent,
 };
-use error::Error;
-use hash::Hash;
-use id::{PublicId, SecretId};
+use crate::error::Error;
+use crate::hash::Hash;
+use crate::id::{PublicId, SecretId};
 #[cfg(any(test, feature = "testing"))]
-use mock::{PeerId, Transaction};
-use network_event::NetworkEvent;
-use observation::{Observation, ObservationKey, ObservationStore};
-use peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
-use serialise;
+use crate::mock::{PeerId, Transaction};
+use crate::network_event::NetworkEvent;
+use crate::observation::{Observation, ObservationKey, ObservationStore};
+use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
+use crate::serialise;
+use crate::vote::{Vote, VoteKey};
 use std::cmp;
 #[cfg(any(test, feature = "testing"))]
 use std::collections::BTreeMap;
 use std::fmt::{self, Debug, Display, Formatter};
 #[cfg(feature = "dump-graphs")]
 use std::io::{self, Write};
-use vote::{Vote, VoteKey};
 
 pub(crate) struct Event<P: PublicId> {
     content: Content<VoteKey<P>, EventIndex, PeerIndex>,
@@ -660,18 +660,18 @@ impl Debug for ShortName {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use error::Error;
-    use gossip::{
+    use crate::error::Error;
+    use crate::gossip::{
         cause::Cause,
         event::Event,
         event_hash::EventHash,
         graph::{EventIndex, Graph},
     };
-    use id::SecretId;
-    use mock::{PeerId, Transaction};
-    use observation::ConsensusMode;
-    use observation::Observation;
-    use peer_list::{PeerList, PeerState};
+    use crate::id::SecretId;
+    use crate::mock::{PeerId, Transaction};
+    use crate::observation::ConsensusMode;
+    use crate::observation::Observation;
+    use crate::peer_list::{PeerList, PeerState};
 
     struct Context {
         graph: Graph<PeerId>,

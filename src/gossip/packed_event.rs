@@ -8,12 +8,12 @@
 
 use super::content::Content;
 use super::event_hash::EventHash;
-use hash::Hash;
-use id::PublicId;
-use network_event::NetworkEvent;
-use serialise;
+use crate::hash::Hash;
+use crate::id::PublicId;
+use crate::network_event::NetworkEvent;
+use crate::serialise;
+use crate::vote::Vote;
 use std::fmt::{self, Debug, Formatter};
-use vote::Vote;
 
 /// Packed event contains only content and signature.
 #[serde(bound = "")]

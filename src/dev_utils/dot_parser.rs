@@ -6,32 +6,32 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use gossip::{CauseInput, Event, EventIndex, Graph, IndexedEventRef};
+use crate::gossip::{CauseInput, Event, EventIndex, Graph, IndexedEventRef};
 #[cfg(any(
     all(test, feature = "malice-detection", feature = "mock"),
     feature = "testing"
 ))]
-use gossip::{EventContextMut, EventContextRef};
-use hash::Hash;
-use hash::HASH_LEN;
-use meta_voting::{
+use crate::gossip::{EventContextMut, EventContextRef};
+use crate::hash::Hash;
+use crate::hash::HASH_LEN;
+use crate::meta_voting::{
     BoolSet, MetaElection, MetaElectionHandle, MetaElections, MetaEvent, MetaVote, Step,
 };
-use mock::{PeerId, Transaction};
+use crate::mock::{PeerId, Transaction};
 #[cfg(any(
     all(test, feature = "malice-detection", feature = "mock"),
     feature = "testing"
 ))]
-use observation::ConsensusMode;
-use observation::{
+use crate::observation::ConsensusMode;
+use crate::observation::{
     Observation, ObservationHash, ObservationInfo, ObservationKey, ObservationStore,
 };
-use peer_list::{PeerIndexMap, PeerIndexSet, PeerList, PeerState};
+use crate::peer_list::{PeerIndexMap, PeerIndexSet, PeerList, PeerState};
+use crate::round_hash::RoundHash;
 use pom::char_class::{alphanum, digit, hex_digit, multispace, space};
 use pom::parser::*;
 use pom::Result as PomResult;
 use pom::{DataInput, Parser};
-use round_hash::RoundHash;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs::File;
 use std::io::{self, Read};
@@ -1037,12 +1037,12 @@ fn next_topological_event(
 #[cfg(all(test, feature = "dump-graphs"))]
 mod tests {
     use super::*;
-    use dev_utils::{Environment, RngChoice, Schedule, ScheduleOptions};
-    use dump_graph::DIR;
-    use gossip::GraphSnapshot;
-    use maidsafe_utilities::serialisation::deserialise;
-    use meta_voting::MetaElectionsSnapshot;
-    use mock::PeerId;
+    use crate::dev_utils::{Environment, RngChoice, Schedule, ScheduleOptions};
+    use crate::dump_graph::DIR;
+    use crate::gossip::GraphSnapshot;
+    use crate::maidsafe_utilities::serialisation::deserialise;
+    use crate::meta_voting::MetaElectionsSnapshot;
+    use crate::mock::PeerId;
     use std::fs;
 
     type Snapshot = (GraphSnapshot, MetaElectionsSnapshot<PeerId>);

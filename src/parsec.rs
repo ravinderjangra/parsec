@@ -6,31 +6,33 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use block::Block;
+use crate::block::Block;
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]
-use dev_utils::ParsedContents;
-use dump_graph;
-use error::{Error, Result};
+use crate::dev_utils::ParsedContents;
+use crate::dump_graph;
+use crate::error::{Error, Result};
 #[cfg(any(all(test, feature = "mock"), feature = "malice-detection"))]
-use gossip::EventHash;
-use gossip::{
+use crate::gossip::EventHash;
+use crate::gossip::{
     Event, EventContextMut, EventContextRef, EventIndex, Graph, IndexedEventRef, PackedEvent,
     Request, Response, UnpackedEvent,
 };
 #[cfg(feature = "malice-detection")]
-use id::PublicId;
-use id::SecretId;
-use meta_voting::{MetaElectionHandle, MetaElections, MetaEvent, MetaEventBuilder, MetaVote, Step};
+use crate::id::PublicId;
+use crate::id::SecretId;
+use crate::meta_voting::{
+    MetaElectionHandle, MetaElections, MetaEvent, MetaEventBuilder, MetaVote, Step,
+};
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]
-use mock::{PeerId, Transaction};
-use network_event::NetworkEvent;
+use crate::mock::{PeerId, Transaction};
+use crate::network_event::NetworkEvent;
 #[cfg(feature = "malice-detection")]
-use observation::UnprovableMalice;
-use observation::{
+use crate::observation::UnprovableMalice;
+use crate::observation::{
     is_more_than_two_thirds, ConsensusMode, Malice, Observation, ObservationHash, ObservationKey,
     ObservationStore,
 };
-use peer_list::{PeerIndex, PeerIndexSet, PeerList, PeerState};
+use crate::peer_list::{PeerIndex, PeerIndexSet, PeerList, PeerState};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::mem;
 #[cfg(all(test, feature = "mock"))]
@@ -2362,7 +2364,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         event: IndexedEventRef<'a, S::PublicId>,
         creator: PeerIndex,
     ) -> Option<IndexedEventRef<'a, S::PublicId>> {
-        use gossip::LastAncestor;
+        use crate::gossip::LastAncestor;
 
         match event.last_ancestor_by(creator) {
             LastAncestor::Some(index) => self
@@ -2623,7 +2625,7 @@ impl<T: NetworkEvent, S: SecretId> DerefMut for TestParsec<T, S> {
 /// Assert that the two parsec instances have the same events modulo their insertion order.
 #[cfg(all(test, feature = "testing"))]
 pub(crate) fn assert_same_events<T: NetworkEvent, S: SecretId>(a: &Parsec<T, S>, b: &Parsec<T, S>) {
-    use gossip::GraphSnapshot;
+    use crate::gossip::GraphSnapshot;
 
     let a = GraphSnapshot::new(&a.graph);
     let b = GraphSnapshot::new(&b.graph);

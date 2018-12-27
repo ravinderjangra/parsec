@@ -9,10 +9,10 @@
 use super::membership_list::MembershipListChange;
 use super::peer_index::PeerIndexSet;
 use super::peer_state::PeerState;
-use gossip::{EventIndex, IndexedEventRef};
-use hash::Hash;
-use id::PublicId;
-use serialise;
+use crate::gossip::{EventIndex, IndexedEventRef};
+use crate::hash::Hash;
+use crate::id::PublicId;
+use crate::serialise;
 use std::iter::{self, FromIterator};
 
 #[derive(Debug)]

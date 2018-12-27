@@ -6,12 +6,12 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use gossip::Graph;
-use id::SecretId;
-use meta_voting::MetaElections;
-use network_event::NetworkEvent;
-use observation::ObservationStore;
-use peer_list::PeerList;
+use crate::gossip::Graph;
+use crate::id::SecretId;
+use crate::meta_voting::MetaElections;
+use crate::network_event::NetworkEvent;
+use crate::observation::ObservationStore;
+use crate::peer_list::PeerList;
 
 /// Use this to initialise the folder into which the dot files will be dumped.  This allows the
 /// folder's path to be displayed at the start of a run, rather than at the arbitrary point when
@@ -59,14 +59,14 @@ pub use self::detail::DIR;
 
 #[cfg(feature = "dump-graphs")]
 mod detail {
-    use gossip::{Event, EventHash, EventIndex, Graph, GraphSnapshot, IndexedEventRef};
-    use id::{PublicId, SecretId};
-    use meta_voting::{MetaElections, MetaElectionsSnapshot, MetaEvent, MetaVote};
-    use network_event::NetworkEvent;
-    use observation::ObservationStore;
-    use peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
+    use crate::gossip::{Event, EventHash, EventIndex, Graph, GraphSnapshot, IndexedEventRef};
+    use crate::id::{PublicId, SecretId};
+    use crate::meta_voting::{MetaElections, MetaElectionsSnapshot, MetaEvent, MetaVote};
+    use crate::network_event::NetworkEvent;
+    use crate::observation::ObservationStore;
+    use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
+    use crate::serialise;
     use rand::{self, Rng};
-    use serialise;
     use std::cell::RefCell;
     use std::cmp;
     use std::collections::{BTreeMap, BTreeSet};

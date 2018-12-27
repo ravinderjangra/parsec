@@ -2,6 +2,7 @@
 authors = ["MaidSafe Developers <dev@maidsafe.net>"]
 description = "Implementation of Protocol for Asynchronous, Reliable, Secure and Efficient Consensus"
 documentation = "https://docs.rs/parsec"
+edition = "2018"
 exclude = ["input_graphs/*"]
 homepage = "https://maidsafe.net"
 license = "GPL-3.0"

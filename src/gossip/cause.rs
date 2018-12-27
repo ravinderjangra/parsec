@@ -13,21 +13,21 @@ use super::{
     event_hash::EventHash,
     graph::{EventIndex, Graph},
 };
-use error::Error;
-use id::{PublicId, SecretId};
+use crate::error::Error;
+use crate::id::{PublicId, SecretId};
 #[cfg(any(test, feature = "testing"))]
-use mock::{PeerId, Transaction};
-use network_event::NetworkEvent;
+use crate::mock::{PeerId, Transaction};
+use crate::network_event::NetworkEvent;
 #[cfg(any(test, feature = "testing"))]
-use observation::ConsensusMode;
-use observation::ObservationInfo;
+use crate::observation::ConsensusMode;
+use crate::observation::ObservationInfo;
 #[cfg(any(test, feature = "dump-graphs", feature = "testing"))]
-use observation::ObservationStore;
-use peer_list::PeerIndex;
+use crate::observation::ObservationStore;
+use crate::peer_list::PeerIndex;
+use crate::vote::{Vote, VoteKey};
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "dump-graphs")]
 use std::fmt::{self, Display, Formatter};
-use vote::{Vote, VoteKey};
 
 #[serde(bound(
     serialize = "V: Serialize, E: Serialize",

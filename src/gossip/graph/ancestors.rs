@@ -7,7 +7,7 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::{Graph, IndexedEventRef};
-use id::PublicId;
+use crate::id::PublicId;
 use std::collections::BTreeSet;
 
 pub(crate) struct Ancestors<'a, P: PublicId + 'a> {

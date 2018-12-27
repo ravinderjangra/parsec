@@ -157,7 +157,6 @@
     clippy::new_ret_no_self
 )]
 
-extern crate fnv;
 #[cfg(any(test, feature = "dump-graphs", feature = "mock"))]
 #[macro_use]
 extern crate lazy_static;
@@ -165,22 +164,14 @@ extern crate lazy_static;
 extern crate log;
 #[macro_use]
 extern crate maidsafe_utilities;
-#[cfg(any(test, feature = "testing"))]
-extern crate pom;
 #[cfg(feature = "testing")]
 #[macro_use]
 extern crate proptest as proptest_crate;
-#[cfg(any(test, feature = "dump-graphs", feature = "mock"))]
-extern crate rand;
-extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-extern crate tiny_keccak;
 #[cfg(any(test, feature = "testing", feature = "dump-graphs"))]
 #[macro_use]
 extern crate unwrap;
-#[cfg(any(test, feature = "mock"))]
-extern crate safe_crypto;
 
 mod block;
 mod dump_graph;
@@ -212,16 +203,16 @@ pub mod dev_utils;
 #[cfg(any(test, feature = "mock"))]
 pub mod mock;
 
-pub use block::Block;
+pub use crate::block::Block;
 #[cfg(feature = "dump-graphs")]
-pub use dump_graph::DIR;
-pub use error::{Error, Result};
-pub use gossip::{EventHash, PackedEvent, Request, Response};
-pub use id::{Proof, PublicId, SecretId};
-pub use network_event::NetworkEvent;
-pub use observation::{ConsensusMode, Malice, Observation};
-pub use parsec::Parsec;
-pub use vote::Vote;
+pub use crate::dump_graph::DIR;
+pub use crate::error::{Error, Result};
+pub use crate::gossip::{EventHash, PackedEvent, Request, Response};
+pub use crate::id::{Proof, PublicId, SecretId};
+pub use crate::network_event::NetworkEvent;
+pub use crate::observation::{ConsensusMode, Malice, Observation};
+pub use crate::parsec::Parsec;
+pub use crate::vote::Vote;
 
 use maidsafe_utilities::serialisation;
 use serde::ser::Serialize;

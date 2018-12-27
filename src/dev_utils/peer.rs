@@ -9,10 +9,10 @@
 use super::Observation;
 #[cfg(feature = "testing")]
 use super::ParsedContents;
-use block::Block;
-use mock::{PeerId, Transaction};
-use observation::{ConsensusMode, Malice, Observation as ParsecObservation};
-use parsec::Parsec;
+use crate::block::Block;
+use crate::mock::{PeerId, Transaction};
+use crate::observation::{ConsensusMode, Malice, Observation as ParsecObservation};
+use crate::parsec::Parsec;
 use rand::Rng;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::{self, Debug, Formatter};

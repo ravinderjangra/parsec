@@ -6,8 +6,8 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use id::{PublicId, SecretId};
-use network_event::NetworkEvent;
+use crate::id::{PublicId, SecretId};
+use crate::network_event::NetworkEvent;
 use rand::{Rand, Rng};
 use safe_crypto::Signature as SafeSignature;
 use safe_crypto::{gen_sign_keypair, PublicSignKey, SecretSignKey};

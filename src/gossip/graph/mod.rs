@@ -15,7 +15,7 @@ pub(crate) use self::event_index::EventIndex;
 pub(crate) use self::event_ref::IndexedEventRef;
 
 use super::{event::Event, event_hash::EventHash};
-use id::PublicId;
+use crate::id::PublicId;
 use std::collections::btree_map::{BTreeMap, Entry};
 use std::collections::BTreeSet;
 
@@ -234,7 +234,7 @@ pub(crate) mod snapshot {
 #[cfg(test)]
 mod tests {
     use super::super::find_event_by_short_name;
-    use dev_utils::parse_test_dot_file;
+    use crate::dev_utils::parse_test_dot_file;
 
     #[test]
     fn ancestors_iterator() {

@@ -10,9 +10,9 @@ use super::Environment;
 use super::Observation;
 use super::{PeerStatus, PeerStatuses};
 #[cfg(feature = "dump-graphs")]
-use dump_graph::DIR;
-use mock::{PeerId, Transaction, NAMES};
-use observation::{ConsensusMode, Observation as ParsecObservation};
+use crate::dump_graph::DIR;
+use crate::mock::{PeerId, Transaction, NAMES};
+use crate::observation::{ConsensusMode, Observation as ParsecObservation};
 use rand::seq;
 use rand::Rng;
 use std::collections::{BTreeMap, BTreeSet};
