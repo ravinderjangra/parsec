@@ -526,7 +526,11 @@ mod detail {
         fn write_peers(&mut self) -> io::Result<()> {
             self.writeln(format_args!("  {{"))?;
             self.writeln(format_args!("    rank=same"))?;
-            let mut peer_ids = self.peer_list.all_ids().collect::<Vec<_>>();
+            let mut peer_ids = self
+                .peer_list
+                .all_ids()
+                .map(|(_, id)| id)
+                .collect::<Vec<_>>();
             for peer_id in &peer_ids {
                 self.writeln(format_args!(
                     "    \"{:?}\" [style=filled, color=white]",
