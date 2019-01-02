@@ -1240,7 +1240,7 @@ digraph GossipGraph {
 /// }
 /// all_voters: {Alice, Bob, Carol, Dave, Eric}
 /// undecided_voters: {Alice, Bob, Carol, Dave, Eric}
-/// start_index: 131
+/// unconsensused_events: {}
 /// meta_events: {
 ///   A_37 -> {
 ///     observees: {}
