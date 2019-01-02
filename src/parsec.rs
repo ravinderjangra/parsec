@@ -2297,12 +2297,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     ) -> Result<()> {
         let (event_hash, creator, starting_index) = {
             let event = self.get_known_event(event)?;
-
-            if self.unprovable_offenders.contains(event.creator()) {
-                // Can only accuse the peer once anyway
-                return Ok(());
-            }
-
             let creator_id = self.event_creator_id(&*event)?;
             let starting_index = first_event_by_peer_in_packed_event
                 .get(creator_id)
