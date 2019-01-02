@@ -21,9 +21,6 @@ before_script:
 script:
   - set -x;
     cargo fmt -- --check &&
-    cargo test --verbose --release --features=testing &&
-    cargo test --verbose --release --features=testing,malice-detection &&
-    cargo test --verbose --release --features=dump-graphs dot_parser &&
     cargo clippy --verbose --all-targets &&
     cargo clippy --verbose --all-targets --features=dump-graphs &&
     cargo clippy --verbose --all-targets --features=testing &&
@@ -33,6 +30,9 @@ script:
     cargo clippy --verbose --all-targets --features=mock &&
     cargo clippy --verbose --all-targets --features=mock,dump-graphs &&
     cargo clippy --verbose --all-targets --features=mock,dump-graphs,malice-detection &&
-    cargo clippy --verbose --manifest-path=dot_gen/Cargo.toml
+    cargo clippy --verbose --manifest-path=dot_gen/Cargo.toml &&
+    cargo test --verbose --release --features=testing &&
+    cargo test --verbose --release --features=testing,malice-detection &&
+    cargo test --verbose --release --features=dump-graphs dot_parser
 before_cache:
  - cargo prune
