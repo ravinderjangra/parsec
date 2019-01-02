@@ -55,8 +55,6 @@
 #[macro_use]
 extern crate criterion;
 #[cfg(feature = "testing")]
-extern crate parsec;
-#[cfg(feature = "testing")]
 #[macro_use]
 extern crate unwrap;
 

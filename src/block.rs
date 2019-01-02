@@ -6,12 +6,12 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use error::Error;
-use id::{Proof, PublicId};
-use network_event::NetworkEvent;
-use observation::Observation;
+use crate::error::Error;
+use crate::id::{Proof, PublicId};
+use crate::network_event::NetworkEvent;
+use crate::observation::Observation;
+use crate::vote::Vote;
 use std::collections::{BTreeMap, BTreeSet};
-use vote::Vote;
 
 /// A struct representing a collection of votes by peers for an `Observation`.
 #[serde(bound = "")]

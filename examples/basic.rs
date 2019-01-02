@@ -52,9 +52,7 @@
 
 #[macro_use]
 extern crate clap;
-extern crate maidsafe_utilities;
-extern crate parsec;
-extern crate rand;
+use parsec;
 #[macro_use]
 extern crate unwrap;
 

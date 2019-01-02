@@ -53,11 +53,8 @@
     variant_size_differences
 )]
 
-extern crate maidsafe_utilities;
-extern crate parsec;
 #[macro_use]
 extern crate proptest;
-extern crate rand;
 #[macro_use]
 extern crate unwrap;
 

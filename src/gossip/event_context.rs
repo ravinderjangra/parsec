@@ -7,10 +7,10 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::graph::Graph;
-use id::SecretId;
-use network_event::NetworkEvent;
-use observation::{ConsensusMode, ObservationStore};
-use peer_list::PeerList;
+use crate::id::SecretId;
+use crate::network_event::NetworkEvent;
+use crate::observation::{ConsensusMode, ObservationStore};
+use crate::peer_list::PeerList;
 
 pub(crate) struct EventContextRef<'a, T: NetworkEvent, S: SecretId> {
     pub(crate) graph: &'a Graph<S::PublicId>,

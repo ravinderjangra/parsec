@@ -6,16 +6,16 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use block::Block;
-use dev_utils::parse_test_dot_file;
-use error::Error;
-use gossip::{Event, Graph, GraphSnapshot};
-use id::PublicId;
-use meta_voting::MetaElectionsSnapshot;
-use mock::{self, PeerId, Transaction};
-use observation::Observation;
-use parsec::TestParsec;
-use peer_list::{MembershipListChange, PeerIndexSet, PeerListSnapshot, PeerState};
+use crate::block::Block;
+use crate::dev_utils::parse_test_dot_file;
+use crate::error::Error;
+use crate::gossip::{Event, Graph, GraphSnapshot};
+use crate::id::PublicId;
+use crate::meta_voting::MetaElectionsSnapshot;
+use crate::mock::{self, PeerId, Transaction};
+use crate::observation::Observation;
+use crate::parsec::TestParsec;
+use crate::peer_list::{MembershipListChange, PeerIndexSet, PeerListSnapshot, PeerState};
 use std::collections::BTreeSet;
 
 macro_rules! assert_err {
@@ -507,13 +507,13 @@ fn gossip_after_fork() {
 #[cfg(feature = "malice-detection")]
 mod handle_malice {
     use super::*;
-    use dev_utils::{parse_dot_file_with_test_name, parse_test_dot_file, ParsedContents};
-    use gossip::{find_event_by_short_name, Event, EventHash};
-    use id::SecretId;
-    use mock::Transaction;
-    use network_event::NetworkEvent;
-    use observation::Malice;
-    use peer_list::{PeerIndex, PeerList, PeerState};
+    use crate::dev_utils::{parse_dot_file_with_test_name, parse_test_dot_file, ParsedContents};
+    use crate::gossip::{find_event_by_short_name, Event, EventHash};
+    use crate::id::SecretId;
+    use crate::mock::Transaction;
+    use crate::network_event::NetworkEvent;
+    use crate::observation::Malice;
+    use crate::peer_list::{PeerIndex, PeerList, PeerState};
     use std::collections::BTreeMap;
 
     // Returns iterator over all votes cast by the given node.

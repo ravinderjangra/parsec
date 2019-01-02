@@ -8,7 +8,7 @@
 
 use super::super::event::Event;
 use super::event_index::EventIndex;
-use id::PublicId;
+use crate::id::PublicId;
 use std::cmp::{Ord, Ordering, PartialOrd};
 use std::ops::Deref;
 

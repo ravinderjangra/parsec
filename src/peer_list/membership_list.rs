@@ -6,7 +6,7 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use peer_list::{PeerIndex, PeerIndexSet};
+use crate::peer_list::{PeerIndex, PeerIndexSet};
 
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd)]
 pub(crate) enum MembershipListChange {

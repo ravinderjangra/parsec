@@ -7,11 +7,11 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::dot_parser::{parse_dot_file, ParsedContents};
-use gossip::{Event, Request, Response};
-use mock::{PeerId, Transaction};
-use observation::{ConsensusMode, Observation, ObservationStore};
-use parsec::Parsec;
-use peer_list::PeerIndex;
+use crate::gossip::{Event, Request, Response};
+use crate::mock::{PeerId, Transaction};
+use crate::observation::{ConsensusMode, Observation, ObservationStore};
+use crate::parsec::Parsec;
+use crate::peer_list::PeerIndex;
 use std::collections::BTreeSet;
 use std::io;
 use std::path::Path;
@@ -194,7 +194,7 @@ fn extract_genesis_group<'a>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use parsec::assert_same_events;
+    use crate::parsec::assert_same_events;
 
     #[test]
     fn smoke() {

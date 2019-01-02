@@ -6,13 +6,13 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use gossip::{EventHash, PackedEvent};
-use hash::Hash;
-use id::PublicId;
-use network_event::NetworkEvent;
-use peer_list::PeerIndex;
+use crate::gossip::{EventHash, PackedEvent};
+use crate::hash::Hash;
+use crate::id::PublicId;
+use crate::network_event::NetworkEvent;
+use crate::peer_list::PeerIndex;
+use crate::serialise;
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
-use serialise;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BTreeSet};
 use std::error::Error;
@@ -291,8 +291,8 @@ pub fn is_more_than_two_thirds(small: usize, large: usize) -> bool {
 #[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
 pub(crate) mod snapshot {
     use super::*;
-    use id::SecretId;
-    use peer_list::PeerList;
+    use crate::id::SecretId;
+    use crate::peer_list::PeerList;
 
     #[serde(bound = "")]
     #[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]
@@ -322,8 +322,8 @@ pub(crate) mod snapshot {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::mock::{PeerId, Transaction};
     use maidsafe_utilities::serialisation::deserialise;
-    use mock::{PeerId, Transaction};
 
     #[test]
     fn malice_comparison_and_hashing_ignores_unprovable_value() {

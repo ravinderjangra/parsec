@@ -8,12 +8,12 @@
 
 use super::meta_event::MetaEvent;
 use super::meta_vote::MetaVote;
+use crate::gossip::EventIndex;
+use crate::id::PublicId;
+use crate::observation::{ObservationHash, ObservationKey};
+use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet};
+use crate::round_hash::RoundHash;
 use fnv::FnvHashMap;
-use gossip::EventIndex;
-use id::PublicId;
-use observation::{ObservationHash, ObservationKey};
-use peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet};
-use round_hash::RoundHash;
 use std::collections::{btree_map::Entry, BTreeMap, BTreeSet, VecDeque};
 use std::fmt::{self, Debug};
 use std::{iter, mem, usize};
@@ -476,10 +476,10 @@ impl MetaElections {
 pub(crate) mod snapshot {
     use super::super::meta_event::snapshot::MetaEventSnapshot;
     use super::*;
-    use gossip::{EventHash, Graph};
-    use id::SecretId;
-    use observation::snapshot::ObservationKeySnapshot;
-    use peer_list::PeerList;
+    use crate::gossip::{EventHash, Graph};
+    use crate::id::SecretId;
+    use crate::observation::snapshot::ObservationKeySnapshot;
+    use crate::peer_list::PeerList;
 
     #[serde(bound = "")]
     #[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]

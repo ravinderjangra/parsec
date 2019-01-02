@@ -8,10 +8,10 @@
 
 use super::meta_elections::MetaElectionHandle;
 use super::meta_vote::MetaVote;
-use gossip::IndexedEventRef;
-use id::PublicId;
-use observation::ObservationKey;
-use peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet};
+use crate::gossip::IndexedEventRef;
+use crate::id::PublicId;
+use crate::observation::ObservationKey;
+use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet};
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub(crate) struct MetaEvent {
@@ -83,9 +83,9 @@ impl<'a, P: PublicId + 'a> MetaEventBuilder<'a, P> {
 #[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
 pub(crate) mod snapshot {
     use super::*;
-    use id::SecretId;
-    use observation::snapshot::ObservationKeySnapshot;
-    use peer_list::PeerList;
+    use crate::id::SecretId;
+    use crate::observation::snapshot::ObservationKeySnapshot;
+    use crate::peer_list::PeerList;
     use std::collections::{BTreeMap, BTreeSet};
 
     #[serde(bound = "")]

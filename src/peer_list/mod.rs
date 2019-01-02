@@ -20,14 +20,14 @@ pub(crate) use self::snapshot::PeerListSnapshot;
 #[cfg(feature = "malice-detection")]
 use self::membership_list::MembershipListWithChanges;
 use self::peer::Peer;
-use error::Error;
+use crate::error::Error;
 #[cfg(any(test, feature = "testing"))]
-use gossip::Graph;
-use gossip::{Event, EventIndex, IndexedEventRef};
-use hash::Hash;
-use id::SecretId;
+use crate::gossip::Graph;
+use crate::gossip::{Event, EventIndex, IndexedEventRef};
+use crate::hash::Hash;
+use crate::id::SecretId;
 #[cfg(any(test, feature = "testing"))]
-use mock::PeerId;
+use crate::mock::PeerId;
 use std::collections::btree_map::{BTreeMap, Entry};
 #[cfg(any(test, feature = "testing"))]
 use std::collections::BTreeSet;
@@ -545,8 +545,8 @@ impl Builder {
 #[cfg(test)]
 pub(crate) mod snapshot {
     use super::*;
-    use gossip::EventHash;
-    use id::PublicId;
+    use crate::gossip::EventHash;
+    use crate::id::PublicId;
 
     #[derive(Eq, PartialEq, Debug)]
     pub(crate) struct PeerListSnapshot<P: PublicId>(

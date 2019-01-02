@@ -12,12 +12,12 @@ use super::{
     event_hash::EventHash,
     graph::EventIndex,
 };
-use error::Error;
-use id::{PublicId, SecretId};
-use network_event::NetworkEvent;
-use peer_list::PeerIndex;
+use crate::error::Error;
+use crate::id::{PublicId, SecretId};
+use crate::network_event::NetworkEvent;
+use crate::peer_list::PeerIndex;
+use crate::vote::{Vote, VoteKey};
 use serde::{Deserialize, Serialize};
-use vote::{Vote, VoteKey};
 
 #[serde(bound(
     serialize = "V: Serialize, E: Serialize, P: Serialize",
