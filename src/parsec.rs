@@ -2209,7 +2209,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             | Malice::IncorrectGenesis(hash)
             | Malice::InvalidAccusation(hash)
             | Malice::InvalidGossipCreator(hash)
-            | Malice::Accomplice(hash) => self
+            | Malice::Accomplice(hash, _) => self
                 .graph
                 .get_index(hash)
                 .and_then(|index| self.graph.get(index))
@@ -2281,7 +2281,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             if can_still_detect_accomplice {
                 // Repoint the malice event to the event where we're actually certain
                 let current = *self.get_known_event(current)?.hash();
-                self.accuse(accomplice.creator, Malice::Accomplice(current));
+                self.accuse(
+                    accomplice.creator,
+                    Malice::Accomplice(current, Box::new(accomplice.against.clone())),
+                );
             }
             let _ = self
                 .candidate_accomplice_accusations
@@ -2311,7 +2314,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 event,
                 CandidateAccompliceAccusation {
                     creator,
-                    accusation: Malice::Accomplice(event_hash),
+                    accusation: Malice::Accomplice(event_hash, Box::new(malice.clone())),
                     against: malice,
                     starting_index,
                 },

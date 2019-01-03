@@ -116,7 +116,7 @@ pub enum Malice<T: NetworkEvent, P: PublicId> {
     /// Detectable but unprovable malice. Relies on consensus.
     Unprovable(UnprovableMalice),
     /// A node is not reporting malice when it should
-    Accomplice(EventHash),
+    Accomplice(EventHash, Box<Malice<T, P>>),
     // TODO: add other malice variants
 }
 
