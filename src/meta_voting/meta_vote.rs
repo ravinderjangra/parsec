@@ -140,7 +140,11 @@ impl MetaVote {
                 let coin_toss = coin_tosses.get(&parent.round);
                 let mut next = parent.clone();
                 Self::increase_step(&mut next, &counts, coin_toss.cloned());
-                Some(next)
+
+                let new_counts = MetaVoteCounts::new(&next, others, total_peers);
+                let updated = Self::update_meta_vote(&next, new_counts, &coin_tosses);
+
+                Some(updated)
             } else {
                 None
             }
