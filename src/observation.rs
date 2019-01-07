@@ -128,6 +128,24 @@ impl<T: NetworkEvent, P: PublicId> Malice<T, P> {
             _ => true,
         }
     }
+
+    #[cfg(feature = "malice-detection")]
+    // If the malice specifies a single event as its source, return it.
+    pub(crate) fn single_hash(&self) -> Option<&EventHash> {
+        match self {
+            Malice::UnexpectedGenesis(hash)
+            | Malice::MissingGenesis(hash)
+            | Malice::IncorrectGenesis(hash)
+            | Malice::Fork(hash)
+            | Malice::InvalidAccusation(hash)
+            | Malice::InvalidGossipCreator(hash)
+            | Malice::Accomplice(hash, _) => Some(hash),
+            Malice::DuplicateVote(_, _)
+            | Malice::OtherParentBySameCreator(_)
+            | Malice::SelfParentByDifferentCreator(_)
+            | Malice::Unprovable(_) => None,
+        }
+    }
 }
 
 // For internal diagnostics only. The value is ignored in comparison, ordering or hashing.
