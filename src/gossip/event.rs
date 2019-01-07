@@ -252,14 +252,14 @@ impl<P: PublicId> Event<P> {
         } else {
             self.cache
                 .last_ancestors
-                .get(&peer_index)
+                .get(peer_index)
                 .map(|last_index| LastAncestor::Some(*last_index))
                 .unwrap_or(LastAncestor::None)
         }
     }
 
     pub(crate) fn is_forking_peer(&self, peer_index: PeerIndex) -> bool {
-        self.cache.forking_peers.contains(&peer_index)
+        self.cache.forking_peers.contains(peer_index)
     }
 
     pub fn payload_key(&self) -> Option<&ObservationKey> {
@@ -551,7 +551,7 @@ fn index_by_creator_and_last_ancestors<S: SecretId>(
 
     if let Some(other_parent) = other_parent {
         for (peer_index, _) in peer_list.iter() {
-            if let Some(other_index) = other_parent.last_ancestors().get(&peer_index) {
+            if let Some(other_index) = other_parent.last_ancestors().get(peer_index) {
                 let existing_index = last_ancestors.entry(peer_index).or_insert(*other_index);
                 *existing_index = cmp::max(*existing_index, *other_index);
             }
@@ -575,14 +575,14 @@ fn join_forking_peers<P: PublicId>(
     forking_peers.extend(
         self_parent
             .into_iter()
-            .flat_map(|parent| parent.cache.forking_peers.iter().cloned()),
+            .flat_map(|parent| parent.cache.forking_peers.iter()),
     );
     forking_peers.extend(
         other_parent
             .into_iter()
-            .flat_map(|parent| parent.cache.forking_peers.iter().cloned()),
+            .flat_map(|parent| parent.cache.forking_peers.iter()),
     );
-    forking_peers.extend(prev_forking_peers.iter().cloned());
+    forking_peers.extend(prev_forking_peers.iter());
     forking_peers
 }
 

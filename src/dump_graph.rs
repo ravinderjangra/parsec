@@ -269,7 +269,7 @@ mod detail {
             );
         }
         for (peer_index, meta_votes) in meta_votes {
-            let peer_id = unwrap!(peer_list.get(*peer_index)).id();
+            let peer_id = unwrap!(peer_list.get(peer_index)).id();
             let mut prefix = format!("{}: ", first_char(peer_id).unwrap_or('?'));
             for mv in meta_votes {
                 let est = mv.estimates.as_short_string();
@@ -881,7 +881,7 @@ mod detail {
     {
         input
             .iter()
-            .filter_map(|index| peer_list.get(*index).map(|peer| peer.id()))
+            .filter_map(|index| peer_list.get(index).map(|peer| peer.id()))
             .collect()
     }
 
@@ -894,7 +894,7 @@ mod detail {
     {
         input
             .iter()
-            .filter_map(|(index, value)| peer_list.get(*index).map(|peer| (peer.id(), value)))
+            .filter_map(|(index, value)| peer_list.get(index).map(|peer| (peer.id(), value)))
             .collect()
     }
 }

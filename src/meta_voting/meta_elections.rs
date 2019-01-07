@@ -105,7 +105,7 @@ impl MetaElection {
         payload_key: &ObservationKey,
     ) -> bool {
         self.interesting_events
-            .get(&creator)
+            .get(creator)
             .map_or(false, |indices| {
                 indices.iter().any(|index| {
                     if let Some(meta_event) = self.meta_events.get(index) {
@@ -172,7 +172,7 @@ impl MetaElections {
     ) -> impl Iterator<Item = MetaElectionHandle> + 'a {
         self.previous_elections
             .iter()
-            .filter(move |(_, election)| election.undecided_voters.contains(&peer_index))
+            .filter(move |(_, election)| election.undecided_voters.contains(peer_index))
             .map(|(handle, _)| *handle)
     }
 
@@ -199,8 +199,8 @@ impl MetaElections {
         };
 
         // Update round hashes.
-        for (peer_id, event_votes) in &meta_event.meta_votes {
-            let hashes = if let Some(hashes) = election.round_hashes.get_mut(&peer_id) {
+        for (peer_index, event_votes) in &meta_event.meta_votes {
+            let hashes = if let Some(hashes) = election.round_hashes.get_mut(peer_index) {
                 hashes
             } else {
                 continue;
@@ -252,7 +252,7 @@ impl MetaElections {
         peer_index: PeerIndex,
     ) -> Option<&Vec<RoundHash>> {
         self.get(handle)
-            .and_then(|e| e.round_hashes.get(&peer_index))
+            .and_then(|e| e.round_hashes.get(peer_index))
     }
 
     /// Payload decided by the given meta-election, if any.
@@ -278,7 +278,7 @@ impl MetaElections {
             election
                 .interesting_events
                 .iter()
-                .map(|(peer_index, event_indices)| (*peer_index, event_indices))
+                .map(|(peer_index, event_indices)| (peer_index, event_indices))
         })
     }
 
@@ -290,7 +290,7 @@ impl MetaElections {
         let election = self.get(handle)?;
         let event_hash = election
             .interesting_events
-            .get(&creator)
+            .get(creator)
             .and_then(VecDeque::front)?;
         let meta_event = election.meta_events.get(event_hash)?;
 
@@ -357,7 +357,7 @@ impl MetaElections {
             peer_index
         );
         if let Entry::Occupied(mut entry) = self.previous_elections.entry(handle) {
-            let _ = entry.get_mut().undecided_voters.remove(&peer_index);
+            let _ = entry.get_mut().undecided_voters.remove(peer_index);
             if entry.get().undecided_voters.is_empty() {
                 trace!("mark_as_decided: Removing meta-election {:?}", handle);
                 let _ = entry.remove();
@@ -368,11 +368,11 @@ impl MetaElections {
     }
 
     pub fn handle_peer_removed(&mut self, peer_index: PeerIndex) {
-        let _ = self.current_election.undecided_voters.remove(&peer_index);
+        let _ = self.current_election.undecided_voters.remove(peer_index);
 
         let mut to_remove = Vec::new();
         for (handle, election) in &mut self.previous_elections {
-            let _ = election.undecided_voters.remove(&peer_index);
+            let _ = election.undecided_voters.remove(peer_index);
             if election.undecided_voters.is_empty() {
                 to_remove.push(*handle);
             }
@@ -540,7 +540,7 @@ pub(crate) mod snapshot {
                 .iter()
                 .filter_map(|(peer_index, event_indices)| {
                     peer_list
-                        .get(*peer_index)
+                        .get(peer_index)
                         .map(|peer| (peer.id(), event_indices))
                 })
                 .map(|(peer_id, indices)| {
@@ -559,14 +559,14 @@ pub(crate) mod snapshot {
                     .iter()
                     .filter_map(|(peer_index, hashes)| {
                         peer_list
-                            .get(*peer_index)
+                            .get(peer_index)
                             .map(|peer| (peer.id().clone(), hashes.clone()))
                     })
                     .collect(),
                 all_voters: meta_election
                     .all_voters
                     .iter()
-                    .filter_map(|index| peer_list.get(*index).map(|peer| peer.id().clone()))
+                    .filter_map(|index| peer_list.get(index).map(|peer| peer.id().clone()))
                     .collect(),
                 interesting_events,
                 consensus_len: meta_election.consensus_len,
