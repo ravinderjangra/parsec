@@ -180,7 +180,7 @@ impl PeerStatuses {
         (*unwrap!(rng.choose(&names))).clone()
     }
 
-    /// Returns an iterator thorugh all the peers
+    /// Returns an iterator through all the peers
     pub fn all_peers(&self) -> impl Iterator<Item = &PeerId> {
         self.statuses.keys()
     }
@@ -197,7 +197,7 @@ impl PeerStatuses {
 
     /// Returns an iterator through the list of present peers (active or pending)
     pub fn present_peers(&self) -> impl Iterator<Item = &PeerId> {
-        self.peers_by_status(|s| *s == PeerStatus::Active || *s == PeerStatus::Failed)
+        self.peers_by_status(|s| *s == PeerStatus::Active || *s == PeerStatus::Pending)
             .map(|(id, _)| id)
     }
 
@@ -216,7 +216,7 @@ impl PeerStatuses {
         let _ = self.statuses.insert(p, PeerStatus::Active);
     }
 
-    // Randomly chooses a peer to remove.
+    /// Randomly chooses a peer to remove.
     pub fn remove_random_peer<R: Rng>(&mut self, rng: &mut R, min_active: usize) -> Option<PeerId> {
         let name = self.choose_name_to_remove(rng);
 

@@ -796,7 +796,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         info!(
             "{:?} got consensus on block {} with payload {:?} and payload hash {:?}",
             self.our_pub_id(),
-            self.meta_elections.consensus_history().len() - 1,
+            self.meta_elections.consensus_history().len(),
             payload,
             payload_key.hash()
         )

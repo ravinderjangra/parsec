@@ -553,10 +553,10 @@ impl Network {
                     for block in &self.peer(&peer).blocks()[first_block..] {
                         match *block.payload() {
                             ParsecObservation::Remove { ref peer_id, .. } => {
-                                peer_removal_guard.record_consensus_on_remove_peer(peer_id);
+                                peer_removal_guard.record_consensus_on_remove_peer(peer, peer_id);
                             }
                             ParsecObservation::Add { ref peer_id, .. } => {
-                                peer_removal_guard.record_consensus_on_add_peer(peer_id);
+                                peer_removal_guard.record_consensus_on_add_peer(peer, peer_id);
                             }
                             _ => (),
                         }
@@ -605,14 +605,20 @@ enum PeerRemovalState {
     Removed,
 }
 
+impl PeerRemovalState {
+    fn is_active(&self) -> bool {
+        match *self {
+            PeerRemovalState::Added | PeerRemovalState::Removing(..) => true,
+            PeerRemovalState::Adding(..) | PeerRemovalState::Removed => false,
+        }
+    }
+}
+
 impl PeerRemovalGuard {
     fn num_active(&self) -> usize {
         self.states
             .values()
-            .filter(|state| match state {
-                PeerRemovalState::Added | PeerRemovalState::Removing(..) => true,
-                PeerRemovalState::Adding(..) | PeerRemovalState::Removed => false,
-            })
+            .filter(|state| state.is_active())
             .count()
     }
 
@@ -637,49 +643,55 @@ impl PeerRemovalGuard {
         let _ = self.states.insert(peer_id, PeerRemovalState::Adding(0));
     }
 
-    fn record_consensus_on_add_peer(&mut self, peer_id: &PeerId) {
+    fn record_consensus_on_add_peer(&mut self, recorder_id: &PeerId, added_peer_id: &PeerId) {
+        if !unwrap!(self.states.get(recorder_id)).is_active() {
+            return;
+        }
+
         let active = self.num_active();
-
-        if let Some(state) = self.states.get_mut(peer_id) {
-            let add = if let PeerRemovalState::Adding(ref mut count) = *state {
-                *count += 1;
-                is_more_than_two_thirds(*count, active)
-            } else {
-                false
-            };
-
-            if add {
-                *state = PeerRemovalState::Added;
-            }
+        let state = unwrap!(
+            self.states.get_mut(added_peer_id),
+            "record consensus on add {:?} failed: unknown peer",
+            added_peer_id
+        );
+        let add = if let PeerRemovalState::Adding(ref mut count) = *state {
+            *count += 1;
+            is_more_than_two_thirds(*count, active)
         } else {
-            panic!("record consensus on add {:?} failed: unknown peer", peer_id)
+            false
+        };
+
+        if add {
+            *state = PeerRemovalState::Added;
         }
     }
 
-    fn record_consensus_on_remove_peer(&mut self, peer_id: &PeerId) {
+    fn record_consensus_on_remove_peer(&mut self, recorder_id: &PeerId, removed_peer_id: &PeerId) {
+        if !unwrap!(self.states.get(recorder_id)).is_active() {
+            return;
+        }
+
         let active = self.num_active();
 
-        if let Some(state) = self.states.get_mut(peer_id) {
-            let remove = match *state {
-                PeerRemovalState::Adding(..) | PeerRemovalState::Added => panic!(
-                    "record consensus on remove {:?} failed: not scheduled for removal",
-                    peer_id
-                ),
-                PeerRemovalState::Removing(ref mut count) => {
-                    *count += 1;
-                    is_more_than_two_thirds(*count, active)
-                }
-                PeerRemovalState::Removed => false,
-            };
-
-            if remove {
-                *state = PeerRemovalState::Removed;
+        let state = unwrap!(
+            self.states.get_mut(removed_peer_id),
+            "record consensus on remove {:?} failed: unknown peer",
+            removed_peer_id
+        );
+        let remove = match *state {
+            PeerRemovalState::Adding(..) | PeerRemovalState::Added => panic!(
+                "record consensus on remove {:?} failed: not scheduled for removal",
+                removed_peer_id
+            ),
+            PeerRemovalState::Removing(ref mut count) => {
+                *count += 1;
+                is_more_than_two_thirds(*count, active)
             }
-        } else {
-            panic!(
-                "record consensus on remove {:?} failed: unknown peer",
-                peer_id
-            )
+            PeerRemovalState::Removed => false,
+        };
+
+        if remove {
+            *state = PeerRemovalState::Removed;
         }
     }
 
