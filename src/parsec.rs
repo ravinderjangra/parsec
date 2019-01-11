@@ -1201,12 +1201,17 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                         &other_votes,
                         &coin_tosses,
                         voters.len(),
+                        voters.contains(builder.event().creator()),
                     )
                 };
 
                 builder.add_meta_votes(peer_index, new_meta_votes);
             }
         } else if self.is_observer(builder) {
+            // For the case that event's creator is not a voter, the initial estimation shall not be
+            // created.
+            let is_voter = voters.contains(builder.event().creator());
+
             // Start meta votes for this event.
             for peer_index in &voters {
                 let other_votes = self.collect_other_meta_votes(
@@ -1219,7 +1224,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
                 builder.add_meta_votes(
                     peer_index,
-                    MetaVote::new(initial_estimate, &other_votes, voters.len()),
+                    MetaVote::new(initial_estimate, &other_votes, voters.len(), is_voter),
                 );
             }
         };
@@ -1263,13 +1268,17 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let round = if parent_vote.estimates.is_empty() {
             // We're waiting for the coin toss result already.
             if parent_vote.round == 0 {
-                // This should never happen as estimates get cleared only in increase step when the
-                // step is Step::GenuineFlip and the round gets incremented.
-                log_or_panic!(
-                    "{:?} missing parent vote estimates at round 0.",
-                    self.our_pub_id()
-                );
-                return Err(Error::Logic);
+                if voters.contains(event.creator()) {
+                    // This should never happen as estimates get cleared only in increase step when the
+                    // step is Step::GenuineFlip and the round gets incremented.
+                    log_or_panic!(
+                        "{:?} missing parent vote estimates at round 0.",
+                        self.our_pub_id()
+                    );
+                    return Err(Error::Logic);
+                } else {
+                    return Ok(None);
+                }
             }
             parent_vote.round - 1
         } else if parent_vote.step == Step::GenuineFlip {
