@@ -22,6 +22,10 @@ pub(crate) struct Peer<P: PublicId> {
     pub(super) state: PeerState,
     pub(super) events: Events,
     pub(super) last_gossiped_event: Option<EventIndex>,
+    // As a performance optimisation we keep track of which events we've cleared for Accomplice
+    // accusations.
+    #[cfg(feature = "malice-detection")]
+    pub accomplice_event_checkpoint: Option<EventIndex>,
     membership_list: PeerIndexSet,
     membership_list_changes: Vec<(usize, MembershipListChange)>,
 }
@@ -36,6 +40,8 @@ impl<P: PublicId> Peer<P> {
             state,
             events: Events::new(),
             last_gossiped_event: None,
+            #[cfg(feature = "malice-detection")]
+            accomplice_event_checkpoint: None,
             membership_list: PeerIndexSet::default(),
             membership_list_changes: Vec::new(),
         }

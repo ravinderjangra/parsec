@@ -11,14 +11,12 @@ use crate::block::Block;
 use crate::dev_utils::ParsedContents;
 use crate::dump_graph;
 use crate::error::{Error, Result};
-#[cfg(any(all(test, feature = "mock"), feature = "malice-detection"))]
+#[cfg(all(test, feature = "mock"))]
 use crate::gossip::EventHash;
 use crate::gossip::{
     Event, EventContextMut, EventContextRef, EventIndex, Graph, IndexedEventRef, PackedEvent,
     Request, Response, UnpackedEvent,
 };
-#[cfg(feature = "malice-detection")]
-use crate::id::PublicId;
 use crate::id::SecretId;
 use crate::meta_voting::{
     MetaElectionHandle, MetaElections, MetaEvent, MetaEventBuilder, MetaVote, Step,
@@ -91,10 +89,6 @@ pub struct Parsec<T: NetworkEvent, S: SecretId> {
     consensus_mode: ConsensusMode,
     // Accusations to raise at the end of the processing of current gossip message.
     pending_accusations: Accusations<T, S::PublicId>,
-    // Accusations to raise at the end of the processing of current gossip message, once we've
-    // established they are genuine.
-    #[cfg(feature = "malice-detection")]
-    candidate_accomplice_accusations: CandidateAccompliceAccusations<T, S::PublicId>,
     // Peers we accused of unprovable malice.
     #[cfg(feature = "malice-detection")]
     unprovable_offenders: PeerIndexSet,
@@ -257,8 +251,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             meta_elections: MetaElections::new(genesis_group),
             consensus_mode,
             pending_accusations: vec![],
-            #[cfg(feature = "malice-detection")]
-            candidate_accomplice_accusations: BTreeSet::new(),
             #[cfg(feature = "malice-detection")]
             unprovable_offenders: PeerIndexSet::default(),
         }
@@ -596,13 +588,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let mut forking_peers = PeerIndexSet::default();
         let mut known = Vec::new();
 
-        // Among the packed_events, Keep track of each peer's earliest events' self_parent, as we
-        // will use them as bounds in the graph for where we look for malice accusations.
-        // NOTE: there is the assumption here that the events arrive in order.
-        #[cfg(feature = "malice-detection")]
-        let first_event_by_peer_in_packed_event =
-            collect_first_self_parents::<T, S>(&packed_events);
-
         for packed_event in packed_events {
             match Event::unpack(packed_event, &forking_peers, self.event_context_mut())? {
                 UnpackedEvent::New(event) => {
@@ -626,14 +611,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                         .record_gossiped_event_by(src_index, event_index);
 
                     #[cfg(feature = "malice-detection")]
-                    {
-                        // See if this event now allows us to act on any of the accusations in
-                        // candidate_accomplice_accusations
-                        self.act_on_accomplice_accusation_candidates_we_can_now_prove(event_index)?;
-                        // We never act on accomplice immediately when we spot it as we need
-                        // follow up events to be certain.
-                        self.detect_accomplice(event_index, &first_event_by_peer_in_packed_event)?;
-                    }
+                    self.detect_accomplice(event_index)?;
                 }
                 UnpackedEvent::Known(index) => {
                     known.push(index);
@@ -2175,10 +2153,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     fn accusations_by_peer_since(
         &self,
         peer_index: PeerIndex,
-        oldest_event: EventIndex,
+        oldest_event: Option<EventIndex>,
     ) -> Accusations<T, S::PublicId> {
         self.graph
-            .iter_from(oldest_event.topological_index())
+            .iter_from(oldest_event.map(|e| e.topological_index()).unwrap_or(0))
             .filter(|event| event.creator() == peer_index)
             .filter_map(|event| match self.event_payload(event.inner()) {
                 Some(Observation::Accusation { offender, malice }) => Some((offender, malice)),
@@ -2209,7 +2187,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             | Malice::IncorrectGenesis(hash)
             | Malice::InvalidAccusation(hash)
             | Malice::InvalidGossipCreator(hash)
-            | Malice::Accomplice(hash) => self
+            | Malice::Accomplice(hash, _) => self
                 .graph
                 .get_index(hash)
                 .and_then(|index| self.graph.get(index))
@@ -2249,79 +2227,41 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
     }
 
-    fn act_on_accomplice_accusation_candidates_we_can_now_prove(
-        &mut self,
-        current: EventIndex,
-    ) -> Result<()> {
-        let accomplice_accusations_we_can_act_on = self
-            .candidate_accomplice_accusations
-            .iter()
-            .filter(|(index, accomplice_accusation)| {
-                self.graph
-                    .iter_from(index.topological_index() + 1)
-                    .filter(|event| event.creator() == accomplice_accusation.creator)
-                    .any(|event| {
-                        self.event_payload(&*event)
-                            .map(|payload| match payload {
-                                Observation::Accusation { .. } => false,
-                                _ => true,
-                            })
-                            .unwrap_or(true)
-                    })
-            })
-            .cloned()
-            .collect::<CandidateAccompliceAccusations<_, _>>();
-
-        for (index, accomplice) in accomplice_accusations_we_can_act_on {
-            let can_still_detect_accomplice = self
-                .detect_accomplice_for_our_accusations(current, accomplice.starting_index)?
-                .iter()
-                .any(|(_, mal)| mal == &accomplice.against);
-
-            if can_still_detect_accomplice {
-                // Repoint the malice event to the event where we're actually certain
-                let current = *self.get_known_event(current)?.hash();
-                self.accuse(accomplice.creator, Malice::Accomplice(current));
-            }
-            let _ = self
-                .candidate_accomplice_accusations
-                .remove(&(index, accomplice));
-        }
-        Ok(())
-    }
-
-    fn detect_accomplice(
-        &mut self,
-        event: EventIndex,
-        first_event_by_peer_in_packed_event: &BTreeMap<S::PublicId, EventHash>,
-    ) -> Result<()> {
-        let (event_hash, creator, starting_index) = {
+    fn detect_accomplice(&mut self, event: EventIndex) -> Result<()> {
+        let (event_hash, creator) = {
             let event = self.get_known_event(event)?;
+            let is_accusation = self
+                .event_payload(&event)
+                .map(|payload| match payload {
+                    Observation::Accusation { .. } => true,
+                    _ => false,
+                })
+                .unwrap_or(false);
 
-            if self.unprovable_offenders.contains(event.creator()) {
-                // Can only accuse the peer once anyway
+            // If this is a Request or an accusation for another malice then the peer might not
+            // have raised the accusation yet.
+            if event.is_request() || is_accusation {
                 return Ok(());
             }
 
-            let creator_id = self.event_creator_id(&*event)?;
-            let starting_index = first_event_by_peer_in_packed_event
-                .get(creator_id)
-                .and_then(|event| self.graph.get_index(event))
-                .ok_or(Error::Logic)?;
-
-            (*event.hash(), event.creator(), starting_index)
+            (*event.hash(), event.creator())
         };
 
+        let starting_index = self.peer_list.accomplice_event_checkpoint_by(creator);
         for (_, malice) in self.detect_accomplice_for_our_accusations(event, starting_index)? {
-            let _ = self.candidate_accomplice_accusations.insert((
-                event,
-                CandidateAccompliceAccusation {
-                    creator,
-                    accusation: Malice::Accomplice(event_hash),
-                    against: malice,
-                    starting_index,
-                },
-            ));
+            self.accuse(creator, Malice::Accomplice(event_hash, Box::new(malice)));
+        }
+
+        // Updating the event checkpoint for the next event when it will be used as starting index,
+        // purely as an optimisation
+        let last_malice_event_accused_by_peer = self
+            .accusations_by_peer_since(creator, starting_index)
+            .iter()
+            .filter_map(|(_, malice)| malice.single_hash().and_then(|h| self.graph.get_index(&h)))
+            .max_by_key(|event_index| event_index.topological_index());
+        if let Some(index) = last_malice_event_accused_by_peer {
+            self.peer_list
+                .update_accomplice_event_checkpoint_by(creator, index);
         }
 
         Ok(())
@@ -2330,7 +2270,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     fn detect_accomplice_for_our_accusations(
         &self,
         event: EventIndex,
-        starting_event: EventIndex,
+        starting_event: Option<EventIndex>,
     ) -> Result<Accusations<T, S::PublicId>> {
         let creator = self.get_known_event(event)?.creator();
         let our_accusations = self.accusations_by_peer_since(PeerIndex::OUR, starting_event);
@@ -2413,34 +2353,6 @@ enum PostProcessAction {
 }
 
 type Accusations<T, P> = Vec<(PeerIndex, Malice<T, P>)>;
-
-#[cfg(feature = "malice-detection")]
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
-struct CandidateAccompliceAccusation<T: NetworkEvent, P: PublicId> {
-    creator: PeerIndex,
-    accusation: Malice<T, P>,
-    against: Malice<T, P>,
-    // The start of the range where source accusations are considered. This is purely a performance
-    // optimisation.
-    starting_index: EventIndex,
-}
-
-#[cfg(feature = "malice-detection")]
-type CandidateAccompliceAccusations<T, P> =
-    BTreeSet<(EventIndex, CandidateAccompliceAccusation<T, P>)>;
-
-#[cfg(feature = "malice-detection")]
-fn collect_first_self_parents<T: NetworkEvent, S: SecretId>(
-    packed_events: &[PackedEvent<T, S::PublicId>],
-) -> BTreeMap<S::PublicId, EventHash> {
-    let mut events = BTreeMap::new();
-    packed_events.iter().for_each(|event| {
-        if let Some(hash) = event.self_parent() {
-            let _ = events.entry(event.creator().clone()).or_insert(*hash);
-        }
-    });
-    events
-}
 
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]
 impl Parsec<Transaction, PeerId> {

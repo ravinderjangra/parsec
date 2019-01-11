@@ -116,7 +116,7 @@ pub enum Malice<T: NetworkEvent, P: PublicId> {
     /// Detectable but unprovable malice. Relies on consensus.
     Unprovable(UnprovableMalice),
     /// A node is not reporting malice when it should
-    Accomplice(EventHash),
+    Accomplice(EventHash, Box<Malice<T, P>>),
     // TODO: add other malice variants
 }
 
@@ -126,6 +126,24 @@ impl<T: NetworkEvent, P: PublicId> Malice<T, P> {
         match *self {
             Malice::Unprovable(_) => false,
             _ => true,
+        }
+    }
+
+    #[cfg(feature = "malice-detection")]
+    // If the malice specifies a single event as its source, return it.
+    pub(crate) fn single_hash(&self) -> Option<&EventHash> {
+        match self {
+            Malice::UnexpectedGenesis(hash)
+            | Malice::MissingGenesis(hash)
+            | Malice::IncorrectGenesis(hash)
+            | Malice::Fork(hash)
+            | Malice::InvalidAccusation(hash)
+            | Malice::InvalidGossipCreator(hash)
+            | Malice::Accomplice(hash, _) => Some(hash),
+            Malice::DuplicateVote(_, _)
+            | Malice::OtherParentBySameCreator(_)
+            | Malice::SelfParentByDifferentCreator(_)
+            | Malice::Unprovable(_) => None,
         }
     }
 }

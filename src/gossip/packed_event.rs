@@ -41,14 +41,3 @@ impl<T: NetworkEvent, P: PublicId> PackedEvent<T, P> {
         EventHash(Hash::from(serialise(&self.content).as_slice()))
     }
 }
-
-#[cfg(feature = "malice-detection")]
-impl<T: NetworkEvent, P: PublicId> PackedEvent<T, P> {
-    pub(crate) fn self_parent(&self) -> Option<&EventHash> {
-        self.content.self_parent()
-    }
-
-    pub(crate) fn creator(&self) -> &P {
-        &self.content.creator
-    }
-}

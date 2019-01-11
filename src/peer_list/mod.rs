@@ -356,6 +356,29 @@ impl<S: SecretId> PeerList<S> {
         }
     }
 
+    #[cfg(feature = "malice-detection")]
+    pub fn accomplice_event_checkpoint_by(&self, peer_index: PeerIndex) -> Option<EventIndex> {
+        self.get(peer_index)
+            .and_then(|peer| peer.accomplice_event_checkpoint)
+    }
+
+    #[cfg(feature = "malice-detection")]
+    pub fn update_accomplice_event_checkpoint_by(
+        &mut self,
+        peer_index: PeerIndex,
+        event_index: EventIndex,
+    ) {
+        if let Some(peer) = self.get_known_mut(peer_index) {
+            if peer
+                .accomplice_event_checkpoint
+                .map(|current| current.topological_index() < event_index.topological_index())
+                .unwrap_or(true)
+            {
+                peer.accomplice_event_checkpoint = Some(event_index)
+            }
+        }
+    }
+
     pub fn confirm_can_add_event(&self, event: &Event<S::PublicId>) -> Result<(), Error> {
         let peer = self.get(event.creator()).ok_or(Error::UnknownPeer)?;
         if event.creator() == PeerIndex::OUR || peer.state.can_send() {

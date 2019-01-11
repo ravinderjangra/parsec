@@ -515,6 +515,7 @@ mod handle_malice {
     use crate::observation::Malice;
     use crate::peer_list::{PeerIndex, PeerList, PeerState};
     use std::collections::BTreeMap;
+    use std::ops::Deref;
 
     // Returns iterator over all votes cast by the given node.
     fn our_votes<T: NetworkEvent, S: SecretId>(
@@ -998,18 +999,26 @@ mod handle_malice {
         accuser: &TestParsec<Transaction, PeerId>,
         suspect: &PeerId,
         event_hash: &EventHash,
+        malice_hash: &EventHash,
     ) {
-        let (offender, hash) = unwrap!(our_votes(accuser)
+        let (offender, hash, against) = unwrap!(our_votes(accuser)
             .filter_map(|payload| match payload {
                 Observation::Accusation {
                     ref offender,
-                    malice: Malice::Accomplice(hash),
-                } => Some((offender, hash)),
+                    malice: Malice::Accomplice(hash, against),
+                } => Some((offender, hash, against)),
                 _ => None,
             })
             .next());
         assert_eq!(offender, suspect);
         assert_eq!(hash, event_hash);
+
+        let against_hash = match against.deref() {
+            Malice::InvalidAccusation(hash) => Some(hash),
+            _ => None,
+        }
+        .expect("Not all malice types supported in test for now");
+        assert_eq!(against_hash, malice_hash);
     }
 
     #[test]
@@ -1045,7 +1054,7 @@ mod handle_malice {
         assert!(our_votes(&carol)
             .filter_map(|payload| match payload {
                 Observation::Accusation {
-                    malice: Malice::Accomplice(_),
+                    malice: Malice::Accomplice(_, _),
                     ..
                 } => Some(()),
                 _ => None,
@@ -1081,7 +1090,7 @@ mod handle_malice {
         assert_eq!(*hash, invalid_accusation);
         assert!(our_accusations.next().is_none());
 
-        verify_accused_accomplice(&carol, bob.our_pub_id(), &b_31_hash);
+        verify_accused_accomplice(&carol, bob.our_pub_id(), &b_31_hash, &invalid_accusation);
     }
 
     #[test]
@@ -1119,16 +1128,13 @@ mod handle_malice {
         let message = unwrap!(bob.create_gossip(Some(&PeerId::new("Carol"))));
         unwrap!(carol.handle_request(bob.our_pub_id(), message));
         assert!(carol.graph().contains(&invalid_accusation));
-        assert!(our_votes(&carol)
-            .filter_map(|payload| match payload {
-                Observation::Accusation {
-                    malice: Malice::Accomplice(_),
-                    ..
-                } => Some(()),
-                _ => None,
-            })
-            .next()
-            .is_none());
+        assert!(our_votes(&carol).all(|payload| match payload {
+            Observation::Accusation {
+                malice: Malice::Accomplice(_, _),
+                ..
+            } => false,
+            _ => true,
+        }));
 
         // Bob adds another event which he then sends to Carol, who now becomes sure that Bob
         // didn't create the accusation he should have.
@@ -1144,7 +1150,7 @@ mod handle_malice {
         unwrap!(carol.handle_request(bob.our_pub_id(), message));
 
         // Verify that Carol detected malice and accused Bob of `Accomplice`.
-        verify_accused_accomplice(&carol, bob.our_pub_id(), &b_31_hash);
+        verify_accused_accomplice(&carol, bob.our_pub_id(), &b_31_hash, &invalid_accusation);
     }
 
     #[test]
@@ -1177,7 +1183,7 @@ mod handle_malice {
         // Verify that Carol didn't accuse Bob of `Accomplice`.
         assert!(our_votes(&carol).all(|payload| match payload {
             Observation::Accusation {
-                malice: Malice::Accomplice(_),
+                malice: Malice::Accomplice(_, _),
                 ..
             } => false,
             _ => true,
@@ -1230,16 +1236,13 @@ mod handle_malice {
         let message = unwrap!(alice.create_gossip(Some(&PeerId::new("Carol"))));
         unwrap!(carol.handle_request(alice.our_pub_id(), message));
         assert!(carol.graph().contains(&invalid_accusation));
-        assert!(our_votes(&carol)
-            .filter_map(|payload| match payload {
-                Observation::Accusation {
-                    ref offender,
-                    malice: Malice::Accomplice(hash),
-                } => Some((offender, hash)),
-                _ => None,
-            })
-            .next()
-            .is_none());
+        assert!(our_votes(&carol).all(|payload| match payload {
+            Observation::Accusation {
+                malice: Malice::Accomplice(_, _),
+                ..
+            } => false,
+            _ => true,
+        }));
 
         // Bob sends his side of the story, the honest side, to Carol
         let message = unwrap!(bob.create_gossip(Some(&PeerId::new("Carol"))));
@@ -1248,7 +1251,7 @@ mod handle_malice {
         // Verify that Carol didn't accuse Bob of `Accomplice`.
         assert!(our_votes(&carol).all(|payload| match payload {
             Observation::Accusation {
-                malice: Malice::Accomplice(_),
+                malice: Malice::Accomplice(_, _),
                 ..
             } => false,
             _ => true,
