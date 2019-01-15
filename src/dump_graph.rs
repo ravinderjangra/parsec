@@ -8,7 +8,7 @@
 
 use crate::gossip::Graph;
 use crate::id::SecretId;
-use crate::meta_voting::MetaElections;
+use crate::meta_voting::MetaElection;
 use crate::network_event::NetworkEvent;
 use crate::observation::ObservationStore;
 use crate::peer_list::PeerList;
@@ -32,14 +32,14 @@ pub(crate) fn init() {
 pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
     owner_id: &S::PublicId,
     gossip_graph: &Graph<S::PublicId>,
-    meta_elections: &MetaElections,
+    meta_election: &MetaElection,
     peer_list: &PeerList<S>,
     observations: &ObservationStore<T, S::PublicId>,
 ) {
     detail::to_file(
         owner_id,
         gossip_graph,
-        meta_elections,
+        meta_election,
         peer_list,
         observations,
     )
@@ -48,7 +48,7 @@ pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
 pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
     _: &S::PublicId,
     _: &Graph<S::PublicId>,
-    _: &MetaElections,
+    _: &MetaElection,
     _: &PeerList<S>,
     _: &ObservationStore<T, S::PublicId>,
 ) {
@@ -61,7 +61,7 @@ pub use self::detail::DIR;
 mod detail {
     use crate::gossip::{Event, EventHash, EventIndex, Graph, GraphSnapshot, IndexedEventRef};
     use crate::id::{PublicId, SecretId};
-    use crate::meta_voting::{MetaElections, MetaElectionsSnapshot, MetaEvent, MetaVote};
+    use crate::meta_voting::{MetaElection, MetaElectionSnapshot, MetaEvent, MetaVote};
     use crate::network_event::NetworkEvent;
     use crate::observation::ObservationStore;
     use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
@@ -118,12 +118,12 @@ mod detail {
         mut file_path: PathBuf,
         gossip_graph: &Graph<S::PublicId>,
         peer_list: &PeerList<S>,
-        meta_elections: &MetaElections,
+        meta_election: &MetaElection,
     ) {
         if let Some("dev_utils::dot_parser::tests::dot_parser") = thread::current().name() {
             let snapshot = (
                 GraphSnapshot::new(gossip_graph),
-                MetaElectionsSnapshot::new(meta_elections, gossip_graph, peer_list),
+                MetaElectionSnapshot::new(meta_election, gossip_graph, peer_list),
             );
             let snapshot = serialise(&snapshot);
 
@@ -140,7 +140,7 @@ mod detail {
     pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
         owner_id: &S::PublicId,
         gossip_graph: &Graph<S::PublicId>,
-        meta_elections: &MetaElections,
+        meta_election: &MetaElection,
         peer_list: &PeerList<S>,
         observations: &ObservationStore<T, S::PublicId>,
     ) {
@@ -152,12 +152,12 @@ mod detail {
             *count
         });
         let file_path = DIR.with(|dir| dir.join(format!("{}-{:03}.dot", id, call_count)));
-        catch_dump(file_path.clone(), gossip_graph, peer_list, meta_elections);
+        catch_dump(file_path.clone(), gossip_graph, peer_list, meta_election);
 
         match DotWriter::new(
             &file_path,
             gossip_graph,
-            meta_elections,
+            meta_election,
             peer_list,
             observations,
         ) {
@@ -302,7 +302,7 @@ mod detail {
     struct DotWriter<'a, T: NetworkEvent + 'a, S: SecretId + 'a> {
         file: BufWriter<File>,
         gossip_graph: &'a Graph<S::PublicId>,
-        meta_elections: &'a MetaElections,
+        meta_election: &'a MetaElection,
         peer_list: &'a PeerList<S>,
         observations: &'a ObservationStore<T, S::PublicId>,
         indent: usize,
@@ -314,14 +314,14 @@ mod detail {
         fn new(
             file_path: &Path,
             gossip_graph: &'a Graph<S::PublicId>,
-            meta_elections: &'a MetaElections,
+            meta_election: &'a MetaElection,
             peer_list: &'a PeerList<S>,
             observations: &'a ObservationStore<T, S::PublicId>,
         ) -> io::Result<Self> {
             File::create(&file_path).map(|file| DotWriter {
                 file: BufWriter::new(file),
                 gossip_graph,
-                meta_elections,
+                meta_election,
                 peer_list,
                 observations,
                 indent: 0,
@@ -547,12 +547,12 @@ mod detail {
         }
 
         fn write_event_details(&mut self, peer_index: PeerIndex) -> io::Result<()> {
-            let current_meta_events = self.meta_elections.current_meta_events();
+            let meta_events = self.meta_election.meta_events();
             for event_index in self.peer_list.peer_events(peer_index) {
                 if let Some(event) = self.gossip_graph.get(event_index) {
                     let attr = EventAttributes::new(
                         event.inner(),
-                        current_meta_events.get(&event_index),
+                        meta_events.get(&event_index),
                         self.observations,
                         &self.peer_list,
                     );
@@ -587,7 +587,7 @@ mod detail {
                 Self::COMMENT,
                 self.indentation()
             ));
-            for key in self.meta_elections.consensus_history() {
+            for key in self.meta_election.consensus_history() {
                 lines.push(format!(
                     "{}{}{}",
                     Self::COMMENT,
@@ -596,7 +596,6 @@ mod detail {
                 ));
             }
 
-            let election = self.meta_elections.current_election();
             lines.push("".to_string());
 
             // write round hashes
@@ -606,7 +605,8 @@ mod detail {
                 self.indentation()
             ));
             self.indent();
-            let round_hashes = convert_peer_index_map(&election.round_hashes, &self.peer_list);
+            let round_hashes =
+                convert_peer_index_map(&self.meta_election.round_hashes, &self.peer_list);
             for (peer, hashes) in round_hashes {
                 lines.push(format!(
                     "{}{}{:?} -> [",
@@ -639,7 +639,7 @@ mod detail {
             self.indent();
 
             let interesting_events =
-                convert_peer_index_map(&election.interesting_events, &self.peer_list);
+                convert_peer_index_map(&self.meta_election.interesting_events, &self.peer_list);
             for (peer, events) in interesting_events {
                 let event_names: Vec<String> = events
                     .iter()
@@ -661,11 +661,12 @@ mod detail {
                 "{}{}all_voters: {:?}",
                 Self::COMMENT,
                 self.indentation(),
-                convert_peer_index_set(&election.all_voters, &self.peer_list)
+                convert_peer_index_set(&self.meta_election.all_voters, &self.peer_list)
             ));
 
             // write unconsensused events
-            let unconsensused_events: BTreeSet<_> = election
+            let unconsensused_events: BTreeSet<_> = self
+                .meta_election
                 .unconsensused_events
                 .iter()
                 .filter_map(|index| self.gossip_graph.get(*index))
@@ -686,7 +687,8 @@ mod detail {
             ));
             self.indent();
             // sort by creator, then index
-            let meta_events = election
+            let meta_events = self
+                .meta_election
                 .meta_events
                 .iter()
                 .filter_map(|(index, mev)| {

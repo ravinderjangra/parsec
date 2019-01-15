@@ -11,7 +11,7 @@ use crate::dev_utils::parse_test_dot_file;
 use crate::error::Error;
 use crate::gossip::{Event, Graph, GraphSnapshot};
 use crate::id::PublicId;
-use crate::meta_voting::MetaElectionsSnapshot;
+use crate::meta_voting::MetaElectionSnapshot;
 use crate::mock::{self, PeerId, Transaction};
 use crate::observation::Observation;
 use crate::parsec::TestParsec;
@@ -45,7 +45,7 @@ macro_rules! btree_set {
 struct Snapshot {
     peer_list: PeerListSnapshot<PeerId>,
     events: GraphSnapshot,
-    meta_elections: MetaElectionsSnapshot<PeerId>,
+    meta_election: MetaElectionSnapshot<PeerId>,
     consensused_blocks: Vec<Block<Transaction, PeerId>>,
 }
 
@@ -54,8 +54,8 @@ impl Snapshot {
         Snapshot {
             peer_list: PeerListSnapshot::new(parsec.peer_list(), parsec.graph()),
             events: GraphSnapshot::new(parsec.graph()),
-            meta_elections: MetaElectionsSnapshot::new(
-                parsec.meta_elections(),
+            meta_election: MetaElectionSnapshot::new(
+                parsec.meta_election(),
                 parsec.graph(),
                 parsec.peer_list(),
             ),
@@ -180,16 +180,13 @@ fn from_parsed_contents() {
     let parsec = TestParsec::from_parsed_contents(parsed_contents);
     assert_eq!(parsed_contents_comparison.graph, *parsec.graph());
     assert_eq!(
-        parsed_contents_comparison.meta_elections,
-        *parsec.meta_elections()
+        parsed_contents_comparison.meta_election,
+        *parsec.meta_election()
     );
 
     let parsed_contents_other = parse_test_dot_file("1.dot");
     assert_ne!(parsed_contents_other.graph, *parsec.graph());
-    assert_ne!(
-        parsed_contents_other.meta_elections,
-        *parsec.meta_elections()
-    );
+    assert_ne!(parsed_contents_other.meta_election, *parsec.meta_election());
 }
 
 #[test]
