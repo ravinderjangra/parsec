@@ -1,10 +1,10 @@
 /// our_id: Alice
 /// peer_list: {
-///   Alice; PeerState(VOTE|SEND|RECV); peers: {}
-///   Bob; PeerState(VOTE|SEND|RECV); peers: {Alice, Bob, Carol, Dave, Eric}
-///   Carol; PeerState(VOTE|SEND|RECV); peers: {Alice, Bob, Carol, Dave, Eric}
-///   Dave; PeerState(VOTE|SEND|RECV); peers: {Alice, Bob, Carol, Dave, Eric}
-///   Eric; PeerState(VOTE|SEND|RECV); peers: {Alice, Bob, Carol, Dave, Eric}
+///   Alice: PeerState(VOTE|SEND|RECV)
+///   Bob: PeerState(VOTE|SEND|RECV)
+///   Carol: PeerState(VOTE|SEND|RECV)
+///   Dave: PeerState(VOTE|SEND|RECV)
+///   Eric: PeerState(VOTE|SEND|RECV)
 /// }
 digraph GossipGraph {
   splines=false
@@ -112,155 +112,6 @@ digraph GossipGraph {
 /// consensus_history:
 /// 557e90b3402a68f6ff018647557ba9919531dd36a5bd86650947bc56dcef3a40
 
-/// MetaElectionHandle(0)
-/// consensus_len: 0
-/// round_hashes: {
-///   Alice -> [
-///     RoundHash { round: 0, latest_block_hash: 0000000000000000000000000000000000000000000000000000000000000000 }
-///   ]
-///   Bob -> [
-///     RoundHash { round: 0, latest_block_hash: 0000000000000000000000000000000000000000000000000000000000000000 }
-///   ]
-///   Carol -> [
-///     RoundHash { round: 0, latest_block_hash: 0000000000000000000000000000000000000000000000000000000000000000 }
-///   ]
-///   Dave -> [
-///     RoundHash { round: 0, latest_block_hash: 0000000000000000000000000000000000000000000000000000000000000000 }
-///   ]
-///   Eric -> [
-///     RoundHash { round: 0, latest_block_hash: 0000000000000000000000000000000000000000000000000000000000000000 }
-///   ]
-/// }
-/// interesting_events: {
-///   Alice -> ["A_4", "A_12"]
-///   Bob -> ["B_5", "B_14"]
-///   Carol -> ["C_4", "C_12"]
-///   Dave -> ["D_3", "D_11"]
-/// }
-/// all_voters: {Alice, Bob, Carol, Dave, Eric}
-/// undecided_voters: {Eric}
-/// payload: Genesis({Alice, Bob, Carol, Dave, Eric})
-/// meta_events: {
-///   A_4 -> {
-///     observees: {}
-///     interesting_content: [Genesis({Alice, Bob, Carol, Dave, Eric})]
-///   }
-///   A_12 -> {
-///     observees: {Alice, Bob, Carol, Dave}
-///     interesting_content: [Remove(Eric)]
-///     meta_votes: {
-///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   t   -   -   - 
-///       E: 0/0   f   -   -   - 
-///     }
-///   }
-///   A_37 -> {
-///     observees: {Alice, Bob, Carol, Dave}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   t   t   t   t 
-///       E: 0/0   f   f   f   - 
-///          0/1   f   f   f   f 
-///     }
-///   }
-///   B_5 -> {
-///     observees: {}
-///     interesting_content: [Genesis({Alice, Bob, Carol, Dave, Eric})]
-///   }
-///   B_14 -> {
-///     observees: {Alice, Bob, Carol, Dave}
-///     interesting_content: [Remove(Eric)]
-///     meta_votes: {
-///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   t   -   -   - 
-///       E: 0/0   f   -   -   - 
-///     }
-///   }
-///   B_49 -> {
-///     observees: {Alice, Bob, Carol, Dave}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   t   t   t   t 
-///       E: 0/0   f   f   f   - 
-///          0/1   f   f   f   f 
-///     }
-///   }
-///   C_4 -> {
-///     observees: {}
-///     interesting_content: [Genesis({Alice, Bob, Carol, Dave, Eric})]
-///   }
-///   C_12 -> {
-///     observees: {Alice, Bob, Carol, Dave}
-///     interesting_content: [Remove(Eric)]
-///     meta_votes: {
-///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   t   -   -   - 
-///       E: 0/0   f   -   -   - 
-///     }
-///   }
-///   C_38 -> {
-///     observees: {Alice, Bob, Carol, Dave}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   t   t   t   t 
-///       E: 0/0   f   f   f   - 
-///          0/1   f   f   f   f 
-///     }
-///   }
-///   D_3 -> {
-///     observees: {}
-///     interesting_content: [Genesis({Alice, Bob, Carol, Dave, Eric})]
-///   }
-///   D_11 -> {
-///     observees: {Alice, Bob, Carol, Dave}
-///     interesting_content: [Remove(Eric)]
-///     meta_votes: {
-///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   t   -   -   - 
-///       E: 0/0   f   -   -   - 
-///     }
-///   }
-///   D_35 -> {
-///     observees: {Alice, Bob, Carol, Dave}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   t   t   t   t 
-///       E: 0/0   f   f   f   - 
-///          0/1   f   f   f   f 
-///     }
-///   }
-/// }
-
-/// MetaElectionHandle(CURRENT)
-/// consensus_len: 1
 /// round_hashes: {
 ///   Alice -> [
 ///     RoundHash { round: 0, latest_block_hash: 557e90b3402a68f6ff018647557ba9919531dd36a5bd86650947bc56dcef3a40 }
@@ -285,7 +136,6 @@ digraph GossipGraph {
 ///   Dave -> ["D_11"]
 /// }
 /// all_voters: {Alice, Bob, Carol, Dave, Eric}
-/// undecided_voters: {Alice, Bob, Carol, Dave, Eric}
 /// meta_events: {
 ///   A_12 -> {
 ///     observees: {}
@@ -296,12 +146,12 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   t   t   t   t 
-///       E: 0/0   f   f   f   - 
-///          0/1   f   f   f   f 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   t   t   t   t
+///       E: 0/0   f   f   f   -
+///          0/1   f   f   f   f
 ///     }
 ///   }
 ///   B_14 -> {
@@ -313,12 +163,12 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   t   t   t   t 
-///       E: 0/0   f   f   f   - 
-///          0/1   f   f   f   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   t   t   t   t
+///       E: 0/0   f   f   f   -
+///          0/1   f   f   f   -
 ///     }
 ///   }
 ///   C_12 -> {
@@ -330,12 +180,12 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   t   t   t   t 
-///       E: 0/0   f   f   f   - 
-///          0/1   f   f   f   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   t   t   t   t
+///       E: 0/0   f   f   f   -
+///          0/1   f   f   f   -
 ///     }
 ///   }
 ///   D_11 -> {
@@ -347,12 +197,12 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   t   t   t   t 
-///       E: 0/0   f   f   f   - 
-///          0/1   f   f   f   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   t   t   t   t
+///       E: 0/0   f   f   f   -
+///          0/1   f   f   f   -
 ///     }
 ///   }
 /// }

@@ -1279,7 +1279,6 @@ digraph GossipGraph {
 ///   Eric -> []
 /// }
 /// all_voters: {Alice, Bob, Carol, Dave, Eric}
-/// undecided_voters: {Alice, Bob, Carol, Dave, Eric}
 /// unconsensused_events: {}
 /// meta_events: {
 ///   A_37 -> {

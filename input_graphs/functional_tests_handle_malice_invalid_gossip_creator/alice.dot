@@ -1,8 +1,8 @@
 /// our_id: Alice
 /// peer_list: {
-///   Alice; PeerState(VOTE|SEND|RECV); peers: {Alice, Bob}
-///   Bob; PeerState(VOTE|SEND|RECV); peers: {Alice, Bob}
-///   Carol; PeerState(); peers: {}
+///   Alice: PeerState(VOTE|SEND|RECV)
+///   Bob: PeerState(VOTE|SEND|RECV)
+///   Carol: PeerState()
 /// }
 digraph GossipGraph {
   splines=false
@@ -93,8 +93,6 @@ digraph GossipGraph {
 /// ===== meta-elections =====
 /// consensus_history:
 
-/// MetaElectionHandle(CURRENT)
-/// consensus_len: 0
 /// round_hashes: {
 ///   Alice -> [
 ///     RoundHash { round: 0, latest_block_hash: 0000000000000000000000000000000000000000000000000000000000000000 }
@@ -106,7 +104,6 @@ digraph GossipGraph {
 /// interesting_events: {
 /// }
 /// all_voters: {Alice, Bob}
-/// undecided_voters: {Alice, Bob}
 /// meta_events: {
 ///   A_1 -> {
 ///     observees: {}

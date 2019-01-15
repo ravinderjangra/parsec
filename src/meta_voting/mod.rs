@@ -18,6 +18,6 @@ pub(crate) use self::bool_set::BoolSet;
 pub(crate) use self::meta_elections::snapshot::MetaElectionsSnapshot;
 #[cfg(any(test, feature = "testing"))]
 pub(crate) use self::meta_elections::MetaElection;
-pub(crate) use self::meta_elections::{MetaElectionHandle, MetaElections};
+pub(crate) use self::meta_elections::MetaElections;
 pub(crate) use self::meta_event::{MetaEvent, MetaEventBuilder};
 pub(crate) use self::meta_vote::{MetaVote, Step};

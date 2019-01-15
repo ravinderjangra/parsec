@@ -6,7 +6,6 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use super::meta_elections::MetaElectionHandle;
 use super::meta_vote::MetaVote;
 use crate::gossip::IndexedEventRef;
 use crate::id::PublicId;
@@ -24,12 +23,8 @@ pub(crate) struct MetaEvent {
 }
 
 impl MetaEvent {
-    pub fn build<P: PublicId>(
-        election: MetaElectionHandle,
-        event: IndexedEventRef<P>,
-    ) -> MetaEventBuilder<P> {
+    pub fn build<P: PublicId>(event: IndexedEventRef<P>) -> MetaEventBuilder<P> {
         MetaEventBuilder {
-            election,
             event,
             meta_event: MetaEvent {
                 observees: PeerIndexSet::default(),
@@ -41,16 +36,11 @@ impl MetaEvent {
 }
 
 pub(crate) struct MetaEventBuilder<'a, P: PublicId + 'a> {
-    election: MetaElectionHandle,
     event: IndexedEventRef<'a, P>,
     meta_event: MetaEvent,
 }
 
 impl<'a, P: PublicId + 'a> MetaEventBuilder<'a, P> {
-    pub fn election(&self) -> MetaElectionHandle {
-        self.election
-    }
-
     pub fn event(&self) -> IndexedEventRef<'a, P> {
         self.event
     }

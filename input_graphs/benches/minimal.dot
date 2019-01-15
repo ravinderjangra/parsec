@@ -1,9 +1,9 @@
 /// our_id: Alice
 /// peer_list: {
-///   Alice; PeerState(VOTE|SEND|RECV); peers: {}
-///   Bob; PeerState(VOTE|SEND|RECV); peers: {Alice, Bob, Carol, Dave}
-///   Carol; PeerState(VOTE|SEND|RECV); peers: {Alice, Bob, Carol, Dave}
-///   Dave; PeerState(VOTE|SEND|RECV); peers: {Alice, Bob, Carol, Dave}
+///   Alice: PeerState(VOTE|SEND|RECV)
+///   Bob: PeerState(VOTE|SEND|RECV)
+///   Carol: PeerState(VOTE|SEND|RECV)
+///   Dave: PeerState(VOTE|SEND|RECV)
 /// }
 digraph GossipGraph {
   splines=false
@@ -969,8 +969,6 @@ digraph GossipGraph {
 /// consensus_history:
 /// a137c1b54c5895b13a1e204869f650636920286bd5b903e0576a9a15a2f58c2c
 
-/// MetaElectionHandle(CURRENT)
-/// consensus_len: 1
 /// round_hashes: {
 ///   Alice -> [
 ///     RoundHash { round: 0, latest_block_hash: a137c1b54c5895b13a1e204869f650636920286bd5b903e0576a9a15a2f58c2c }
@@ -992,7 +990,6 @@ digraph GossipGraph {
 ///   Dave -> ["D_8"]
 /// }
 /// all_voters: {Alice, Bob, Carol, Dave}
-/// undecided_voters: {Alice, Bob, Carol, Dave}
 /// meta_events: {
 ///   A_0 -> {
 ///     observees: {}
@@ -1043,10 +1040,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   f   -   -   - 
+///       A: 0/0   t   -   -   -
+///       B: 0/0   t   -   -   -
+///       C: 0/0   t   -   -   -
+///       D: 0/0   f   -   -   -
 ///     }
 ///   }
 ///   A_12 -> {
@@ -1054,10 +1051,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   f   -   -   - 
+///       A: 0/0   t   -   -   -
+///       B: 0/0   t   -   -   -
+///       C: 0/0   t   -   -   -
+///       D: 0/0   f   -   -   -
 ///     }
 ///   }
 ///   A_13 -> {
@@ -1065,10 +1062,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   f   -   -   - 
+///       A: 0/0   t   -   -   -
+///       B: 0/0   t   -   -   -
+///       C: 0/0   t   -   -   -
+///       D: 0/0   f   -   -   -
 ///     }
 ///   }
 ///   A_14 -> {
@@ -1076,10 +1073,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   f   -   -   - 
+///       A: 0/0   t   -   -   -
+///       B: 0/0   t   -   -   -
+///       C: 0/0   t   -   -   -
+///       D: 0/0   f   -   -   -
 ///     }
 ///   }
 ///   A_15 -> {
@@ -1087,10 +1084,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   - 
-///       B: 0/0   t   t   t   - 
-///       C: 0/0   t   t   t   - 
-///       D: 0/0   f   f   f   - 
+///       A: 0/0   t   t   t   -
+///       B: 0/0   t   t   t   -
+///       C: 0/0   t   t   t   -
+///       D: 0/0   f   f   f   -
 ///     }
 ///   }
 ///   A_16 -> {
@@ -1098,10 +1095,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   - 
-///       B: 0/0   t   t   t   - 
-///       C: 0/0   t   t   t   - 
-///       D: 0/0   f   f   f   - 
+///       A: 0/0   t   t   t   -
+///       B: 0/0   t   t   t   -
+///       C: 0/0   t   t   t   -
+///       D: 0/0   f   f   f   -
 ///     }
 ///   }
 ///   A_17 -> {
@@ -1109,11 +1106,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   -   -   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   -   -   -
 ///     }
 ///   }
 ///   A_18 -> {
@@ -1121,11 +1118,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   f   f   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   f   f   -
 ///     }
 ///   }
 ///   A_19 -> {
@@ -1133,11 +1130,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   f   f   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   f   f   -
 ///     }
 ///   }
 ///   A_20 -> {
@@ -1145,11 +1142,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   f   f   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   f   f   -
 ///     }
 ///   }
 ///   A_21 -> {
@@ -1157,11 +1154,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   f   f   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   f   f   -
 ///     }
 ///   }
 ///   A_22 -> {
@@ -1169,11 +1166,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   f   f   f 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   f   f   f
 ///     }
 ///   }
 ///   B_0 -> {
@@ -1221,10 +1218,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   - 
-///       B: 0/0   t   t   t   - 
-///       C: 0/0   t   t   t   - 
-///       D: 0/0   f   f   f   - 
+///       A: 0/0   t   t   t   -
+///       B: 0/0   t   t   t   -
+///       C: 0/0   t   t   t   -
+///       D: 0/0   f   f   f   -
 ///     }
 ///   }
 ///   B_11 -> {
@@ -1232,10 +1229,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   - 
-///       B: 0/0   t   t   t   - 
-///       C: 0/0   t   t   t   - 
-///       D: 0/0   f   f   f   - 
+///       A: 0/0   t   t   t   -
+///       B: 0/0   t   t   t   -
+///       C: 0/0   t   t   t   -
+///       D: 0/0   f   f   f   -
 ///     }
 ///   }
 ///   B_12 -> {
@@ -1243,10 +1240,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   - 
-///       B: 0/0   t   t   t   - 
-///       C: 0/0   t   t   t   - 
-///       D: 0/0   f   f   f   - 
+///       A: 0/0   t   t   t   -
+///       B: 0/0   t   t   t   -
+///       C: 0/0   t   t   t   -
+///       D: 0/0   f   f   f   -
 ///     }
 ///   }
 ///   B_13 -> {
@@ -1254,10 +1251,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   - 
-///       B: 0/0   t   t   t   - 
-///       C: 0/0   t   t   t   - 
-///       D: 0/0   f   f   f   - 
+///       A: 0/0   t   t   t   -
+///       B: 0/0   t   t   t   -
+///       C: 0/0   t   t   t   -
+///       D: 0/0   f   f   f   -
 ///     }
 ///   }
 ///   B_14 -> {
@@ -1265,10 +1262,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   - 
-///       B: 0/0   t   t   t   - 
-///       C: 0/0   t   t   t   - 
-///       D: 0/0   f   f   f   - 
+///       A: 0/0   t   t   t   -
+///       B: 0/0   t   t   t   -
+///       C: 0/0   t   t   t   -
+///       D: 0/0   f   f   f   -
 ///     }
 ///   }
 ///   B_15 -> {
@@ -1276,10 +1273,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   - 
-///       B: 0/0   t   t   t   - 
-///       C: 0/0   t   t   t   - 
-///       D: 0/0   f   f   f   - 
+///       A: 0/0   t   t   t   -
+///       B: 0/0   t   t   t   -
+///       C: 0/0   t   t   t   -
+///       D: 0/0   f   f   f   -
 ///     }
 ///   }
 ///   B_16 -> {
@@ -1287,10 +1284,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   - 
-///       B: 0/0   t   t   t   - 
-///       C: 0/0   t   t   t   - 
-///       D: 0/0   f   f   f   - 
+///       A: 0/0   t   t   t   -
+///       B: 0/0   t   t   t   -
+///       C: 0/0   t   t   t   -
+///       D: 0/0   f   f   f   -
 ///     }
 ///   }
 ///   B_17 -> {
@@ -1298,11 +1295,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   -   -   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   -   -   -
 ///     }
 ///   }
 ///   B_18 -> {
@@ -1310,11 +1307,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   f   f   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   f   f   -
 ///     }
 ///   }
 ///   B_19 -> {
@@ -1322,11 +1319,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   f   f   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   f   f   -
 ///     }
 ///   }
 ///   C_0 -> {
@@ -1374,10 +1371,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   f   -   -   - 
+///       A: 0/0   t   -   -   -
+///       B: 0/0   t   -   -   -
+///       C: 0/0   t   -   -   -
+///       D: 0/0   f   -   -   -
 ///     }
 ///   }
 ///   C_11 -> {
@@ -1385,10 +1382,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   f   -   -   - 
+///       A: 0/0   t   -   -   -
+///       B: 0/0   t   -   -   -
+///       C: 0/0   t   -   -   -
+///       D: 0/0   f   -   -   -
 ///     }
 ///   }
 ///   C_12 -> {
@@ -1396,10 +1393,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   f   -   -   - 
+///       A: 0/0   t   -   -   -
+///       B: 0/0   t   -   -   -
+///       C: 0/0   t   -   -   -
+///       D: 0/0   f   -   -   -
 ///     }
 ///   }
 ///   C_13 -> {
@@ -1407,10 +1404,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   f   -   -   - 
+///       A: 0/0   t   -   -   -
+///       B: 0/0   t   -   -   -
+///       C: 0/0   t   -   -   -
+///       D: 0/0   f   -   -   -
 ///     }
 ///   }
 ///   C_14 -> {
@@ -1418,10 +1415,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   f   -   -   - 
+///       A: 0/0   t   -   -   -
+///       B: 0/0   t   -   -   -
+///       C: 0/0   t   -   -   -
+///       D: 0/0   f   -   -   -
 ///     }
 ///   }
 ///   C_15 -> {
@@ -1429,10 +1426,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   f   -   -   - 
+///       A: 0/0   t   -   -   -
+///       B: 0/0   t   -   -   -
+///       C: 0/0   t   -   -   -
+///       D: 0/0   f   -   -   -
 ///     }
 ///   }
 ///   C_16 -> {
@@ -1440,10 +1437,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   - 
-///       B: 0/0   t   t   t   - 
-///       C: 0/0   t   t   t   - 
-///       D: 0/0   f   f   f   - 
+///       A: 0/0   t   t   t   -
+///       B: 0/0   t   t   t   -
+///       C: 0/0   t   t   t   -
+///       D: 0/0   f   f   f   -
 ///     }
 ///   }
 ///   C_17 -> {
@@ -1451,10 +1448,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   - 
-///       B: 0/0   t   t   t   - 
-///       C: 0/0   t   t   t   - 
-///       D: 0/0   f   f   f   - 
+///       A: 0/0   t   t   t   -
+///       B: 0/0   t   t   t   -
+///       C: 0/0   t   t   t   -
+///       D: 0/0   f   f   f   -
 ///     }
 ///   }
 ///   C_18 -> {
@@ -1462,11 +1459,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   -   -   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   -   -   -
 ///     }
 ///   }
 ///   C_19 -> {
@@ -1474,11 +1471,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   -   -   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   -   -   -
 ///     }
 ///   }
 ///   C_20 -> {
@@ -1486,11 +1483,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   -   -   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   -   -   -
 ///     }
 ///   }
 ///   C_21 -> {
@@ -1498,11 +1495,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   -   -   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   -   -   -
 ///     }
 ///   }
 ///   D_0 -> {
@@ -1562,10 +1559,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   f   -   -   - 
+///       A: 0/0   t   -   -   -
+///       B: 0/0   t   -   -   -
+///       C: 0/0   t   -   -   -
+///       D: 0/0   f   -   -   -
 ///     }
 ///   }
 ///   D_14 -> {
@@ -1573,10 +1570,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   f   -   -   - 
+///       A: 0/0   t   -   -   -
+///       B: 0/0   t   -   -   -
+///       C: 0/0   t   -   -   -
+///       D: 0/0   f   -   -   -
 ///     }
 ///   }
 ///   D_15 -> {
@@ -1584,10 +1581,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   f   -   -   - 
+///       A: 0/0   t   -   -   -
+///       B: 0/0   t   -   -   -
+///       C: 0/0   t   -   -   -
+///       D: 0/0   f   -   -   -
 ///     }
 ///   }
 ///   D_16 -> {
@@ -1595,10 +1592,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   f   -   -   - 
+///       A: 0/0   t   -   -   -
+///       B: 0/0   t   -   -   -
+///       C: 0/0   t   -   -   -
+///       D: 0/0   f   -   -   -
 ///     }
 ///   }
 ///   D_17 -> {
@@ -1606,10 +1603,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   - 
-///       B: 0/0   t   t   t   - 
-///       C: 0/0   t   t   t   - 
-///       D: 0/0   f   f   f   - 
+///       A: 0/0   t   t   t   -
+///       B: 0/0   t   t   t   -
+///       C: 0/0   t   t   t   -
+///       D: 0/0   f   f   f   -
 ///     }
 ///   }
 ///   D_18 -> {
@@ -1617,11 +1614,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   -   -   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   -   -   -
 ///     }
 ///   }
 ///   D_19 -> {
@@ -1629,11 +1626,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   -   -   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   -   -   -
 ///     }
 ///   }
 ///   D_20 -> {
@@ -1641,11 +1638,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   -   -   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   -   -   -
 ///     }
 ///   }
 ///   D_21 -> {
@@ -1653,11 +1650,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   -   -   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   -   -   -
 ///     }
 ///   }
 ///   D_22 -> {
@@ -1665,11 +1662,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   -   -   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   -   -   -
 ///     }
 ///   }
 ///   D_23 -> {
@@ -1677,11 +1674,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   f   f   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   f   f   -
 ///     }
 ///   }
 ///   D_24 -> {
@@ -1689,11 +1686,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   f   f   f   - 
-///          0/1   f   f   f   - 
+///       A: 0/0   t   t   t   t
+///       B: 0/0   t   t   t   t
+///       C: 0/0   t   t   t   t
+///       D: 0/0   f   f   f   -
+///          0/1   f   f   f   -
 ///     }
 ///   }
 /// }
