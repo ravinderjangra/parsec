@@ -256,7 +256,7 @@ fn add_peer() {
 
 #[test]
 fn remove_peer() {
-    // Generated with RNG seed: [3580486268, 2993583568, 344059332, 3173905166].
+    // Generated with RNG seed: [1048220270, 1673192006, 3171321266, 2580820785].
     let mut parsed_contents = parse_test_dot_file("alice.dot");
 
     // The final decision to remove Eric is reached in the last event of Alice.
@@ -1143,12 +1143,14 @@ mod handle_malice {
         let (_, _b_31) = unwrap!(alice.remove_last_event());
         let b_30_index = unwrap!(find_event_by_short_name(alice.graph(), "B_30")).event_index();
         let a_27_index = unwrap!(find_event_by_short_name(alice.graph(), "A_27")).event_index();
+
         let a_28_replacement = unwrap!(Event::new_from_request(
             a_27_index,
             b_30_index,
             &PeerIndexSet::default(),
             alice.event_context()
         ));
+
         unwrap!(alice.add_event(a_28_replacement));
 
         let mut carol = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(

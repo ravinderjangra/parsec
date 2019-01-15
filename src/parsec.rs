@@ -17,7 +17,7 @@ use crate::gossip::{
     Event, EventContextMut, EventContextRef, EventIndex, Graph, IndexedEventRef, PackedEvent,
     Request, Response, UnpackedEvent,
 };
-use crate::id::SecretId;
+use crate::id::{PublicId, SecretId};
 use crate::meta_voting::{MetaElection, MetaEvent, MetaEventBuilder, MetaVote, Step};
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]
 use crate::mock::{PeerId, Transaction};
@@ -124,7 +124,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .collect();
 
         let mut parsec = Self::empty(peer_list, genesis_indices, consensus_mode);
-        parsec.meta_election.initialise(parsec.peer_list.all_ids());
+        parsec
+            .meta_election
+            .initialise_round_hashes(parsec.peer_list.all_ids());
 
         // Add initial event.
         let event = Event::new_initial(parsec.event_context());
@@ -208,7 +210,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         let mut parsec = Self::empty(peer_list, genesis_indices, consensus_mode);
 
-        parsec.meta_election.initialise(parsec.peer_list.all_ids());
+        parsec
+            .meta_election
+            .initialise_round_hashes(parsec.peer_list.all_ids());
 
         let initial_event = Event::new_initial(parsec.event_context());
         if let Err(error) = parsec.add_event(initial_event) {
@@ -441,14 +445,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
     /// Must only be used for events which have already been added to our graph.
     fn get_known_event(&self, event_index: EventIndex) -> Result<IndexedEventRef<S::PublicId>> {
-        self.graph.get(event_index).ok_or_else(|| {
-            log_or_panic!(
-                "{:?} doesn't have event {:?}",
-                self.our_pub_id(),
-                event_index
-            );
-            Error::Logic
-        })
+        get_known_event(self.our_pub_id(), &self.graph, event_index)
     }
 
     fn confirm_peer_state(&self, peer_index: PeerIndex, required: PeerState) -> Result<()> {
@@ -709,7 +706,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             );
 
             // Trigger reprocess.
-            self.meta_election.initialise(self.peer_list.all_ids());
+            self.meta_election
+                .initialise_round_hashes(self.peer_list.all_ids());
             let start_index = self.start_index();
             return Ok(PostProcessAction::Restart(start_index));
         }
@@ -825,29 +823,29 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     fn create_meta_event(&mut self, event_index: EventIndex) -> Result<()> {
-        if self.meta_election.meta_event(event_index).is_some() {
-            return Ok(());
-        }
+        let event = get_known_event(self.our_pub_id(), &self.graph, event_index)?;
 
-        let (meta_event, creator) = {
-            let event = self.get_known_event(event_index)?;
-            trace!(
-                "{:?} creating a meta-event for event {:?}",
-                self.our_pub_id(),
-                event
-            );
+        let mut builder =
+            if let Some(meta_event) = self.meta_election.remove_meta_event(event_index) {
+                meta_event.rebuild(event)
+            } else {
+                MetaEvent::build(event)
+            };
 
-            let mut builder = MetaEvent::build(event);
+        trace!(
+            "{:?} creating a meta-event for event {:?}",
+            self.our_pub_id(),
+            event
+        );
 
-            self.set_interesting_content(&mut builder);
-            self.set_observees(&mut builder);
-            self.set_meta_votes(&mut builder)?;
+        self.set_interesting_content(&mut builder);
+        self.set_observees(&mut builder);
+        self.set_meta_votes(&mut builder)?;
 
-            (builder.finish(), event.creator())
-        };
+        let meta_event = builder.finish();
 
         self.meta_election
-            .add_meta_event(event_index, creator, meta_event);
+            .add_meta_event(event_index, event.creator(), meta_event);
 
         Ok(())
     }
@@ -855,14 +853,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     // Any payloads which this event sees as "interesting".  If this returns a non-empty set, then
     // this event is classed as an interesting one.
     fn set_interesting_content(&self, builder: &mut MetaEventBuilder<S::PublicId>) {
-        /* TODO: bring this back somehow
-        if let Some(payloads_keys) =
-            self.previous_interesting_content(builder.election(), builder.event())
-        {
-            builder.set_interesting_content(payloads_keys);
+        if self.reuse_previous_interesting_content(builder) {
             return;
-        };
-        */
+        }
 
         let peers_that_can_vote = self.voters();
         let start_index = self.start_index();
@@ -907,53 +900,47 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         builder.set_interesting_content(payloads);
     }
 
-    /*
-    // Try to get interesting content of the given event from the previous meta-election.
-    fn previous_interesting_content(
+    // Try to reuse interesting content of the given event from the previous meta-election.
+    fn reuse_previous_interesting_content(
         &self,
-        election: MetaElectionHandle,
-        event: IndexedEventRef<S::PublicId>,
-    ) -> Option<Vec<ObservationKey>> {
-        let prev_election = self.meta_elections.preceding(election)?;
-
-        // If membership change occurred, we can't reuse the interesting content.
-        // Note: it's not enough to compare just the voter counts, because the preceding
-        // meta-election might not necessarily be the directly preceding one, but might be further
-        // in the past.
-        if self.meta_elections.voters(election) != self.meta_elections.voters(prev_election) {
-            return None;
+        builder: &mut MetaEventBuilder<S::PublicId>,
+    ) -> bool {
+        // Can't reuse interesting content of new meta-events.
+        if builder.is_new() {
+            return false;
         }
 
-        let prev_meta_event = self
-            .meta_elections
-            .meta_event(prev_election, event.event_index())?;
-        let payloads: Vec<_> = prev_meta_event
-            .interesting_content
-            .iter()
-            .filter(|payload_key| {
-                if self.meta_elections.is_already_interesting_content(
-                    election,
-                    event.creator(),
-                    payload_key,
-                ) {
-                    return false;
-                }
+        let last_consensus = if let Some(payload_key) = self.meta_election.consensus_history.last()
+        {
+            payload_key
+        } else {
+            // This is the first meta-election. Nothing to reuse.
+            return false;
+        };
 
-                if self
-                    .meta_elections
-                    .is_already_consensused(election, payload_key)
-                {
-                    return false;
-                }
+        // If membership change occurred in the last meta-election, we can't reuse the interesting
+        // content.
+        let payload = self
+            .observations
+            .get(last_consensus)
+            .map(|info| &info.observation);
+        match payload {
+            Some(&Observation::Add { .. })
+            | Some(&Observation::Remove { .. })
+            | Some(&Observation::Accusation { .. }) => return false,
+            _ => (),
+        }
 
-                true
-            })
-            .cloned()
-            .collect();
+        let creator = builder.event().creator();
+        builder.reuse_interesting_content(|payload_key| {
+            payload_key != last_consensus
+                && !self
+                    .meta_election
+                    .is_already_interesting_content(creator, payload_key)
+        });
 
-        Some(payloads)
+        true
     }
-    */
 
     // Returns true if `builder.event()` has an ancestor by a different creator that has `payload`
     // in interesting content
@@ -2163,6 +2150,17 @@ impl<T: NetworkEvent, S: SecretId> Drop for Parsec<T, S> {
     }
 }
 
+fn get_known_event<'a, P: PublicId>(
+    our_pub_id: &P,
+    graph: &'a Graph<P>,
+    event_index: EventIndex,
+) -> Result<IndexedEventRef<'a, P>> {
+    graph.get(event_index).ok_or_else(|| {
+        log_or_panic!("{:?} doesn't have event {:?}", our_pub_id, event_index);
+        Error::Logic
+    })
+}
+
 // What to do after processing the current event.
 enum PostProcessAction {
     // Continue with the next event (if any)
@@ -2300,7 +2298,14 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
 
     #[cfg(feature = "malice-detection")]
     pub fn remove_last_event(&mut self) -> Option<(EventIndex, Event<S::PublicId>)> {
-        self.graph.remove_last()
+        let (event_index, event) = self.graph.remove_last()?;
+        let _ = self
+            .0
+            .meta_election
+            .unconsensused_events
+            .remove(&event_index);
+
+        Some((event_index, event))
     }
 
     #[cfg(feature = "malice-detection")]

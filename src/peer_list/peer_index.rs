@@ -239,6 +239,10 @@ impl PeerIndexSet {
             false
         }
     }
+
+    pub fn clear(&mut self) {
+        self.0.clear()
+    }
 }
 
 impl Default for PeerIndexSet {

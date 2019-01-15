@@ -80,6 +80,10 @@ impl MetaElection {
         let _ = self.meta_events.insert(event_index, meta_event);
     }
 
+    pub fn remove_meta_event(&mut self, event_index: EventIndex) -> Option<MetaEvent> {
+        self.meta_events.remove(&event_index)
+    }
+
     pub fn meta_event(&self, event_index: EventIndex) -> Option<&MetaEvent> {
         self.meta_events.get(&event_index)
     }
@@ -137,10 +141,6 @@ impl MetaElection {
             })
     }
 
-    // pub fn is_already_consensused(&self, payload_key: &ObservationKey) -> bool {
-    //     self.consensus_history().contains(payload_key)
-    // }
-
     /// Topological index of the first unconsensused payload-carrying event.
     pub fn start_index(&self) -> Option<usize> {
         // `unconsensused_events` are already sorted topologically, so just return the first one.
@@ -157,15 +157,21 @@ impl MetaElection {
         voters: PeerIndexSet,
         unconsensused_events: BTreeSet<EventIndex>,
     ) {
-        self.meta_events.clear();
         self.round_hashes.clear();
         self.all_voters = voters;
         self.interesting_events.clear();
         self.unconsensused_events = unconsensused_events;
         self.consensus_history.push(payload_key);
+
+        if let Some(start_index) = self.start_index() {
+            self.meta_events
+                .retain(|event_index, _| event_index.topological_index() >= start_index)
+        } else {
+            self.meta_events.clear()
+        }
     }
 
-    pub fn initialise<'a, I, P>(&mut self, peer_ids: I)
+    pub fn initialise_round_hashes<'a, I, P>(&mut self, peer_ids: I)
     where
         I: IntoIterator<Item = (PeerIndex, &'a P)>,
         P: PublicId + 'a,
@@ -183,11 +189,6 @@ impl MetaElection {
                 (index, vec![round_hash])
             })
             .collect();
-
-        // Clearing these caches is needed to be able to reprocess the whole graph outside of
-        // consensus, which we sometimes need in tests.
-        self.meta_events.clear();
-        self.interesting_events.clear();
     }
 
     #[cfg(feature = "dump-graphs")]

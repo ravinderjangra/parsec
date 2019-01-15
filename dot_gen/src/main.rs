@@ -84,7 +84,8 @@
     missing_copy_implementations,
     missing_debug_implementations,
     variant_size_differences,
-    unused
+    unused,
+    clippy::unreadable_literal
 )]
 
 #[macro_use]
@@ -119,6 +120,17 @@ fn main() {
     // -------------------------------------------------------------------------
     // Define scenarios here:
 
+    let _ = scenarios
+        .add("functional_tests::remove_peer", |env| {
+            let obs = ObservationSchedule {
+                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric"),
+                schedule: vec![(1, RemovePeer(PeerId::new("Eric")))],
+            };
+
+            Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+        })
+        .seed([1048220270, 1673192006, 3171321266, 2580820785]);
+
     let _ = scenarios.add(
         "functional_tests::handle_malice_genesis_event_not_after_initial",
         |env| {
@@ -146,7 +158,7 @@ fn main() {
                 Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
             },
         )
-        .seed([848_911_612, 2_362_592_349, 3_178_199_135, 2_458_552_022]);
+        .seed([848911612, 2362592349, 3178199135, 2458552022]);
 
     let _ = scenarios
         .add(
