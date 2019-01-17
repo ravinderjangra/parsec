@@ -22,11 +22,12 @@ pub(crate) struct MetaEvent {
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub(crate) enum Observer {
-    // This event has supermajority of observees and it is the first such event of the same creator.
-    First(PeerIndexSet),
-    // This event has supermajority of observees, but so does its self-parent.
-    Later,
-    // This event has less than the supermajority of observees.
+    // This event is observer (it has supermajority of observees and it is the first such event of
+    // the same creator).
+    This(PeerIndexSet),
+    // This event isn't observer, but one of its self-ancestors is.
+    Ancestor,
+    // This event isn't observer and neither is any of its self-ancestors.
     None,
 }
 
@@ -44,8 +45,6 @@ impl MetaEvent {
     }
 
     pub fn rebuild<P: PublicId>(mut self, event: IndexedEventRef<P>) -> MetaEventBuilder<P> {
-        // Do not clear `interesting_content` as it can be reused in some cases.
-        self.observer = Observer::None;
         self.meta_votes.clear();
 
         MetaEventBuilder {
@@ -57,14 +56,14 @@ impl MetaEvent {
 
     pub fn is_observer(&self) -> bool {
         match self.observer {
-            Observer::First(_) => true,
+            Observer::This(_) => true,
             _ => false,
         }
     }
 
-    pub fn is_descendant_of_observer(&self) -> bool {
+    pub fn has_ancestor_observer(&self) -> bool {
         match self.observer {
-            Observer::First(_) | Observer::Later => true,
+            Observer::Ancestor => true,
             _ => false,
         }
     }
@@ -91,7 +90,20 @@ impl<'a, P: PublicId + 'a> MetaEventBuilder<'a, P> {
 
     pub fn has_observee(&self, peer_index: PeerIndex) -> bool {
         match self.meta_event.observer {
-            Observer::First(ref observees) => observees.contains(peer_index),
+            Observer::This(ref observees) => observees.contains(peer_index),
+            _ => false,
+        }
+    }
+
+    pub fn can_reuse_observer(&self) -> bool {
+        // If this event wasn't observer in the previous meta-election and there was no membership
+        // change, it won't be observer in the current meta-election either.
+        if self.new {
+            return false;
+        }
+
+        match self.meta_event.observer {
+            Observer::None => true,
             _ => false,
         }
     }
@@ -135,7 +147,7 @@ pub(crate) mod snapshot {
             S: SecretId<PublicId = P>,
         {
             let observees = match meta_event.observer {
-                Observer::First(ref observees) => observees
+                Observer::This(ref observees) => observees
                     .iter()
                     .filter_map(|index| peer_list.get(index))
                     .map(|peer| peer.id().clone())

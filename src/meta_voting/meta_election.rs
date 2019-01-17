@@ -30,8 +30,6 @@ pub(crate) struct MetaElection {
     pub(crate) interesting_events: PeerIndexMap<Vec<EventIndex>>,
     // Set of all events that carry a payload that hasn't yet been consensused.
     pub(crate) unconsensused_events: BTreeSet<EventIndex>,
-    // Set of all events that are observers.
-    pub(crate) observers: BTreeSet<EventIndex>,
     // Keys of the consensused blocks' payloads in the order they were consensused.
     pub(crate) consensus_history: Vec<ObservationKey>,
 }
@@ -44,7 +42,6 @@ impl MetaElection {
             voters,
             interesting_events: PeerIndexMap::default(),
             unconsensused_events: BTreeSet::new(),
-            observers: BTreeSet::new(),
             consensus_history: Vec::new(),
         }
     }
@@ -76,11 +73,6 @@ impl MetaElection {
                 .entry(creator)
                 .or_insert_with(Vec::new)
                 .push(event_index);
-        }
-
-        // Update observers
-        if meta_event.is_observer() {
-            let _ = self.observers.insert(event_index);
         }
 
         // Insert the meta-event itself.
@@ -198,7 +190,6 @@ impl MetaElection {
             self.meta_events.clear();
         }
 
-        self.observers.clear();
         self.consensus_history.push(decided_key);
     }
 

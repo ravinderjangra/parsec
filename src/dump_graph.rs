@@ -732,7 +732,7 @@ mod detail {
                 self.indent();
 
                 let observees = match mev.observer {
-                    Observer::First(ref observees) => {
+                    Observer::This(ref observees) => {
                         convert_peer_index_set(observees, &self.peer_list)
                     }
                     _ => BTreeSet::new(),

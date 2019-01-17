@@ -810,6 +810,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     fn create_meta_event(&mut self, event_index: EventIndex) -> Result<()> {
         let event = get_known_event(self.our_pub_id(), &self.graph, event_index)?;
 
+        trace!(
+            "{:?} creating a meta-event for event {:?}",
+            self.our_pub_id(),
+            event
+        );
+
         let mut builder =
             if let Some(meta_event) = self.meta_election.remove_meta_event(event_index) {
                 meta_event.rebuild(event)
@@ -817,17 +823,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 MetaEvent::build(event)
             };
 
-        trace!(
-            "{:?} creating a meta-event for event {:?}",
-            self.our_pub_id(),
-            event
-        );
-
-        if builder.is_new() {
-            self.set_interesting_content(&mut builder);
-        }
-
-        self.set_is_observer(&mut builder);
+        self.set_interesting_content(&mut builder);
+        self.set_observer(&mut builder);
         self.set_meta_votes(&mut builder)?;
 
         self.meta_election.add_meta_event(builder);
@@ -838,6 +835,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     // Any payloads which this event sees as "interesting".  If this returns a non-empty set, then
     // this event is classed as an interesting one.
     fn set_interesting_content(&self, builder: &mut MetaEventBuilder<S::PublicId>) {
+        if !builder.is_new() {
+            return;
+        }
+
         let peers_that_can_vote = self.voters();
         let start_index = self.start_index();
 
@@ -947,12 +948,16 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .count()
     }
 
-    fn set_is_observer(&self, builder: &mut MetaEventBuilder<S::PublicId>) {
+    fn set_observer(&self, builder: &mut MetaEventBuilder<S::PublicId>) {
         // An event is an observer if it has a supermajority of observees and its self-parent
         // does not.
 
+        if builder.can_reuse_observer() {
+            return;
+        }
+
         if self.is_descendant_of_observer(builder.event()) {
-            builder.set_observer(Observer::Later);
+            builder.set_observer(Observer::Ancestor);
             return;
         }
 
@@ -973,7 +978,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         if is_more_than_two_thirds(observees.len(), voter_count) {
             // This event is observer.
-            builder.set_observer(Observer::First(observees));
+            builder.set_observer(Observer::This(observees));
+        } else {
+            builder.set_observer(Observer::None);
         }
     }
 
@@ -997,7 +1004,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
 
         if let Some(meta_parent) = self.meta_election.meta_event(self_parent.event_index()) {
-            meta_parent.is_descendant_of_observer()
+            meta_parent.is_observer() || meta_parent.has_ancestor_observer()
         } else {
             log_or_panic!(
                 "{:?} doesn't have meta-event for event {:?} (self-parent of {:?})",

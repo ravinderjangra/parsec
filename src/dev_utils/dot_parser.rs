@@ -896,8 +896,6 @@ fn convert_to_meta_election(
             .filter_map(|id| event_indices.get(&id))
             .cloned()
             .collect(),
-        // TODO: parse these too:
-        observers: BTreeSet::new(),
         consensus_history: meta_election.consensus_history,
     }
 }
@@ -909,7 +907,7 @@ fn convert_to_meta_event(meta_event: ParsedMetaEvent, peer_list: &PeerList<PeerI
         observer: if observees.is_empty() {
             Observer::None
         } else {
-            Observer::First(observees)
+            Observer::This(observees)
         },
         interesting_content: meta_event.interesting_content,
         meta_votes: convert_peer_id_map(meta_event.meta_votes, peer_list),
