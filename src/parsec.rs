@@ -22,7 +22,7 @@ use crate::gossip::{
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]
 use crate::hash::Hash;
 use crate::id::{PublicId, SecretId};
-use crate::meta_voting::{MetaElection, MetaEvent, MetaEventBuilder, MetaVote, Step};
+use crate::meta_voting::{MetaElection, MetaEvent, MetaEventBuilder, MetaVote, Observer, Step};
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]
 use crate::mock::{PeerId, Transaction};
 use crate::network_event::NetworkEvent;
@@ -494,58 +494,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         })
     }
 
-    fn is_observer(&self, builder: &MetaEventBuilder<S::PublicId>) -> bool {
-        // An event is an observer if it has a supermajority of observees and its self-parent
-        // does not.
-        let voter_count = self.voter_count();
-
-        if !is_more_than_two_thirds(builder.observee_count(), voter_count) {
-            return false;
-        }
-
-        let self_parent_index = if let Some(index) = builder.event().self_parent() {
-            index
-        } else {
-            log_or_panic!(
-                "{:?} has event {:?} with observations, but not self-parent",
-                self.our_pub_id(),
-                *builder.event()
-            );
-            return false;
-        };
-
-        let self_parent = if let Ok(event) = self.get_known_event(self_parent_index) {
-            event
-        } else {
-            return false;
-        };
-
-        // If self-parent is initial, we don't have to check it's meta-event, as we already know it
-        // can not have any observations. Also, we don't assign meta-events to initial events anyway.
-        if self_parent.is_initial() {
-            return true;
-        }
-
-        // If self-parent is earlier in history than the start of the meta-election, it won't have
-        // a meta-event; but it also means that it wasn't an observer, so this event is
-        if self.start_index() > self_parent.topological_index() {
-            return true;
-        }
-
-        if let Some(meta_parent) = self.meta_election.meta_event(self_parent_index) {
-            !is_more_than_two_thirds(meta_parent.observees.len(), voter_count)
-        } else {
-            log_or_panic!(
-                "{:?} doesn't have meta-event for event {:?} (self-parent of {:?})",
-                self.our_pub_id(),
-                *self_parent,
-                builder.event().hash(),
-            );
-
-            false
-        }
-    }
-
     fn pack_events<'a, I>(&self, events: I) -> Result<Vec<PackedEvent<T, S::PublicId>>>
     where
         I: IntoIterator<Item = &'a Event<S::PublicId>>,
@@ -873,7 +821,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         );
 
         self.set_interesting_content(&mut builder);
-        self.set_observees(&mut builder);
+        self.set_is_observer(&mut builder);
         self.set_meta_votes(&mut builder)?;
 
         let meta_event = builder.finish();
@@ -1042,12 +990,21 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .count()
     }
 
-    fn set_observees(&self, builder: &mut MetaEventBuilder<S::PublicId>) {
-        let observees = self
+    fn set_is_observer(&self, builder: &mut MetaEventBuilder<S::PublicId>) {
+        // An event is an observer if it has a supermajority of observees and its self-parent
+        // does not.
+
+        if self.is_descendant_of_observer(builder.event()) {
+            builder.set_observer(Observer::Later);
+            return;
+        }
+
+        let voter_count = self.voter_count();
+        let observees: PeerIndexSet = self
             .meta_election
             .interesting_events()
             .filter_map(|(peer_index, event_indices)| {
-                let event_index = event_indices.front()?;
+                let event_index = event_indices.first()?;
                 let event = self.get_known_event(*event_index).ok()?;
                 if self.strongly_sees(builder.event(), event) {
                     Some(peer_index)
@@ -1056,7 +1013,44 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 }
             })
             .collect();
-        builder.set_observees(observees);
+
+        if is_more_than_two_thirds(observees.len(), voter_count) {
+            // This event is observer.
+            builder.set_observer(Observer::First(observees));
+        }
+    }
+
+    fn is_descendant_of_observer(&self, event: IndexedEventRef<S::PublicId>) -> bool {
+        let self_parent = if let Some(self_parent) = self.graph.self_parent(event) {
+            self_parent
+        } else {
+            return false;
+        };
+
+        // If self-parent is initial, we don't have to check it's meta-event, as we already know it
+        // can not have any observees.
+        if self_parent.is_initial() {
+            return false;
+        }
+
+        // If self-parent is earlier in history than the start of the meta-election, it won't have
+        // a meta-event; but it also means that it wasn't an observer.
+        if self.start_index() > self_parent.topological_index() {
+            return false;
+        }
+
+        if let Some(meta_parent) = self.meta_election.meta_event(self_parent.event_index()) {
+            meta_parent.is_descendant_of_observer()
+        } else {
+            log_or_panic!(
+                "{:?} doesn't have meta-event for event {:?} (self-parent of {:?})",
+                self.our_pub_id(),
+                *self_parent,
+                event.hash(),
+            );
+
+            false
+        }
     }
 
     fn set_meta_votes(&self, builder: &mut MetaEventBuilder<S::PublicId>) -> Result<()> {
@@ -1065,7 +1059,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .self_parent()
             .and_then(|parent_hash| self.meta_election.populated_meta_votes(parent_hash));
 
-        if parent_meta_votes.is_none() && !self.is_observer(builder) {
+        if parent_meta_votes.is_none() && !builder.is_observer() {
             // No meta votes to set for this event
             return Ok(());
         }

@@ -61,7 +61,7 @@ pub use self::detail::DIR;
 mod detail {
     use crate::gossip::{Event, EventHash, EventIndex, Graph, GraphSnapshot, IndexedEventRef};
     use crate::id::{PublicId, SecretId};
-    use crate::meta_voting::{MetaElection, MetaElectionSnapshot, MetaEvent, MetaVote};
+    use crate::meta_voting::{MetaElection, MetaElectionSnapshot, MetaEvent, MetaVote, Observer};
     use crate::network_event::NetworkEvent;
     use crate::observation::ObservationStore;
     use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
@@ -730,11 +730,19 @@ mod detail {
                     short_name
                 ));
                 self.indent();
+
+                let observees = match mev.observer {
+                    Observer::First(ref observees) => {
+                        convert_peer_index_set(observees, &self.peer_list)
+                    }
+                    _ => BTreeSet::new(),
+                };
+
                 lines.push(format!(
                     "{}{}observees: {:?}",
                     Self::COMMENT,
                     self.indentation(),
-                    convert_peer_index_set(&mev.observees, &self.peer_list)
+                    observees
                 ));
                 let interesting_content = mev
                     .interesting_content

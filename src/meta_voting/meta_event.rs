@@ -14,12 +14,20 @@ use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet};
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub(crate) struct MetaEvent {
-    // The set of peers for which this event can strongly-see an event by that peer which carries a
-    // valid block.  If there are a supermajority of peers here, this event is an "observer".
-    pub observees: PeerIndexSet,
+    pub observer: Observer,
     // Hashes of payloads of all the votes deemed interesting by this event.
     pub interesting_content: Vec<ObservationKey>,
     pub meta_votes: PeerIndexMap<Vec<MetaVote>>,
+}
+
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub(crate) enum Observer {
+    // This event has supermajority of observees and it is the first such event of the same creator.
+    First(PeerIndexSet),
+    // This event has supermajority of observees, but so does its self-parent.
+    Later,
+    // This event has less than the supermajority of observees.
+    None,
 }
 
 impl MetaEvent {
@@ -27,7 +35,7 @@ impl MetaEvent {
         MetaEventBuilder {
             event,
             meta_event: MetaEvent {
-                observees: PeerIndexSet::default(),
+                observer: Observer::None,
                 interesting_content: Vec::new(),
                 meta_votes: PeerIndexMap::default(),
             },
@@ -37,13 +45,27 @@ impl MetaEvent {
 
     pub fn rebuild<P: PublicId>(mut self, event: IndexedEventRef<P>) -> MetaEventBuilder<P> {
         // Do not clear `interesting_content` as it can be reused in some cases.
-        self.observees.clear();
+        self.observer = Observer::None;
         self.meta_votes.clear();
 
         MetaEventBuilder {
             event,
             meta_event: self,
             new: false,
+        }
+    }
+
+    pub fn is_observer(&self) -> bool {
+        match self.observer {
+            Observer::First(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_descendant_of_observer(&self) -> bool {
+        match self.observer {
+            Observer::First(_) | Observer::Later => true,
+            _ => false,
         }
     }
 }
@@ -63,16 +85,19 @@ impl<'a, P: PublicId + 'a> MetaEventBuilder<'a, P> {
         self.new
     }
 
-    pub fn observee_count(&self) -> usize {
-        self.meta_event.observees.len()
+    pub fn is_observer(&self) -> bool {
+        self.meta_event.is_observer()
     }
 
     pub fn has_observee(&self, peer_index: PeerIndex) -> bool {
-        self.meta_event.observees.contains(peer_index)
+        match self.meta_event.observer {
+            Observer::First(ref observees) => observees.contains(peer_index),
+            _ => false,
+        }
     }
 
-    pub fn set_observees(&mut self, observees: PeerIndexSet) {
-        self.meta_event.observees = observees;
+    pub fn set_observer(&mut self, observer: Observer) {
+        self.meta_event.observer = observer;
     }
 
     pub fn set_interesting_content(&mut self, content: Vec<ObservationKey>) {
@@ -121,13 +146,17 @@ pub(crate) mod snapshot {
         where
             S: SecretId<PublicId = P>,
         {
-            Self {
-                observees: meta_event
-                    .observees
+            let observees = match meta_event.observer {
+                Observer::First(ref observees) => observees
                     .iter()
                     .filter_map(|index| peer_list.get(index))
                     .map(|peer| peer.id().clone())
                     .collect(),
+                _ => BTreeSet::new(),
+            };
+
+            Self {
+                observees,
                 interesting_content: meta_event
                     .interesting_content
                     .iter()

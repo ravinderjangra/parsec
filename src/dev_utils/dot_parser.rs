@@ -19,7 +19,7 @@ use crate::gossip::EventContextRef;
 use crate::gossip::{CauseInput, Event, EventIndex, Graph, IndexedEventRef};
 use crate::hash::Hash;
 use crate::hash::HASH_LEN;
-use crate::meta_voting::{BoolSet, MetaElection, MetaEvent, MetaVote, Step};
+use crate::meta_voting::{BoolSet, MetaElection, MetaEvent, MetaVote, Observer, Step};
 use crate::mock::{PeerId, Transaction};
 #[cfg(any(
     all(test, feature = "malice-detection", feature = "mock"),
@@ -904,8 +904,14 @@ fn convert_to_meta_election(
 }
 
 fn convert_to_meta_event(meta_event: ParsedMetaEvent, peer_list: &PeerList<PeerId>) -> MetaEvent {
+    let observees = convert_peer_id_set(meta_event.observees, peer_list);
+
     MetaEvent {
-        observees: convert_peer_id_set(meta_event.observees, peer_list),
+        observer: if observees.is_empty() {
+            Observer::None
+        } else {
+            Observer::First(observees)
+        },
         interesting_content: meta_event.interesting_content,
         meta_votes: convert_peer_id_map(meta_event.meta_votes, peer_list),
     }

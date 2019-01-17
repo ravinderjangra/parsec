@@ -14,7 +14,7 @@ use crate::observation::{ObservationHash, ObservationKey};
 use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet};
 use crate::round_hash::RoundHash;
 use fnv::FnvHashMap;
-use std::collections::{BTreeSet, VecDeque};
+use std::collections::BTreeSet;
 use std::usize;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -27,7 +27,7 @@ pub(crate) struct MetaElection {
     // meta-election has been created.
     pub(crate) all_voters: PeerIndexSet,
     // The indices of events for each peer that have a non-empty set of `interesting_content`.
-    pub(crate) interesting_events: PeerIndexMap<VecDeque<EventIndex>>,
+    pub(crate) interesting_events: PeerIndexMap<Vec<EventIndex>>,
     // Set of all events that carry a payload that hasn't yet been consensused.
     pub(crate) unconsensused_events: BTreeSet<EventIndex>,
     // Keys of the consensused blocks' payloads in the order they were consensused.
@@ -72,8 +72,8 @@ impl MetaElection {
         if !meta_event.interesting_content.is_empty() {
             self.interesting_events
                 .entry(creator)
-                .or_insert_with(VecDeque::new)
-                .push_back(event_index);
+                .or_insert_with(Vec::new)
+                .push(event_index);
         }
 
         // Insert the meta-event itself.
@@ -112,17 +112,17 @@ impl MetaElection {
         &self.consensus_history
     }
 
-    pub fn interesting_events(&self) -> impl Iterator<Item = (PeerIndex, &VecDeque<EventIndex>)> {
+    pub fn interesting_events(&self) -> impl Iterator<Item = (PeerIndex, &[EventIndex])> {
         self.interesting_events
             .iter()
-            .map(|(peer_index, event_indices)| (peer_index, event_indices))
+            .map(|(peer_index, event_indices)| (peer_index, &event_indices[..]))
     }
 
     pub fn first_interesting_content_by(&self, creator: PeerIndex) -> Option<&ObservationKey> {
         let event_index = self
             .interesting_events
             .get(creator)
-            .and_then(VecDeque::front)?;
+            .and_then(|indices| indices.first())?;
         let meta_event = self.meta_events.get(event_index)?;
 
         meta_event.interesting_content.first()
