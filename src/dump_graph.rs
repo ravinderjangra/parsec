@@ -682,7 +682,7 @@ mod detail {
                 "{}{}all_voters: {:?}",
                 Self::COMMENT,
                 self.indentation(),
-                convert_peer_index_set(&self.meta_election.all_voters, &self.peer_list)
+                convert_peer_index_set(&self.meta_election.voters, &self.peer_list)
             ));
 
             // write unconsensused events

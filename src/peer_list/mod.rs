@@ -112,6 +112,7 @@ impl<S: SecretId> PeerList<S> {
     }
 
     /// Returns an iterator of peers that can vote.
+    #[cfg(feature = "malice-detection")]
     pub fn voters(&self) -> impl Iterator<Item = (PeerIndex, &Peer<S::PublicId>)> {
         self.iter().filter(|(_, peer)| peer.state.can_vote())
     }
@@ -141,11 +142,6 @@ impl<S: SecretId> PeerList<S> {
     /// Returns an unsorted map of peer index => Hash(peer_id).
     pub fn all_id_hashes(&self) -> impl Iterator<Item = (PeerIndex, &Hash)> {
         self.iter().map(|(index, peer)| (index, peer.id_hash()))
-    }
-
-    /// Returns indices of the peers that can vote.
-    pub fn voter_indices<'a>(&'a self) -> impl Iterator<Item = PeerIndex> + 'a {
-        self.voters().map(|(index, _)| index)
     }
 
     pub fn peer_state(&self, index: PeerIndex) -> PeerState {
@@ -391,6 +387,13 @@ impl Builder {
 
         self.peer_list
     }
+}
+
+/// Type of change to the peer list
+#[derive(Clone, Copy)]
+pub(crate) enum PeerListChange {
+    Add(PeerIndex),
+    Remove(PeerIndex),
 }
 
 #[cfg(test)]

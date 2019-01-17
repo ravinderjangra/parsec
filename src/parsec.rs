@@ -33,7 +33,9 @@ use crate::observation::{
     ObservationStore,
 };
 use crate::parsec_helpers::find_interesting_content_for_event;
-use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerState};
+use crate::peer_list::{
+    PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerListChange, PeerState,
+};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::mem;
 #[cfg(all(test, feature = "mock"))]
@@ -676,20 +678,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             }
 
             self.mark_observation_as_consensused(&payload_key);
-            self.handle_consensus(&payload_key);
+            let peer_list_change = self.handle_consensus(&payload_key);
 
-            // Calculate new unconsensused events here, because `MetaElections` doesn't have access
-            // to the actual payloads, so can't tell which ones are consensused.
-            let unconsensused_events = self.collect_unconsensused_events(&payload_key);
-            self.meta_election.new_election(
-                payload_key,
-                self.peer_list.voter_indices().collect(),
-                unconsensused_events,
-            );
-
-            // Trigger reprocess.
+            self.meta_election
+                .new_election(&self.graph, payload_key, peer_list_change);
             self.meta_election
                 .initialise_round_hashes(self.peer_list.all_ids());
+
+            // Trigger reprocess.
             let start_index = self.start_index();
             return Ok(PostProcessAction::Restart(start_index));
         }
@@ -732,13 +728,13 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     /// Handles consensus reached by us.
-    fn handle_consensus(&mut self, payload_key: &ObservationKey) {
+    fn handle_consensus(&mut self, payload_key: &ObservationKey) -> Option<PeerListChange> {
         match self
             .observations
             .get(payload_key)
             .map(|info| info.observation.clone())
         {
-            Some(Observation::Add { ref peer_id, .. }) => self.handle_add_peer(peer_id),
+            Some(Observation::Add { ref peer_id, .. }) => self.handle_add_peer(peer_id).into(),
             Some(Observation::Remove { ref peer_id, .. }) => self.handle_remove_peer(peer_id),
             Some(Observation::Accusation {
                 ref offender,
@@ -753,14 +749,15 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
                 self.handle_remove_peer(offender)
             }
-            Some(Observation::Genesis(_)) | Some(Observation::OpaquePayload(_)) => (),
+            Some(Observation::Genesis(_)) | Some(Observation::OpaquePayload(_)) => None,
             None => {
                 log_or_panic!("Failed to get observation from hash.");
+                None
             }
         }
     }
 
-    fn handle_add_peer(&mut self, peer_id: &S::PublicId) {
+    fn handle_add_peer(&mut self, peer_id: &S::PublicId) -> PeerListChange {
         // - If we are already full member of the section, we can start sending gossips to
         //   the new peer from this moment.
         // - If we are the new peer, we must wait for the other members to send gossips to
@@ -791,16 +788,22 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             PeerState::VOTE | PeerState::SEND
         };
 
-        if let Some(peer_index) = self.peer_list.get_index(peer_id) {
+        let peer_index = if let Some(peer_index) = self.peer_list.get_index(peer_id) {
             self.peer_list.change_peer_state(peer_index, state);
+            peer_index
         } else {
-            let _ = self.peer_list.add_peer(peer_id.clone(), state);
-        }
+            self.peer_list.add_peer(peer_id.clone(), state)
+        };
+
+        PeerListChange::Add(peer_index)
     }
 
-    fn handle_remove_peer(&mut self, peer_id: &S::PublicId) {
+    fn handle_remove_peer(&mut self, peer_id: &S::PublicId) -> Option<PeerListChange> {
         if let Some(peer_index) = self.peer_list.get_index(peer_id) {
             self.peer_list.remove_peer(peer_index);
+            Some(PeerListChange::Remove(peer_index))
+        } else {
+            None
         }
     }
 
@@ -820,14 +823,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             event
         );
 
-        self.set_interesting_content(&mut builder);
+        if builder.is_new() {
+            self.set_interesting_content(&mut builder);
+        }
+
         self.set_is_observer(&mut builder);
         self.set_meta_votes(&mut builder)?;
 
-        let meta_event = builder.finish();
-
-        self.meta_election
-            .add_meta_event(event_index, event.creator(), meta_event);
+        self.meta_election.add_meta_event(builder);
 
         Ok(())
     }
@@ -835,10 +838,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     // Any payloads which this event sees as "interesting".  If this returns a non-empty set, then
     // this event is classed as an interesting one.
     fn set_interesting_content(&self, builder: &mut MetaEventBuilder<S::PublicId>) {
-        if self.reuse_previous_interesting_content(builder) {
-            return;
-        }
-
         let peers_that_can_vote = self.voters();
         let start_index = self.start_index();
 
@@ -864,48 +863,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         );
 
         builder.set_interesting_content(payloads);
-    }
-
-    // Try to reuse interesting content of the given event from the previous meta-election.
-    fn reuse_previous_interesting_content(
-        &self,
-        builder: &mut MetaEventBuilder<S::PublicId>,
-    ) -> bool {
-        // Can't reuse interesting content of new meta-events.
-        if builder.is_new() {
-            return false;
-        }
-
-        let last_consensus = if let Some(payload_key) = self.meta_election.consensus_history.last()
-        {
-            payload_key
-        } else {
-            // This is the first meta-election. Nothing to reuse.
-            return false;
-        };
-
-        // If membership change occurred in the last meta-election, we can't reuse the interesting
-        // content.
-        let payload = self
-            .observations
-            .get(last_consensus)
-            .map(|info| &info.observation);
-        match payload {
-            Some(&Observation::Add { .. })
-            | Some(&Observation::Remove { .. })
-            | Some(&Observation::Accusation { .. }) => return false,
-            _ => (),
-        }
-
-        let creator = builder.event().creator();
-        builder.reuse_interesting_content(|payload_key| {
-            payload_key != last_consensus
-                && !self
-                    .meta_election
-                    .is_already_interesting_content(creator, payload_key)
-        });
-
-        true
     }
 
     // Returns true if `builder.event()` has an ancestor by a different creator that has `payload`
@@ -1400,20 +1357,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .collect();
 
         Block::new(&votes)
-    }
-
-    // Collects still unconsensused event from the current meta-election.
-    fn collect_unconsensused_events(&self, decided_key: &ObservationKey) -> BTreeSet<EventIndex> {
-        self.meta_election
-            .unconsensused_events()
-            .filter(|event_index| {
-                self.get_known_event(*event_index)
-                    .ok()
-                    .and_then(|event| event.inner().payload_key())
-                    .map(|payload_key| payload_key != decided_key)
-                    .unwrap_or(false)
-            })
-            .collect()
     }
 
     // Returns the number of peers that created events which are seen by event X (descendant) and

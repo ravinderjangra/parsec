@@ -104,18 +104,6 @@ impl<'a, P: PublicId + 'a> MetaEventBuilder<'a, P> {
         self.meta_event.interesting_content = content;
     }
 
-    /// Reuse the interesting content for which the given predicate returns true.
-    pub fn reuse_interesting_content<F>(&mut self, f: F)
-    where
-        F: FnMut(&ObservationKey) -> bool,
-    {
-        if self.new {
-            log_or_panic!("Can't reuse interesting content of new meta-event.");
-        }
-
-        self.meta_event.interesting_content.retain(f)
-    }
-
     pub fn add_meta_votes(&mut self, peer_index: PeerIndex, votes: Vec<MetaVote>) {
         let _ = self.meta_event.meta_votes.insert(peer_index, votes);
     }
