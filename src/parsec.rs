@@ -686,7 +686,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 .initialise_round_hashes(self.peer_list.all_ids());
 
             // Trigger reprocess.
-            let start_index = self.start_index();
+            let start_index = self.meta_election.upper_start_index();
             return Ok(PostProcessAction::Restart(start_index));
         }
 
@@ -840,7 +840,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
 
         let peers_that_can_vote = self.voters();
-        let start_index = self.start_index();
 
         let is_already_interesting_content = |payload_key: &ObservationKey| {
             self.meta_election
@@ -851,9 +850,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             self.is_interesting_payload(builder, &peers_that_can_vote, payload_key)
         };
 
-        let has_interesting_ancestor = |payload_key: &ObservationKey| {
-            self.has_interesting_ancestor(builder, payload_key, start_index)
-        };
+        let has_interesting_ancestor =
+            |payload_key: &ObservationKey| self.has_interesting_ancestor(builder, payload_key);
 
         let payloads = find_interesting_content_for_event(
             builder.event().as_ref(),
@@ -872,8 +870,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         &self,
         builder: &MetaEventBuilder<S::PublicId>,
         payload_key: &ObservationKey,
-        start_index: usize,
     ) -> bool {
+        let start_index = self.meta_election.lower_start_index();
+
         self.graph
             .ancestors(builder.event())
             .take_while(|that_event| that_event.topological_index() >= start_index)
@@ -952,10 +951,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         // An event is an observer if it has a supermajority of observees and its self-parent
         // does not.
 
-        if builder.can_reuse_observer() {
-            return;
-        }
-
         if self.is_descendant_of_observer(builder.event()) {
             builder.set_observer(Observer::Ancestor);
             return;
@@ -977,7 +972,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .collect();
 
         if is_more_than_two_thirds(observees.len(), voter_count) {
-            // This event is observer.
             builder.set_observer(Observer::This(observees));
         } else {
             builder.set_observer(Observer::None);
@@ -999,7 +993,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         // If self-parent is earlier in history than the start of the meta-election, it won't have
         // a meta-event; but it also means that it wasn't an observer.
-        if self.start_index() > self_parent.topological_index() {
+        if self.meta_election.upper_start_index() > self_parent.topological_index() {
             return false;
         }
 
@@ -1283,12 +1277,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         self.meta_election
             .unconsensused_events()
             .filter_map(move |index| self.get_known_event(index).ok())
-    }
-
-    fn start_index(&self) -> usize {
-        self.meta_election
-            .start_index()
-            .unwrap_or_else(|| self.graph.len())
     }
 
     fn compute_consensus(&self, event_index: EventIndex) -> Option<ObservationKey> {

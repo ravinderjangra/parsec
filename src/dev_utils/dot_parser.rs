@@ -722,6 +722,11 @@ impl ParsedContents {
     pub fn add_event(&mut self, event: Event<PeerId>) -> EventIndex {
         let indexed_event = self.graph.insert(event);
         self.peer_list.add_event(indexed_event);
+
+        let start_index = indexed_event.event_index().topological_index() + 1;
+        self.meta_election.lower_start_index = start_index;
+        self.meta_election.upper_start_index = start_index;
+
         indexed_event.event_index()
     }
 
@@ -897,6 +902,8 @@ fn convert_to_meta_election(
             .cloned()
             .collect(),
         consensus_history: meta_election.consensus_history,
+        upper_start_index: 0,
+        lower_start_index: 0,
     }
 }
 

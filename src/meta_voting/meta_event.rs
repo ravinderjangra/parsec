@@ -95,19 +95,6 @@ impl<'a, P: PublicId + 'a> MetaEventBuilder<'a, P> {
         }
     }
 
-    pub fn can_reuse_observer(&self) -> bool {
-        // If this event wasn't observer in the previous meta-election and there was no membership
-        // change, it won't be observer in the current meta-election either.
-        if self.new {
-            return false;
-        }
-
-        match self.meta_event.observer {
-            Observer::None => true,
-            _ => false,
-        }
-    }
-
     pub fn set_observer(&mut self, observer: Observer) {
         self.meta_event.observer = observer;
     }
