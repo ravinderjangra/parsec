@@ -151,7 +151,7 @@ impl PeerStatuses {
     pub fn new(names: &BTreeSet<PeerId>) -> PeerStatuses {
         PeerStatuses {
             statuses: names
-                .into_iter()
+                .iter()
                 .map(|x| (x.clone(), PeerStatus::Active))
                 .collect(),
         }

@@ -277,7 +277,7 @@ impl Network {
     fn check_consensus_broken(&self) -> Result<(), ConsensusError> {
         let mut block_order = BTreeMap::new();
         for peer in self.active_peers() {
-            for (index, block) in peer.blocks().into_iter().enumerate() {
+            for (index, block) in peer.blocks().iter().enumerate() {
                 let key = self.block_key(block);
 
                 if let Some((old_peer, old_index)) = block_order.insert(key, (peer, index)) {
@@ -306,7 +306,7 @@ impl Network {
     ) -> (&'a Observation, Option<&'a PeerId>) {
         let peer_id = if block.payload().is_opaque() {
             if self.consensus_mode == ConsensusMode::Single {
-                Some(&unwrap!(block.proofs().into_iter().next()).public_id)
+                Some(&unwrap!(block.proofs().iter().next()).public_id)
             } else {
                 None
             }
@@ -371,7 +371,7 @@ impl Network {
     ) -> Result<(), ConsensusError> {
         let signatories: BTreeSet<_> = block
             .proofs()
-            .into_iter()
+            .iter()
             .map(|proof| proof.public_id().clone())
             .collect();
         if let Some(pub_id) = signatories.difference(section).next() {
