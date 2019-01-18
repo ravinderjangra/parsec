@@ -289,8 +289,13 @@ mod detail {
                     .to_string(),
             );
         }
-        for (peer_index, meta_votes) in meta_votes {
-            let peer_id = unwrap!(peer_list.get(peer_index)).id();
+
+        let meta_votes: BTreeMap<_, _> = meta_votes
+            .iter()
+            .map(|(peer_index, meta_votes)| (unwrap!(peer_list.get(peer_index)).id(), meta_votes))
+            .collect();
+
+        for (peer_id, meta_votes) in meta_votes {
             let mut prefix = format!("{}: ", first_char(peer_id).unwrap_or('?'));
             for mv in meta_votes {
                 let est = mv.estimates.as_short_string();
@@ -548,6 +553,8 @@ mod detail {
                 .all_ids()
                 .map(|(_, id)| id)
                 .collect::<Vec<_>>();
+            peer_ids.sort();
+
             for peer_id in &peer_ids {
                 self.writeln(format_args!(
                     "    \"{:?}\" [style=filled, color=white]",
@@ -836,6 +843,11 @@ mod detail {
                     attr.fillcolor = "style=filled, fillcolor=crimson";
                     attr.is_rectangle = true;
                 }
+
+                if meta_event.is_observer() {
+                    attr.fillcolor = "style=filled, fillcolor=orange";
+                }
+
                 if !meta_event.meta_votes.is_empty() {
                     let meta_votes =
                         dump_meta_votes(peer_list, &meta_event.meta_votes, false).join("\n");
