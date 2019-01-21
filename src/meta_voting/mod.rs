@@ -7,7 +7,7 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 mod bool_set;
-mod meta_elections;
+mod meta_election;
 mod meta_event;
 mod meta_vote;
 mod meta_vote_counts;
@@ -15,9 +15,7 @@ mod meta_vote_counts;
 #[cfg(any(test, feature = "testing"))]
 pub(crate) use self::bool_set::BoolSet;
 #[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
-pub(crate) use self::meta_elections::snapshot::MetaElectionsSnapshot;
-#[cfg(any(test, feature = "testing"))]
-pub(crate) use self::meta_elections::MetaElection;
-pub(crate) use self::meta_elections::{MetaElectionHandle, MetaElections};
+pub(crate) use self::meta_election::snapshot::MetaElectionSnapshot;
+pub(crate) use self::meta_election::MetaElection;
 pub(crate) use self::meta_event::{MetaEvent, MetaEventBuilder};
 pub(crate) use self::meta_vote::{MetaVote, Step};

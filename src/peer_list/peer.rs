@@ -6,8 +6,6 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use super::membership_list::MembershipListChange;
-use super::peer_index::PeerIndexSet;
 use super::peer_state::PeerState;
 use crate::gossip::{EventIndex, IndexedEventRef};
 use crate::hash::Hash;
@@ -26,8 +24,6 @@ pub(crate) struct Peer<P: PublicId> {
     // accusations.
     #[cfg(feature = "malice-detection")]
     pub accomplice_event_checkpoint: Option<EventIndex>,
-    membership_list: PeerIndexSet,
-    membership_list_changes: Vec<(usize, MembershipListChange)>,
 }
 
 impl<P: PublicId> Peer<P> {
@@ -42,8 +38,6 @@ impl<P: PublicId> Peer<P> {
             last_gossiped_event: None,
             #[cfg(feature = "malice-detection")]
             accomplice_event_checkpoint: None,
-            membership_list: PeerIndexSet::default(),
-            membership_list_changes: Vec::new(),
         }
     }
 
@@ -81,31 +75,6 @@ impl<P: PublicId> Peer<P> {
     #[cfg(all(test, feature = "mock"))]
     pub(super) fn remove_last_event(&mut self) -> Option<EventIndex> {
         self.events.remove_last()
-    }
-
-    pub(super) fn change_membership_list(&mut self, change: MembershipListChange) {
-        if change.apply(&mut self.membership_list) {
-            self.record_membership_list_change(change);
-        }
-    }
-
-    pub(super) fn record_membership_list_change(&mut self, change: MembershipListChange) {
-        let index = self
-            .events
-            .indexed()
-            .rev()
-            .next()
-            .map(|(index, _)| index)
-            .unwrap_or(0);
-        self.membership_list_changes.push((index, change));
-    }
-
-    pub(crate) fn membership_list(&self) -> &PeerIndexSet {
-        &self.membership_list
-    }
-
-    pub(super) fn membership_list_changes(&self) -> &[(usize, MembershipListChange)] {
-        &self.membership_list_changes
     }
 }
 
@@ -147,6 +116,7 @@ impl Events {
         self.0.iter().flat_map(|slot| slot.iter())
     }
 
+    #[cfg(test)]
     fn indexed<'a>(&'a self) -> impl DoubleEndedIterator<Item = (usize, EventIndex)> + 'a {
         self.0
             .iter()

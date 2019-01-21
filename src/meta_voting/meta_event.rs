@@ -6,7 +6,6 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use super::meta_elections::MetaElectionHandle;
 use super::meta_vote::MetaVote;
 use crate::gossip::IndexedEventRef;
 use crate::id::PublicId;
@@ -24,35 +23,44 @@ pub(crate) struct MetaEvent {
 }
 
 impl MetaEvent {
-    pub fn build<P: PublicId>(
-        election: MetaElectionHandle,
-        event: IndexedEventRef<P>,
-    ) -> MetaEventBuilder<P> {
+    pub fn build<P: PublicId>(event: IndexedEventRef<P>) -> MetaEventBuilder<P> {
         MetaEventBuilder {
-            election,
             event,
             meta_event: MetaEvent {
                 observees: PeerIndexSet::default(),
                 interesting_content: Vec::new(),
                 meta_votes: PeerIndexMap::default(),
             },
+            new: true,
+        }
+    }
+
+    pub fn rebuild<P: PublicId>(mut self, event: IndexedEventRef<P>) -> MetaEventBuilder<P> {
+        // Do not clear `interesting_content` as it can be reused in some cases.
+        self.observees.clear();
+        self.meta_votes.clear();
+
+        MetaEventBuilder {
+            event,
+            meta_event: self,
+            new: false,
         }
     }
 }
 
 pub(crate) struct MetaEventBuilder<'a, P: PublicId + 'a> {
-    election: MetaElectionHandle,
     event: IndexedEventRef<'a, P>,
     meta_event: MetaEvent,
+    new: bool,
 }
 
 impl<'a, P: PublicId + 'a> MetaEventBuilder<'a, P> {
-    pub fn election(&self) -> MetaElectionHandle {
-        self.election
-    }
-
     pub fn event(&self) -> IndexedEventRef<'a, P> {
         self.event
+    }
+
+    pub fn is_new(&self) -> bool {
+        self.new
     }
 
     pub fn observee_count(&self) -> usize {
@@ -69,6 +77,18 @@ impl<'a, P: PublicId + 'a> MetaEventBuilder<'a, P> {
 
     pub fn set_interesting_content(&mut self, content: Vec<ObservationKey>) {
         self.meta_event.interesting_content = content;
+    }
+
+    /// Reuse the interesting content for which the given predicate returns true.
+    pub fn reuse_interesting_content<F>(&mut self, f: F)
+    where
+        F: FnMut(&ObservationKey) -> bool,
+    {
+        if self.new {
+            log_or_panic!("Can't reuse interesting content of new meta-event.");
+        }
+
+        self.meta_event.interesting_content.retain(f)
     }
 
     pub fn add_meta_votes(&mut self, peer_index: PeerIndex, votes: Vec<MetaVote>) {
