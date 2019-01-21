@@ -70,9 +70,9 @@ fn bench(c: &mut Criterion) {
     }
 
     for name in &[
-        //"a_node4_opaque_evt8", // panic
+        "a_node4_opaque_evt8",
         "a_node8_opaque_evt8",
-        //"a_node12_opaque_evt8",
+        "a_node12_opaque_evt8",
         "a_node16_opaque_evt8",
         "a_node24_opaque_evt8",
         //"a_node32_opaque_evt8",

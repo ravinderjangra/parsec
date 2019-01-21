@@ -119,11 +119,13 @@ impl From<ParsedContents> for Record {
                         .map(|peer| peer.id().clone()));
 
                     let mut events_to_gossip = Vec::new();
+                    let other_parent_tindex = other_parent.topological_index();
                     for event in contents.graph.ancestors(other_parent) {
-                        if known[event.topological_index()] {
+                        let event_tindex = event.topological_index();
+                        if known[event_tindex] && other_parent_tindex != event_tindex {
                             continue;
                         } else {
-                            known[event.topological_index()] = true;
+                            known[event_tindex] = true;
                         }
 
                         events_to_gossip.push(unwrap!(event.pack(contents.event_context())));

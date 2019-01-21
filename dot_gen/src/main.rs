@@ -42,7 +42,7 @@
 //! When scenarios are defined, run the tool from within Parsec's root directory:
 //!
 //!     cargo run --release --manifest-path=dot_gen/Cargo.toml -- ARGS
-//! 
+//!
 //! where ARGS are the arguments to the tool. Run with --help for more info.
 //!
 //! To speed up generation of bigger test cases:
