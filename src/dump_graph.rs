@@ -87,6 +87,18 @@ mod detail {
                 .collect::<String>()
         };
         static ref ROOT_DIR: PathBuf = { ROOT_DIR_PREFIX.join(&*ROOT_DIR_SUFFIX) };
+
+        static ref GENERATE_SVG: bool = {
+            // PARSEC_DUMP_GRAPH_SVG=0 to disable svg file generation
+            env::var("PARSEC_DUMP_GRAPH_SVG").ok().map_or(true, |x| x != "0")
+        };
+
+        static ref FILTER_PEERS: Option<Vec<String>> = {
+            // PARSEC_DUMP_GRAPH_PEERS=Alice,Bob to only dump graph for them.
+            env::var("PARSEC_DUMP_GRAPH_PEERS").ok().map(|x| {
+                x.split(',').map(|x | x.to_string()).collect::<Vec<String>>()
+            })
+        };
     }
 
     thread_local!(
@@ -145,6 +157,13 @@ mod detail {
         observations: &ObservationStore<T, S::PublicId>,
     ) {
         let id = format!("{:?}", owner_id);
+
+        if let Some(ref filter_peers) = *FILTER_PEERS {
+            if !filter_peers.contains(&id) {
+                return;
+            }
+        }
+
         let call_count = DUMP_COUNTS.with(|counts| {
             let mut borrowed_counts = counts.borrow_mut();
             let count = borrowed_counts.entry(id.clone()).or_insert(0);
@@ -170,11 +189,13 @@ mod detail {
         }
 
         // Try to generate an SVG file from the dot file, but we don't care about failure here.
-        if let Ok(mut child) = Command::new("dot")
-            .args(&["-Tsvg", file_path.to_string_lossy().as_ref(), "-O"])
-            .spawn()
-        {
-            let _ = child.wait();
+        if *GENERATE_SVG {
+            if let Ok(mut child) = Command::new("dot")
+                .args(&["-Tsvg", file_path.to_string_lossy().as_ref(), "-O"])
+                .spawn()
+            {
+                let _ = child.wait();
+            }
         }
 
         // Create symlink so it's easier to find the latest graphs.

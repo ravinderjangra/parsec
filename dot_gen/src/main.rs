@@ -41,9 +41,15 @@
 //!
 //! When scenarios are defined, run the tool from within Parsec's root directory:
 //!
-//!     cargo run --manifest-path=dot_gen/Cargo.toml -- ARGS
+//!     cargo run --release --manifest-path=dot_gen/Cargo.toml -- ARGS
 //!
 //! where ARGS are the arguments to the tool. Run with --help for more info.
+//!
+//! To speed up generation of bigger test cases:
+//!     Use PARSEC_DUMP_GRAPH_SVG=0 to disable generation of .svg files with .dot files
+//!     PARSEC_DUMP_GRAPH_PEERS=Alice,Bob,Carol to only generate temporary .dot/.svg files for Alice,Bob,Carol peers.
+//!     PARSEC_DUMP_GRAPH_SVG=0 PARSEC_DUMP_GRAPH_PEERS=Alice,Bob,Carol cargo run --release --manifest-path=dot_gen/Cargo.toml -- ARGS
+//!
 
 #![forbid(
     exceeding_bitshifts,
@@ -217,6 +223,43 @@ fn main() {
             )
         })
         .file("Alice", "dynamic.dot");
+
+    let add_bench_scalability = |s: &mut Scenarios, opaque_to_add: usize, genesis_size: usize| {
+        let file_name_a = format!("a_node{}_opaque_evt{}.dot", genesis_size, opaque_to_add );
+        let file_name_b = format!("b_node{}_opaque_evt{}.dot", genesis_size, opaque_to_add );
+        let file_name_c = format!("c_node{}_opaque_evt{}.dot", genesis_size, opaque_to_add );
+        let bench_name = format!("bench_section_size_evt{}", opaque_to_add );
+
+        let _ = s.add(bench_name, move |env| {
+            Schedule::new(
+                env,
+                &ScheduleOptions {
+                    genesis_size,
+                    opaque_to_add,
+                    votes_before_gossip: true,
+                    ..Default::default()
+                },
+            )
+        })
+        .seed([1, 2, 3, 4])
+        .file("Alice", &file_name_a)
+        .file("Bob", &file_name_b)
+        .file("Carol", &file_name_c);
+    };
+
+    add_bench_scalability(&mut scenarios, 8, 4);
+    add_bench_scalability(&mut scenarios, 8, 8);
+    add_bench_scalability(&mut scenarios, 8, 12);
+    add_bench_scalability(&mut scenarios, 8, 16);
+    add_bench_scalability(&mut scenarios, 8, 24);
+    add_bench_scalability(&mut scenarios, 8, 32);
+
+    add_bench_scalability(&mut scenarios, 16, 4);
+    add_bench_scalability(&mut scenarios, 16, 8);
+    add_bench_scalability(&mut scenarios, 16, 12);
+    add_bench_scalability(&mut scenarios, 16, 16);
+    add_bench_scalability(&mut scenarios, 16, 24);
+    add_bench_scalability(&mut scenarios, 16, 32);
 
     // Do not edit below this line.
     // -------------------------------------------------------------------------

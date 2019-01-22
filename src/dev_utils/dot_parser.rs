@@ -24,7 +24,7 @@ use crate::observation::ConsensusMode;
 use crate::observation::{
     Observation, ObservationHash, ObservationInfo, ObservationKey, ObservationStore,
 };
-use crate::peer_list::{PeerIndexMap, PeerIndexSet, PeerList, PeerState};
+use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerState};
 use crate::round_hash::RoundHash;
 use pom::char_class::{alphanum, digit, hex_digit, multispace, space};
 use pom::parser::*;
@@ -865,8 +865,15 @@ fn create_events(
 ) -> BTreeMap<String, EventIndex> {
     let mut event_indices = BTreeMap::new();
 
+    let graph = std::mem::replace(graph, BTreeMap::new());
+
+    let mut graph: BTreeMap<(Option<PeerIndex>, String), ParsedEvent> = graph
+        .into_iter()
+        .map(|(name, evt)| ((peer_list.get_index(&evt.creator), name.clone()), evt))
+        .collect();
+
     while !graph.is_empty() {
-        let (ev_id, next_parsed_event) = next_topological_event(graph, &event_indices);
+        let (ev_id, next_parsed_event) = next_topological_event(&mut graph, &event_indices);
         let next_event_details = unwrap!(details.remove(&ev_id));
 
         let (self_parent, other_parent, index_by_creator) = {
@@ -916,7 +923,7 @@ fn get_event_by_id<'a>(
 }
 
 fn next_topological_event(
-    graph: &mut BTreeMap<String, ParsedEvent>,
+    graph: &mut BTreeMap<(Option<PeerIndex>, String), ParsedEvent>,
     indices: &BTreeMap<String, EventIndex>,
 ) -> (String, ParsedEvent) {
     let next_key = unwrap!(graph
@@ -935,6 +942,8 @@ fn next_topological_event(
         .next())
     .clone();
     let ev = unwrap!(graph.remove(&next_key));
+
+    let (_, next_key) = next_key;
     (next_key, ev)
 }
 
