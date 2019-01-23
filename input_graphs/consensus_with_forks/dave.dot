@@ -1,10 +1,10 @@
 /// our_id: Dave
 /// peer_list: {
-///   Alice; PeerState(VOTE|SEND|RECV); peers: {Alice, Bob, Carol, Dave, Eric}
-///   Bob; PeerState(VOTE|SEND|RECV); peers: {Alice, Bob, Carol, Dave, Eric}
-///   Carol; PeerState(VOTE|SEND|RECV); peers: {Alice, Bob, Carol, Dave, Eric}
-///   Dave; PeerState(VOTE|SEND|RECV); peers: {}
-///   Eric; PeerState(VOTE|SEND|RECV); peers: {Alice, Bob, Carol, Dave, Eric}
+///   Alice: PeerState(VOTE|SEND|RECV)
+///   Bob: PeerState(VOTE|SEND|RECV)
+///   Carol: PeerState(VOTE|SEND|RECV)
+///   Dave: PeerState(VOTE|SEND|RECV)
+///   Eric: PeerState(VOTE|SEND|RECV)
 /// }
 digraph GossipGraph {
   splines=false
@@ -1260,8 +1260,6 @@ digraph GossipGraph {
 /// consensus_history:
 /// 557e90b3402a68f6ff018647557ba9919531dd36a5bd86650947bc56dcef3a40
 
-/// MetaElectionHandle(CURRENT)
-/// consensus_len: 1
 /// round_hashes: {
 ///   Alice -> [
 ///     RoundHash { round: 0, latest_block_hash: 557e90b3402a68f6ff018647557ba9919531dd36a5bd86650947bc56dcef3a40 }
