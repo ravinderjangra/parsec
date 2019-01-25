@@ -147,7 +147,7 @@ pub struct PeerStatuses {
 }
 
 impl PeerStatuses {
-    /// Creates a new PeerStatuses struct with the given active peers
+    /// Creates a new `PeerStatuses` struct with the given active peers.
     pub fn new(names: &BTreeSet<PeerId>) -> PeerStatuses {
         PeerStatuses {
             statuses: names
@@ -180,7 +180,7 @@ impl PeerStatuses {
         (*unwrap!(rng.choose(&names))).clone()
     }
 
-    /// Returns an iterator through all the peers
+    /// Returns an iterator through all the peers.
     pub fn all_peers(&self) -> impl Iterator<Item = &PeerId> {
         self.statuses.keys()
     }
@@ -189,19 +189,19 @@ impl PeerStatuses {
         self.peers_by_status(|s| *s == PeerStatus::Active).count()
     }
 
-    /// Returns an iterator through the list of active peers
+    /// Returns an iterator through the list of active peers.
     pub fn active_peers(&self) -> impl Iterator<Item = &PeerId> {
         self.peers_by_status(|s| *s == PeerStatus::Active)
             .map(|(id, _)| id)
     }
 
-    /// Returns an iterator through the list of present peers (active or pending)
+    /// Returns an iterator through the list of present peers (active or pending).
     pub fn present_peers(&self) -> impl Iterator<Item = &PeerId> {
         self.peers_by_status(|s| *s == PeerStatus::Active || *s == PeerStatus::Pending)
             .map(|(id, _)| id)
     }
 
-    /// Returns an iterator through the list of inactive peers (removed and failed)
+    /// Returns an iterator through the list of inactive peers (removed and failed).
     pub fn inactive_peers(&self) -> impl Iterator<Item = &PeerId> {
         self.peers_by_status(|s| *s == PeerStatus::Removed || *s == PeerStatus::Failed)
             .map(|(id, _)| id)
@@ -237,9 +237,9 @@ impl PeerStatuses {
         }
     }
 
-    /// Remove the given peer
+    /// Remove the given peer.
     pub fn remove_peer(&mut self, peer: &PeerId) {
-        let status = self.statuses.get_mut(peer).unwrap();
+        let status = unwrap!(self.statuses.get_mut(peer));
         *status = PeerStatus::Removed;
     }
 
@@ -259,7 +259,7 @@ impl PeerStatuses {
     }
 
     pub fn fail_peer(&mut self, peer: &PeerId) {
-        let status = self.statuses.get_mut(peer).unwrap();
+        let status = unwrap!(self.statuses.get_mut(peer));
         *status = PeerStatus::Failed;
     }
 }

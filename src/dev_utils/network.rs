@@ -76,7 +76,7 @@ pub enum ConsensusError {
 }
 
 impl Network {
-    /// Create an empty test network
+    /// Create an empty test network.
     pub fn new(consensus_mode: ConsensusMode) -> Self {
         Network {
             peers: BTreeMap::new(),
@@ -86,7 +86,7 @@ impl Network {
         }
     }
 
-    /// Create a test network with initial peers constructed from the given IDs
+    /// Create a test network with initial peers constructed from the given IDs.
     pub fn with_peers<I: IntoIterator<Item = PeerId>>(
         all_ids: I,
         consensus_mode: ConsensusMode,
@@ -151,7 +151,7 @@ impl Network {
     }
 
     /// Returns true if all peers hold the same sequence of stable blocks.
-    fn blocks_all_in_sequence(&self) -> Result<(), ConsensusError> {
+    fn check_blocks_all_in_sequence(&self) -> Result<(), ConsensusError> {
         let first_peer = unwrap!(self.active_peers().next());
         let payloads = first_peer.blocks_payloads();
         if let Some(peer) = self
@@ -197,7 +197,7 @@ impl Network {
             });
     }
 
-    /// Handles incoming requests and responses
+    /// Handles incoming requests and responses.
     fn handle_messages(&mut self, peer: &PeerId, step: usize) {
         if let Some(msgs) = self.msg_queue.remove(peer) {
             let (to_handle, rest) = msgs
@@ -330,7 +330,7 @@ impl Network {
         .is_ok()
     }
 
-    /// Checks whether there is a right number of blocks and the blocks are in an agreeing order
+    /// Checks whether there is a right number of blocks and the blocks are in an agreeing order.
     fn check_consensus(
         &self,
         expected_peers: &BTreeMap<PeerId, PeerStatus>,
@@ -361,7 +361,7 @@ impl Network {
         }
 
         // Check everybody has the same blocks in the same order.
-        self.blocks_all_in_sequence()
+        self.check_blocks_all_in_sequence()
     }
 
     fn check_block_signatories(
@@ -401,15 +401,15 @@ impl Network {
         Ok(())
     }
 
-    /// Checks if the blocks are only signed by valid voters
+    /// Checks if the blocks are only signed by valid voters.
     fn check_blocks_signatories(&self) -> Result<(), ConsensusError> {
-        let blocks = self.active_peers().next().unwrap().blocks();
+        let blocks = unwrap!(self.active_peers().next()).blocks();
         let mut valid_voters = BTreeSet::new();
         for block in blocks {
             match *block.payload() {
                 ParsecObservation::Genesis(ref g) => {
-                    // explicitly don't check signatories - the list of valid voters
-                    // should be empty at this point
+                    // Explicitly don't check signatories - the list of valid voters should be empty
+                    // at this point.
                     valid_voters = g.clone();
                 }
                 ParsecObservation::Add { ref peer_id, .. } => {
@@ -445,7 +445,7 @@ impl Network {
         }
     }
 
-    /// Simulates the network according to the given schedule
+    /// Simulates the network according to the given schedule.
     pub fn execute_schedule<R: Rng>(
         &mut self,
         rng: &mut R,
@@ -493,7 +493,7 @@ impl Network {
         match event {
             ScheduleEvent::Genesis(genesis_group) => {
                 if !self.peers.is_empty() {
-                    // if the peers are already initialised, we won't initialise them again
+                    // If the peers are already initialised, we won't initialise them again.
                     return Ok(true);
                 }
                 let peers = genesis_group
@@ -510,22 +510,22 @@ impl Network {
                 }
                 self.peers = peers;
                 self.genesis = genesis_group;
-                // do a full reset while we're at it
+                // Do a full reset while we're at it.
                 self.msg_queue.clear();
             }
-            ScheduleEvent::AddPeer(peer) => {
+            ScheduleEvent::AddPeer(peer_id) => {
                 let current_peers = self.active_peers().map(|peer| peer.id.clone()).collect();
                 let _ = self.peers.insert(
-                    peer.clone(),
+                    peer_id.clone(),
                     Peer::from_existing(
-                        peer.clone(),
+                        peer_id.clone(),
                         &self.genesis,
                         &current_peers,
                         self.consensus_mode,
                     ),
                 );
 
-                peer_removal_guard.add_peer(peer);
+                peer_removal_guard.add_peer(peer_id);
             }
             ScheduleEvent::RemovePeer(peer) => {
                 if peer_removal_guard.attempt_to_remove_peer(&peer) {
