@@ -8,7 +8,7 @@
 
 #[cfg(feature = "testing")]
 use super::parse_test_dot_file;
-use super::peer::{Peer, PeerStatus};
+use super::peer::{NetworkView, Peer, PeerStatus};
 use super::schedule::{Schedule, ScheduleEvent, ScheduleOptions};
 use super::Observation;
 use crate::block::Block;
@@ -134,20 +134,33 @@ impl Network {
         self.consensus_mode
     }
 
-    fn peers_with_status(&self, status: PeerStatus) -> impl Iterator<Item = &Peer> {
+    fn active_peers(&self) -> impl Iterator<Item = &Peer> {
         self.peers
             .values()
-            .filter(move |&peer| peer.status == status)
+            .filter(|peer| peer.status() == PeerStatus::Active)
     }
 
-    fn active_peers(&self) -> impl Iterator<Item = &Peer> {
-        self.peers_with_status(PeerStatus::Active)
+    /// Returns the IDs of peers which consider themselves to be still running correctly, i.e. those
+    /// for which `is_running()` is true.
+    fn running_peers_ids(&self) -> Vec<PeerId> {
+        self.peers
+            .values()
+            .filter_map(|peer| {
+                if peer.is_running() {
+                    Some(peer.id().clone())
+                } else {
+                    None
+                }
+            })
+            .collect()
     }
 
-    fn present_peers(&self) -> impl Iterator<Item = &Peer> {
-        self.peers.values().filter(move |&peer| {
-            peer.status == PeerStatus::Active || peer.status == PeerStatus::Pending
-        })
+    /// Returns the number of peers for which the network has the given view of their state.
+    fn num_with_network_view(&self, network_view: NetworkView) -> usize {
+        self.peers
+            .values()
+            .filter(|peer| peer.network_view() == network_view)
+            .count()
     }
 
     /// Returns true if all peers hold the same sequence of stable blocks.
@@ -160,11 +173,11 @@ impl Network {
         {
             Err(ConsensusError::DifferingBlocksOrder {
                 order_1: BlocksOrder {
-                    peer: first_peer.id.clone(),
+                    peer: first_peer.id().clone(),
                     order: payloads.into_iter().cloned().collect(),
                 },
                 order_2: BlocksOrder {
-                    peer: peer.id.clone(),
+                    peer: peer.id().clone(),
                     order: peer.blocks_payloads().into_iter().cloned().collect(),
                 },
             })
@@ -182,9 +195,7 @@ impl Network {
     }
 
     fn send_message(&mut self, src: PeerId, dst: &PeerId, message: Message, deliver_after: usize) {
-        if self.peer(dst).status != PeerStatus::Active
-            && self.peer(dst).status != PeerStatus::Pending
-        {
+        if !self.peer(dst).is_running() {
             return;
         }
         self.msg_queue
@@ -285,11 +296,11 @@ impl Network {
                         // old index exists and isn't equal to the new one
                         return Err(ConsensusError::DifferingBlocksOrder {
                             order_1: BlocksOrder {
-                                peer: peer.id.clone(),
+                                peer: peer.id().clone(),
                                 order: peer.blocks_payloads().into_iter().cloned().collect(),
                             },
                             order_2: BlocksOrder {
-                                peer: old_peer.id.clone(),
+                                peer: old_peer.id().clone(),
                                 order: old_peer.blocks_payloads().into_iter().cloned().collect(),
                             },
                         });
@@ -351,7 +362,7 @@ impl Network {
         let got = self
             .peers
             .values()
-            .map(|peer| (peer.id.clone(), peer.status))
+            .map(|peer| (peer.id().clone(), peer.status()))
             .collect();
         if *expected_peers != got {
             return Err(ConsensusError::WrongPeers {
@@ -436,7 +447,7 @@ impl Network {
             .find(|(_, malice)| malice.is_provable());
         if let Some((offender, malice)) = accusation {
             return Err(ConsensusError::UnexpectedAccusation {
-                accuser: peer.id.clone(),
+                accuser: peer.id().clone(),
                 accused: offender.clone(),
                 malice: malice.clone(),
             });
@@ -458,12 +469,11 @@ impl Network {
             max_observations,
             events,
         } = schedule;
-        let mut peer_removal_guard = PeerRemovalGuard::default();
         let mut queue: VecDeque<_> = events.into_iter().collect();
         let mut retry = Vec::new();
 
         while let Some(event) = queue.pop_front() {
-            if self.execute_event(rng, options, event.clone(), &mut peer_removal_guard)? {
+            if self.execute_event(rng, options, event.clone())? {
                 for event in retry.drain(..).rev() {
                     queue.push_front(event)
                 }
@@ -488,7 +498,6 @@ impl Network {
         rng: &mut R,
         options: &ScheduleOptions,
         event: ScheduleEvent,
-        peer_removal_guard: &mut PeerRemovalGuard,
     ) -> Result<bool, ConsensusError> {
         match event {
             ScheduleEvent::Genesis(genesis_group) => {
@@ -505,16 +514,13 @@ impl Network {
                         )
                     })
                     .collect();
-                for node in &genesis_group {
-                    peer_removal_guard.add_genesis_peer(node.clone());
-                }
                 self.peers = peers;
                 self.genesis = genesis_group;
                 // Do a full reset while we're at it.
                 self.msg_queue.clear();
             }
             ScheduleEvent::AddPeer(peer_id) => {
-                let current_peers = self.active_peers().map(|peer| peer.id.clone()).collect();
+                let current_peers = self.active_peers().map(|peer| peer.id().clone()).collect();
                 let _ = self.peers.insert(
                     peer_id.clone(),
                     Peer::from_existing(
@@ -524,197 +530,66 @@ impl Network {
                         self.consensus_mode,
                     ),
                 );
-
-                peer_removal_guard.add_peer(peer_id);
             }
-            ScheduleEvent::RemovePeer(peer) => {
-                if peer_removal_guard.attempt_to_remove_peer(&peer) {
-                    (*self.peer_mut(&peer)).status = PeerStatus::Removed;
+            ScheduleEvent::RemovePeer(peer_id) => {
+                if self.allow_removal_of_peer(&peer_id) {
+                    (*self.peer_mut(&peer_id)).mark_as_removed();
                 } else {
                     return Ok(false);
                 }
             }
-            ScheduleEvent::Fail(peer) => {
-                if peer_removal_guard.attempt_to_remove_peer(&peer) {
-                    (*self.peer_mut(&peer)).status = PeerStatus::Failed;
+            ScheduleEvent::Fail(peer_id) => {
+                if self.allow_removal_of_peer(&peer_id) {
+                    (*self.peer_mut(&peer_id)).mark_as_failed();
                 } else {
                     return Ok(false);
                 }
             }
             ScheduleEvent::LocalStep(step) => {
-                let present_peers: Vec<PeerId> =
-                    self.present_peers().map(|peer| peer.id.clone()).collect();
-                for peer in &present_peers {
-                    self.peer_mut(&peer).make_votes();
-                    self.handle_messages(&peer, step);
-                    let first_block = self.peer_mut(&peer).poll();
-                    self.check_unexpected_accusations(&peer)?;
-
-                    for block in &self.peer(&peer).blocks()[first_block..] {
-                        match *block.payload() {
-                            ParsecObservation::Remove { ref peer_id, .. } => {
-                                peer_removal_guard.record_consensus_on_remove_peer(peer, peer_id);
-                            }
-                            ParsecObservation::Add { ref peer_id, .. } => {
-                                peer_removal_guard.record_consensus_on_add_peer(peer, peer_id);
-                            }
-                            _ => (),
-                        }
-                    }
-
+                for peer_id in self.running_peers_ids() {
+                    self.peer_mut(&peer_id).make_votes();
+                    self.handle_messages(&peer_id, step);
+                    self.peer_mut(&peer_id).poll_all();
+                    self.check_unexpected_accusations(&peer_id)?;
+                }
+                Peer::update_network_views(&mut self.peers);
+                let running_peers_ids = self.running_peers_ids();
+                for peer_id in &running_peers_ids {
                     if rng.gen::<f64>() < options.prob_gossip {
-                        self.send_gossip(rng, options, peer, &present_peers, step);
+                        self.send_gossip(rng, options, peer_id, &running_peers_ids, step);
                     }
                 }
             }
-            ScheduleEvent::VoteFor(peer, observation) => {
+            ScheduleEvent::VoteFor(voting_peer_id, observation) => {
                 // Skip voting by removed/failed peers.
-                match self.peer(&peer).status {
-                    PeerStatus::Active | PeerStatus::Pending => (),
-                    PeerStatus::Removed | PeerStatus::Failed => return Ok(true),
+                if !self.peer(&voting_peer_id).is_running() {
+                    return Ok(true);
                 }
 
                 if let ParsecObservation::Remove { ref peer_id, .. } = observation {
-                    if !peer_removal_guard.attempt_to_remove_peer(&peer_id) {
+                    if self.allow_removal_of_peer(&peer_id) {
+                        (*self.peer_mut(&peer_id)).mark_network_view_as_leaving();
+                    } else {
                         return Ok(false);
                     }
                 }
 
-                self.peer_mut(&peer).vote_for(&observation);
+                self.peer_mut(&voting_peer_id).vote_for(&observation);
             }
         }
         Ok(true)
     }
-}
 
-// Helper struct that protects the test network from losing too many nodes.
-#[derive(Default)]
-struct PeerRemovalGuard {
-    states: BTreeMap<PeerId, PeerRemovalState>,
-}
-
-#[derive(Debug)]
-enum PeerRemovalState {
-    // Peer is being added. The `usize` is the number of peers that consensused the add.
-    Adding(usize),
-    // Peer was added by at least the supermajority of the section.
-    Added,
-    // Peer is being removed. The `usize` is the number of peers that consensused the remove.
-    Removing(usize),
-    // Peer was removed by at least the supermajority of the section.
-    Removed,
-}
-
-impl PeerRemovalState {
-    fn is_active(&self) -> bool {
-        match *self {
-            PeerRemovalState::Added | PeerRemovalState::Removing(..) => true,
-            PeerRemovalState::Adding(..) | PeerRemovalState::Removed => false,
-        }
-    }
-}
-
-impl PeerRemovalGuard {
-    fn num_active(&self) -> usize {
-        self.states
-            .values()
-            .filter(|state| state.is_active())
-            .count()
-    }
-
-    fn num_removing(&self) -> usize {
-        self.states
-            .values()
-            .filter(|state| {
-                if let PeerRemovalState::Removing(..) = *state {
-                    true
-                } else {
-                    false
-                }
-            })
-            .count()
-    }
-
-    fn add_genesis_peer(&mut self, peer_id: PeerId) {
-        let _ = self.states.insert(peer_id, PeerRemovalState::Added);
-    }
-
-    fn add_peer(&mut self, peer_id: PeerId) {
-        let _ = self.states.insert(peer_id, PeerRemovalState::Adding(0));
-    }
-
-    fn record_consensus_on_add_peer(&mut self, recorder_id: &PeerId, added_peer_id: &PeerId) {
-        if !unwrap!(self.states.get(recorder_id)).is_active() {
-            return;
-        }
-
-        let active = self.num_active();
-        let state = unwrap!(
-            self.states.get_mut(added_peer_id),
-            "record consensus on add {:?} failed: unknown peer",
-            added_peer_id
-        );
-        let add = if let PeerRemovalState::Adding(ref mut count) = *state {
-            *count += 1;
-            is_more_than_two_thirds(*count, active)
-        } else {
-            false
-        };
-
-        if add {
-            *state = PeerRemovalState::Added;
-        }
-    }
-
-    fn record_consensus_on_remove_peer(&mut self, recorder_id: &PeerId, removed_peer_id: &PeerId) {
-        if !unwrap!(self.states.get(recorder_id)).is_active() {
-            return;
-        }
-
-        let active = self.num_active();
-
-        let state = unwrap!(
-            self.states.get_mut(removed_peer_id),
-            "record consensus on remove {:?} failed: unknown peer",
-            removed_peer_id
-        );
-        let remove = match *state {
-            PeerRemovalState::Adding(..) | PeerRemovalState::Added => panic!(
-                "record consensus on remove {:?} failed: not scheduled for removal",
-                removed_peer_id
-            ),
-            PeerRemovalState::Removing(ref mut count) => {
-                *count += 1;
-                is_more_than_two_thirds(*count, active)
+    fn allow_removal_of_peer(&self, peer_id: &PeerId) -> bool {
+        match self.peer(peer_id).network_view() {
+            NetworkView::Joining => false,
+            NetworkView::Joined => {
+                let joined_count = self.num_with_network_view(NetworkView::Joined);
+                let leaving_count = self.num_with_network_view(NetworkView::Leaving);
+                let current_count = joined_count + leaving_count;
+                is_more_than_two_thirds(joined_count - 1, current_count)
             }
-            PeerRemovalState::Removed => false,
-        };
-
-        if remove {
-            *state = PeerRemovalState::Removed;
-        }
-    }
-
-    fn attempt_to_remove_peer(&mut self, peer_id: &PeerId) -> bool {
-        let active = self.num_active();
-        let removing = self.num_removing();
-        let remaining = active - removing - 1;
-
-        if let Some(state) = self.states.get_mut(peer_id) {
-            match *state {
-                PeerRemovalState::Adding(..) => false,
-                PeerRemovalState::Added => {
-                    if is_more_than_two_thirds(remaining, active) {
-                        *state = PeerRemovalState::Removing(0);
-                        true
-                    } else {
-                        false
-                    }
-                }
-                PeerRemovalState::Removing(..) | PeerRemovalState::Removed => true,
-            }
-        } else {
-            panic!("attempt to remove {:?} failed: unknown peer", peer_id)
+            NetworkView::Leaving | NetworkView::Left => true,
         }
     }
 }

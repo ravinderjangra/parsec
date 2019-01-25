@@ -12,6 +12,7 @@ mod dot_parser;
 mod environment;
 mod network;
 mod peer;
+mod peer_statuses;
 #[cfg(feature = "testing")]
 pub mod proptest;
 #[cfg(feature = "testing")]
@@ -26,7 +27,8 @@ pub(crate) use self::dot_parser::parse_test_dot_file;
 pub(crate) use self::dot_parser::ParsedContents;
 pub use self::environment::{Environment, RngChoice};
 pub use self::network::{ConsensusError, Network};
-pub use self::peer::{Peer, PeerStatus, PeerStatuses};
+pub use self::peer::{NetworkView, Peer, PeerStatus};
+pub use self::peer_statuses::PeerStatuses;
 #[cfg(feature = "testing")]
 pub use self::record::Record;
 pub use self::schedule::*;
