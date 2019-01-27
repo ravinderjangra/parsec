@@ -14,8 +14,8 @@ use crate::error::{Error, Result};
 #[cfg(all(test, feature = "mock"))]
 use crate::gossip::EventHash;
 use crate::gossip::{
-    Event, EventContextMut, EventContextRef, EventIndex, Graph, IndexedEventRef, PackedEvent,
-    Request, Response, UnpackedEvent,
+    AbstractEvent, Event, EventContextMut, EventContextRef, EventIndex, Graph, IndexedEventRef,
+    PackedEvent, Request, Response, UnpackedEvent,
 };
 use crate::id::{PublicId, SecretId};
 use crate::meta_voting::{MetaElection, MetaEvent, MetaEventBuilder, MetaVote, Step};
@@ -860,24 +860,54 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let peers_that_can_vote = self.voters();
         let start_index = self.start_index();
 
-        let mut payloads: Vec<_> = self
-            .unconsensused_events()
-            .map(|event| event.inner())
-            .filter(|event| builder.event().sees(event))
+        let is_already_interesting_content = |payload_key: &ObservationKey| {
+            self.meta_election
+                .is_already_interesting_content(builder.event().creator(), payload_key)
+        };
+
+        let is_interesting_payload = |payload_key: &ObservationKey| {
+            self.is_interesting_payload(builder, &peers_that_can_vote, payload_key)
+        };
+
+        let has_interesting_ancestor = |payload_key: &ObservationKey| {
+            self.has_interesting_ancestor(builder, payload_key, start_index)
+        };
+
+        let payloads = Self::find_interesting_content_for_event(
+            builder.event().as_ref(),
+            self.unconsensused_events().map(|event| event.inner()),
+            is_already_interesting_content,
+            is_interesting_payload,
+            has_interesting_ancestor,
+        );
+
+        builder.set_interesting_content(payloads);
+    }
+
+    #[allow(unused_qualifications)]
+    // E: std::convert::AsRef<E> both requiered and considered unused by 1.32
+    pub(crate) fn find_interesting_content_for_event<'a, E>(
+        builder_event: &E,
+        unconsensused_events: impl Iterator<Item = &'a E>,
+        is_already_interesting_content: impl Fn(&ObservationKey) -> bool,
+        is_interesting_payload: impl Fn(&ObservationKey) -> bool,
+        has_interesting_ancestor: impl Fn(&ObservationKey) -> bool,
+    ) -> Vec<ObservationKey>
+    where
+        E: 'a + AbstractEvent,
+        E: std::convert::AsRef<E>,
+    {
+        let mut payloads: Vec<_> = unconsensused_events
+            .filter(|event| builder_event.sees(event))
             .filter_map(|event| event.payload_key().map(|key| (event, key)))
-            .filter(|(_, payload_key)| {
-                !self
-                    .meta_election
-                    .is_already_interesting_content(builder.event().creator(), payload_key)
-            })
+            .filter(|(_, payload_key)| !is_already_interesting_content(payload_key))
             .filter(|(event, payload_key)| {
-                self.is_interesting_payload(builder, &peers_that_can_vote, payload_key)
-                    || event.sees_fork()
-                        && self.has_interesting_ancestor(builder, payload_key, start_index)
+                is_interesting_payload(payload_key)
+                    || event.sees_fork() && has_interesting_ancestor(payload_key)
             })
             .map(|(event, payload_key)| {
                 (
-                    if event.creator() == builder.event().creator() {
+                    if event.creator() == builder_event.creator() {
                         event.index_by_creator()
                     } else {
                         usize::MAX
@@ -896,8 +926,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         // not voted for by the creator (if any).
         payloads.sort();
 
-        let payloads = payloads.into_iter().map(|(_, key)| key).cloned().collect();
-        builder.set_interesting_content(payloads);
+        payloads.into_iter().map(|(_, key)| key).cloned().collect()
     }
 
     // Try to reuse interesting content of the given event from the previous meta-election.

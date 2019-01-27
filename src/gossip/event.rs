@@ -33,6 +33,36 @@ use std::fmt::{self, Debug, Display, Formatter};
 #[cfg(feature = "dump-graphs")]
 use std::io::{self, Write};
 
+/// Provide a small interface to Event not dependent on PublicId. Serves as a test seam.
+pub(crate) trait AbstractEvent {
+    /// Returns whether this event can see `other`, i.e. whether there's a directed path from `other`
+    /// to `self` in the graph, and no two events created by `other`'s creator are ancestors to
+    /// `self` (fork).
+    fn sees<E: AsRef<Self>>(&self, other: E) -> bool
+    where
+        Self: Sized;
+
+    /// The vote payload_key for an Observation event
+    fn payload_key(&self) -> Option<&ObservationKey>
+    where
+        Self: Sized;
+
+    /// The PeerIndex for this event creator
+    fn creator(&self) -> PeerIndex
+    where
+        Self: Sized;
+
+    /// Whether we have seen any forking peers
+    fn sees_fork(&self) -> bool
+    where
+        Self: Sized;
+
+    // Index of this event relative to other events by the same creator.
+    fn index_by_creator(&self) -> usize
+    where
+        Self: Sized;
+}
+
 pub(crate) struct Event<P: PublicId> {
     content: Content<VoteKey<P>, EventIndex, PeerIndex>,
     // Creator's signature of `content`.
@@ -357,6 +387,28 @@ impl<P: PublicId> Event<P> {
             "/// cause: {}",
             self.content.cause.display(observations)
         )
+    }
+}
+
+impl<P: PublicId> AbstractEvent for Event<P> {
+    fn sees<E: AsRef<Self>>(&self, other: E) -> bool {
+        self.sees(other)
+    }
+
+    fn payload_key(&self) -> Option<&ObservationKey> {
+        self.payload_key()
+    }
+
+    fn creator(&self) -> PeerIndex {
+        self.creator()
+    }
+
+    fn sees_fork(&self) -> bool {
+        self.sees_fork()
+    }
+
+    fn index_by_creator(&self) -> usize {
+        self.index_by_creator()
     }
 }
 
