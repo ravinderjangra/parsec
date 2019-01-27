@@ -16,6 +16,11 @@ pub(crate) struct PeerIndex(pub(super) usize);
 impl PeerIndex {
     /// `PeerIndex` of ourselves.
     pub const OUR: Self = PeerIndex(0);
+
+    #[cfg(any(test, feature = "testing"))]
+    pub fn new_test_peer_index(index: usize) -> Self {
+        Self(index)
+    }
 }
 
 /// Map keyed by `PeerIndex`.

@@ -14,8 +14,8 @@ use crate::error::{Error, Result};
 #[cfg(all(test, feature = "mock"))]
 use crate::gossip::EventHash;
 use crate::gossip::{
-    AbstractEvent, Event, EventContextMut, EventContextRef, EventIndex, Graph, IndexedEventRef,
-    PackedEvent, Request, Response, UnpackedEvent,
+    Event, EventContextMut, EventContextRef, EventIndex, Graph, IndexedEventRef, PackedEvent,
+    Request, Response, UnpackedEvent,
 };
 use crate::id::{PublicId, SecretId};
 use crate::meta_voting::{MetaElection, MetaEvent, MetaEventBuilder, MetaVote, Step};
@@ -28,6 +28,7 @@ use crate::observation::{
     is_more_than_two_thirds, ConsensusMode, Malice, Observation, ObservationHash, ObservationKey,
     ObservationStore,
 };
+use crate::parsec_helpers::find_interesting_content_for_event;
 use crate::peer_list::{PeerIndex, PeerIndexSet, PeerList, PeerState};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::mem;
@@ -873,7 +874,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             self.has_interesting_ancestor(builder, payload_key, start_index)
         };
 
-        let payloads = Self::find_interesting_content_for_event(
+        let payloads = find_interesting_content_for_event(
             builder.event().as_ref(),
             self.unconsensused_events().map(|event| event.inner()),
             is_already_interesting_content,
@@ -882,51 +883,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         );
 
         builder.set_interesting_content(payloads);
-    }
-
-    #[allow(unused_qualifications)]
-    // E: std::convert::AsRef<E> both requiered and considered unused by 1.32
-    pub(crate) fn find_interesting_content_for_event<'a, E>(
-        builder_event: &E,
-        unconsensused_events: impl Iterator<Item = &'a E>,
-        is_already_interesting_content: impl Fn(&ObservationKey) -> bool,
-        is_interesting_payload: impl Fn(&ObservationKey) -> bool,
-        has_interesting_ancestor: impl Fn(&ObservationKey) -> bool,
-    ) -> Vec<ObservationKey>
-    where
-        E: 'a + AbstractEvent,
-        E: std::convert::AsRef<E>,
-    {
-        let mut payloads: Vec<_> = unconsensused_events
-            .filter(|event| builder_event.sees(event))
-            .filter_map(|event| event.payload_key().map(|key| (event, key)))
-            .filter(|(_, payload_key)| !is_already_interesting_content(payload_key))
-            .filter(|(event, payload_key)| {
-                is_interesting_payload(payload_key)
-                    || event.sees_fork() && has_interesting_ancestor(payload_key)
-            })
-            .map(|(event, payload_key)| {
-                (
-                    if event.creator() == builder_event.creator() {
-                        event.index_by_creator()
-                    } else {
-                        usize::MAX
-                    },
-                    payload_key,
-                )
-            })
-            .collect();
-
-        // First, remove duplicates (preferring payloads voted for by the creator)...
-        payloads
-            .sort_by(|(l_index, l_key), (r_index, r_key)| (l_key, l_index).cmp(&(r_key, r_index)));
-        payloads.dedup_by(|(_, l_key), (_, r_key)| l_key == r_key);
-
-        // ...then sort the payloads in the order the creator voted for them, followed by the ones
-        // not voted for by the creator (if any).
-        payloads.sort();
-
-        payloads.into_iter().map(|(_, key)| key).cloned().collect()
     }
 
     // Try to reuse interesting content of the given event from the previous meta-election.
