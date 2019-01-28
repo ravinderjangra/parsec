@@ -1,4 +1,4 @@
-// Copyright 2018 MaidSafe.net limited.
+// Copyright 2019 MaidSafe.net limited.
 //
 // This SAFE Network Software is licensed to you under The General Public License (GPL), version 3.
 // Unless required by applicable law or agreed to in writing, the SAFE Network Software distributed
@@ -8,12 +8,11 @@
 
 use crate::gossip::AbstractEvent;
 use crate::observation::ObservationKey;
+use itertools::Itertools;
 use std::usize;
 
 /// Find interesting payloads for the builder_event.
 /// For payload observed from builder_event, order them by creation index.
-#[allow(unused_qualifications)]
-// E: std::convert::AsRef<E> both requiered and considered unused by 1.32
 pub(crate) fn find_interesting_content_for_event<'a, E>(
     builder_event: &E,
     unconsensused_events: impl Iterator<Item = &'a E>,
@@ -22,20 +21,58 @@ pub(crate) fn find_interesting_content_for_event<'a, E>(
     has_interesting_ancestor: impl Fn(&ObservationKey) -> bool,
 ) -> Vec<ObservationKey>
 where
-    E: 'a + AbstractEvent,
-    E: std::convert::AsRef<E>,
+    E: 'a + AbstractEvent + AsRef<E>,
 {
-    let mut payloads: Vec<_> = unconsensused_events
+    let has_builder_creator = |event: &E| event.creator() == builder_event.creator();
+
+    let mut events_to_process = unconsensused_events
         .filter(|event| builder_event.sees(event))
-        .filter_map(|event| event.payload_key().map(|key| (event, key)))
-        .filter(|(_, payload_key)| !is_already_interesting_content(payload_key))
-        .filter(|(event, payload_key)| {
-            is_interesting_payload(payload_key)
-                || event.sees_fork() && has_interesting_ancestor(payload_key)
+        .filter_map(|event| {
+            event
+                .payload_key()
+                .map(|payload_key| {
+                    (
+                        event,
+                        (payload_key, if has_builder_creator(event) { 0 } else { 1 }),
+                    )
+                })
+        })
+        .filter(|(_, payload_key, _)| !is_already_interesting_content(payload_key))
+        .collect_vec();
+
+    // Transform to `Vec<(PayloadKey, Vec<Event>)>` so we can process identical payload once.
+    // The First element of `Vec<Event>` will be the event that has builder creator.
+    //
+    // Order to group same payload together so group_by can group events with same payloads.
+    // Each payload exists in Number of peers events with `ConsensusMode::Supermajority`.
+    events_to_process.sort_by(|(_, l_key), (_, r_key)| l_key.cmp(&r_key));
+    let payload_keys_with_events = events_to_process
+        .into_iter()
+        .group_by(|(_, (&payload_key, _))| payload_key)
+        .into_iter()
+        .map(|(payload_key, events)| {
+            let events = events.map(|(event, _)| event);
+            (payload_key, events.collect_vec())
+        })
+        .collect_vec();
+
+    let mut interesting_payload_keys = payload_keys_with_events
+        .iter()
+        .filter_map(|(payload_key, events)| {
+            // Event created by builder creator is first. Return this event if suitable.
+            if is_interesting_payload(&payload_key) {
+                events.iter().next().map(|event| (event, payload_key))
+            } else {
+                events
+                    .iter()
+                    .find(|event| event.sees_fork())
+                    .filter(|_| has_interesting_ancestor(payload_key))
+                    .map(|event| (event, payload_key))
+            }
         })
         .map(|(event, payload_key)| {
             (
-                if event.creator() == builder_event.creator() {
+                if has_builder_creator(event) {
                     event.index_by_creator()
                 } else {
                     usize::MAX
@@ -43,17 +80,17 @@ where
                 payload_key,
             )
         })
-        .collect();
+        .collect_vec();
 
-    // First, remove duplicates (preferring payloads voted for by the creator)...
-    payloads.sort_by(|(l_index, l_key), (r_index, r_key)| (l_key, l_index).cmp(&(r_key, r_index)));
-    payloads.dedup_by(|(_, l_key), (_, r_key)| l_key == r_key);
-
-    // ...then sort the payloads in the order the creator voted for them, followed by the ones
+    // Sort the payloads in the order the creator voted for them, followed by the ones
     // not voted for by the creator (if any).
-    payloads.sort();
+    interesting_payload_keys.sort();
 
-    payloads.into_iter().map(|(_, key)| key).cloned().collect()
+    interesting_payload_keys
+        .into_iter()
+        .map(|(_, key)| key)
+        .cloned()
+        .collect()
 }
 
 #[cfg(test)]
