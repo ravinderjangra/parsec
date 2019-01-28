@@ -221,7 +221,7 @@ impl<S: SecretId> PeerList<S> {
             if peer
                 .last_gossiped_event
                 .map(|current| current < event_index)
-                .unwrap_or(false)
+                .unwrap_or(true)
             {
                 peer.last_gossiped_event = Some(event_index)
             }
@@ -366,10 +366,12 @@ impl Builder {
     pub fn finish(mut self, graph: &Graph<PeerId>) -> PeerList<PeerId> {
         // Set peer events and apply the membership list changes.
         for (index, peer) in self.peer_list.iter_mut() {
-            peer.events = graph
+            let events = graph
                 .iter()
                 .filter(|event| event.creator() == index)
-                .collect();
+                .collect::<Vec<_>>();
+            peer.last_gossiped_event = events.last().map(|event| event.event_index());
+            peer.events = events.into_iter().collect();
         }
 
         self.peer_list
