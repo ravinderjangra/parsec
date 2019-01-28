@@ -30,6 +30,7 @@ where
         .filter_map(|event| {
             event
                 .payload_key()
+                .filter(|payload_key| !is_already_interesting_content(payload_key))
                 .map(|payload_key| {
                     (
                         event,
@@ -37,7 +38,6 @@ where
                     )
                 })
         })
-        .filter(|(_, payload_key, _)| !is_already_interesting_content(payload_key))
         .collect_vec();
 
     // Transform to `Vec<(PayloadKey, Vec<Event>)>` so we can process identical payload once.
