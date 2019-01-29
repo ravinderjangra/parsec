@@ -11,27 +11,85 @@ use super::Observation;
 use super::ParsedContents;
 use crate::block::Block;
 use crate::mock::{PeerId, Transaction};
-use crate::observation::{ConsensusMode, Malice, Observation as ParsecObservation};
+use crate::observation::{
+    is_more_than_two_thirds, ConsensusMode, Malice, Observation as ParsecObservation,
+};
 use crate::parsec::Parsec;
-use rand::Rng;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::{self, Debug, Formatter};
 
+/// This represents the peer's own view of its current status.
+///
+/// A new peer will start as `Pending` and transition to `Active` once `Peer::poll()` yields a block
+/// adding itself to the network.  The peer can later be killed by setting the status to `Removed`
+/// or `Failed`, although it is up to the test framework to handle this; the peer's `parsec` will
+/// remain unaffected by the status change, so the tests should avoid calling or ignore peers which
+/// are `Removed` or `Failed`.
+///
+/// Peer Start
+///     |-> `Pending`
+///     |
+///     `Peer::poll()` yields a block
+///         |-> `Active`
+///         |
+///         Need to kill peer
+///             |-> `Removed`
+///             |-> `Failed`
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum PeerStatus {
-    Active,
     Pending,
+    Active,
     Removed,
     Failed,
 }
 
+/// This represents the network's view of a peer's state.
+///
+/// A new peer will start as `Joining`.  While in this state, its own status may or may not
+/// transition from `PeerStatus::Pending` to `PeerStatus::Active`.  Once a supermajority of
+/// currently `Joined` peers have reached consensus on this peer being added, its network view will
+/// change to `Joined`.
+///
+/// While a peer is in the `Joining` state, it cannot be transitioned directly to the `Leaving`
+/// state.  This means a peer must be seen by the network as having joined before it can be killed
+/// or voted for removal.
+///
+/// Similarly, once a peer is set as `PeerStatus::Removed` or `PeerStatus::Failed`, or once a peer
+/// votes to remove this one, the network view will change to `Leaving`.  Once a supermajority of
+/// currently `Joined` peers have reached consensus on this peer being removed, the network view
+/// will change to `Left`.
+///
+/// Peer start
+///     |-> `Joining`
+///     |
+///     Supermajority of `Joined` peers see `Add` for this one
+///         |-> `Joined`
+///         |
+///         Any peer votes to remove this one OR this peer is killed
+///             |-> `Leaving`
+///             |
+///             Supermajority of `Joined` peers see `Remove` for this one
+///                 |-> `Left`
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum NetworkView {
+    Joining,
+    Joined,
+    Leaving,
+    Left,
+}
+
 pub struct Peer {
-    pub id: PeerId,
+    id: PeerId,
     pub parsec: Parsec<Transaction, PeerId>,
     /// The blocks returned by `parsec.poll()`, held in the order in which they were returned.
-    pub blocks: Vec<Block<Transaction, PeerId>>,
-    pub status: PeerStatus,
+    blocks: Vec<Block<Transaction, PeerId>>,
+    status: PeerStatus,
+    network_view: NetworkView,
     votes_to_make: Vec<Observation>,
+    /// Peers' IDs for which we have an `Observation::Add` block.
+    added_peers_ids: BTreeSet<PeerId>,
+    /// Peers' IDs for which we have an `Observation::Remove` block.
+    removed_peers_ids: BTreeSet<PeerId>,
 }
 
 impl Peer {
@@ -45,7 +103,10 @@ impl Peer {
             parsec: Parsec::from_genesis(id, genesis_group, consensus_mode),
             blocks: vec![],
             status: PeerStatus::Active,
+            network_view: NetworkView::Joined,
             votes_to_make: vec![],
+            added_peers_ids: BTreeSet::new(),
+            removed_peers_ids: BTreeSet::new(),
         }
     }
 
@@ -60,7 +121,10 @@ impl Peer {
             parsec: Parsec::from_existing(id, genesis_group, current_group, consensus_mode),
             blocks: vec![],
             status: PeerStatus::Pending,
+            network_view: NetworkView::Joining,
             votes_to_make: vec![],
+            added_peers_ids: BTreeSet::new(),
+            removed_peers_ids: BTreeSet::new(),
         }
     }
 
@@ -73,7 +137,10 @@ impl Peer {
             parsec,
             blocks: vec![],
             status: PeerStatus::Active,
+            network_view: NetworkView::Joined,
             votes_to_make: vec![],
+            added_peers_ids: BTreeSet::new(),
+            removed_peers_ids: BTreeSet::new(),
         }
     }
 
@@ -97,21 +164,113 @@ impl Peer {
         }
     }
 
-    /// Returns the index of the first new block.
-    pub fn poll(&mut self) -> usize {
-        let first = self.blocks.len();
-
+    /// Repeatedly calls `parsec.poll()` until `None` and returns the index of the first new block.
+    pub fn poll_all(&mut self) {
         while let Some(block) = self.parsec.poll() {
             self.make_active_if_added(&block);
+            match block.payload() {
+                ParsecObservation::Add { peer_id, .. } => {
+                    assert!(self.added_peers_ids.insert(peer_id.clone()))
+                }
+                ParsecObservation::Remove { peer_id, .. } => {
+                    assert!(self.removed_peers_ids.insert(peer_id.clone()))
+                }
+                _ => (),
+            }
             self.blocks.push(block);
         }
-
-        first
     }
 
-    /// Returns self.blocks
+    pub fn id(&self) -> &PeerId {
+        &self.id
+    }
+
     pub fn blocks(&self) -> &[Block<Transaction, PeerId>] {
         &self.blocks
+    }
+
+    pub fn status(&self) -> PeerStatus {
+        self.status
+    }
+
+    pub fn network_view(&self) -> NetworkView {
+        self.network_view
+    }
+
+    pub fn is_running(&self) -> bool {
+        match self.status {
+            PeerStatus::Pending | PeerStatus::Active => true,
+            PeerStatus::Removed | PeerStatus::Failed => false,
+        }
+    }
+
+    /// Sets the node's own status to `Removed` and the network's view of it to `Leaving`.  Panics
+    /// if the node in question isn't yet viewed by the network as being `Joined`.
+    pub fn mark_as_removed(&mut self) {
+        if self.status == PeerStatus::Failed {
+            panic!("{:?} already has status Failed.", self.id);
+        }
+        self.mark_network_view_as_leaving();
+        self.status = PeerStatus::Removed;
+    }
+
+    /// Sets the node's own status to `Failed` and the network's view of it to `Leaving`.  Panics if
+    /// the node in question isn't yet viewed by the network as being `Joined`.
+    pub fn mark_as_failed(&mut self) {
+        if self.status == PeerStatus::Removed {
+            panic!("{:?} already has status Removed.", self.id);
+        }
+        self.mark_network_view_as_leaving();
+        self.status = PeerStatus::Failed;
+    }
+
+    /// Sets the network's view of the node to `Leaving` but doesn't affect the node's own status
+    /// (e.g. other peers have voted for this one to be removed, but it is still unaware of this).
+    /// Panics if the node in question isn't yet viewed by the network as being `Joined`.
+    pub fn mark_network_view_as_leaving(&mut self) {
+        match self.network_view {
+            NetworkView::Joining => panic!("Network views {:?} as not yet having joined.", self.id),
+            NetworkView::Joined => (),
+            NetworkView::Leaving | NetworkView::Left => return,
+        }
+        self.network_view = NetworkView::Leaving;
+    }
+
+    /// Check if a supermajority of `Joined` peers have polled blocks changing the network view of
+    /// `Joining` or `Leaving` peers.  Transition these to `Joined` or `Left` respectively.
+    pub fn update_network_views(all_peers: &mut BTreeMap<PeerId, Peer>) {
+        let mut added_counts = BTreeMap::new();
+        let mut removed_counts = BTreeMap::new();
+        let mut running_peers_count = 0;
+        let do_count = |peer_ids: &BTreeSet<PeerId>, counts: &mut BTreeMap<PeerId, usize>| {
+            for peer_id in peer_ids {
+                let count = counts.entry(peer_id.clone()).or_insert(0);
+                *count += 1;
+            }
+        };
+        for peer in all_peers
+            .values()
+            .filter(|peer| peer.network_view == NetworkView::Joined)
+        {
+            do_count(&peer.added_peers_ids, &mut added_counts);
+            do_count(&peer.removed_peers_ids, &mut removed_counts);
+            running_peers_count += 1;
+        }
+
+        for (added_peer_id, count) in &added_counts {
+            let peer = unwrap!(all_peers.get_mut(added_peer_id));
+            if peer.network_view == NetworkView::Joining
+                && is_more_than_two_thirds(*count, running_peers_count)
+            {
+                peer.network_view = NetworkView::Joined;
+            }
+        }
+
+        for (removed_peer_id, count) in &removed_counts {
+            if is_more_than_two_thirds(*count, running_peers_count) {
+                unwrap!(all_peers.get_mut(removed_peer_id)).network_view = NetworkView::Left;
+            }
+        }
     }
 
     /// Returns the payloads of `self.blocks` in the order in which they were returned by `poll()`.
@@ -119,8 +278,8 @@ impl Peer {
         self.blocks.iter().map(Block::payload).collect()
     }
 
-    /// Returns iterator over all accusations raised by this peer that haven't been retrieved by
-    /// `poll` yet.
+    /// Returns an iterator over all accusations raised by this peer that haven't been retrieved by
+    /// `poll_all()` yet.
     pub fn unpolled_accusations(
         &self,
     ) -> impl Iterator<Item = (&PeerId, &Malice<Transaction, PeerId>)> {
@@ -134,138 +293,22 @@ impl Peer {
                 _ => None,
             })
     }
+
+    pub fn is_active_and_has_block(&self, payload: &Observation) -> bool {
+        self.status == PeerStatus::Active
+            && self.blocks.iter().any(|block| block.payload() == payload)
+    }
 }
 
 impl Debug for Peer {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
-        write!(formatter, "{:?}: Blocks: {:?}", self.id, self.blocks)
-    }
-}
-
-pub struct PeerStatuses {
-    statuses: BTreeMap<PeerId, PeerStatus>,
-}
-
-impl PeerStatuses {
-    /// Creates a new PeerStatuses struct with the given active peers
-    pub fn new(names: &BTreeSet<PeerId>) -> PeerStatuses {
-        PeerStatuses {
-            statuses: names
-                .iter()
-                .map(|x| (x.clone(), PeerStatus::Active))
-                .collect(),
-        }
-    }
-
-    fn peers_by_status<F: Fn(&PeerStatus) -> bool>(
-        &self,
-        f: F,
-    ) -> impl Iterator<Item = (&PeerId, &PeerStatus)> {
-        self.statuses.iter().filter(move |&(_, status)| f(status))
-    }
-
-    fn choose_name_to_remove<R: Rng>(&self, rng: &mut R) -> PeerId {
-        let names: Vec<&PeerId> = self
-            .peers_by_status(|s| *s == PeerStatus::Active || *s == PeerStatus::Failed)
-            .map(|(id, _)| id)
-            .collect();
-        (*unwrap!(rng.choose(&names))).clone()
-    }
-
-    fn choose_name_to_fail<R: Rng>(&self, rng: &mut R) -> PeerId {
-        let names: Vec<&PeerId> = self
-            .peers_by_status(|s| *s == PeerStatus::Active)
-            .map(|(id, _)| id)
-            .collect();
-        (*unwrap!(rng.choose(&names))).clone()
-    }
-
-    /// Returns an iterator through all the peers
-    pub fn all_peers(&self) -> impl Iterator<Item = &PeerId> {
-        self.statuses.keys()
-    }
-
-    fn num_active_peers(&self) -> usize {
-        self.peers_by_status(|s| *s == PeerStatus::Active).count()
-    }
-
-    /// Returns an iterator through the list of active peers
-    pub fn active_peers(&self) -> impl Iterator<Item = &PeerId> {
-        self.peers_by_status(|s| *s == PeerStatus::Active)
-            .map(|(id, _)| id)
-    }
-
-    /// Returns an iterator through the list of present peers (active or pending)
-    pub fn present_peers(&self) -> impl Iterator<Item = &PeerId> {
-        self.peers_by_status(|s| *s == PeerStatus::Active || *s == PeerStatus::Pending)
-            .map(|(id, _)| id)
-    }
-
-    /// Returns an iterator through the list of inactive peers (removed and failed)
-    pub fn inactive_peers(&self) -> impl Iterator<Item = &PeerId> {
-        self.peers_by_status(|s| *s == PeerStatus::Removed || *s == PeerStatus::Failed)
-            .map(|(id, _)| id)
-    }
-
-    fn num_failed_peers(&self) -> usize {
-        self.peers_by_status(|s| *s == PeerStatus::Failed).count()
-    }
-
-    /// Adds an active peer.
-    pub fn add_peer(&mut self, p: PeerId) {
-        let _ = self.statuses.insert(p, PeerStatus::Active);
-    }
-
-    /// Randomly chooses a peer to remove.
-    pub fn remove_random_peer<R: Rng>(&mut self, rng: &mut R, min_active: usize) -> Option<PeerId> {
-        let name = self.choose_name_to_remove(rng);
-
-        let mut active_peers = self.num_active_peers();
-        let mut failed_peers = self.num_failed_peers();
-
-        match self.statuses[&name] {
-            PeerStatus::Active => active_peers -= 1,
-            PeerStatus::Failed => failed_peers -= 1,
-            _ => return None,
-        }
-
-        if 2 * failed_peers < active_peers && active_peers >= min_active {
-            self.remove_peer(&name);
-            Some(name)
-        } else {
-            None
-        }
-    }
-
-    /// Remove the given peer
-    pub fn remove_peer(&mut self, peer: &PeerId) {
-        let status = self.statuses.get_mut(peer).unwrap();
-        *status = PeerStatus::Removed;
-    }
-
-    /// Randomly chooses a peer to fail.
-    pub fn fail_random_peer<R: Rng>(&mut self, rng: &mut R, min_active: usize) -> Option<PeerId> {
-        let name = self.choose_name_to_fail(rng);
-
-        let active_peers = self.num_active_peers() - 1;
-        let failed_peers = self.num_failed_peers() + 1;
-
-        if 2 * failed_peers < active_peers && active_peers >= min_active {
-            self.fail_peer(&name);
-            Some(name)
-        } else {
-            None
-        }
-    }
-
-    pub fn fail_peer(&mut self, peer: &PeerId) {
-        let status = self.statuses.get_mut(peer).unwrap();
-        *status = PeerStatus::Failed;
-    }
-}
-
-impl Into<BTreeMap<PeerId, PeerStatus>> for PeerStatuses {
-    fn into(self) -> BTreeMap<PeerId, PeerStatus> {
-        self.statuses
+        write!(
+            formatter,
+            "{:?} [{:?}/{:?}]: Blocks: {:?}",
+            self.id,
+            self.status,
+            self.network_view,
+            self.blocks_payloads()
+        )
     }
 }

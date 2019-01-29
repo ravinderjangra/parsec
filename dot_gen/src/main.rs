@@ -97,6 +97,8 @@
 #[macro_use]
 extern crate clap;
 extern crate parsec;
+#[macro_use]
+extern crate unwrap;
 
 use clap::{App, Arg};
 use parsec::dev_utils::ObservationEvent::*;
@@ -401,7 +403,7 @@ impl Scenarios {
         F: FnMut(&mut Environment) -> Schedule + 'static,
     {
         self.0.push(Scenario::new(name, schedule));
-        self.0.last_mut().unwrap()
+        unwrap!(self.0.last_mut())
     }
 
     fn iter(&self) -> slice::Iter<Scenario> {

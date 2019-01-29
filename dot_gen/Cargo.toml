@@ -11,3 +11,4 @@ version = "0.1.0"
 [dependencies]
 parsec = { path = "..", features = ["testing", "dump-graphs"] }
 clap = "~2.32.0"
+unwrap = "~1.2.1"
