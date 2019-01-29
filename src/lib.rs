@@ -183,6 +183,7 @@ mod meta_voting;
 mod network_event;
 mod observation;
 mod parsec;
+mod parsec_helpers;
 mod peer_list;
 mod round_hash;
 mod vote;

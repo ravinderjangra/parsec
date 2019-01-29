@@ -28,6 +28,7 @@ use crate::observation::{
     is_more_than_two_thirds, ConsensusMode, Malice, Observation, ObservationHash, ObservationKey,
     ObservationStore,
 };
+use crate::parsec_helpers::find_interesting_content_for_event;
 use crate::peer_list::{PeerIndex, PeerIndexSet, PeerList, PeerState};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::mem;
@@ -860,43 +861,27 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let peers_that_can_vote = self.voters();
         let start_index = self.start_index();
 
-        let mut payloads: Vec<_> = self
-            .unconsensused_events()
-            .map(|event| event.inner())
-            .filter(|event| builder.event().sees(event))
-            .filter_map(|event| event.payload_key().map(|key| (event, key)))
-            .filter(|(_, payload_key)| {
-                !self
-                    .meta_election
-                    .is_already_interesting_content(builder.event().creator(), payload_key)
-            })
-            .filter(|(event, payload_key)| {
-                self.is_interesting_payload(builder, &peers_that_can_vote, payload_key)
-                    || event.sees_fork()
-                        && self.has_interesting_ancestor(builder, payload_key, start_index)
-            })
-            .map(|(event, payload_key)| {
-                (
-                    if event.creator() == builder.event().creator() {
-                        event.index_by_creator()
-                    } else {
-                        usize::MAX
-                    },
-                    payload_key,
-                )
-            })
-            .collect();
+        let is_already_interesting_content = |payload_key: &ObservationKey| {
+            self.meta_election
+                .is_already_interesting_content(builder.event().creator(), payload_key)
+        };
 
-        // First, remove duplicates (preferring payloads voted for by the creator)...
-        payloads
-            .sort_by(|(l_index, l_key), (r_index, r_key)| (l_key, l_index).cmp(&(r_key, r_index)));
-        payloads.dedup_by(|(_, l_key), (_, r_key)| l_key == r_key);
+        let is_interesting_payload = |payload_key: &ObservationKey| {
+            self.is_interesting_payload(builder, &peers_that_can_vote, payload_key)
+        };
 
-        // ...then sort the payloads in the order the creator voted for them, followed by the ones
-        // not voted for by the creator (if any).
-        payloads.sort();
+        let has_interesting_ancestor = |payload_key: &ObservationKey| {
+            self.has_interesting_ancestor(builder, payload_key, start_index)
+        };
 
-        let payloads = payloads.into_iter().map(|(_, key)| key).cloned().collect();
+        let payloads = find_interesting_content_for_event(
+            builder.event().as_ref(),
+            self.unconsensused_events().map(|event| event.inner()),
+            is_already_interesting_content,
+            is_interesting_payload,
+            has_interesting_ancestor,
+        );
+
         builder.set_interesting_content(payloads);
     }
 
