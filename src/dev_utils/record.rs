@@ -8,13 +8,15 @@
 
 use super::dot_parser::{parse_dot_file, ParsedContents};
 use crate::gossip::{Event, Request, Response};
+use crate::hash::Hash;
 use crate::mock::{PeerId, Transaction};
-use crate::observation::{ConsensusMode, Observation, ObservationStore};
+use crate::observation::{ConsensusMode, Observation, ObservationKey, ObservationStore};
 use crate::parsec::Parsec;
 use crate::peer_list::PeerIndex;
 use std::collections::BTreeSet;
 use std::io;
 use std::path::Path;
+use crate::gossip::IndexedEventRef;
 
 /// Record of a Parsec session which consist of sequence of operations (`vote_for`, `handle_request`
 /// and `handle_response`). Can be produced from a previously dumped DOT file and after replaying,
@@ -24,6 +26,9 @@ pub struct Record {
     our_id: PeerId,
     genesis_group: BTreeSet<PeerId>,
     actions: Vec<Action>,
+
+    // Keys of the consensused blocks' payloads in the order they were consensused.
+    consensus_history: Vec<ObservationKey>,
 }
 
 impl Record {
@@ -44,6 +49,13 @@ impl Record {
         }
 
         parsec
+    }
+
+    pub fn consensus_history(&self) -> Vec<Hash> {
+        self.consensus_history
+            .iter()
+            .map(|observation| observation.hash().0)
+            .collect()
     }
 }
 
@@ -68,6 +80,40 @@ impl From<ParsedContents> for Record {
         let mut actions = Vec::new();
         let mut skip_our_accusations = false;
         let mut known = vec![false; contents.graph.len()];
+
+        let collect_event_to_gossip = |other_parent: IndexedEventRef<_>, known: &mut Vec<bool>| {
+            let mut events_to_gossip = Vec::new();
+            let other_parent_tindex = other_parent.topological_index();
+            for event in contents.graph.ancestors(other_parent) {
+                let event_tindex = event.topological_index();
+                if known[event_tindex] && other_parent_tindex != event_tindex {
+                    continue;
+                } else {
+                    known[event_tindex] = true;
+                }
+
+                events_to_gossip.push(unwrap!(event.pack(contents.event_context())));
+            }
+            events_to_gossip.reverse();
+            events_to_gossip
+        };
+
+        let collect_remaining_event_to_gossip = |known: &mut Vec<bool>| {
+            let mut events_to_gossip = Vec::new();
+            let mut last_event = None;
+            for event in contents.graph.iter() {
+                let event_tindex = event.topological_index();
+                if known[event_tindex] {
+                    continue;
+                } else {
+                    known[event_tindex] = true;
+                }
+
+                events_to_gossip.push(unwrap!(event.pack(contents.event_context())));
+                last_event = Some(event);
+            }
+            (events_to_gossip, last_event)
+        };
 
         for event in &contents.graph {
             if event.topological_index() == 0 {
@@ -118,19 +164,7 @@ impl From<ParsedContents> for Record {
                         .get(other_parent.creator())
                         .map(|peer| peer.id().clone()));
 
-                    let mut events_to_gossip = Vec::new();
-                    let other_parent_tindex = other_parent.topological_index();
-                    for event in contents.graph.ancestors(other_parent) {
-                        let event_tindex = event.topological_index();
-                        if known[event_tindex] && other_parent_tindex != event_tindex {
-                            continue;
-                        } else {
-                            known[event_tindex] = true;
-                        }
-
-                        events_to_gossip.push(unwrap!(event.pack(contents.event_context())));
-                    }
-                    events_to_gossip.reverse();
+                    let events_to_gossip = collect_event_to_gossip(other_parent, &mut known);
 
                     if event.is_request() {
                         actions.push(Action::Request(src, Request::new(events_to_gossip)))
@@ -149,10 +183,21 @@ impl From<ParsedContents> for Record {
             }
         }
 
+        // Need a request to our peer with the remaining events
+        let (events_to_gossip, other_parent) = collect_remaining_event_to_gossip(&mut known);
+        if let Some(other_parent) = other_parent {
+            let src = unwrap!(contents
+                    .peer_list
+                    .get(other_parent.creator())
+                    .map(|peer| peer.id().clone()));
+            actions.push(Action::Request(src, Request::new(events_to_gossip)));
+        }
+
         Record {
             our_id: contents.our_id,
             genesis_group,
             actions,
+            consensus_history: contents.meta_election.consensus_history,
         }
     }
 }

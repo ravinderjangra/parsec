@@ -54,6 +54,7 @@
 #[cfg(feature = "testing")]
 #[macro_use]
 extern crate criterion;
+
 #[cfg(feature = "testing")]
 #[macro_use]
 extern crate unwrap;
@@ -62,6 +63,9 @@ extern crate unwrap;
 use criterion::Criterion;
 #[cfg(feature = "testing")]
 use parsec::dev_utils::Record;
+
+#[cfg(feature = "testing")]
+use std::cmp;
 
 #[cfg(feature = "testing")]
 fn bench(c: &mut Criterion) {
@@ -123,7 +127,29 @@ fn bench_dot_file(c: &mut Criterion, group_name: &'static str, name: &'static st
             "input_graphs/{}/{}.dot",
             group_name, name
         )));
-        b.iter_with_setup(|| record.clone(), |record| record.play())
+        b.iter_with_setup(
+            || record.clone(),
+            |record| {
+                let expected_history = record.consensus_history();
+                let missing_expected_element = 1;
+
+                let parsec = record.play();
+                let actual_history = parsec.meta_election_consensus_history_hash();
+
+                // Verify parsec reached the same consensus as in source dot file.
+                // The last consensused element is not in dot file as it is added after generating the file.
+                assert_eq!(
+                    (
+                        expected_history.len() + missing_expected_element,
+                        &expected_history[..]
+                    ),
+                    (
+                        actual_history.len(),
+                        &actual_history[0..cmp::min(actual_history.len(), expected_history.len())]
+                    )
+                );
+            },
+        )
     });
 }
 
