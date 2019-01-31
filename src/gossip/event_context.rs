@@ -16,6 +16,7 @@ pub(crate) struct EventContextRef<'a, T: NetworkEvent, S: SecretId> {
     pub(crate) graph: &'a Graph<S::PublicId>,
     pub(crate) peer_list: &'a PeerList<S>,
     pub(crate) observations: &'a ObservationStore<T, S::PublicId>,
+    pub(crate) consensus_mode: ConsensusMode,
 }
 
 // `#[derive(Clone)]` doesn't work here for some reason...
@@ -25,16 +26,10 @@ impl<'a, T: NetworkEvent, S: SecretId> Clone for EventContextRef<'a, T, S> {
             graph: self.graph,
             peer_list: self.peer_list,
             observations: self.observations,
+            consensus_mode: self.consensus_mode,
         }
     }
 }
 
 // ...neither does `#[derive(Copy)]`.
 impl<'a, T: NetworkEvent, S: SecretId> Copy for EventContextRef<'a, T, S> {}
-
-pub(crate) struct EventContextMut<'a, T: NetworkEvent, S: SecretId> {
-    pub(crate) graph: &'a Graph<S::PublicId>,
-    pub(crate) peer_list: &'a PeerList<S>,
-    pub(crate) observations: &'a mut ObservationStore<T, S::PublicId>,
-    pub(crate) consensus_mode: ConsensusMode,
-}
