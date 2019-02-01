@@ -7,6 +7,7 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::dot_parser::{parse_dot_file, ParsedContents};
+use crate::gossip::IndexedEventRef;
 use crate::gossip::{Event, Request, Response};
 use crate::hash::Hash;
 use crate::mock::{PeerId, Transaction};
@@ -16,7 +17,6 @@ use crate::peer_list::PeerIndex;
 use std::collections::BTreeSet;
 use std::io;
 use std::path::Path;
-use crate::gossip::IndexedEventRef;
 
 /// Record of a Parsec session which consist of sequence of operations (`vote_for`, `handle_request`
 /// and `handle_response`). Can be produced from a previously dumped DOT file and after replaying,
@@ -187,9 +187,9 @@ impl From<ParsedContents> for Record {
         let (events_to_gossip, other_parent) = collect_remaining_event_to_gossip(&mut known);
         if let Some(other_parent) = other_parent {
             let src = unwrap!(contents
-                    .peer_list
-                    .get(other_parent.creator())
-                    .map(|peer| peer.id().clone()));
+                .peer_list
+                .get(other_parent.creator())
+                .map(|peer| peer.id().clone()));
             actions.push(Action::Request(src, Request::new(events_to_gossip)));
         }
 
