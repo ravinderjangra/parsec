@@ -17,6 +17,8 @@ use crate::gossip::{
     Event, EventContextMut, EventContextRef, EventIndex, Graph, IndexedEventRef, PackedEvent,
     Request, Response, UnpackedEvent,
 };
+#[cfg(any(feature = "testing", all(test, feature = "mock")))]
+use crate::hash::Hash;
 use crate::id::{PublicId, SecretId};
 use crate::meta_voting::{MetaElection, MetaEvent, MetaEventBuilder, MetaVote, Step};
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]
@@ -2188,6 +2190,15 @@ impl Parsec<Transaction, PeerId> {
         parsec.peer_list = parsed_contents.peer_list;
         parsec.observations = parsed_contents.observations;
         parsec
+    }
+
+    /// The consensus history hashes in order of consensus (for testing)
+    pub fn meta_election_consensus_history_hash(&self) -> Vec<Hash> {
+        self.meta_election
+            .consensus_history
+            .iter()
+            .map(|observation| observation.hash().0)
+            .collect()
     }
 }
 
