@@ -88,10 +88,15 @@ impl MetaElection {
         self.meta_events.get(&event_index)
     }
 
-    pub fn meta_votes(&self, event_index: EventIndex) -> Option<&PeerIndexMap<Vec<MetaVote>>> {
+    /// The event meta votes if available
+    pub fn populated_meta_votes(
+        &self,
+        event_index: EventIndex,
+    ) -> Option<&PeerIndexMap<Vec<MetaVote>>> {
         self.meta_events
             .get(&event_index)
             .map(|meta_event| &meta_event.meta_votes)
+            .filter(|meta_votes| !meta_votes.is_empty())
     }
 
     pub fn round_hashes(&self, peer_index: PeerIndex) -> Option<&Vec<RoundHash>> {

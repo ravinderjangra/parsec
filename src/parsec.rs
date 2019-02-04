@@ -1063,14 +1063,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let parent_meta_votes = builder
             .event()
             .self_parent()
-            .and_then(|parent_hash| self.meta_election.meta_votes(parent_hash))
-            .and_then(|parent_meta_votes| {
-                if !parent_meta_votes.is_empty() {
-                    Some(parent_meta_votes)
-                } else {
-                    None
-                }
-            });
+            .and_then(|parent_hash| self.meta_election.populated_meta_votes(parent_hash));
 
         // If self-parent already has meta votes associated with it, derive this event's meta votes
         // from those ones.
@@ -1253,7 +1246,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             }
         };
         self.meta_election
-            .meta_votes(event_index)
+            .populated_meta_votes(event_index)
             .and_then(|meta_votes| meta_votes.get(event.creator()))
             .map_or(false, |event_votes| {
                 event_votes
@@ -1276,7 +1269,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         if fork_event.is_none() {
             // Not a fork
             if let Some(event) = event {
-                return self.meta_election.meta_votes(event);
+                return self.meta_election.populated_meta_votes(event);
             }
         }
         None
@@ -1329,7 +1322,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     fn compute_consensus(&self, event_index: EventIndex) -> Option<ObservationKey> {
-        let last_meta_votes = self.meta_election.meta_votes(event_index)?;
+        let last_meta_votes = self.meta_election.populated_meta_votes(event_index)?;
 
         let decided_meta_votes = last_meta_votes
             .iter()
