@@ -461,19 +461,19 @@ impl Network {
         &mut self,
         rng: &mut R,
         schedule: Schedule,
-        options: &ScheduleOptions,
     ) -> Result<(), ConsensusError> {
         let Schedule {
             peers,
             min_observations,
             max_observations,
             events,
+            options,
         } = schedule;
         let mut queue: VecDeque<_> = events.into_iter().collect();
         let mut retry = Vec::new();
 
         while let Some(event) = queue.pop_front() {
-            if self.execute_event(rng, options, event.clone())? {
+            if self.execute_event(rng, &options, event.clone())? {
                 for event in retry.drain(..).rev() {
                     queue.push_front(event)
                 }

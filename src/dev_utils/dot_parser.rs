@@ -989,9 +989,7 @@ mod tests {
         };
         let schedule = Schedule::new(&mut env, &options);
 
-        unwrap!(env
-            .network
-            .execute_schedule(&mut env.rng, schedule, &options));
+        unwrap!(env.network.execute_schedule(&mut env.rng, schedule));
 
         let mut num_of_files = 0u8;
         let entries = DIR.with(|dir| unwrap!(fs::read_dir(dir)));

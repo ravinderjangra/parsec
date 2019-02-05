@@ -408,6 +408,7 @@ pub struct Schedule {
     pub min_observations: usize,
     pub max_observations: usize,
     pub events: Vec<ScheduleEvent>,
+    pub options: ScheduleOptions,
 }
 
 impl fmt::Debug for Schedule {
@@ -625,6 +626,7 @@ impl Schedule {
             min_observations,
             max_observations,
             events: schedule,
+            options: options.clone(),
         };
         #[cfg(feature = "dump-graphs")]
         result.save(options);
