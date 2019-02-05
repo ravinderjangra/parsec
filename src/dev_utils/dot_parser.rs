@@ -6,12 +6,17 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use crate::gossip::{CauseInput, Event, EventIndex, Graph, IndexedEventRef};
 #[cfg(any(
     all(test, feature = "malice-detection", feature = "mock"),
     feature = "testing"
 ))]
-use crate::gossip::{EventContextMut, EventContextRef};
+use crate::error::Error;
+#[cfg(any(
+    all(test, feature = "malice-detection", feature = "mock"),
+    feature = "testing"
+))]
+use crate::gossip::EventContextRef;
+use crate::gossip::{CauseInput, Event, EventIndex, Graph, IndexedEventRef};
 use crate::hash::Hash;
 use crate::hash::HASH_LEN;
 use crate::meta_voting::{BoolSet, MetaElection, MetaEvent, MetaVote, Step};
@@ -680,6 +685,7 @@ impl ParsedContents {
             graph: &self.graph,
             peer_list: &self.peer_list,
             observations: &self.observations,
+            consensus_mode: ConsensusMode::Supermajority,
         }
     }
 
@@ -687,13 +693,22 @@ impl ParsedContents {
         all(test, feature = "malice-detection", feature = "mock"),
         feature = "testing"
     ))]
-    pub fn event_context_mut(&mut self) -> EventContextMut<Transaction, PeerId> {
-        EventContextMut {
-            graph: &self.graph,
-            peer_list: &self.peer_list,
-            observations: &mut self.observations,
-            consensus_mode: ConsensusMode::Supermajority,
+    pub fn new_event_from_observation(
+        &mut self,
+        self_parent: EventIndex,
+        observation: Observation<Transaction, PeerId>,
+    ) -> Result<Event<PeerId>, Error> {
+        let (event, observation_for_store) =
+            Event::new_from_observation(self_parent, observation, &self.event_context())?;
+
+        if let Some((payload_key, observation_info)) = observation_for_store {
+            let _ = self
+                .observations
+                .entry(payload_key)
+                .or_insert_with(|| observation_info);
         }
+
+        Ok(event)
     }
 }
 

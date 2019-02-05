@@ -9,7 +9,7 @@
 #[cfg(any(test, feature = "testing"))]
 use super::event::CauseInput;
 use super::{
-    event_context::{EventContextMut, EventContextRef},
+    event_context::EventContextRef,
     event_hash::EventHash,
     graph::{EventIndex, Graph},
 };
@@ -20,6 +20,7 @@ use crate::mock::{PeerId, Transaction};
 use crate::network_event::NetworkEvent;
 #[cfg(any(test, feature = "testing"))]
 use crate::observation::ConsensusMode;
+use crate::observation::ObservationForStore;
 use crate::observation::ObservationInfo;
 #[cfg(any(test, feature = "dump-graphs", feature = "testing"))]
 use crate::observation::ObservationStore;
@@ -46,42 +47,47 @@ pub(super) enum Cause<V, E> {
 }
 
 impl<P: PublicId> Cause<VoteKey<P>, EventIndex> {
-    #[allow(clippy::needless_pass_by_value)]
     pub(crate) fn unpack<T: NetworkEvent, S: SecretId<PublicId = P>>(
         packed_cause: Cause<Vote<T, P>, EventHash>,
         creator: PeerIndex,
-        ctx: EventContextMut<T, S>,
-    ) -> Result<Self, Error> {
+        ctx: &EventContextRef<T, S>,
+    ) -> Result<(Self, ObservationForStore<T, P>), Error> {
         let cause = match packed_cause {
             Cause::Request {
                 ref self_parent,
                 ref other_parent,
-            } => Cause::Request {
-                self_parent: self_parent_index(ctx.graph, self_parent)?,
-                other_parent: other_parent_index(ctx.graph, other_parent)?,
-            },
+            } => (
+                Cause::Request {
+                    self_parent: self_parent_index(ctx.graph, self_parent)?,
+                    other_parent: other_parent_index(ctx.graph, other_parent)?,
+                },
+                None,
+            ),
             Cause::Response {
                 ref self_parent,
                 ref other_parent,
-            } => Cause::Response {
-                self_parent: self_parent_index(ctx.graph, self_parent)?,
-                other_parent: other_parent_index(ctx.graph, other_parent)?,
-            },
+            } => (
+                Cause::Response {
+                    self_parent: self_parent_index(ctx.graph, self_parent)?,
+                    other_parent: other_parent_index(ctx.graph, other_parent)?,
+                },
+                None,
+            ),
             Cause::Observation { self_parent, vote } => {
                 let self_parent = self_parent_index(ctx.graph, &self_parent)?;
 
                 let (vote_key, observation) = VoteKey::new(vote, creator, ctx.consensus_mode);
-                let _ = ctx
-                    .observations
-                    .entry(*vote_key.payload_key())
-                    .or_insert_with(|| ObservationInfo::new(observation));
+                let payload_key = *vote_key.payload_key();
 
-                Cause::Observation {
-                    self_parent,
-                    vote: vote_key,
-                }
+                (
+                    Cause::Observation {
+                        self_parent,
+                        vote: vote_key,
+                    },
+                    Some((payload_key, ObservationInfo::new(observation))),
+                )
             }
-            Cause::Initial => Cause::Initial,
+            Cause::Initial => (Cause::Initial, None),
         };
 
         Ok(cause)

@@ -243,6 +243,9 @@ impl<T: NetworkEvent, P: PublicId> ObservationInfo<T, P> {
 // Storage for observations
 pub(crate) type ObservationStore<T, P> = BTreeMap<ObservationKey, ObservationInfo<T, P>>;
 
+// Observation with corresponding key for ObservationStore
+pub(crate) type ObservationForStore<T, P> = Option<(ObservationKey, ObservationInfo<T, P>)>;
+
 // Key to compare observations.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Debug)]
 pub(crate) enum ObservationKey {

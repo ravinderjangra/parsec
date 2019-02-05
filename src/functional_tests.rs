@@ -389,18 +389,16 @@ fn gossip_after_fork() {
     let a_1_index = unwrap!(alice.peer_list().our_events().next());
     let a_1_hash = *unwrap!(alice.graph().get(a_1_index)).hash();
 
-    let a_2 = unwrap!(Event::new_from_observation(
+    let a_2 = unwrap!(alice.new_event_from_observation(
         a_1_index,
         Observation::OpaquePayload(Transaction::new("one")),
-        alice.event_context_mut()
     ));
     let a_2_hash = *a_2.hash();
     let a_2_index = unwrap!(alice.add_event(a_2));
 
-    let a_3 = unwrap!(Event::new_from_observation(
+    let a_3 = unwrap!(alice.new_event_from_observation(
         a_2_index,
         Observation::OpaquePayload(Transaction::new("two")),
-        alice.event_context_mut(),
     ));
     let a_3_hash = *a_3.hash();
     let a_3_packed = alice.pack_event(&a_3);
@@ -419,10 +417,9 @@ fn gossip_after_fork() {
     assert!(bob.graph().contains(&a_3_hash));
 
     // Alice creates a fork.
-    let a_2_fork = unwrap!(Event::new_from_observation(
+    let a_2_fork = unwrap!(alice.new_event_from_observation(
         a_1_index,
         Observation::OpaquePayload(Transaction::new("two-fork")),
-        alice.event_context_mut(),
     ));
     let a_2_fork_hash = *a_2_fork.hash();
     unwrap!(alice.add_event(a_2_fork));
@@ -497,18 +494,15 @@ mod handle_malice {
         let d_0 = Event::new_initial(dave_contents.event_context());
         let d_0_index = dave_contents.add_event(d_0);
 
-        let d_1 = unwrap!(Event::new_from_observation(
+        let d_1 = unwrap!(dave_contents.new_event_from_observation(
             d_0_index,
             Observation::OpaquePayload(Transaction::new("dave's malicious vote")),
-            dave_contents.event_context_mut()
         ));
         let d_1_index = dave_contents.add_event(d_1);
 
-        let d_2 = unwrap!(Event::new_from_observation(
-            d_1_index,
-            Observation::Genesis(genesis),
-            dave_contents.event_context_mut()
-        ));
+        let d_2 = unwrap!(
+            dave_contents.new_event_from_observation(d_1_index, Observation::Genesis(genesis),)
+        );
         let d_2_hash = *d_2.hash();
         let _ = dave_contents.add_event(d_2);
 
@@ -561,11 +555,9 @@ mod handle_malice {
         let e_0 = Event::new_initial(eric_contents.event_context());
         let e_0_index = eric_contents.add_event(e_0);
 
-        let e_1 = unwrap!(Event::new_from_observation(
-            e_0_index,
-            Observation::Genesis(genesis),
-            eric_contents.event_context_mut()
-        ));
+        let e_1 = unwrap!(
+            eric_contents.new_event_from_observation(e_0_index, Observation::Genesis(genesis),)
+        );
         let e_1_hash = *e_1.hash();
         let _ = eric_contents.add_event(e_1);
 
@@ -601,17 +593,10 @@ mod handle_malice {
         let ev_0 = Event::new_initial(result.event_context());
         let ev_0_index = result.add_event(ev_0);
         let ev_1 = if let Some(obs_1) = second_event {
-            unwrap!(Event::new_from_observation(
-                ev_0_index,
-                obs_1,
-                result.event_context_mut()
-            ))
+            unwrap!(result.new_event_from_observation(ev_0_index, obs_1,))
         } else {
-            unwrap!(Event::new_from_observation(
-                ev_0_index,
-                Observation::Genesis(genesis.clone()),
-                result.event_context_mut()
-            ))
+            unwrap!(result
+                .new_event_from_observation(ev_0_index, Observation::Genesis(genesis.clone()),))
         };
 
         let _ = result.add_event(ev_1);
@@ -720,25 +705,22 @@ mod handle_malice {
         // opaque payload.
         let mut carol = TestParsec::from_parsed_contents(parse_test_dot_file("carol.dot"));
 
-        let first_duplicate = unwrap!(Event::new_from_observation(
+        let first_duplicate = unwrap!(carol.new_event_from_observation(
             carol.our_last_event_index(),
             Observation::OpaquePayload(Transaction::new("ABCD")),
-            carol.event_context_mut()
         ));
 
-        let first_duplicate_clone = unwrap!(Event::new_from_observation(
+        let first_duplicate_clone = unwrap!(carol.new_event_from_observation(
             carol.our_last_event_index(),
             Observation::OpaquePayload(Transaction::new("ABCD")),
-            carol.event_context_mut()
         ));
         let first_duplicate_clone_packed = carol.pack_event(&first_duplicate_clone);
 
         let first_duplicate_hash = *first_duplicate.hash();
         let first_duplicate_index = unwrap!(carol.add_event(first_duplicate));
-        let second_duplicate = unwrap!(Event::new_from_observation(
+        let second_duplicate = unwrap!(carol.new_event_from_observation(
             first_duplicate_index,
             Observation::OpaquePayload(Transaction::new("ABCD")),
-            carol.event_context_mut()
         ));
         let second_duplicate_packed = carol.pack_event(&second_duplicate);
 
@@ -775,13 +757,12 @@ mod handle_malice {
         let d_1_hash = *unwrap!(find_event_by_short_name(&alice_contents.graph, "D_1")).hash();
 
         // Create an invalid accusation from Alice
-        let a_5 = unwrap!(Event::new_from_observation(
+        let a_5 = unwrap!(alice_contents.new_event_from_observation(
             a_4_index,
             Observation::Accusation {
                 offender: PeerId::new("Dave"),
                 malice: Malice::Fork(d_1_hash),
             },
-            alice_contents.event_context_mut()
         ));
         let a_5_hash = *a_5.hash();
         let _ = alice_contents.add_event(a_5);
@@ -905,13 +886,12 @@ mod handle_malice {
         let d_1_hash = *unwrap!(find_event_by_short_name(&alice_contents.graph, "D_1")).hash();
 
         // Create an invalid accusation from Alice
-        let a_27 = unwrap!(Event::new_from_observation(
+        let a_27 = unwrap!(alice_contents.new_event_from_observation(
             a_26_index,
             Observation::Accusation {
                 offender: PeerId::new("Dave"),
                 malice: Malice::Fork(d_1_hash),
             },
-            alice_contents.event_context_mut()
         ));
         let a_27_hash = *a_27.hash();
         let _ = alice_contents.add_event(a_27);
@@ -990,10 +970,9 @@ mod handle_malice {
         // Bob adds another event which he then sends to Carol, who now becomes sure that Bob
         // didn't create the accusation he should have.
         let b_30_index = unwrap!(find_event_by_short_name(bob.graph(), "B_30")).event_index();
-        let b_31_replacement = unwrap!(Event::new_from_observation(
+        let b_31_replacement = unwrap!(bob.new_event_from_observation(
             b_30_index,
             Observation::OpaquePayload(Transaction::new("ABCD")),
-            bob.event_context_mut(),
         ));
         let b_31_hash = *b_31_replacement.hash();
         unwrap!(bob.add_event(b_31_replacement));
@@ -1064,10 +1043,9 @@ mod handle_malice {
         // Bob adds another event which he then sends to Carol, who now becomes sure that Bob
         // didn't create the accusation he should have.
         let b_30_index = unwrap!(find_event_by_short_name(bob.graph(), "B_30")).event_index();
-        let b_31_replacement = unwrap!(Event::new_from_observation(
+        let b_31_replacement = unwrap!(bob.new_event_from_observation(
             b_30_index,
             Observation::OpaquePayload(Transaction::new("ABCD")),
-            bob.event_context_mut(),
         ));
         let b_31_hash = *b_31_replacement.hash();
         unwrap!(bob.add_event(b_31_replacement));
@@ -1233,10 +1211,9 @@ mod handle_malice {
 
         // Carol creates an event with one of Bob's as the self-parent.
         let b_2_index = unwrap!(find_event_by_short_name(carol.graph(), "B_2")).event_index();
-        let c_4 = unwrap!(Event::new_from_observation(
+        let c_4 = unwrap!(carol.new_event_from_observation(
             b_2_index,
             Observation::OpaquePayload(Transaction::new("ABCD")),
-            carol.event_context_mut()
         ));
         let c_4_hash = *c_4.hash();
         let c_4_packed = carol.pack_event(&c_4);

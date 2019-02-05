@@ -14,8 +14,8 @@ use crate::error::{Error, Result};
 #[cfg(all(test, feature = "mock"))]
 use crate::gossip::EventHash;
 use crate::gossip::{
-    Event, EventContextMut, EventContextRef, EventIndex, Graph, IndexedEventRef, PackedEvent,
-    Request, Response, UnpackedEvent,
+    Event, EventContextRef, EventIndex, Graph, IndexedEventRef, PackedEvent, Request, Response,
+    UnpackedEvent,
 };
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]
 use crate::hash::Hash;
@@ -144,11 +144,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         // Add event carrying genesis observation.
         let genesis_observation = Observation::Genesis(genesis_group.clone());
         let event = parsec.our_last_event_index().and_then(|self_parent| {
-            Event::new_from_observation(
-                self_parent,
-                genesis_observation,
-                parsec.event_context_mut(),
-            )
+            parsec.new_event_from_observation(self_parent, genesis_observation)
         });
         if let Err(error) = event.and_then(|event| parsec.add_event(event)) {
             log_or_panic!(
@@ -272,8 +268,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
 
         let self_parent = self.our_last_event_index()?;
-        let event =
-            Event::new_from_observation(self_parent, observation, self.event_context_mut())?;
+        let event = self.new_event_from_observation(self_parent, observation)?;
 
         let _ = self.add_event(event)?;
         Ok(())
@@ -572,8 +567,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let mut known = Vec::new();
 
         for packed_event in packed_events {
-            match Event::unpack(packed_event, &forking_peers, self.event_context_mut())? {
-                UnpackedEvent::New(event) => {
+            match self.unpack(packed_event, &forking_peers)? {
+                UnpackedEvent::New(event, _) => {
                     if self
                         .peer_list
                         .events_by_index(event.creator(), event.index_by_creator())
@@ -612,6 +607,40 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
 
         Ok(forking_peers)
+    }
+
+    fn unpack(
+        &mut self,
+        packed_event: PackedEvent<T, S::PublicId>,
+        forking_peers: &PeerIndexSet,
+    ) -> Result<UnpackedEvent<T, S::PublicId>> {
+        let mut unpacked_event =
+            Event::unpack(packed_event, &forking_peers, &self.event_context())?;
+        if let Some((payload_key, observation_info)) = unpacked_event.take_observation() {
+            let _ = self
+                .observations
+                .entry(payload_key)
+                .or_insert_with(|| observation_info);
+        }
+        Ok(unpacked_event)
+    }
+
+    fn new_event_from_observation(
+        &mut self,
+        self_parent: EventIndex,
+        observation: Observation<T, S::PublicId>,
+    ) -> Result<Event<S::PublicId>> {
+        let (event, observation_for_store) =
+            Event::new_from_observation(self_parent, observation, &self.event_context())?;
+
+        if let Some((payload_key, observation_info)) = observation_for_store {
+            let _ = self
+                .observations
+                .entry(payload_key)
+                .or_insert_with(|| observation_info);
+        }
+
+        Ok(event)
     }
 
     fn add_event(&mut self, event: Event<S::PublicId>) -> Result<EventIndex> {
@@ -1530,10 +1559,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         malice: Malice<T, S::PublicId>,
     ) -> Result<()> {
         let offender = self.peer_list.get_known(offender)?.id().clone();
-        let event = Event::new_from_observation(
+        let event = self.new_event_from_observation(
             self.our_last_event_index()?,
             Observation::Accusation { offender, malice },
-            self.event_context_mut(),
         )?;
 
         let _ = self.add_event(event)?;
@@ -1554,14 +1582,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             graph: &self.graph,
             peer_list: &self.peer_list,
             observations: &self.observations,
-        }
-    }
-
-    fn event_context_mut(&mut self) -> EventContextMut<T, S> {
-        EventContextMut {
-            graph: &self.graph,
-            peer_list: &self.peer_list,
-            observations: &mut self.observations,
             consensus_mode: self.consensus_mode,
         }
     }
@@ -2273,8 +2293,8 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         &mut self,
         event: PackedEvent<T, S::PublicId>,
     ) -> Result<EventIndex> {
-        match Event::unpack(event, &PeerIndexSet::default(), self.0.event_context_mut())? {
-            UnpackedEvent::New(event) => self.0.add_event(event),
+        match self.0.unpack(event, &PeerIndexSet::default())? {
+            UnpackedEvent::New(event, _) => self.0.add_event(event),
             UnpackedEvent::Known(index) => Ok(index),
         }
     }
@@ -2335,8 +2355,12 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         self.0.event_context()
     }
 
-    pub fn event_context_mut(&mut self) -> EventContextMut<T, S> {
-        self.0.event_context_mut()
+    pub fn new_event_from_observation(
+        &mut self,
+        self_parent: EventIndex,
+        observation: Observation<T, S::PublicId>,
+    ) -> Result<Event<S::PublicId>> {
+        self.0.new_event_from_observation(self_parent, observation)
     }
 }
 

@@ -11,7 +11,7 @@ use super::graph::IndexedEventRef;
 use super::{
     cause::{other_parent_hash, self_parent_hash, Cause},
     content::Content,
-    event_context::{EventContextMut, EventContextRef},
+    event_context::EventContextRef,
     event_hash::EventHash,
     graph::{EventIndex, Graph},
     packed_event::PackedEvent,
@@ -22,7 +22,7 @@ use crate::id::{PublicId, SecretId};
 #[cfg(any(test, feature = "testing"))]
 use crate::mock::{PeerId, Transaction};
 use crate::network_event::NetworkEvent;
-use crate::observation::{Observation, ObservationKey, ObservationStore};
+use crate::observation::{Observation, ObservationForStore, ObservationKey, ObservationStore};
 use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
 use crate::serialise;
 use crate::vote::{Vote, VoteKey};
@@ -140,12 +140,11 @@ impl<P: PublicId> Event<P> {
     }
 
     // Creates a new event as the result of observing a network event.
-    #[allow(clippy::needless_pass_by_value)]
     pub fn new_from_observation<T: NetworkEvent, S: SecretId<PublicId = P>>(
         self_parent: EventIndex,
         observation: Observation<T, P>,
-        ctx: EventContextMut<T, S>,
-    ) -> Result<Self, Error> {
+        ctx: &EventContextRef<T, S>,
+    ) -> Result<(Self, ObservationForStore<T, P>), Error> {
         // Compute event hash + signature.
         let vote = Vote::new(ctx.peer_list.our_id(), observation);
         let content = Content {
@@ -158,15 +157,18 @@ impl<P: PublicId> Event<P> {
         let (hash, signature) = compute_event_hash_and_signature(&content, ctx.peer_list.our_id());
         let graph = ctx.graph;
         let peer_list = ctx.peer_list;
-        let content = Content::unpack(content, ctx)?;
+        let (content, observation_for_store) = Content::unpack(content, ctx)?;
 
-        Ok(Self::new(
-            hash,
-            signature,
-            content,
-            graph,
-            peer_list,
-            &PeerIndexSet::default(),
+        Ok((
+            Self::new(
+                hash,
+                signature,
+                content,
+                graph,
+                peer_list,
+                &PeerIndexSet::default(),
+            ),
+            observation_for_store,
         ))
     }
 
@@ -218,12 +220,11 @@ impl<P: PublicId> Event<P> {
     //   - `Err(Error::SignatureFailure)` if signature validation fails
     //   - `Err(Error::UnknownParent)` if the event indicates it should have an ancestor, but the
     //     ancestor isn't in `events`.
-    #[allow(clippy::needless_pass_by_value)]
     pub(crate) fn unpack<T: NetworkEvent, S: SecretId<PublicId = P>>(
         packed_event: PackedEvent<T, P>,
         forking_peers: &PeerIndexSet,
-        ctx: EventContextMut<T, S>,
-    ) -> Result<UnpackedEvent<P>, Error> {
+        ctx: &EventContextRef<T, S>,
+    ) -> Result<UnpackedEvent<T, P>, Error> {
         let hash = compute_event_hash_and_verify_signature(
             &packed_event.content,
             &packed_event.signature,
@@ -235,14 +236,17 @@ impl<P: PublicId> Event<P> {
 
         let graph = ctx.graph;
         let peer_list = ctx.peer_list;
-        let content = Content::unpack(packed_event.content, ctx)?;
+        let (content, observation_for_store) = Content::unpack(packed_event.content, ctx)?;
         let cache = Cache::new(hash, &content, graph, peer_list, forking_peers);
 
-        Ok(UnpackedEvent::New(Self {
-            content,
-            signature: packed_event.signature,
-            cache,
-        }))
+        Ok(UnpackedEvent::New(
+            Self {
+                content,
+                signature: packed_event.signature,
+                cache,
+            },
+            observation_for_store,
+        ))
     }
 
     // Creates a `PackedEvent` from this `Event`.
@@ -510,11 +514,20 @@ impl Event<PeerId> {
 }
 
 #[derive(Debug)]
-pub(crate) enum UnpackedEvent<P: PublicId> {
+pub(crate) enum UnpackedEvent<T: NetworkEvent, P: PublicId> {
     // Event is already in our gossip graph
     Known(EventIndex),
     // Event is not yet in our gossip graph
-    New(Event<P>),
+    New(Event<P>, ObservationForStore<T, P>),
+}
+
+impl<T: NetworkEvent, P: PublicId> UnpackedEvent<T, P> {
+    pub fn take_observation(&mut self) -> ObservationForStore<T, P> {
+        match self {
+            UnpackedEvent::New(_, observation) => observation.take(),
+            UnpackedEvent::Known(_) => None,
+        }
+    }
 }
 
 pub(crate) enum LastAncestor {
@@ -749,14 +762,6 @@ mod tests {
                 graph: &self.graph,
                 peer_list: &self.peer_list,
                 observations: &self.observations,
-            }
-        }
-
-        fn as_mut(&mut self) -> EventContextMut<Transaction, PeerId> {
-            EventContextMut {
-                graph: &self.graph,
-                peer_list: &self.peer_list,
-                observations: &mut self.observations,
                 consensus_mode: self.consensus_mode,
             }
         }
@@ -800,11 +805,11 @@ mod tests {
     fn convert_event(
         event: &Event<PeerId>,
         src: EventContextRef<Transaction, PeerId>,
-        dst: EventContextMut<Transaction, PeerId>,
+        dst: EventContextRef<Transaction, PeerId>,
     ) -> Event<PeerId> {
         let e = unwrap!(event.pack(src));
-        match unwrap!(Event::unpack(e, &PeerIndexSet::default(), dst)) {
-            UnpackedEvent::New(e) => e,
+        match unwrap!(Event::unpack(e, &PeerIndexSet::default(), &dst)) {
+            UnpackedEvent::New(e, _) => e,
             UnpackedEvent::Known(_) => panic!("Unexpected known event"),
         }
     }
@@ -828,11 +833,14 @@ mod tests {
         // Our observation
         let net_event = Observation::OpaquePayload(Transaction::new("event_observed_by_alice"));
 
-        let event_from_observation = unwrap!(Event::new_from_observation(
+        let (event_from_observation, observation_for_store) = unwrap!(Event::new_from_observation(
             initial_event_index,
             net_event.clone(),
-            alice.as_mut(),
+            &alice.as_ref(),
         ));
+
+        let (key, observation_info) = unwrap!(observation_for_store);
+        let _ = alice.observations.insert(key, observation_info);
 
         let packed_event_from_observation = unwrap!(event_from_observation.pack(alice.as_ref()));
 
@@ -863,11 +871,11 @@ mod tests {
     #[test]
     #[cfg(feature = "testing")]
     fn event_construction_from_observation_with_phony_self_parent() {
-        let mut alice = Context::new("Alice");
+        let alice = Context::new("Alice");
         let self_parent_index = EventIndex::PHONY;
         let net_event = Observation::OpaquePayload(Transaction::new("event_observed_by_alice"));
 
-        match Event::new_from_observation(self_parent_index, net_event.clone(), alice.as_mut()) {
+        match Event::new_from_observation(self_parent_index, net_event.clone(), &alice.as_ref()) {
             Err(Error::UnknownSelfParent) => (),
             x => panic!("Unexpected {:?}", x),
         }
@@ -876,7 +884,7 @@ mod tests {
     #[test]
     fn event_construction_from_request() {
         let (mut alice, a_0, bob, b_0) = create_two_events("Alice", "Bob");
-        let b_0 = convert_event(&b_0, bob.as_ref(), alice.as_mut());
+        let b_0 = convert_event(&b_0, bob.as_ref(), alice.as_ref());
         let a_0_index = alice.graph.insert(a_0).event_index();
         let b_0_index = alice.graph.insert(b_0).event_index();
 
@@ -905,7 +913,7 @@ mod tests {
     #[cfg(feature = "testing")]
     fn event_construction_from_request_without_self_parent_event_in_graph() {
         let (mut alice, _, bob, b_0) = create_two_events("Alice", "Bob");
-        let b_0 = convert_event(&b_0, bob.as_ref(), alice.as_mut());
+        let b_0 = convert_event(&b_0, bob.as_ref(), alice.as_ref());
         let b_0_index = alice.graph.insert(b_0).event_index();
 
         match Event::new_from_request(
@@ -939,7 +947,7 @@ mod tests {
     #[test]
     fn event_construction_from_response() {
         let (mut alice, a_0, bob, b_0) = create_two_events("Alice", "Bob");
-        let b_0 = convert_event(&b_0, bob.as_ref(), alice.as_mut());
+        let b_0 = convert_event(&b_0, bob.as_ref(), alice.as_ref());
         let a_0_index = alice.graph.insert(a_0).event_index();
         let b_0_index = alice.graph.insert(b_0).event_index();
 
@@ -970,19 +978,22 @@ mod tests {
         // Our observation
         let net_event = Observation::OpaquePayload(Transaction::new("event_observed_by_alice"));
 
-        let event_from_observation = unwrap!(Event::new_from_observation(
+        let (event_from_observation, observation_for_store) = unwrap!(Event::new_from_observation(
             a_0_index,
             net_event,
-            alice.as_mut()
+            &alice.as_ref()
         ));
+
+        let (key, observation_info) = unwrap!(observation_for_store);
+        let _ = alice.observations.insert(key, observation_info);
 
         let packed_event = unwrap!(event_from_observation.pack(alice.as_ref()));
         let unpacked_event = match unwrap!(Event::unpack(
             packed_event.clone(),
             &PeerIndexSet::default(),
-            alice.as_mut()
+            &alice.as_ref()
         )) {
-            UnpackedEvent::New(event) => event,
+            UnpackedEvent::New(event, _) => event,
             UnpackedEvent::Known(_) => panic!("Unexpected known event"),
         };
 
@@ -994,9 +1005,9 @@ mod tests {
         match unwrap!(Event::unpack(
             packed_event,
             &PeerIndexSet::default(),
-            alice.as_mut()
+            &alice.as_ref()
         )) {
-            UnpackedEvent::New(_) => panic!("Unexpected new event"),
+            UnpackedEvent::New(_, _) => panic!("Unexpected new event"),
             UnpackedEvent::Known(_) => (),
         }
     }
@@ -1009,11 +1020,14 @@ mod tests {
         // Our observation
         let net_event = Observation::OpaquePayload(Transaction::new("event_observed_by_alice"));
 
-        let event_from_observation = unwrap!(Event::new_from_observation(
+        let (event_from_observation, observation_for_store) = unwrap!(Event::new_from_observation(
             a_0_index,
             net_event,
-            alice.as_mut()
+            &alice.as_ref()
         ));
+
+        let (key, observation_info) = unwrap!(observation_for_store);
+        let _ = alice.observations.insert(key, observation_info);
 
         let mut packed_event = unwrap!(event_from_observation.pack(alice.as_ref()));
         packed_event.signature = alice.peer_list.our_id().sign_detached(&[123]);
@@ -1021,7 +1035,7 @@ mod tests {
         let error = unwrap_err!(Event::unpack(
             packed_event,
             &PeerIndexSet::default(),
-            alice.as_mut()
+            &alice.as_ref()
         ));
         if let Error::SignatureFailure = error {
         } else {

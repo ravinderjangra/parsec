@@ -7,14 +7,12 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::{
-    cause::Cause,
-    event_context::{EventContextMut, EventContextRef},
-    event_hash::EventHash,
-    graph::EventIndex,
+    cause::Cause, event_context::EventContextRef, event_hash::EventHash, graph::EventIndex,
 };
 use crate::error::Error;
 use crate::id::{PublicId, SecretId};
 use crate::network_event::NetworkEvent;
+use crate::observation::ObservationForStore;
 use crate::peer_list::PeerIndex;
 use crate::vote::{Vote, VoteKey};
 use serde::{Deserialize, Serialize};
@@ -67,15 +65,15 @@ impl<V, E, P> Content<V, E, P> {
 impl<P: PublicId> Content<VoteKey<P>, EventIndex, PeerIndex> {
     pub(crate) fn unpack<T: NetworkEvent, S: SecretId<PublicId = P>>(
         packed_content: Content<Vote<T, P>, EventHash, P>,
-        ctx: EventContextMut<T, S>,
-    ) -> Result<Self, Error> {
+        ctx: &EventContextRef<T, S>,
+    ) -> Result<(Self, ObservationForStore<T, P>), Error> {
         let creator = ctx
             .peer_list
             .get_index(&packed_content.creator)
             .ok_or(Error::UnknownPeer)?;
-        let cause = Cause::unpack(packed_content.cause, creator, ctx)?;
+        let (cause, observation_for_store) = Cause::unpack(packed_content.cause, creator, ctx)?;
 
-        Ok(Self { creator, cause })
+        Ok((Self { creator, cause }, observation_for_store))
     }
 
     pub(crate) fn pack<T: NetworkEvent, S: SecretId<PublicId = P>>(
