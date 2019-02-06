@@ -1058,20 +1058,26 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     fn set_meta_votes(&self, builder: &mut MetaEventBuilder<S::PublicId>) -> Result<()> {
-        let voters = self.voters();
-
         let parent_meta_votes = builder
             .event()
             .self_parent()
             .and_then(|parent_hash| self.meta_election.populated_meta_votes(parent_hash));
 
-        // If self-parent already has meta votes associated with it, derive this event's meta votes
-        // from those ones.
+        if parent_meta_votes.is_none() && !self.is_observer(builder) {
+            // No meta votes to set for this event
+            return Ok(());
+        }
+
+        let voters = self.voters();
+        let is_voter = voters.contains(builder.event().creator());
+        let ancestors_meta_votes =
+            self.other_voting_ancestors_meta_votes(&voters, &builder.event());
+
         if let Some(parent_meta_votes) = parent_meta_votes {
+            // Parent has meta votes: Derive this event's meta votes from them.
             for (peer_index, parent_event_votes) in parent_meta_votes {
                 let new_meta_votes = {
-                    let other_votes =
-                        self.collect_other_meta_votes(&voters, peer_index, &*builder.event());
+                    let other_votes = Self::peer_meta_votes(&ancestors_meta_votes, peer_index);
                     let coin_tosses =
                         self.toss_coins(&voters, peer_index, &parent_event_votes, builder.event())?;
                     MetaVote::next(
@@ -1079,29 +1085,25 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                         &other_votes,
                         &coin_tosses,
                         voters.len(),
-                        voters.contains(builder.event().creator()),
+                        is_voter,
                     )
                 };
 
                 builder.add_meta_votes(peer_index, new_meta_votes);
             }
-        } else if self.is_observer(builder) {
-            // For the case that event's creator is not a voter, the initial estimation shall not be
-            // created.
-            let is_voter = voters.contains(builder.event().creator());
-
-            // Start meta votes for this event.
+        } else {
+            // Start meta votes for this observer event.
             for peer_index in voters {
-                let other_votes =
-                    self.collect_other_meta_votes(&voters, peer_index, &*builder.event());
-                let initial_estimate = builder.has_observee(peer_index);
+                let new_meta_votes = {
+                    let other_votes = Self::peer_meta_votes(&ancestors_meta_votes, peer_index);
+                    let initial_estimate = builder.has_observee(peer_index);
 
-                builder.add_meta_votes(
-                    peer_index,
-                    MetaVote::new(initial_estimate, &other_votes, voters.len(), is_voter),
-                );
+                    MetaVote::new(initial_estimate, &other_votes, voters.len(), is_voter)
+                };
+
+                builder.add_meta_votes(peer_index, new_meta_votes);
             }
-        };
+        }
 
         trace!(
             "{:?} has set the meta votes for {:?}",
@@ -1275,14 +1277,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         None
     }
 
-    // Returns the set of meta votes held by all peers other than the creator of `event` which are
-    // votes by the peer at `peer_index`.
-    fn collect_other_meta_votes(
+    // Returns all the meta votes from the event's voting ancestors except the event's creator.
+    fn other_voting_ancestors_meta_votes(
         &self,
         voters: &PeerIndexSet,
-        peer_index: PeerIndex,
         event: &Event<S::PublicId>,
-    ) -> Vec<&[MetaVote]> {
+    ) -> Vec<&PeerIndexMap<Vec<MetaVote>>> {
         voters
             .iter()
             .filter(|voter_index| *voter_index != event.creator())
@@ -1293,9 +1293,19 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     .and_then(|creator_event_index| {
                         self.meta_votes_by_creator(creator, *creator_event_index)
                     })
-                    .and_then(|meta_votes| meta_votes.get(peer_index))
-                    .map(|meta_votes| meta_votes.as_slice())
             })
+            .collect()
+    }
+
+    // Collect the vectors of meta votes for the peer
+    fn peer_meta_votes<'a>(
+        meta_votes_maps: &'a [&PeerIndexMap<Vec<MetaVote>>],
+        peer_index: PeerIndex,
+    ) -> Vec<&'a [MetaVote]> {
+        meta_votes_maps
+            .iter()
+            .filter_map(|meta_votes| meta_votes.get(peer_index))
+            .map(|meta_votes| meta_votes.as_slice())
             .collect()
     }
 
