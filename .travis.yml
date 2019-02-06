@@ -18,12 +18,16 @@ before_script:
 jobs:
   include:
     - script: scripts/clippy
+      env: CACHE_NAME=clippylinux
       os: linux
     - script: scripts/clippy
+      env: CACHE_NAME=clippyosx
       os: osx
     - script: scripts/tests
+      env: CACHE_NAME=testslinux
       os: linux
     - script: scripts/tests
+      env: CACHE_NAME=testsosx
       os: osx
 before_cache:
  - cargo prune
