@@ -2,9 +2,6 @@ env:
   global:
     - RUST_BACKTRACE=1
     - PATH=$PATH:$HOME/.cargo/bin
-os:
-  - linux
-  - osx
 language: rust
 rust:
   - stable
@@ -20,25 +17,13 @@ before_script:
   - rustup component add rustfmt clippy
 jobs:
   include:
-    - name: "clippy"
-      script:
-      - set -x -e;
-        cargo fmt -- --check
-        cargo clippy --verbose --all-targets
-        cargo clippy --verbose --all-targets --features=dump-graphs
-        cargo clippy --verbose --all-targets --features=testing
-        cargo clippy --verbose --all-targets --features=testing,malice-detection
-        cargo clippy --verbose --all-targets --features=dump-graphs,testing
-        cargo clippy --verbose --all-targets --features=dump-graphs,testing,malice-detection
-        cargo clippy --verbose --all-targets --features=mock
-        cargo clippy --verbose --all-targets --features=mock,dump-graphs
-        cargo clippy --verbose --all-targets --features=mock,dump-graphs,malice-detection
-        cargo clippy --verbose --manifest-path=dot_gen/Cargo.toml
-    - name: "tests"
-      script:
-      - set -x -e;
-        cargo test --verbose --release --features=testing
-        cargo test --verbose --release --features=testing,malice-detection
-        cargo test --verbose --release --features=dump-graphs dot_parser
+    - script: scripts/clippy
+      os: linux
+    - script: scripts/clippy
+      os: osx
+    - script: scripts/tests
+      os: linux
+    - script: scripts/tests
+      os: osx
 before_cache:
  - cargo prune
