@@ -18,21 +18,27 @@ before_script:
   - curl -sSL https://github.com/maidsafe/QA/raw/master/travis/cargo_install.sh > cargo_install.sh
   - bash cargo_install.sh cargo-prune;
   - rustup component add rustfmt clippy
-script:
-  - set -x;
-    cargo fmt -- --check &&
-    cargo clippy --verbose --all-targets &&
-    cargo clippy --verbose --all-targets --features=dump-graphs &&
-    cargo clippy --verbose --all-targets --features=testing &&
-    cargo clippy --verbose --all-targets --features=testing,malice-detection &&
-    cargo clippy --verbose --all-targets --features=dump-graphs,testing &&
-    cargo clippy --verbose --all-targets --features=dump-graphs,testing,malice-detection &&
-    cargo clippy --verbose --all-targets --features=mock &&
-    cargo clippy --verbose --all-targets --features=mock,dump-graphs &&
-    cargo clippy --verbose --all-targets --features=mock,dump-graphs,malice-detection &&
-    cargo clippy --verbose --manifest-path=dot_gen/Cargo.toml &&
-    cargo test --verbose --release --features=testing &&
-    cargo test --verbose --release --features=testing,malice-detection &&
-    cargo test --verbose --release --features=dump-graphs dot_parser
+jobs:
+  include:
+    - name: "clippy"
+      script:
+      - set -x -e;
+        cargo fmt -- --check
+        cargo clippy --verbose --all-targets
+        cargo clippy --verbose --all-targets --features=dump-graphs
+        cargo clippy --verbose --all-targets --features=testing
+        cargo clippy --verbose --all-targets --features=testing,malice-detection
+        cargo clippy --verbose --all-targets --features=dump-graphs,testing
+        cargo clippy --verbose --all-targets --features=dump-graphs,testing,malice-detection
+        cargo clippy --verbose --all-targets --features=mock
+        cargo clippy --verbose --all-targets --features=mock,dump-graphs
+        cargo clippy --verbose --all-targets --features=mock,dump-graphs,malice-detection
+        cargo clippy --verbose --manifest-path=dot_gen/Cargo.toml
+    - name: "tests"
+      script:
+      - set -x -e;
+        cargo test --verbose --release --features=testing
+        cargo test --verbose --release --features=testing,malice-detection
+        cargo test --verbose --release --features=dump-graphs dot_parser
 before_cache:
  - cargo prune
