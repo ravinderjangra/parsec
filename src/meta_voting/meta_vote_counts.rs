@@ -29,7 +29,7 @@ impl MetaVoteCounts {
     // meta vote, if `is_voter` is true.
     pub fn new(
         parent: &MetaVote,
-        others: &[Vec<MetaVote>],
+        others: &[&[MetaVote]],
         total_peers: usize,
         is_voter: bool,
     ) -> Self {
@@ -40,7 +40,7 @@ impl MetaVoteCounts {
             .filter_map(|other| {
                 other
                     .iter()
-                    .filter(|vote| vote.round == parent.round && vote.step == parent.step)
+                    .filter(|vote| vote.round_and_step() == parent.round_and_step())
                     .last()
             })
             .chain(if is_voter { Some(parent) } else { None })

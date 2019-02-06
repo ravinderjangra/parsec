@@ -74,7 +74,7 @@ impl Debug for MetaVote {
 impl MetaVote {
     pub fn new(
         initial_estimate: bool,
-        others: &[Vec<MetaVote>],
+        others: &[&[MetaVote]],
         total_peers: usize,
         is_voter: bool,
     ) -> Vec<Self> {
@@ -87,7 +87,7 @@ impl MetaVote {
 
     pub fn next(
         parent: &[MetaVote],
-        others: &[Vec<MetaVote>],
+        others: &[&[MetaVote]],
         coin_tosses: &BTreeMap<usize, bool>,
         total_peers: usize,
         is_voter: bool,
@@ -109,6 +109,10 @@ impl MetaVote {
             next.push(next_meta_vote);
         }
         next
+    }
+
+    pub fn round_and_step(&self) -> (usize, Step) {
+        (self.round, self.step)
     }
 
     fn update_meta_vote(
@@ -138,7 +142,7 @@ impl MetaVote {
 
     fn next_meta_vote(
         parent: Option<&MetaVote>,
-        others: &[Vec<MetaVote>],
+        others: &[&[MetaVote]],
         coin_tosses: &BTreeMap<usize, bool>,
         total_peers: usize,
         is_voter: bool,

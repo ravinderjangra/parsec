@@ -31,7 +31,7 @@ use crate::observation::{
     ObservationStore,
 };
 use crate::parsec_helpers::find_interesting_content_for_event;
-use crate::peer_list::{PeerIndex, PeerIndexSet, PeerList, PeerState};
+use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerState};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::mem;
 #[cfg(all(test, feature = "mock"))]
@@ -1214,15 +1214,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         peer_index: PeerIndex,
         round: usize,
     ) -> Option<bool> {
-        self.meta_votes_since_round_and_step(
-            creator,
-            creator_event_index,
-            peer_index,
-            round,
-            Step::GenuineFlip,
-        )
-        .next()
-        .and_then(|meta_vote| meta_vote.aux_value)
+        self.meta_votes_by_creator(creator, creator_event_index)
+            .and_then(|meta_votes| meta_votes.get(peer_index))
+            .and_then(|votes| {
+                votes
+                    .iter()
+                    .find(|meta_vote| meta_vote.round_and_step() >= (round, Step::GenuineFlip))
+            })
+            .and_then(|meta_vote| meta_vote.aux_value)
     }
 
     // Skips back through events created by the peer until passed `responsiveness_threshold`
@@ -1263,34 +1262,24 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             })
     }
 
-    // Returns the meta votes for the given peer, created by `creator`, since the given round and
-    // step.  Starts iterating down the creator's events starting from `creator_event_index`.
-    fn meta_votes_since_round_and_step(
+    // Returns the meta votes created by `creator`.
+    fn meta_votes_by_creator(
         &self,
         creator: PeerIndex,
         creator_event_index: usize,
-        peer_index: PeerIndex,
-        round: usize,
-        step: Step,
-    ) -> impl Iterator<Item = &MetaVote> {
-        let mut events = self.peer_list.events_by_index(creator, creator_event_index);
-        let event = events.next().and_then(|event| {
-            if events.next().is_some() {
-                // Fork
-                None
-            } else {
-                Some(event)
-            }
-        });
+    ) -> Option<&PeerIndexMap<Vec<MetaVote>>> {
+        let (event, fork_event) = {
+            let mut events = self.peer_list.events_by_index(creator, creator_event_index);
+            (events.next(), events.next())
+        };
 
-        event
-            .and_then(|event| self.meta_election.meta_votes(event))
-            .and_then(|meta_votes| meta_votes.get(peer_index))
-            .into_iter()
-            .flat_map(|meta_votes| meta_votes)
-            .filter(move |meta_vote| {
-                meta_vote.round > round || meta_vote.round == round && meta_vote.step >= step
-            })
+        if fork_event.is_none() {
+            // Not a fork
+            if let Some(event) = event {
+                return self.meta_election.meta_votes(event);
+            }
+        }
+        None
     }
 
     // Returns the set of meta votes held by all peers other than the creator of `event` which are
@@ -1300,7 +1289,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         voters: &PeerIndexSet,
         peer_index: PeerIndex,
         event: &Event<S::PublicId>,
-    ) -> Vec<Vec<MetaVote>> {
+    ) -> Vec<&[MetaVote]> {
         voters
             .iter()
             .filter(|voter_index| *voter_index != event.creator())
@@ -1308,17 +1297,11 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 event
                     .last_ancestors()
                     .get(creator)
-                    .map(|creator_event_index| {
-                        self.meta_votes_since_round_and_step(
-                            creator,
-                            *creator_event_index,
-                            peer_index,
-                            0,
-                            Step::ForcedTrue,
-                        )
-                        .cloned()
-                        .collect()
+                    .and_then(|creator_event_index| {
+                        self.meta_votes_by_creator(creator, *creator_event_index)
                     })
+                    .and_then(|meta_votes| meta_votes.get(peer_index))
+                    .map(|meta_votes| meta_votes.as_slice())
             })
             .collect()
     }
