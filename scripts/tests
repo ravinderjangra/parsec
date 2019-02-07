@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -e -x
+
+cargo test --verbose --release --features=testing
+cargo test --verbose --release --features=testing,malice-detection
+cargo test --verbose --release --features=dump-graphs dot_parser
