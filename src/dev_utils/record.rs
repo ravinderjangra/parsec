@@ -241,19 +241,88 @@ fn extract_genesis_group<'a>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::parsec::assert_same_events;
+    use crate::parsec::get_graph_snapshot;
+    use std::cmp;
 
-    #[test]
-    fn smoke() {
-        let path = "input_graphs/benches/minimal.dot";
+    #[derive(PartialEq, Eq, Debug)]
+    struct TrucatedHashes<'th> {
+        actual_len: usize,
+        hashes: &'th [Hash],
+    }
 
+    impl<'th> TrucatedHashes<'th> {
+        fn new_with_one_missing_element(hashes: &'th [Hash]) -> Self {
+            Self {
+                actual_len: hashes.len() + 1,
+                hashes,
+            }
+        }
+
+        fn new_with_one_trucated_element(hashes: &'th [Hash]) -> Self {
+            Self {
+                actual_len: hashes.len(),
+                hashes: &hashes[0..cmp::max(hashes.len(), 1) - 1],
+            }
+        }
+    }
+
+    /// Run smoke test using given dot file
+    /// Use ignore_last_events to skip fake request that replay generates to send remaining gossip events.
+    fn smoke(path: &str, ignore_last_events: usize) {
         let contents = unwrap!(parse_dot_file(path));
         let expected = Parsec::from_parsed_contents(contents);
+        let expected_events = {
+            let ignore_last_events = 0;
+            get_graph_snapshot(&expected, ignore_last_events)
+        };
 
         let contents = unwrap!(parse_dot_file(path));
         let replay = Record::from(contents);
         let actual = replay.play();
+        let actual_events = get_graph_snapshot(&actual, ignore_last_events);
 
-        assert_same_events(&actual, &expected);
+        assert_eq!(expected_events, actual_events);
+    }
+
+    /// Run smoke test using given dot file checking the consensus history
+    fn smoke_consensus_history(path: &str) {
+        let contents = unwrap!(parse_dot_file(path));
+        let replay = Record::from(contents);
+        let expected_history = replay.consensus_history();
+
+        let actual = replay.play();
+        let actual_history = actual.meta_election_consensus_history_hash();
+
+        assert_eq!(
+            TrucatedHashes::new_with_one_missing_element(&expected_history),
+            TrucatedHashes::new_with_one_trucated_element(&actual_history)
+        );
+    }
+
+    #[test]
+    fn smoke_parsec() {
+        let ignore_last_events = 0;
+        smoke("input_graphs/benches/minimal.dot", ignore_last_events)
+    }
+
+    #[test]
+    fn smoke_other_peer_names() {
+        let ignore_last_events = 1;
+        smoke(
+            "input_graphs/dev_utils_record_tests_smoke_other_peer_names/annie.dot",
+            ignore_last_events,
+        )
+    }
+
+    #[test]
+    fn smoke_consensus_history_parsec() {
+        smoke_consensus_history("input_graphs/benches/minimal.dot")
+    }
+
+    #[test]
+    fn smoke_consensus_history_other_peer_names() {
+        smoke_consensus_history(
+            "input_graphs/dev_utils_record_tests_smoke_other_peer_names/annie.dot",
+        )
     }
 }

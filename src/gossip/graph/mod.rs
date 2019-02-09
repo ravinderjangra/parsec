@@ -222,11 +222,22 @@ pub(crate) mod snapshot {
     /// Snapshot of the graph. Two snapshots compare as equal if the graphs had the same events
     /// modulo their insertion order.
     #[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]
-    pub(crate) struct GraphSnapshot(BTreeSet<EventHash>);
+    pub(crate) struct GraphSnapshot(pub BTreeSet<EventHash>);
 
     impl GraphSnapshot {
         pub fn new<P: PublicId>(graph: &Graph<P>) -> Self {
-            GraphSnapshot(graph.iter().map(|event| *event.hash()).collect())
+            Self::new_with_ignore(graph, 0)
+        }
+
+        /// Generate a snapshot without the last `ignore_last_events` events
+        pub fn new_with_ignore<P: PublicId>(graph: &Graph<P>, ignore_last_events: usize) -> Self {
+            GraphSnapshot(
+                graph
+                    .iter()
+                    .map(|event| *event.hash())
+                    .take(graph.len() - ignore_last_events)
+                    .collect(),
+            )
         }
     }
 }
