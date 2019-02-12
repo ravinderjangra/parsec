@@ -96,14 +96,13 @@ impl ParserCtx {
             .collect();
     }
 
-    fn peer_id_from_short_name(&self, short_name: char) -> PeerId {
+    fn peer_id_from_short_name(&self, short_name: &str) -> PeerId {
         use std::ops::Bound::{Included, Unbounded};
 
         let peer_ids = self.peer_ids.borrow();
-        let search_short_name = short_name.to_string();
 
         // The full name will be the first greater or equal full name
-        let mut range = peer_ids.range((Included(search_short_name), Unbounded));
+        let mut range = peer_ids.range::<str, _>((Included(short_name), Unbounded));
         if let Some((_name, peer_id)) = range.next() {
             return peer_id.clone();
         }
@@ -630,7 +629,8 @@ fn parse_meta_votes(ctx: &Rc<ParserCtx>) -> Parser<u8, BTreeMap<PeerId, Vec<Meta
 }
 
 fn parse_peer_meta_votes(ctx: &Rc<ParserCtx>) -> Parser<u8, (PeerId, Vec<MetaVote>)> {
-    let peer_line = comment_prefix() * is_a(alphanum).map(char::from) - seq(b": ")
+    let peer_line = comment_prefix() * is_a(alphanum).repeat(1..).convert(String::from_utf8)
+        - seq(b": ")
         + parse_meta_vote()
         - next_line();
     let next_line = comment_prefix() * parse_meta_vote() - next_line();
@@ -639,7 +639,7 @@ fn parse_peer_meta_votes(ctx: &Rc<ParserCtx>) -> Parser<u8, (PeerId, Vec<MetaVot
     (peer_line + next_line.repeat(0..)).map(move |((peer_short_name, first_mv), other_mvs)| {
         let mut mvs = vec![first_mv];
         mvs.extend(other_mvs);
-        (ctx.peer_id_from_short_name(peer_short_name), mvs)
+        (ctx.peer_id_from_short_name(&peer_short_name), mvs)
     })
 }
 
