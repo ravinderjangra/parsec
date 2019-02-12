@@ -273,6 +273,7 @@ fn main() {
     add_bench_scalability(&mut scenarios, 8, 16);
     add_bench_scalability(&mut scenarios, 8, 24);
     add_bench_scalability(&mut scenarios, 8, 32);
+    add_bench_scalability(&mut scenarios, 8, 48);
 
     add_bench_scalability(&mut scenarios, 16, 4);
     add_bench_scalability(&mut scenarios, 16, 8);
