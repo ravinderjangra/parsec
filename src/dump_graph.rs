@@ -59,11 +59,13 @@ pub use self::detail::DIR;
 
 #[cfg(feature = "dump-graphs")]
 mod detail {
-    use crate::gossip::{Event, EventHash, EventIndex, Graph, GraphSnapshot, IndexedEventRef};
+    use crate::gossip::{
+        Cause, Event, EventHash, EventIndex, Graph, GraphSnapshot, IndexedEventRef,
+    };
     use crate::id::{PublicId, SecretId};
     use crate::meta_voting::{MetaElection, MetaElectionSnapshot, MetaEvent, MetaVote, Observer};
     use crate::network_event::NetworkEvent;
-    use crate::observation::ObservationStore;
+    use crate::observation::{Observation, ObservationKey, ObservationStore};
     use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
     use crate::serialise;
     use itertools::Itertools;
@@ -72,7 +74,7 @@ mod detail {
     use std::cmp;
     use std::collections::{BTreeMap, BTreeSet};
     use std::env;
-    use std::fmt;
+    use std::fmt::{self, Debug, Formatter};
     use std::fs::{self, File};
     use std::io::{self, BufWriter, Write};
     use std::path::{Path, PathBuf};
@@ -182,7 +184,7 @@ mod detail {
             gossip_graph,
             meta_election,
             peer_list,
-            observations,
+            &DotObservation::from_observations(&observations),
             &short_peer_ids,
         ) {
             Ok(mut dot_writer) => {
@@ -327,17 +329,17 @@ mod detail {
         lines
     }
 
-    struct DotWriter<'a, T: NetworkEvent + 'a, S: SecretId + 'a> {
+    struct DotWriter<'a, S: SecretId + 'a> {
         file: BufWriter<File>,
         gossip_graph: &'a Graph<S::PublicId>,
         meta_election: &'a MetaElection,
         peer_list: &'a PeerList<S>,
-        observations: &'a ObservationStore<T, S::PublicId>,
+        observations: &'a DotObservationStore,
         short_peer_ids: &'a PeerIndexMap<String>,
         indent: usize,
     }
 
-    impl<'a, T: NetworkEvent + 'a, S: SecretId + 'a> DotWriter<'a, T, S> {
+    impl<'a, S: SecretId + 'a> DotWriter<'a, S> {
         const COMMENT: &'static str = "/// ";
 
         fn new(
@@ -345,7 +347,7 @@ mod detail {
             gossip_graph: &'a Graph<S::PublicId>,
             meta_election: &'a MetaElection,
             peer_list: &'a PeerList<S>,
-            observations: &'a ObservationStore<T, S::PublicId>,
+            observations: &'a DotObservationStore,
             short_peer_ids: &'a PeerIndexMap<String>,
         ) -> io::Result<Self> {
             File::create(&file_path).map(|file| DotWriter {
@@ -600,7 +602,7 @@ mod detail {
                         attr.to_string()
                     ))?;
 
-                    event.write_cause_to_dot_format(&mut self.file, &self.observations)?;
+                    self.write_cause_to_dot_format(&event)?;
 
                     let last_ancestors =
                         convert_peer_index_map(event.last_ancestors(), &self.peer_list);
@@ -610,6 +612,28 @@ mod detail {
                 }
             }
             Ok(())
+        }
+
+        pub fn write_cause_to_dot_format(
+            &mut self,
+            event: &IndexedEventRef<S::PublicId>,
+        ) -> io::Result<()> {
+            let mut buffer;
+            let cause = match event.cause() {
+                Cause::Request { .. } => "Request",
+                Cause::Response { .. } => "Response",
+                Cause::Observation { ref vote, .. } => {
+                    if let Some(observation) = self.observations.get(vote.payload_key()) {
+                        buffer = format!("Observation({:?})", observation);
+                        buffer.as_str()
+                    } else {
+                        "Observation(?)"
+                    }
+                }
+                Cause::Initial => "Initial",
+            };
+
+            writeln!(&mut self.file, "/// cause: {}", cause)
         }
 
         fn write_meta_elections(&mut self) -> io::Result<()> {
@@ -763,7 +787,7 @@ mod detail {
                 let interesting_content = mev
                     .interesting_content
                     .iter()
-                    .map(|obs_key| unwrap!(self.observations.get(obs_key)).observation.clone())
+                    .map(|obs_key| unwrap!(self.observations.get(obs_key)))
                     .collect::<Vec<_>>();
                 lines.push(format!(
                     "{}{}interesting_content: {:?}",
@@ -806,11 +830,11 @@ mod detail {
     }
 
     impl EventAttributes {
-        fn new<T: NetworkEvent, P: PublicId>(
+        fn new<P: PublicId>(
             event: &Event<P>,
             event_short_name: String,
             opt_meta_event: Option<&MetaEvent>,
-            observations: &ObservationStore<T, P>,
+            observations: &DotObservationStore,
             short_peer_ids: &PeerIndexMap<String>,
         ) -> Self {
             let mut attr = EventAttributes {
@@ -826,11 +850,7 @@ mod detail {
                 attr.label
             );
 
-            if let Some(event_payload) = event
-                .payload_key()
-                .and_then(|key| observations.get(key))
-                .map(|info| &info.observation)
-            {
+            if let Some(event_payload) = event.payload_key().and_then(|key| observations.get(key)) {
                 attr.label = format!(
                     "{}<tr><td colspan=\"6\">{:?}</td></tr>\n",
                     attr.label, event_payload
@@ -844,7 +864,7 @@ mod detail {
                     let interesting_content = meta_event
                         .interesting_content
                         .iter()
-                        .map(|obs_key| &unwrap!(observations.get(obs_key)).observation)
+                        .map(|obs_key| unwrap!(observations.get(obs_key)))
                         .collect::<Vec<_>>();
                     attr.label = format!(
                         "{}<tr><td colspan=\"6\">{:?}</td></tr>",
@@ -908,6 +928,52 @@ mod detail {
             .iter()
             .filter_map(|(index, value)| peer_list.get(index).map(|peer| (peer.id(), value)))
             .collect()
+    }
+
+    type DotObservationStore = BTreeMap<ObservationKey, DotObservation>;
+
+    struct DotObservation {
+        value: String,
+    }
+
+    impl Debug for DotObservation {
+        fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+            write!(formatter, "{}", self.value)
+        }
+    }
+
+    impl DotObservation {
+        fn from_observations<T: NetworkEvent, P: PublicId>(
+            observations: &ObservationStore<T, P>,
+        ) -> DotObservationStore {
+            observations
+                .iter()
+                .map(|(key, info)| (*key, DotObservation::new(&info.observation)))
+                .collect()
+        }
+
+        fn new<T: NetworkEvent, P: PublicId>(observation: &Observation<T, P>) -> Self {
+            let value = match observation {
+                Observation::Genesis(group) => format!("Genesis({:?})", group),
+                Observation::Add { peer_id, .. } => format!("Add({:?})", peer_id),
+                Observation::Remove { peer_id, .. } => format!("Remove({:?})", peer_id),
+                Observation::Accusation { offender, malice } => {
+                    format!("Accusation {{ {:?}, {:?} }}", offender, malice)
+                }
+                Observation::OpaquePayload(payload) => {
+                    let max_length = 16;
+                    let mut payload_str = format!("{:?}", payload);
+                    if payload_str.len() > max_length {
+                        payload_str.truncate(max_length - 2);
+                        payload_str.push('.');
+                        payload_str.push('.');
+                    }
+                    format!("OpaquePayload({})", payload_str)
+                }
+            };
+
+            DotObservation { value }
+        }
     }
 
     fn peer_ids_from_peer_list<S: SecretId>(peer_list: &PeerList<S>) -> PeerIndexMap<String> {

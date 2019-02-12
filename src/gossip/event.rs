@@ -30,8 +30,6 @@ use std::cmp;
 #[cfg(any(test, feature = "testing"))]
 use std::collections::BTreeMap;
 use std::fmt::{self, Debug, Display, Formatter};
-#[cfg(feature = "dump-graphs")]
-use std::io::{self, Write};
 
 /// Provide a small interface to Event not dependent on PublicId. Serves as a test seam.
 pub(crate) trait AbstractEvent {
@@ -381,16 +379,8 @@ impl<P: PublicId> Event<P> {
     }
 
     #[cfg(feature = "dump-graphs")]
-    pub fn write_cause_to_dot_format<T: NetworkEvent>(
-        &self,
-        writer: &mut Write,
-        observations: &ObservationStore<T, P>,
-    ) -> io::Result<()> {
-        writeln!(
-            writer,
-            "/// cause: {}",
-            self.content.cause.display(observations)
-        )
+    pub fn cause(&self) -> &Cause<VoteKey<P>, EventIndex> {
+        &self.content.cause
     }
 }
 
