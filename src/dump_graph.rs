@@ -66,6 +66,7 @@ mod detail {
     use crate::observation::ObservationStore;
     use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
     use crate::serialise;
+    use itertools::Itertools;
     use rand::{self, Rng};
     use std::cell::RefCell;
     use std::cmp;
@@ -290,10 +291,10 @@ mod detail {
             );
         }
 
-        let meta_votes: BTreeMap<_, _> = meta_votes
+        let meta_votes = meta_votes
             .iter()
             .map(|(peer_index, meta_votes)| (unwrap!(peer_list.get(peer_index)).id(), meta_votes))
-            .collect();
+            .sorted_by(|(lhs_peer_id, _), (rhs_peer_id, _)| Ord::cmp(lhs_peer_id, rhs_peer_id));
 
         for (peer_id, meta_votes) in meta_votes {
             let mut prefix = format!("{}: ", first_char(peer_id).unwrap_or('?'));
@@ -548,13 +549,7 @@ mod detail {
         fn write_peers(&mut self) -> io::Result<()> {
             self.writeln(format_args!("  {{"))?;
             self.writeln(format_args!("    rank=same"))?;
-            let mut peer_ids = self
-                .peer_list
-                .all_ids()
-                .map(|(_, id)| id)
-                .collect::<Vec<_>>();
-            peer_ids.sort();
-
+            let mut peer_ids = self.peer_list.all_ids().map(|(_, id)| id).sorted();
             for peer_id in &peer_ids {
                 self.writeln(format_args!(
                     "    \"{:?}\" [style=filled, color=white]",

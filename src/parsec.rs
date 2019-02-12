@@ -686,7 +686,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 .initialise_round_hashes(self.peer_list.all_ids());
 
             // Trigger reprocess.
-            let start_index = self.meta_election.upper_start_index();
+            let start_index = self.meta_election.continue_consensus_start_index();
             return Ok(PostProcessAction::Restart(start_index));
         }
 
@@ -799,12 +799,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     fn handle_remove_peer(&mut self, peer_id: &S::PublicId) -> Option<PeerListChange> {
-        if let Some(peer_index) = self.peer_list.get_index(peer_id) {
+        self.peer_list.get_index(peer_id).map(|peer_index| {
             self.peer_list.remove_peer(peer_index);
-            Some(PeerListChange::Remove(peer_index))
-        } else {
-            None
-        }
+            PeerListChange::Remove(peer_index)
+        })
     }
 
     fn create_meta_event(&mut self, event_index: EventIndex) -> Result<()> {
@@ -871,7 +869,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         builder: &MetaEventBuilder<S::PublicId>,
         payload_key: &ObservationKey,
     ) -> bool {
-        let start_index = self.meta_election.lower_start_index();
+        let start_index = self.meta_election.new_consensus_start_index();
 
         self.graph
             .ancestors(builder.event())
@@ -979,36 +977,11 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     fn is_descendant_of_observer(&self, event: IndexedEventRef<S::PublicId>) -> bool {
-        let self_parent = if let Some(self_parent) = self.graph.self_parent(event) {
-            self_parent
-        } else {
-            return false;
-        };
-
-        // If self-parent is initial, we don't have to check it's meta-event, as we already know it
-        // can not have any observees.
-        if self_parent.is_initial() {
-            return false;
-        }
-
-        // If self-parent is earlier in history than the start of the meta-election, it won't have
-        // a meta-event; but it also means that it wasn't an observer.
-        if self.meta_election.upper_start_index() > self_parent.topological_index() {
-            return false;
-        }
-
-        if let Some(meta_parent) = self.meta_election.meta_event(self_parent.event_index()) {
-            meta_parent.is_observer() || meta_parent.has_ancestor_observer()
-        } else {
-            log_or_panic!(
-                "{:?} doesn't have meta-event for event {:?} (self-parent of {:?})",
-                self.our_pub_id(),
-                *self_parent,
-                event.hash(),
-            );
-
-            false
-        }
+        self.graph
+            .self_parent(event)
+            .and_then(|self_parent| self.meta_election.meta_event(self_parent.event_index()))
+            .map(|meta_parent| meta_parent.is_observer() || meta_parent.has_ancestor_observer())
+            .unwrap_or(false)
     }
 
     fn set_meta_votes(&self, builder: &mut MetaEventBuilder<S::PublicId>) -> Result<()> {

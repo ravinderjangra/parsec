@@ -31,6 +31,38 @@ pub(crate) enum Observer {
     None,
 }
 
+impl Observer {
+    #[cfg(any(test, feature = "testing"))]
+    pub fn new(observees: PeerIndexSet) -> Self {
+        if observees.is_empty() {
+            Observer::None
+        } else {
+            Observer::This(observees)
+        }
+    }
+
+    fn is_observer(&self) -> bool {
+        match self {
+            Observer::This(_) => true,
+            Observer::Ancestor | Observer::None => false,
+        }
+    }
+
+    fn has_ancestor_observer(&self) -> bool {
+        match self {
+            Observer::Ancestor => true,
+            Observer::This(_) | Observer::None => false,
+        }
+    }
+
+    fn has_observee(&self, peer_index: PeerIndex) -> bool {
+        match self {
+            Observer::This(observees) => observees.contains(peer_index),
+            Observer::Ancestor | Observer::None => false,
+        }
+    }
+}
+
 impl MetaEvent {
     pub fn build<P: PublicId>(event: IndexedEventRef<P>) -> MetaEventBuilder<P> {
         MetaEventBuilder {
@@ -55,17 +87,11 @@ impl MetaEvent {
     }
 
     pub fn is_observer(&self) -> bool {
-        match self.observer {
-            Observer::This(_) => true,
-            _ => false,
-        }
+        self.observer.is_observer()
     }
 
     pub fn has_ancestor_observer(&self) -> bool {
-        match self.observer {
-            Observer::Ancestor => true,
-            _ => false,
-        }
+        self.observer.has_ancestor_observer()
     }
 }
 
@@ -89,10 +115,7 @@ impl<'a, P: PublicId + 'a> MetaEventBuilder<'a, P> {
     }
 
     pub fn has_observee(&self, peer_index: PeerIndex) -> bool {
-        match self.meta_event.observer {
-            Observer::This(ref observees) => observees.contains(peer_index),
-            _ => false,
-        }
+        self.meta_event.observer.has_observee(peer_index)
     }
 
     pub fn set_observer(&mut self, observer: Observer) {

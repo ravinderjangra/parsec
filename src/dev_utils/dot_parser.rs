@@ -717,15 +717,15 @@ impl ParsedContents {
     }
 
     #[cfg(all(feature = "malice-detection", feature = "mock"))]
-    /// Insert event into the `ParsedContents`. Note this does not perform any validations whatsoever,
-    /// so this is useful for simulating all kinds of invalid or malicious situations.
+    /// Insert event into the `ParsedContents`. Note this does not perform any validations
+    /// whatsoever, so this is useful for simulating all kinds of invalid or malicious situations.
     pub fn add_event(&mut self, event: Event<PeerId>) -> EventIndex {
         let indexed_event = self.graph.insert(event);
         self.peer_list.add_event(indexed_event);
 
         let start_index = indexed_event.event_index().topological_index() + 1;
-        self.meta_election.lower_start_index = start_index;
-        self.meta_election.upper_start_index = start_index;
+        self.meta_election.new_consensus_start_index = start_index;
+        self.meta_election.continue_consensus_start_index = start_index;
 
         indexed_event.event_index()
     }
@@ -902,8 +902,8 @@ fn convert_to_meta_election(
             .cloned()
             .collect(),
         consensus_history: meta_election.consensus_history,
-        upper_start_index: 0,
-        lower_start_index: 0,
+        continue_consensus_start_index: 0,
+        new_consensus_start_index: 0,
     }
 }
 
@@ -911,11 +911,7 @@ fn convert_to_meta_event(meta_event: ParsedMetaEvent, peer_list: &PeerList<PeerI
     let observees = convert_peer_id_set(meta_event.observees, peer_list);
 
     MetaEvent {
-        observer: if observees.is_empty() {
-            Observer::None
-        } else {
-            Observer::This(observees)
-        },
+        observer: Observer::new(observees),
         interesting_content: meta_event.interesting_content,
         meta_votes: convert_peer_id_map(meta_event.meta_votes, peer_list),
     }

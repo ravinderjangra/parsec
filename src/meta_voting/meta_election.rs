@@ -35,9 +35,9 @@ pub(crate) struct MetaElection {
     pub(crate) consensus_history: Vec<ObservationKey>,
     // Topological index of the first unconsensused payload-carrying event or of the first observer
     // event, whichever is the greater.
-    pub(crate) upper_start_index: usize,
+    pub(crate) continue_consensus_start_index: usize,
     // Topological index of the first unconsensused payload-carrying event.
-    pub(crate) lower_start_index: usize,
+    pub(crate) new_consensus_start_index: usize,
 }
 
 impl MetaElection {
@@ -49,8 +49,8 @@ impl MetaElection {
             interesting_events: PeerIndexMap::default(),
             unconsensused_events: BTreeSet::new(),
             consensus_history: Vec::new(),
-            upper_start_index: 0,
-            lower_start_index: 0,
+            continue_consensus_start_index: 0,
+            new_consensus_start_index: 0,
         }
     }
 
@@ -150,12 +150,12 @@ impl MetaElection {
             })
     }
 
-    pub fn upper_start_index(&self) -> usize {
-        self.upper_start_index
+    pub fn continue_consensus_start_index(&self) -> usize {
+        self.continue_consensus_start_index
     }
 
-    pub fn lower_start_index(&self) -> usize {
-        self.lower_start_index
+    pub fn new_consensus_start_index(&self) -> usize {
+        self.new_consensus_start_index
     }
 
     /// Starts new election.
@@ -167,8 +167,8 @@ impl MetaElection {
     ) {
         self.update_voters(peer_list_change);
         self.update_unconsensused_events(graph, &decided_key);
-        self.update_lower_start_index();
-        self.update_upper_start_index(peer_list_change.is_some());
+        self.update_new_consensus_start_index();
+        self.update_continue_consensus_start_index(peer_list_change.is_some());
         self.update_meta_events(&decided_key, peer_list_change.is_some());
         self.update_interesting_content(graph);
 
@@ -255,8 +255,8 @@ impl MetaElection {
         }
     }
 
-    fn update_lower_start_index(&mut self) {
-        self.lower_start_index = self
+    fn update_new_consensus_start_index(&mut self) {
+        self.new_consensus_start_index = self
             .unconsensused_events
             .iter()
             .next()
@@ -264,9 +264,9 @@ impl MetaElection {
             .unwrap_or(usize::MAX);
     }
 
-    fn update_upper_start_index(&mut self, peer_list_changed: bool) {
-        self.upper_start_index = if peer_list_changed {
-            self.lower_start_index
+    fn update_continue_consensus_start_index(&mut self, peer_list_changed: bool) {
+        self.continue_consensus_start_index = if peer_list_changed {
+            self.new_consensus_start_index
         } else {
             cmp::max(
                 self.meta_events
@@ -274,8 +274,8 @@ impl MetaElection {
                     .filter(|(_, meta_event)| meta_event.is_observer())
                     .map(|(event_index, _)| event_index.topological_index())
                     .min()
-                    .unwrap_or(self.lower_start_index),
-                self.lower_start_index,
+                    .unwrap_or(self.new_consensus_start_index),
+                self.new_consensus_start_index,
             )
         };
     }
@@ -284,9 +284,10 @@ impl MetaElection {
         if peer_list_changed {
             self.meta_events.clear();
         } else {
-            let lower_start_index = self.lower_start_index;
-            self.meta_events
-                .retain(|event_index, _| event_index.topological_index() >= lower_start_index);
+            let new_consensus_start_index = self.new_consensus_start_index;
+            self.meta_events.retain(|event_index, _| {
+                event_index.topological_index() >= new_consensus_start_index
+            });
             for meta_event in self.meta_events.values_mut() {
                 meta_event
                     .interesting_content
@@ -298,10 +299,10 @@ impl MetaElection {
     fn update_interesting_content<P: PublicId>(&mut self, graph: &Graph<P>) {
         self.interesting_events.clear();
 
-        let upper_start_index = self.upper_start_index;
+        let continue_consensus_start_index = self.continue_consensus_start_index;
         for event in graph
-            .iter_from(self.lower_start_index)
-            .take_while(|event| event.topological_index() < upper_start_index)
+            .iter_from(self.new_consensus_start_index)
+            .take_while(|event| event.topological_index() < continue_consensus_start_index)
         {
             let interesting = self
                 .meta_events
