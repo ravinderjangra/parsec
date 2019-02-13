@@ -13,6 +13,8 @@ use crate::dump_graph;
 use crate::error::{Error, Result};
 #[cfg(all(test, feature = "mock"))]
 use crate::gossip::EventHash;
+#[cfg(all(test, feature = "testing"))]
+use crate::gossip::GraphSnapshot;
 use crate::gossip::{
     Event, EventContextRef, EventIndex, Graph, IndexedEventRef, PackedEvent, Request, Response,
     UnpackedEvent,
@@ -2373,13 +2375,11 @@ impl<T: NetworkEvent, S: SecretId> DerefMut for TestParsec<T, S> {
     }
 }
 
-/// Assert that the two parsec instances have the same events modulo their insertion order.
+/// Get the parsec graph snapshot with inserted events out of order.
 #[cfg(all(test, feature = "testing"))]
-pub(crate) fn assert_same_events<T: NetworkEvent, S: SecretId>(a: &Parsec<T, S>, b: &Parsec<T, S>) {
-    use crate::gossip::GraphSnapshot;
-
-    let a = GraphSnapshot::new(&a.graph);
-    let b = GraphSnapshot::new(&b.graph);
-
-    assert_eq!(a, b)
+pub(crate) fn get_graph_snapshot<T: NetworkEvent, S: SecretId>(
+    parsec: &Parsec<T, S>,
+    ignore_last_events: usize,
+) -> GraphSnapshot {
+    GraphSnapshot::new_with_ignore(&parsec.graph, ignore_last_events)
 }

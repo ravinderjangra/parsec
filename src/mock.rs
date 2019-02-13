@@ -53,8 +53,8 @@ impl PeerId {
         PEERS
             .iter()
             .find(|peer| peer.id == id)
-            .unwrap_or(&PeerId::new_with_random_keypair(id))
-            .clone()
+            .cloned()
+            .unwrap_or_else(|| PeerId::new_with_keypair(id))
     }
 
     pub fn new_with_random_keypair(id: &str) -> Self {
@@ -66,18 +66,44 @@ impl PeerId {
         }
     }
 
+    #[cfg(not(feature = "mock"))]
+    fn new_with_keypair(id: &str) -> Self {
+        Self::new_with_random_keypair(id)
+    }
+
+    #[cfg(feature = "mock")]
+    fn new_with_keypair(id: &str) -> Self {
+        Self::new_with_deterministic_keypair(id)
+    }
+
+    #[cfg(feature = "mock")]
+    fn new_with_deterministic_keypair(id: &str) -> Self {
+        use crate::hash::Hash;
+        use rand::{SeedableRng, XorShiftRng};
+        use safe_crypto::init_with_rng;
+
+        let name_hash = Hash::from(id.as_bytes());
+        let seed = name_hash
+            .as_bytes()
+            .chunks_exact(4)
+            .map(|bytes| u32::from_le_bytes(Self::make_array_of_len_4(bytes)))
+            .collect::<Vec<_>>();
+
+        let mut rng = XorShiftRng::from_seed(Self::make_array_of_len_4(&seed));
+        unwrap!(init_with_rng(&mut rng));
+
+        Self::new_with_random_keypair(id)
+    }
+
+    #[cfg(feature = "mock")]
+    fn make_array_of_len_4<T: Copy>(values: &[T]) -> [T; 4] {
+        [values[0], values[1], values[2], values[3]]
+    }
+
     // Only being used by the dot_parser.
     #[cfg(any(test, feature = "testing"))]
-    pub fn from_initial(initial: char) -> Self {
-        for name in NAMES.iter() {
-            if name.starts_with(initial) {
-                return PeerId::new(name);
-            }
-        }
-        panic!(
-            "cannot find a name starts with {:?} within {:?}",
-            initial, NAMES
-        );
+    pub fn id(&self) -> &str {
+        &self.id
     }
 
     pub fn from_index(peer_index: usize) -> Option<Self> {

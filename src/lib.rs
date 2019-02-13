@@ -169,7 +169,7 @@ extern crate maidsafe_utilities;
 extern crate proptest as proptest_crate;
 #[macro_use]
 extern crate serde_derive;
-#[cfg(any(test, feature = "testing", feature = "dump-graphs"))]
+#[cfg(any(test, feature = "mock", feature = "testing", feature = "dump-graphs"))]
 #[macro_use]
 extern crate unwrap;
 

@@ -34,6 +34,11 @@ impl Hash {
     pub fn from_bytes(bytes: [u8; HASH_LEN]) -> Self {
         Hash(bytes)
     }
+
+    #[cfg(feature = "mock")]
+    pub fn as_bytes(&self) -> &[u8; HASH_LEN] {
+        &self.0
+    }
 }
 
 impl<'a> From<&'a [u8]> for Hash {

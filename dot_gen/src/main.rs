@@ -187,6 +187,18 @@ fn main() {
         .file("Carol", "carol.dot");
 
     let _ = scenarios
+        .add("dev_utils::record::tests::smoke_other_peer_names", |env| {
+            let obs = ObservationSchedule {
+                genesis: peer_ids!("Annie", "Bill", "Claire", "Dan"),
+                schedule: vec![(0, Opaque(Transaction::new("1")))],
+            };
+
+            Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+        })
+        .seed([1, 2, 3, 4])
+        .file("Annie", "annie.dot");
+
+    let _ = scenarios
         .add("benches", |env| {
             Schedule::new(
                 env,
