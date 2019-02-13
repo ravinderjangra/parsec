@@ -21,6 +21,7 @@ use crate::observation::{
 use itertools::Itertools;
 use rand::Rng;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
+use std::fmt;
 
 enum Message {
     Request(Request<Transaction, PeerId>, usize),
@@ -46,12 +47,36 @@ pub struct BlocksOrder {
     order: Vec<Observation>,
 }
 
+pub struct DifferingBlocksOrder {
+    order_1: BlocksOrder,
+    order_2: BlocksOrder,
+}
+
+impl fmt::Debug for DifferingBlocksOrder {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(formatter, "{{")?;
+        writeln!(
+            formatter,
+            "  peers: {:?} / {:?}",
+            self.order_1.peer, self.order_2.peer
+        )?;
+        writeln!(formatter, "  order:")?;
+        for (i, (block1, block2)) in self
+            .order_1
+            .order
+            .iter()
+            .zip(self.order_2.order.iter())
+            .enumerate()
+        {
+            writeln!(formatter, "  {}. {:?} / {:?}", i + 1, block1, block2)?;
+        }
+        write!(formatter, "}}")
+    }
+}
+
 #[derive(Debug)]
 pub enum ConsensusError {
-    DifferingBlocksOrder {
-        order_1: BlocksOrder,
-        order_2: BlocksOrder,
-    },
+    DifferingBlocksOrder(DifferingBlocksOrder),
     WrongBlocksNumber {
         expected_min: usize,
         expected_max: usize,
@@ -173,7 +198,7 @@ impl Network {
             .active_peers()
             .find(|peer| peer.blocks_payloads() != payloads)
         {
-            Err(ConsensusError::DifferingBlocksOrder {
+            Err(ConsensusError::DifferingBlocksOrder(DifferingBlocksOrder {
                 order_1: BlocksOrder {
                     peer: first_peer.id().clone(),
                     order: payloads.into_iter().cloned().collect(),
@@ -182,7 +207,7 @@ impl Network {
                     peer: peer.id().clone(),
                     order: peer.blocks_payloads().into_iter().cloned().collect(),
                 },
-            })
+            }))
         } else {
             Ok(())
         }
@@ -296,7 +321,7 @@ impl Network {
                 if let Some((old_peer, old_index)) = block_order.insert(key, (peer, index)) {
                     if old_index != index {
                         // old index exists and isn't equal to the new one
-                        return Err(ConsensusError::DifferingBlocksOrder {
+                        return Err(ConsensusError::DifferingBlocksOrder(DifferingBlocksOrder {
                             order_1: BlocksOrder {
                                 peer: peer.id().clone(),
                                 order: peer.blocks_payloads().into_iter().cloned().collect(),
@@ -305,7 +330,7 @@ impl Network {
                                 peer: old_peer.id().clone(),
                                 order: old_peer.blocks_payloads().into_iter().cloned().collect(),
                             },
-                        });
+                        }));
                     }
                 }
             }
