@@ -63,6 +63,8 @@ extern crate unwrap;
 use criterion::Criterion;
 #[cfg(feature = "testing")]
 use parsec::dev_utils::Record;
+#[cfg(feature = "testing")]
+use parsec::ConsensusMode;
 
 #[cfg(feature = "testing")]
 use std::cmp;
@@ -70,7 +72,7 @@ use std::cmp;
 #[cfg(feature = "testing")]
 fn bench(c: &mut Criterion) {
     for name in &["minimal", "static", "dynamic"] {
-        bench_dot_file(c, "benches", name);
+        bench_dot_file(c, "benches", name, ConsensusMode::Supermajority);
     }
 
     for name in &[
@@ -96,7 +98,12 @@ fn bench(c: &mut Criterion) {
         "c_node32_opaque_evt8",
         "c_node48_opaque_evt8",
     ] {
-        bench_dot_file(c, "bench_section_size_evt8", name);
+        bench_dot_file(
+            c,
+            "bench_section_size_evt8",
+            name,
+            ConsensusMode::Supermajority,
+        );
     }
 
     for name in &[
@@ -119,17 +126,52 @@ fn bench(c: &mut Criterion) {
         "c_node24_opaque_evt16",
         "c_node32_opaque_evt16",
     ] {
-        bench_dot_file(c, "bench_section_size_evt16", name);
+        bench_dot_file(
+            c,
+            "bench_section_size_evt16",
+            name,
+            ConsensusMode::Supermajority,
+        );
+    }
+
+    for name in &[
+        "PublicIdname754598-054",
+        "PublicIdname754598-110",
+        "PublicIdname754598-111",
+        "PublicIdname93b63e-054",
+        "PublicIdname93b63e-113",
+        "PublicIdname93b63e-194",
+    ] {
+        // Benchmark generated using routing test with seed Some([0,1,2,4]).
+        // Only the last dumps before a section change were copied (last before drop in size).
+        //
+        // PARSEC_DUMP_GRAPH_SVG=0 PARSEC_DUMP_GRAPH_PEERS=PublicIdname754598,PublicIdname93b63e
+        // RUSTFLAGS=-g cargo test --release --features=mock merge_three_sections_into_one
+        bench_dot_file(
+            c,
+            "bench_routing/mock_crust_merge_merge_three_sections_into_one",
+            name,
+            ConsensusMode::Single,
+        );
     }
 }
 
 #[cfg(feature = "testing")]
-fn bench_dot_file(c: &mut Criterion, group_name: &'static str, name: &'static str) {
+fn bench_dot_file(
+    c: &mut Criterion,
+    group_name: &'static str,
+    name: &'static str,
+    consensus_mode: ConsensusMode,
+) {
     let _ = c.bench_function(name, move |b| {
-        let record = unwrap!(Record::parse(format!(
-            "input_graphs/{}/{}.dot",
-            group_name, name
-        )));
+        let record = {
+            let mut record = unwrap!(Record::parse(format!(
+                "input_graphs/{}/{}.dot",
+                group_name, name
+            )));
+            record.set_consensus_mode(consensus_mode);
+            record
+        };
         b.iter_with_setup(
             || record.clone(),
             |record| {

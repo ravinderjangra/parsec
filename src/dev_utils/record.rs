@@ -29,6 +29,9 @@ pub struct Record {
 
     // Keys of the consensused blocks' payloads in the order they were consensused.
     consensus_history: Vec<ObservationKey>,
+
+    // Consensus mode to play
+    consensus_mode: ConsensusMode,
 }
 
 impl Record {
@@ -38,11 +41,8 @@ impl Record {
     }
 
     pub fn play(self) -> Parsec<Transaction, PeerId> {
-        let mut parsec = Parsec::from_genesis(
-            self.our_id,
-            &self.genesis_group,
-            ConsensusMode::Supermajority,
-        );
+        let mut parsec =
+            Parsec::from_genesis(self.our_id, &self.genesis_group, self.consensus_mode);
 
         for action in self.actions {
             action.run(&mut parsec)
@@ -56,6 +56,10 @@ impl Record {
             .iter()
             .map(|observation| observation.hash().0)
             .collect()
+    }
+
+    pub fn set_consensus_mode(&mut self, consensus_mode: ConsensusMode) {
+        self.consensus_mode = consensus_mode;
     }
 }
 
@@ -198,6 +202,7 @@ impl From<ParsedContents> for Record {
             genesis_group,
             actions,
             consensus_history: contents.meta_election.consensus_history,
+            consensus_mode: ConsensusMode::Supermajority,
         }
     }
 }
