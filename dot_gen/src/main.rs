@@ -189,7 +189,9 @@ fn main() {
     let _ = scenarios
         .add("dev_utils::record::tests::smoke_other_peer_names", |env| {
             let obs = ObservationSchedule {
-                genesis: peer_ids!("Annie", "Bill", "Claire", "Dan"),
+                // Non hard-coded name, 2 with same initial, one smaller than short name
+                // Last consensus reached in event not from Annie.
+                genesis: peer_ids!("Annie", "B", "Claire", "Carol"),
                 schedule: vec![(0, Opaque(Transaction::new("1")))],
             };
 
@@ -271,6 +273,7 @@ fn main() {
     add_bench_scalability(&mut scenarios, 8, 16);
     add_bench_scalability(&mut scenarios, 8, 24);
     add_bench_scalability(&mut scenarios, 8, 32);
+    add_bench_scalability(&mut scenarios, 8, 48);
 
     add_bench_scalability(&mut scenarios, 16, 4);
     add_bench_scalability(&mut scenarios, 16, 8);

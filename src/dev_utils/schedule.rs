@@ -296,7 +296,11 @@ pub struct ObservationSchedule {
 impl ObservationSchedule {
     fn gen<R: Rng>(rng: &mut R, options: &ScheduleOptions) -> ObservationSchedule {
         let mut schedule = vec![];
-        let mut names_iter = NAMES.iter();
+        let mut names_iter = NAMES
+            .iter()
+            .map(|name| name.to_string())
+            // Generate numbered names skipping the ones in NAMES.
+            .chain((10..).map(|num| num.to_string()));
 
         // a counter for peer adds/removes and opaque transactions
         // (so not counting genesis and failures)
@@ -309,7 +313,7 @@ impl ObservationSchedule {
         let genesis_names = names_iter
             .by_ref()
             .take(options.genesis_size)
-            .map(|s| PeerId::new(*s))
+            .map(|s| PeerId::new(&s))
             .collect();
         let mut peers = PeerStatuses::new(&genesis_names);
 
@@ -326,7 +330,7 @@ impl ObservationSchedule {
                 opaque_count += 1;
             }
             if added_peers < options.peers_to_add && rng.gen::<f64>() < options.prob_add {
-                let next_id = PeerId::new(unwrap!(names_iter.next()));
+                let next_id = PeerId::new(&unwrap!(names_iter.next()));
                 peers.add_peer(next_id.clone());
                 schedule.push((step, ObservationEvent::AddPeer(next_id)));
                 num_observations += 1;

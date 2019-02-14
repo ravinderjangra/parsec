@@ -80,18 +80,21 @@ fn bench(c: &mut Criterion) {
         "a_node16_opaque_evt8",
         "a_node24_opaque_evt8",
         "a_node32_opaque_evt8",
+        "a_node48_opaque_evt8",
         "b_node4_opaque_evt8",
         "b_node8_opaque_evt8",
         "b_node12_opaque_evt8",
         "b_node16_opaque_evt8",
         "b_node24_opaque_evt8",
         "b_node32_opaque_evt8",
+        "b_node48_opaque_evt8",
         "c_node4_opaque_evt8",
         "c_node8_opaque_evt8",
         "c_node12_opaque_evt8",
         "c_node16_opaque_evt8",
         "c_node24_opaque_evt8",
         "c_node32_opaque_evt8",
+        "c_node48_opaque_evt8",
     ] {
         bench_dot_file(c, "bench_section_size_evt8", name);
     }

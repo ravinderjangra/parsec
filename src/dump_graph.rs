@@ -72,7 +72,7 @@ mod detail {
     use std::cmp;
     use std::collections::{BTreeMap, BTreeSet};
     use std::env;
-    use std::fmt::{self, Debug};
+    use std::fmt;
     use std::fs::{self, File};
     use std::io::{self, BufWriter, Write};
     use std::path::{Path, PathBuf};
@@ -174,12 +174,16 @@ mod detail {
         let file_path = DIR.with(|dir| dir.join(format!("{}-{:03}.dot", id, call_count)));
         catch_dump(file_path.clone(), gossip_graph, peer_list, meta_election);
 
+        let peer_ids = peer_ids_from_peer_list(peer_list);
+        let short_peer_ids = short_peer_id_names(&peer_ids);
+
         match DotWriter::new(
             &file_path,
             gossip_graph,
             meta_election,
             peer_list,
             observations,
+            &short_peer_ids,
         ) {
             Ok(mut dot_writer) => {
                 if let Err(error) = dot_writer.write() {
@@ -260,10 +264,6 @@ mod detail {
         fs::remove_dir(path)
     }
 
-    fn first_char<D: Debug>(id: &D) -> Option<char> {
-        format!("{:?}", id).chars().next()
-    }
-
     fn as_short_string(value: Option<bool>) -> &'static str {
         match value {
             None => "-",
@@ -272,8 +272,8 @@ mod detail {
         }
     }
 
-    fn dump_meta_votes<S: SecretId>(
-        peer_list: &PeerList<S>,
+    fn dump_meta_votes(
+        short_peer_ids: &PeerIndexMap<String>,
         meta_votes: &PeerIndexMap<Vec<MetaVote>>,
         comment: bool,
     ) -> Vec<String> {
@@ -290,14 +290,16 @@ mod detail {
                     .to_string(),
             );
         }
-
         let meta_votes = meta_votes
             .iter()
-            .map(|(peer_index, meta_votes)| (unwrap!(peer_list.get(peer_index)).id(), meta_votes))
-            .sorted_by(|(lhs_peer_id, _), (rhs_peer_id, _)| Ord::cmp(lhs_peer_id, rhs_peer_id));
+            .map(|(peer_index, meta_votes)| (unwrap!(short_peer_ids.get(peer_index)), meta_votes))
+            .sorted_by(|(lhs_short_id, _), (rhs_short_id, _)| Ord::cmp(lhs_short_id, rhs_short_id));
 
-        for (peer_id, meta_votes) in meta_votes {
-            let mut prefix = format!("{}: ", first_char(peer_id).unwrap_or('?'));
+        for (short_peer_id, meta_votes) in meta_votes {
+            let prefix = format!("{}: ", short_peer_id);
+            let blank_prefix = " ".repeat(prefix.len()).to_string();
+
+            let mut prefix: &str = prefix.as_str();
             for mv in meta_votes {
                 let est = mv.estimates.as_short_string();
                 let bin = mv.bin_values.as_short_string();
@@ -315,11 +317,10 @@ mod detail {
                         prefix, mv.round, mv.step, est, bin, aux, dec
                     )
                 };
-                // we want only the first line to have the prefix
-                // wrapping in an `if` avoids multiple allocations
-                if prefix != "   " {
-                    prefix = "   ".to_string();
-                }
+
+                // Only the first line have the prefix
+                prefix = blank_prefix.as_str();
+
                 lines.push(line);
             }
         }
@@ -332,6 +333,7 @@ mod detail {
         meta_election: &'a MetaElection,
         peer_list: &'a PeerList<S>,
         observations: &'a ObservationStore<T, S::PublicId>,
+        short_peer_ids: &'a PeerIndexMap<String>,
         indent: usize,
     }
 
@@ -344,6 +346,7 @@ mod detail {
             meta_election: &'a MetaElection,
             peer_list: &'a PeerList<S>,
             observations: &'a ObservationStore<T, S::PublicId>,
+            short_peer_ids: &'a PeerIndexMap<String>,
         ) -> io::Result<Self> {
             File::create(&file_path).map(|file| DotWriter {
                 file: BufWriter::new(file),
@@ -351,6 +354,7 @@ mod detail {
                 meta_election,
                 peer_list,
                 observations,
+                short_peer_ids,
                 indent: 0,
             })
         }
@@ -370,7 +374,17 @@ mod detail {
         fn index_to_short_name(&self, index: EventIndex) -> Option<String> {
             self.gossip_graph
                 .get(index)
-                .map(|event| event.short_name().to_string())
+                .map(|event| self.event_to_short_name(&event))
+        }
+
+        fn event_to_short_name(&self, event: &Event<S::PublicId>) -> String {
+            let peer_short_name: &str = self
+                .short_peer_ids
+                .get(event.creator())
+                .map(|id| id.as_str())
+                .unwrap_or("???");
+
+            format!("{}_{}", peer_short_name, event.index_by_creator())
         }
 
         fn writeln(&mut self, args: fmt::Arguments) -> io::Result<()> {
@@ -514,7 +528,7 @@ mod detail {
                 lines.push(format!(
                     "    {} -> \"{}\" {}",
                     before_arrow,
-                    event.short_name(),
+                    self.event_to_short_name(&event),
                     suffix
                 ));
             }
@@ -537,8 +551,8 @@ mod detail {
                 {
                     lines.push(format!(
                         "  \"{}\" -> \"{}\" [constraint=false]",
-                        other_parent.short_name(),
-                        event.short_name()
+                        self.event_to_short_name(&other_parent),
+                        self.event_to_short_name(&event)
                     ));
                 }
             }
@@ -575,13 +589,14 @@ mod detail {
                 if let Some(event) = self.gossip_graph.get(event_index) {
                     let attr = EventAttributes::new(
                         event.inner(),
+                        self.event_to_short_name(event.inner()),
                         meta_events.get(&event_index),
                         self.observations,
-                        &self.peer_list,
+                        &self.short_peer_ids,
                     );
                     self.writeln(format_args!(
                         "  \"{}\" {}",
-                        event.short_name(),
+                        self.event_to_short_name(&event),
                         attr.to_string()
                     ))?;
 
@@ -692,8 +707,7 @@ mod detail {
                 .meta_election
                 .unconsensused_events
                 .iter()
-                .filter_map(|index| self.gossip_graph.get(*index))
-                .map(|event| event.short_name())
+                .filter_map(|index| self.index_to_short_name(*index))
                 .collect();
             lines.push(format!(
                 "{}{}unconsensused_events: {:?}",
@@ -719,7 +733,7 @@ mod detail {
                     let creator_id = self.peer_list.get(event.creator()).map(|peer| peer.id())?;
 
                     let creator_and_index = (creator_id, event.index_by_creator());
-                    let short_name_and_mev = (event.short_name(), mev);
+                    let short_name_and_mev = (self.event_to_short_name(&event), mev);
                     Some((creator_and_index, short_name_and_mev))
                 })
                 .collect::<BTreeMap<_, _>>();
@@ -766,7 +780,7 @@ mod detail {
                     ));
                     self.indent();
                     lines.extend(
-                        dump_meta_votes(&self.peer_list, &mev.meta_votes, true)
+                        dump_meta_votes(&self.short_peer_ids, &mev.meta_votes, true)
                             .into_iter()
                             .map(|s| format!("{}{}{}", Self::COMMENT, self.indentation(), s)),
                     );
@@ -792,16 +806,17 @@ mod detail {
     }
 
     impl EventAttributes {
-        fn new<T: NetworkEvent, S: SecretId>(
-            event: &Event<S::PublicId>,
+        fn new<T: NetworkEvent, P: PublicId>(
+            event: &Event<P>,
+            event_short_name: String,
             opt_meta_event: Option<&MetaEvent>,
-            observations: &ObservationStore<T, S::PublicId>,
-            peer_list: &PeerList<S>,
+            observations: &ObservationStore<T, P>,
+            short_peer_ids: &PeerIndexMap<String>,
         ) -> Self {
             let mut attr = EventAttributes {
                 fillcolor: "fillcolor=white",
                 is_rectangle: false,
-                label: event.short_name().to_string(),
+                label: event_short_name,
             };
 
             attr.label = format!(
@@ -845,7 +860,7 @@ mod detail {
 
                 if !meta_event.meta_votes.is_empty() {
                     let meta_votes =
-                        dump_meta_votes(peer_list, &meta_event.meta_votes, false).join("\n");
+                        dump_meta_votes(short_peer_ids, &meta_event.meta_votes, false).join("\n");
                     attr.label = format!("{}{}", attr.label, meta_votes);
                 }
                 attr.is_rectangle = true;
@@ -893,5 +908,118 @@ mod detail {
             .iter()
             .filter_map(|(index, value)| peer_list.get(index).map(|peer| (peer.id(), value)))
             .collect()
+    }
+
+    fn peer_ids_from_peer_list<S: SecretId>(peer_list: &PeerList<S>) -> PeerIndexMap<String> {
+        let peer_id = |peer_id| format!("{:?}", peer_id);
+
+        peer_list
+            .iter()
+            .map(|(index, peer)| (index, peer_id(peer.id())))
+            .collect()
+    }
+
+    fn short_peer_id_names(peer_ids: &PeerIndexMap<String>) -> PeerIndexMap<String> {
+        // Sort ids so we can find difference in most similar names
+        let sorted_ids = {
+            let mut ids: Vec<_> = peer_ids.iter().map(|(_index, id)| id.as_str()).collect();
+            ids.sort();
+            ids
+        };
+
+        // Keep character after the longest adjacent mismatch so each truncated names is different
+        let num_char_if_only_one_element = 1;
+        let mismatch_len = sorted_ids
+            .windows(2)
+            .map(|adjacent: &[&str]| find_mismatch(adjacent[0].as_bytes(), adjacent[1].as_bytes()))
+            .max()
+            .map(|len| len + 1)
+            .unwrap_or(num_char_if_only_one_element);
+
+        // Have all short names the same lengh or shorter
+        let make_short_name = |name: &str| {
+            let copy_len = cmp::min(mismatch_len, name.len());
+            name[0..copy_len].to_string()
+        };
+
+        peer_ids
+            .iter()
+            .map(|(index, id)| (index, make_short_name(&id)))
+            .collect()
+    }
+
+    fn find_mismatch(s1: &[u8], s2: &[u8]) -> usize {
+        s1.iter()
+            .enumerate()
+            .position(|(index, c)| s2.get(index) != Some(&c))
+            .unwrap_or_else(|| cmp::min(s1.len(), s2.len()))
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        fn new_peer_id_peer_index_map(values: &[(usize, &str)]) -> PeerIndexMap<String> {
+            values
+                .iter()
+                .map(|(index, string)| (PeerIndex::new_test_peer_index(*index), string.to_string()))
+                .collect()
+        }
+
+        #[test]
+        /// Basic happy path
+        fn test_find_mismatch() {
+            let expected = [
+                ("Alice", "Bob", 0),
+                ("Alice", "Al", 2),
+                ("", "", 0),
+                ("Alice", "Aline", 3),
+            ];
+
+            let actual = expected
+                .iter()
+                .map(|(s1, s2, _)| (*s1, *s2, find_mismatch(s1.as_bytes(), s2.as_bytes())))
+                .collect::<Vec<_>>();
+
+            assert_eq!(expected, actual.as_slice());
+        }
+
+        #[test]
+        /// Basic happy path
+        fn test_short_peer_id_names() {
+            //
+            // Arrange
+            //
+            let names = [
+                [(3, "Alice"), (2, "Bob"), (6, "Carol")],
+                [(3, "Alice"), (2, "Al"), (6, "Aline")],
+                [(3, "Alice"), (2, "Bob"), (6, "Anne")],
+            ]
+            .iter()
+            .map(|list| new_peer_id_peer_index_map(list))
+            .collect::<Vec<_>>();
+
+            let expected = [
+                [(3, "A"), (2, "B"), (6, "C")],
+                [(3, "Alic"), (2, "Al"), (6, "Alin")],
+                [(3, "Al"), (2, "Bo"), (6, "An")],
+            ]
+            .iter()
+            .map(|list| new_peer_id_peer_index_map(list))
+            .collect::<Vec<_>>();
+
+            //
+            // Act
+            //
+            let actual = names
+                .iter()
+                .map(|ids| short_peer_id_names(&ids))
+                .collect::<Vec<_>>();
+
+            //
+            // Assert
+            //
+            assert_eq!(expected, actual);
+        }
     }
 }

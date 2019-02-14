@@ -372,7 +372,7 @@ impl<P: PublicId> Event<P> {
     }
 
     /// Returns the first char of the creator's ID, followed by an underscore and the event's index.
-    #[cfg(any(test, feature = "testing", feature = "dump-graphs"))]
+    #[cfg(any(test, feature = "testing"))]
     pub fn short_name(&self) -> ShortName {
         ShortName {
             creator_initial: self.cache.creator_initial,
@@ -428,7 +428,7 @@ impl<P: PublicId> Debug for Event<P> {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         write!(formatter, "Event{{")?;
 
-        #[cfg(any(test, feature = "testing", feature = "dump-graphs"))]
+        #[cfg(any(test, feature = "testing"))]
         write!(formatter, " {}", self.short_name())?;
 
         write!(formatter, " {:?}", self.hash())?;
@@ -559,7 +559,7 @@ struct Cache {
     // Peers with a fork having both sides seen by this event.
     forking_peers: PeerIndexSet,
     // First leter of the creator name.
-    #[cfg(any(test, feature = "testing", feature = "dump-graphs"))]
+    #[cfg(any(test, feature = "testing"))]
     creator_initial: char,
 }
 
@@ -591,7 +591,7 @@ impl Cache {
             index_by_creator,
             last_ancestors,
             forking_peers,
-            #[cfg(any(test, feature = "testing", feature = "dump-graphs"))]
+            #[cfg(any(test, feature = "testing"))]
             creator_initial: get_creator_initial(peer_list, content.creator),
         }
     }
@@ -692,7 +692,7 @@ where
         .find(|event| event.short_name().to_string() == short_name)
 }
 
-#[cfg(any(test, feature = "testing", feature = "dump-graphs"))]
+#[cfg(any(test, feature = "testing"))]
 fn get_creator_initial<S: SecretId>(peer_list: &PeerList<S>, creator: PeerIndex) -> char {
     peer_list
         .get(creator)
