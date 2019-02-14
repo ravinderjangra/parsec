@@ -1530,7 +1530,7 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 28, Bob: 33, Carol: 30, Dave: 28, Eric: 30, Fred: 28, Gina: 26, Hank: 27, Iris: 30, Judy: 33, Kent: 29, Lucy: 22}
 
-  "A_29" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "A_29" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_29</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -2422,7 +2422,7 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 26, Bob: 38, Carol: 30, Dave: 31, Eric: 32, Fred: 29, Gina: 26, Hank: 29, Iris: 29, Judy: 33, Kent: 28, Lucy: 22}
 
-  "B_39" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_39" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_39</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -3192,7 +3192,7 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 53, Bob: 74, Carol: 45, Dave: 55, Eric: 64, Fred: 56, Gina: 48, Hank: 52, Iris: 50, Judy: 60, Kent: 54, Lucy: 47}
 
-  "C_0" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_0</td></tr>
 </table>>]
 /// cause: Initial
@@ -3401,7 +3401,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 22, Bob: 29, Carol: 31, Dave: 25, Eric: 26, Fred: 26, Gina: 26, Hank: 25, Iris: 26, Judy: 27, Kent: 24, Lucy: 19}
 
-  "C_32" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_32" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_32</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -3802,7 +3802,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 51, Bob: 64, Carol: 50, Dave: 58, Eric: 58, Fred: 53, Gina: 47, Hank: 56, Iris: 49, Judy: 55, Kent: 49, Lucy: 41}
 
-  "D_0" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "D_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_0</td></tr>
 </table>>]
 /// cause: Initial
@@ -4023,7 +4023,7 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 26, Bob: 37, Carol: 30, Dave: 33, Eric: 34, Fred: 29, Gina: 26, Hank: 29, Iris: 30, Judy: 33, Kent: 28, Lucy: 22}
 
-  "D_34" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "D_34" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_34</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -4731,7 +4731,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 53, Bob: 74, Carol: 48, Dave: 65, Eric: 68, Fred: 58, Gina: 48, Hank: 57, Iris: 56, Judy: 62, Kent: 56, Lucy: 48}
 
-  "E_0" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "E_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_0</td></tr>
 </table>>]
 /// cause: Initial
@@ -4964,7 +4964,7 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 25, Bob: 36, Carol: 30, Dave: 30, Eric: 35, Fred: 28, Gina: 26, Hank: 29, Iris: 29, Judy: 34, Kent: 28, Lucy: 22}
 
-  "E_36" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "E_36" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_36</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -5648,7 +5648,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 53, Bob: 71, Carol: 46, Dave: 63, Eric: 68, Fred: 57, Gina: 48, Hank: 55, Iris: 50, Judy: 62, Kent: 52, Lucy: 48}
 
-  "F_0" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "F_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_0</td></tr>
 </table>>]
 /// cause: Initial
@@ -5881,7 +5881,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 26, Bob: 38, Carol: 30, Dave: 31, Eric: 32, Fred: 35, Gina: 26, Hank: 31, Iris: 29, Judy: 33, Kent: 28, Lucy: 22}
 
-  "F_36" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "F_36" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_36</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -6384,7 +6384,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 53, Bob: 69, Carol: 50, Dave: 59, Eric: 59, Fred: 59, Gina: 47, Hank: 60, Iris: 53, Judy: 64, Kent: 52, Lucy: 46}
 
-  "G_0" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "G_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">G_0</td></tr>
 </table>>]
 /// cause: Initial
@@ -6569,7 +6569,7 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 22, Bob: 29, Carol: 31, Dave: 25, Eric: 26, Fred: 26, Gina: 27, Hank: 25, Iris: 26, Judy: 27, Kent: 24, Lucy: 19}
 
-  "G_28" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "G_28" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">G_28</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -6994,7 +6994,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 48, Bob: 64, Carol: 45, Dave: 51, Eric: 61, Fred: 53, Gina: 48, Hank: 50, Iris: 47, Judy: 55, Kent: 49, Lucy: 42}
 
-  "H_0" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "H_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">H_0</td></tr>
 </table>>]
 /// cause: Initial
@@ -7203,7 +7203,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 26, Bob: 37, Carol: 30, Dave: 29, Eric: 32, Fred: 32, Gina: 26, Hank: 31, Iris: 29, Judy: 33, Kent: 28, Lucy: 22}
 
-  "H_32" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "H_32" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">H_32</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -7814,7 +7814,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 51, Bob: 67, Carol: 50, Dave: 59, Eric: 59, Fred: 54, Gina: 47, Hank: 60, Iris: 49, Judy: 62, Kent: 52, Lucy: 43}
 
-  "I_0" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "I_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">I_0</td></tr>
 </table>>]
 /// cause: Initial
@@ -8017,7 +8017,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 25, Bob: 29, Carol: 26, Dave: 25, Eric: 27, Fred: 24, Gina: 23, Hank: 27, Iris: 30, Judy: 27, Kent: 24, Lucy: 21}
 
-  "I_31" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "I_31" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">I_31</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -8597,7 +8597,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 53, Bob: 74, Carol: 48, Dave: 59, Eric: 64, Fred: 58, Gina: 48, Hank: 57, Iris: 57, Judy: 60, Kent: 55, Lucy: 48}
 
-  "J_0" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "J_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">J_0</td></tr>
 </table>>]
 /// cause: Initial
@@ -8824,7 +8824,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 22, Bob: 36, Carol: 30, Dave: 28, Eric: 33, Fred: 28, Gina: 26, Hank: 27, Iris: 29, Judy: 34, Kent: 28, Lucy: 22}
 
-  "J_35" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "J_35" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">J_35</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -9516,7 +9516,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 53, Bob: 74, Carol: 50, Dave: 59, Eric: 64, Fred: 59, Gina: 48, Hank: 60, Iris: 56, Judy: 66, Kent: 56, Lucy: 47}
 
-  "K_0" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "K_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">K_0</td></tr>
 </table>>]
 /// cause: Initial
@@ -9719,7 +9719,7 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 24, Bob: 33, Carol: 29, Dave: 28, Eric: 31, Fred: 25, Gina: 26, Hank: 27, Iris: 29, Judy: 33, Kent: 30, Lucy: 22}
 
-  "K_31" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "K_31" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">K_31</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -10326,7 +10326,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 53, Bob: 74, Carol: 50, Dave: 65, Eric: 68, Fred: 59, Gina: 48, Hank: 60, Iris: 57, Judy: 66, Kent: 59, Lucy: 48}
 
-  "L_0" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "L_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">L_0</td></tr>
 </table>>]
 /// cause: Initial
@@ -10487,7 +10487,7 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 23, Bob: 12, Carol: 26, Dave: 24, Eric: 22, Fred: 18, Gina: 16, Hank: 23, Iris: 26, Judy: 27, Kent: 22, Lucy: 23}
 
-  "L_24" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "L_24" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">L_24</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -11168,11 +11168,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   A_27 -> {
-///     observees: {Alice, Bob, Dave, Iris}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   A_28 -> {
-///     observees: {Alice, Bob, Dave, Eric, Iris, Kent}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   A_29 -> {
@@ -11195,7 +11195,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_30 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11214,7 +11214,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_31 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11233,7 +11233,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_32 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11252,7 +11252,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_33 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11271,7 +11271,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_34 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11290,7 +11290,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_35 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11311,7 +11311,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_36 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11332,7 +11332,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_37 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11353,7 +11353,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_38 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11374,7 +11374,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_39 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11395,7 +11395,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_40 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11416,7 +11416,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_41 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11437,7 +11437,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_42 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11458,7 +11458,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_43 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11479,7 +11479,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_44 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11500,7 +11500,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_45 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11521,7 +11521,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_46 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11545,7 +11545,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_47 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11569,7 +11569,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_48 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11593,7 +11593,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_49 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11617,7 +11617,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_50 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11641,7 +11641,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_51 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11665,7 +11665,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_52 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11691,7 +11691,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_53 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11717,7 +11717,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_54 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11743,7 +11743,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_55 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11769,7 +11769,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_56 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11795,7 +11795,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_57 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11821,7 +11821,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_58 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -11975,19 +11975,19 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   B_35 -> {
-///     observees: {Alice, Bob, Dave, Iris}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   B_36 -> {
-///     observees: {Alice, Bob, Dave, Iris}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   B_37 -> {
-///     observees: {Alice, Bob, Dave, Eric, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   B_38 -> {
-///     observees: {Alice, Bob, Dave, Eric, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   B_39 -> {
@@ -12010,7 +12010,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_40 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12029,7 +12029,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_41 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12048,7 +12048,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_42 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12067,7 +12067,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_43 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12086,7 +12086,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_44 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12105,7 +12105,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_45 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12124,7 +12124,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_46 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12143,7 +12143,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_47 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12162,7 +12162,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_48 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12183,7 +12183,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_49 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12204,7 +12204,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_50 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12225,7 +12225,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_51 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12246,7 +12246,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_52 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12267,7 +12267,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_53 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12288,7 +12288,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_54 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12309,7 +12309,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_55 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12330,7 +12330,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_56 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12351,7 +12351,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_57 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12372,7 +12372,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_58 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12393,7 +12393,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_59 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12417,7 +12417,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_60 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12441,7 +12441,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_61 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12465,7 +12465,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_62 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12489,7 +12489,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_63 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12513,7 +12513,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_64 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12537,7 +12537,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_65 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12563,7 +12563,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_66 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12589,7 +12589,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_67 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12615,7 +12615,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_68 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12641,7 +12641,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_69 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12667,7 +12667,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_70 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12693,7 +12693,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_71 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12719,7 +12719,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_72 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12745,7 +12745,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_73 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12771,7 +12771,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_74 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12795,10 +12795,6 @@ digraph GossipGraph {
 ///       K: 0/0   t   t   t   t 
 ///       L: 0/0   t   t   t   t 
 ///     }
-///   }
-///   C_0 -> {
-///     observees: {}
-///     interesting_content: []
 ///   }
 ///   C_1 -> {
 ///     observees: {}
@@ -12944,7 +12940,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_33 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12963,7 +12959,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_34 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -12982,7 +12978,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_35 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13001,7 +12997,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_36 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13022,7 +13018,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_37 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13043,7 +13039,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_38 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13064,7 +13060,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_39 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13085,7 +13081,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_40 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13106,7 +13102,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_41 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13127,7 +13123,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_42 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13148,7 +13144,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_43 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13169,7 +13165,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_44 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13193,7 +13189,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_45 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13217,7 +13213,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_46 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13241,7 +13237,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_47 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13267,7 +13263,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_48 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13293,7 +13289,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_49 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13319,7 +13315,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_50 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13343,10 +13339,6 @@ digraph GossipGraph {
 ///       K: 0/0   t   t   t   t 
 ///       L: 0/0   t   t   t   t 
 ///     }
-///   }
-///   D_0 -> {
-///     observees: {}
-///     interesting_content: []
 ///   }
 ///   D_1 -> {
 ///     observees: {}
@@ -13465,19 +13457,19 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   D_30 -> {
-///     observees: {Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   D_31 -> {
-///     observees: {Alice, Bob, Dave, Eric, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   D_32 -> {
-///     observees: {Alice, Bob, Dave, Eric, Hank, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   D_33 -> {
-///     observees: {Alice, Bob, Dave, Eric, Hank, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   D_34 -> {
@@ -13500,7 +13492,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_35 -> {
-///     observees: {Alice, Bob, Dave, Eric, Fred, Hank, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13519,7 +13511,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_36 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Hank, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13538,7 +13530,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_37 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13557,7 +13549,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_38 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13576,7 +13568,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_39 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13595,7 +13587,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_40 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13616,7 +13608,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_41 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13637,7 +13629,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_42 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13658,7 +13650,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_43 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13679,7 +13671,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_44 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13700,7 +13692,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_45 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13721,7 +13713,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_46 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13745,7 +13737,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_47 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13769,7 +13761,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_48 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13793,7 +13785,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_49 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13817,7 +13809,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_50 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13841,7 +13833,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_51 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13865,7 +13857,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_52 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13889,7 +13881,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_53 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13913,7 +13905,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_54 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13937,7 +13929,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_55 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13961,7 +13953,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_56 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -13987,7 +13979,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_57 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14013,7 +14005,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_58 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14039,7 +14031,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_59 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14065,7 +14057,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_60 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14091,7 +14083,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_61 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14117,7 +14109,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_62 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14143,7 +14135,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_63 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14169,7 +14161,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_64 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14195,7 +14187,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_65 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14219,10 +14211,6 @@ digraph GossipGraph {
 ///       K: 0/0   t   t   t   t 
 ///       L: 0/0   t   t   t   t 
 ///     }
-///   }
-///   E_0 -> {
-///     observees: {}
-///     interesting_content: []
 ///   }
 ///   E_1 -> {
 ///     observees: {}
@@ -14349,19 +14337,19 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   E_32 -> {
-///     observees: {Alice, Bob, Dave, Iris}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   E_33 -> {
-///     observees: {Alice, Bob, Dave, Iris}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   E_34 -> {
-///     observees: {Alice, Bob, Dave, Eric, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   E_35 -> {
-///     observees: {Alice, Bob, Dave, Eric, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   E_36 -> {
@@ -14384,7 +14372,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_37 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14403,7 +14391,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_38 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14422,7 +14410,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_39 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14441,7 +14429,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_40 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14460,7 +14448,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_41 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14479,7 +14467,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_42 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14498,7 +14486,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_43 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14517,7 +14505,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_44 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14536,7 +14524,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_45 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14555,7 +14543,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_46 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14574,7 +14562,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_47 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14595,7 +14583,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_48 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14616,7 +14604,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_49 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14637,7 +14625,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_50 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14658,7 +14646,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_51 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14679,7 +14667,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_52 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14700,7 +14688,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_53 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14721,7 +14709,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_54 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14742,7 +14730,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_55 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14763,7 +14751,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_56 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14784,7 +14772,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_57 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14805,7 +14793,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_58 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14826,7 +14814,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_59 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14850,7 +14838,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_60 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14874,7 +14862,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_61 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14900,7 +14888,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_62 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14926,7 +14914,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_63 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14952,7 +14940,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_64 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -14978,7 +14966,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_65 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15004,7 +14992,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_66 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15030,7 +15018,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_67 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15056,7 +15044,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_68 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15080,10 +15068,6 @@ digraph GossipGraph {
 ///       K: 0/0   t   t   t   t 
 ///       L: 0/0   t   t   t   t 
 ///     }
-///   }
-///   F_0 -> {
-///     observees: {}
-///     interesting_content: []
 ///   }
 ///   F_1 -> {
 ///     observees: {}
@@ -15202,27 +15186,27 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   F_30 -> {
-///     observees: {Alice, Bob, Dave, Eric, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   F_31 -> {
-///     observees: {Alice, Bob, Dave, Eric, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   F_32 -> {
-///     observees: {Alice, Bob, Dave, Eric, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   F_33 -> {
-///     observees: {Alice, Bob, Dave, Eric, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   F_34 -> {
-///     observees: {Alice, Bob, Dave, Eric, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   F_35 -> {
-///     observees: {Alice, Bob, Dave, Eric, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   F_36 -> {
@@ -15245,7 +15229,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_37 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15264,7 +15248,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_38 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15283,7 +15267,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_39 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15302,7 +15286,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_40 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15321,7 +15305,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_41 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15340,7 +15324,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_42 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15359,7 +15343,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_43 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15380,7 +15364,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_44 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15401,7 +15385,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_45 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15422,7 +15406,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_46 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15443,7 +15427,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_47 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15464,7 +15448,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_48 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15485,7 +15469,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_49 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15506,7 +15490,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_50 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15527,7 +15511,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_51 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15551,7 +15535,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_52 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15575,7 +15559,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_53 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15599,7 +15583,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_54 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15623,7 +15607,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_55 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15649,7 +15633,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_56 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15675,7 +15659,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_57 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15701,7 +15685,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_58 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15727,7 +15711,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_59 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15751,10 +15735,6 @@ digraph GossipGraph {
 ///       K: 0/0   t   t   t   t 
 ///       L: 0/0   t   t   t   t 
 ///     }
-///   }
-///   G_0 -> {
-///     observees: {}
-///     interesting_content: []
 ///   }
 ///   G_1 -> {
 ///     observees: {}
@@ -15884,7 +15864,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_29 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15903,7 +15883,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_30 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15922,7 +15902,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_31 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15941,7 +15921,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_32 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15960,7 +15940,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_33 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15979,7 +15959,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_34 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -15998,7 +15978,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_35 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16017,7 +15997,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_36 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16036,7 +16016,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_37 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16057,7 +16037,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_38 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16078,7 +16058,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_39 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16099,7 +16079,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_40 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16120,7 +16100,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_41 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16141,7 +16121,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_42 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16165,7 +16145,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_43 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16189,7 +16169,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_44 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16213,7 +16193,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_45 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16237,7 +16217,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_46 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16261,7 +16241,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_47 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16285,7 +16265,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_48 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16309,10 +16289,6 @@ digraph GossipGraph {
 ///       K: 0/0   t   t   t   t 
 ///       L: 0/0   t   t   t   t 
 ///     }
-///   }
-///   H_0 -> {
-///     observees: {}
-///     interesting_content: []
 ///   }
 ///   H_1 -> {
 ///     observees: {}
@@ -16427,15 +16403,15 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   H_29 -> {
-///     observees: {Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   H_30 -> {
-///     observees: {Alice, Bob, Dave, Eric, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   H_31 -> {
-///     observees: {Alice, Bob, Dave, Eric, Iris, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   H_32 -> {
@@ -16458,7 +16434,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_33 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16477,7 +16453,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_34 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16496,7 +16472,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_35 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16515,7 +16491,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_36 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16534,7 +16510,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_37 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16553,7 +16529,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_38 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16572,7 +16548,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_39 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16591,7 +16567,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_40 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16610,7 +16586,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_41 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16629,7 +16605,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_42 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16650,7 +16626,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_43 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16671,7 +16647,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_44 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16692,7 +16668,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_45 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16713,7 +16689,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_46 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16734,7 +16710,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_47 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16755,7 +16731,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_48 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16779,7 +16755,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_49 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16803,7 +16779,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_50 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16827,7 +16803,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_51 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16851,7 +16827,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_52 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16875,7 +16851,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_53 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16899,7 +16875,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_54 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16923,7 +16899,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_55 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16949,7 +16925,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_56 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -16975,7 +16951,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_57 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17001,7 +16977,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_58 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17027,7 +17003,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_59 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17053,7 +17029,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_60 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17077,10 +17053,6 @@ digraph GossipGraph {
 ///       K: 0/0   t   t   t   t 
 ///       L: 0/0   t   t   t   t 
 ///     }
-///   }
-///   I_0 -> {
-///     observees: {}
-///     interesting_content: []
 ///   }
 ///   I_1 -> {
 ///     observees: {}
@@ -17222,7 +17194,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_32 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17241,7 +17213,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_33 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17260,7 +17232,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_34 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17279,7 +17251,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_35 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17298,7 +17270,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_36 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17317,7 +17289,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_37 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17336,7 +17308,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_38 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17355,7 +17327,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_39 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17374,7 +17346,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_40 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17395,7 +17367,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_41 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17416,7 +17388,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_42 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17437,7 +17409,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_43 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17458,7 +17430,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_44 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17482,7 +17454,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_45 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17506,7 +17478,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_46 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17530,7 +17502,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_47 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17554,7 +17526,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_48 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17578,7 +17550,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_49 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17602,7 +17574,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_50 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17628,7 +17600,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_51 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17654,7 +17626,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_52 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17680,7 +17652,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_53 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17706,7 +17678,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_54 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17732,7 +17704,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_55 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17758,7 +17730,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_56 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17784,7 +17756,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   I_57 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17808,10 +17780,6 @@ digraph GossipGraph {
 ///       K: 0/0   t   t   t   t 
 ///       L: 0/0   t   t   t   t 
 ///     }
-///   }
-///   J_0 -> {
-///     observees: {}
-///     interesting_content: []
 ///   }
 ///   J_1 -> {
 ///     observees: {}
@@ -17946,7 +17914,7 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   J_34 -> {
-///     observees: {Alice, Bob, Dave, Iris}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   J_35 -> {
@@ -17969,7 +17937,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_36 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -17988,7 +17956,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_37 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18007,7 +17975,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_38 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18026,7 +17994,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_39 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18045,7 +18013,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_40 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18064,7 +18032,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_41 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18083,7 +18051,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_42 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18102,7 +18070,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_43 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18121,7 +18089,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_44 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18140,7 +18108,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_45 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18159,7 +18127,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_46 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18180,7 +18148,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_47 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18201,7 +18169,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_48 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18222,7 +18190,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_49 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18246,7 +18214,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_50 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18270,7 +18238,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_51 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18294,7 +18262,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_52 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18318,7 +18286,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_53 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18342,7 +18310,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_54 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18366,7 +18334,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_55 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18390,7 +18358,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_56 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18414,7 +18382,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_57 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18440,7 +18408,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_58 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18466,7 +18434,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_59 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18492,7 +18460,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_60 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18518,7 +18486,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_61 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18544,7 +18512,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_62 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18570,7 +18538,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_63 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18596,7 +18564,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_64 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18622,7 +18590,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_65 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18648,7 +18616,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   J_66 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18672,10 +18640,6 @@ digraph GossipGraph {
 ///       K: 0/0   t   t   t   t 
 ///       L: 0/0   t   t   t   t 
 ///     }
-///   }
-///   K_0 -> {
-///     observees: {}
-///     interesting_content: []
 ///   }
 ///   K_1 -> {
 ///     observees: {}
@@ -18794,7 +18758,7 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   K_30 -> {
-///     observees: {Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   K_31 -> {
@@ -18817,7 +18781,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_32 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18836,7 +18800,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_33 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18855,7 +18819,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_34 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18874,7 +18838,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_35 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18893,7 +18857,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_36 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18912,7 +18876,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_37 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18931,7 +18895,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_38 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18950,7 +18914,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_39 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18969,7 +18933,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_40 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -18988,7 +18952,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_41 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19007,7 +18971,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_42 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19028,7 +18992,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_43 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19049,7 +19013,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_44 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19070,7 +19034,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_45 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19091,7 +19055,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_46 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19112,7 +19076,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_47 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19133,7 +19097,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_48 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19154,7 +19118,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_49 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19178,7 +19142,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_50 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19202,7 +19166,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_51 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19226,7 +19190,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_52 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19252,7 +19216,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_53 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19278,7 +19242,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_54 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19304,7 +19268,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_55 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19330,7 +19294,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_56 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19356,7 +19320,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_57 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19382,7 +19346,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_58 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19408,7 +19372,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   K_59 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19432,10 +19396,6 @@ digraph GossipGraph {
 ///       K: 0/0   t   t   t   t 
 ///       L: 0/0   t   t   t   t 
 ///     }
-///   }
-///   L_0 -> {
-///     observees: {}
-///     interesting_content: []
 ///   }
 ///   L_1 -> {
 ///     observees: {}
@@ -19549,7 +19509,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_25 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19568,7 +19528,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_26 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19587,7 +19547,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_27 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19606,7 +19566,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_28 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19625,7 +19585,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_29 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19646,7 +19606,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_30 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19667,7 +19627,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_31 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19688,7 +19648,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_32 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19709,7 +19669,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_33 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19730,7 +19690,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_34 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19751,7 +19711,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_35 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19772,7 +19732,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_36 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19793,7 +19753,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_37 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19817,7 +19777,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_38 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19841,7 +19801,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_39 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19865,7 +19825,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_40 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19889,7 +19849,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_41 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19913,7 +19873,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_42 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19939,7 +19899,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_43 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19965,7 +19925,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_44 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -19991,7 +19951,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_45 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -20017,7 +19977,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_46 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -20043,7 +20003,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_47 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -20069,7 +20029,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   L_48 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec

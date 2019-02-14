@@ -541,16 +541,16 @@ digraph GossipGraph {
 
   {
     rank=same
-    "Carol" [style=filled, color=white]
     "Alice" [style=filled, color=white]
     "Bob" [style=filled, color=white]
+    "Carol" [style=filled, color=white]
     "Dave" [style=filled, color=white]
     "Eric" [style=filled, color=white]
     "Fred" [style=filled, color=white]
     "Gina" [style=filled, color=white]
     "Hank" [style=filled, color=white]
   }
-  "Carol" -> "Alice" -> "Bob" -> "Dave" -> "Eric" -> "Fred" -> "Gina" -> "Hank" [style=invis]
+  "Alice" -> "Bob" -> "Carol" -> "Dave" -> "Eric" -> "Fred" -> "Gina" -> "Hank" [style=invis]
 
 /// ===== details of events =====
   "C_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
@@ -718,12 +718,12 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 17, Bob: 16, Carol: 25, Dave: 17, Eric: 21, Fred: 19, Gina: 21, Hank: 16}
 
-  "C_26" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_26" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_26</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -735,9 +735,9 @@ digraph GossipGraph {
   "C_27" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_27</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -749,9 +749,9 @@ digraph GossipGraph {
   "C_28" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_28</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -763,9 +763,9 @@ digraph GossipGraph {
   "C_29" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_29</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -777,9 +777,9 @@ digraph GossipGraph {
   "C_30" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_30</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -791,9 +791,9 @@ digraph GossipGraph {
   "C_31" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_31</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -805,9 +805,9 @@ digraph GossipGraph {
   "C_32" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_32</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -819,9 +819,9 @@ digraph GossipGraph {
   "C_33" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_33</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -833,9 +833,9 @@ digraph GossipGraph {
   "C_34" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_34</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -847,9 +847,9 @@ digraph GossipGraph {
   "C_35" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_35</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -863,9 +863,9 @@ digraph GossipGraph {
   "C_36" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_36</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -879,9 +879,9 @@ digraph GossipGraph {
   "C_37" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_37</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -895,9 +895,9 @@ digraph GossipGraph {
   "C_38" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_38</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -911,9 +911,9 @@ digraph GossipGraph {
   "C_39" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_39</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -927,9 +927,9 @@ digraph GossipGraph {
   "C_40" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_40</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -943,9 +943,9 @@ digraph GossipGraph {
   "C_41" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_41</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -959,9 +959,9 @@ digraph GossipGraph {
   "C_42" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_42</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -1101,12 +1101,12 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 19, Bob: 15, Carol: 23, Dave: 17, Eric: 17, Fred: 17, Gina: 19, Hank: 14}
 
-  "A_20" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "A_20" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_20</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -1118,9 +1118,9 @@ digraph GossipGraph {
   "A_21" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_21</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -1132,9 +1132,9 @@ digraph GossipGraph {
   "A_22" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_22</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -1146,9 +1146,9 @@ digraph GossipGraph {
   "A_23" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_23</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -1160,9 +1160,9 @@ digraph GossipGraph {
   "A_24" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_24</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -1174,9 +1174,9 @@ digraph GossipGraph {
   "A_25" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_25</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -1188,9 +1188,9 @@ digraph GossipGraph {
   "A_26" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_26</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -1202,9 +1202,9 @@ digraph GossipGraph {
   "A_27" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_27</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -1218,9 +1218,9 @@ digraph GossipGraph {
   "A_28" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_28</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -1234,9 +1234,9 @@ digraph GossipGraph {
   "A_29" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_29</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -1250,9 +1250,9 @@ digraph GossipGraph {
   "A_30" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_30</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -1266,9 +1266,9 @@ digraph GossipGraph {
   "A_31" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_31</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -1414,12 +1414,12 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 19, Bob: 20, Carol: 23, Dave: 17, Eric: 19, Fred: 17, Gina: 19, Hank: 18}
 
-  "B_21" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_21" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_21</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -1431,9 +1431,9 @@ digraph GossipGraph {
   "B_22" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_22</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -1445,9 +1445,9 @@ digraph GossipGraph {
   "B_23" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_23</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -1459,9 +1459,9 @@ digraph GossipGraph {
   "B_24" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_24</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -1473,9 +1473,9 @@ digraph GossipGraph {
   "B_25" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_25</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -1487,9 +1487,9 @@ digraph GossipGraph {
   "B_26" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_26</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -1501,9 +1501,9 @@ digraph GossipGraph {
   "B_27" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_27</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -1515,9 +1515,9 @@ digraph GossipGraph {
   "B_28" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_28</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -1649,12 +1649,12 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 18, Bob: 13, Carol: 19, Dave: 18, Eric: 17, Fred: 17, Gina: 19, Hank: 14}
 
-  "D_19" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "D_19" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_19</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -1666,9 +1666,9 @@ digraph GossipGraph {
   "D_20" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_20</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -1680,9 +1680,9 @@ digraph GossipGraph {
   "D_21" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_21</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -1694,9 +1694,9 @@ digraph GossipGraph {
   "D_22" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_22</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -1708,9 +1708,9 @@ digraph GossipGraph {
   "D_23" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_23</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -1722,9 +1722,9 @@ digraph GossipGraph {
   "D_24" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_24</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -1736,9 +1736,9 @@ digraph GossipGraph {
   "D_25" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_25</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -1750,9 +1750,9 @@ digraph GossipGraph {
   "D_26" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_26</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -1766,9 +1766,9 @@ digraph GossipGraph {
   "D_27" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_27</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -1782,9 +1782,9 @@ digraph GossipGraph {
   "D_28" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_28</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -1798,9 +1798,9 @@ digraph GossipGraph {
   "D_29" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_29</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -1814,9 +1814,9 @@ digraph GossipGraph {
   "D_30" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_30</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -1830,9 +1830,9 @@ digraph GossipGraph {
   "D_31" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_31</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -1990,12 +1990,12 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 17, Bob: 16, Carol: 24, Dave: 17, Eric: 22, Fred: 21, Gina: 21, Hank: 16}
 
-  "E_23" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "E_23" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_23</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -2007,9 +2007,9 @@ digraph GossipGraph {
   "E_24" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_24</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -2021,9 +2021,9 @@ digraph GossipGraph {
   "E_25" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_25</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -2035,9 +2035,9 @@ digraph GossipGraph {
   "E_26" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_26</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -2049,9 +2049,9 @@ digraph GossipGraph {
   "E_27" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_27</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -2063,9 +2063,9 @@ digraph GossipGraph {
   "E_28" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_28</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -2077,9 +2077,9 @@ digraph GossipGraph {
   "E_29" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_29</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -2091,9 +2091,9 @@ digraph GossipGraph {
   "E_30" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_30</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -2105,9 +2105,9 @@ digraph GossipGraph {
   "E_31" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_31</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -2119,9 +2119,9 @@ digraph GossipGraph {
   "E_32" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_32</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -2133,9 +2133,9 @@ digraph GossipGraph {
   "E_33" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_33</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2149,9 +2149,9 @@ digraph GossipGraph {
   "E_34" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_34</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2165,9 +2165,9 @@ digraph GossipGraph {
   "E_35" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_35</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2181,9 +2181,9 @@ digraph GossipGraph {
   "E_36" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_36</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2197,9 +2197,9 @@ digraph GossipGraph {
   "E_37" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_37</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2213,9 +2213,9 @@ digraph GossipGraph {
   "E_38" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_38</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2229,9 +2229,9 @@ digraph GossipGraph {
   "E_39" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_39</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2242,7 +2242,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 29, Bob: 28, Carol: 38, Dave: 28, Eric: 39, Fred: 33, Gina: 30, Hank: 30}
 
-  "F_0" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "F_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_0</td></tr>
 </table>>]
 /// cause: Initial
@@ -2383,12 +2383,12 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 17, Bob: 16, Carol: 24, Dave: 17, Eric: 21, Fred: 21, Gina: 21, Hank: 16}
 
-  "F_22" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "F_22" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_22</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -2400,9 +2400,9 @@ digraph GossipGraph {
   "F_23" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_23</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -2414,9 +2414,9 @@ digraph GossipGraph {
   "F_24" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_24</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -2428,9 +2428,9 @@ digraph GossipGraph {
   "F_25" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_25</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -2442,9 +2442,9 @@ digraph GossipGraph {
   "F_26" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_26</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -2456,9 +2456,9 @@ digraph GossipGraph {
   "F_27" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_27</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -2470,9 +2470,9 @@ digraph GossipGraph {
   "F_28" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_28</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -2484,9 +2484,9 @@ digraph GossipGraph {
   "F_29" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_29</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -2498,9 +2498,9 @@ digraph GossipGraph {
   "F_30" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_30</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2514,9 +2514,9 @@ digraph GossipGraph {
   "F_31" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_31</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2530,9 +2530,9 @@ digraph GossipGraph {
   "F_32" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_32</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2546,9 +2546,9 @@ digraph GossipGraph {
   "F_33" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_33</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2562,9 +2562,9 @@ digraph GossipGraph {
   "F_34" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_34</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2578,9 +2578,9 @@ digraph GossipGraph {
   "F_35" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_35</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2594,9 +2594,9 @@ digraph GossipGraph {
   "F_36" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_36</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2760,12 +2760,12 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 16, Bob: 17, Carol: 22, Dave: 17, Eric: 19, Fred: 19, Gina: 23, Hank: 19}
 
-  "G_24" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "G_24" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">G_24</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -2777,9 +2777,9 @@ digraph GossipGraph {
   "G_25" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">G_25</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -2791,9 +2791,9 @@ digraph GossipGraph {
   "G_26" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">G_26</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -2805,9 +2805,9 @@ digraph GossipGraph {
   "G_27" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">G_27</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2821,9 +2821,9 @@ digraph GossipGraph {
   "G_28" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">G_28</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2837,9 +2837,9 @@ digraph GossipGraph {
   "G_29" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">G_29</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2853,9 +2853,9 @@ digraph GossipGraph {
   "G_30" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">G_30</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2869,9 +2869,9 @@ digraph GossipGraph {
   "G_31" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">G_31</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -2885,9 +2885,9 @@ digraph GossipGraph {
   "G_32" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">G_32</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -3033,12 +3033,12 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 16, Bob: 19, Carol: 22, Dave: 17, Eric: 19, Fred: 19, Gina: 22, Hank: 20}
 
-  "H_21" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "H_21" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">H_21</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -3050,9 +3050,9 @@ digraph GossipGraph {
   "H_22" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">H_22</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -3064,9 +3064,9 @@ digraph GossipGraph {
   "H_23" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">H_23</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -3078,9 +3078,9 @@ digraph GossipGraph {
   "H_24" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">H_24</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -3092,9 +3092,9 @@ digraph GossipGraph {
   "H_25" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">H_25</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -3106,9 +3106,9 @@ digraph GossipGraph {
   "H_26" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">H_26</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -3120,9 +3120,9 @@ digraph GossipGraph {
   "H_27" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">H_27</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>F: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -3134,9 +3134,9 @@ digraph GossipGraph {
   "H_28" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">H_28</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -3150,9 +3150,9 @@ digraph GossipGraph {
   "H_29" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">H_29</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -3166,9 +3166,9 @@ digraph GossipGraph {
   "H_30" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">H_30</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -3182,9 +3182,9 @@ digraph GossipGraph {
   "H_31" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">H_31</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -3198,9 +3198,9 @@ digraph GossipGraph {
   "H_32" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">H_32</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>f</td><td>f</td><td>-</td></tr>
 <tr><td>   </td><td>0/1</td><td>f</td><td>f</td><td>f</td><td>f</td></tr>
 <tr><td>E: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
@@ -3328,7 +3328,7 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   A_19 -> {
-///     observees: {Carol, Fred}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   A_20 -> {
@@ -3336,9 +3336,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3347,13 +3347,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_21 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3362,13 +3362,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_22 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3377,13 +3377,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_23 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3392,13 +3392,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_24 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3407,13 +3407,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_25 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -3422,13 +3422,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_26 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -3437,13 +3437,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_27 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -3454,13 +3454,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_28 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -3471,13 +3471,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_29 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -3488,13 +3488,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_30 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -3505,13 +3505,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_31 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -3574,15 +3574,15 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   B_18 -> {
-///     observees: {Carol, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   B_19 -> {
-///     observees: {Carol, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   B_20 -> {
-///     observees: {Carol, Eric, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   B_21 -> {
@@ -3590,9 +3590,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3601,13 +3601,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_22 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3616,13 +3616,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_23 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3631,13 +3631,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_24 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3646,13 +3646,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_25 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3661,13 +3661,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_26 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3676,13 +3676,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_27 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -3691,13 +3691,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_28 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -3758,15 +3758,15 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   C_23 -> {
-///     observees: {Carol, Fred}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   C_24 -> {
-///     observees: {Carol, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   C_25 -> {
-///     observees: {Bob, Carol, Eric, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   C_26 -> {
@@ -3774,9 +3774,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3785,13 +3785,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_27 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3800,13 +3800,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_28 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3815,13 +3815,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_29 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3830,13 +3830,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_30 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3845,13 +3845,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_31 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -3860,13 +3860,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_32 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -3875,13 +3875,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_33 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -3890,13 +3890,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_34 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -3905,13 +3905,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_35 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -3922,13 +3922,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_36 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -3939,13 +3939,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_37 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -3956,13 +3956,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_38 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -3973,13 +3973,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_39 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -3990,13 +3990,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_40 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -4007,13 +4007,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_41 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -4024,13 +4024,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_42 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -4085,7 +4085,7 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   D_18 -> {
-///     observees: {Carol, Fred}
+///     observees: {}
 ///     interesting_content: [OpaquePayload(0)]
 ///   }
 ///   D_19 -> {
@@ -4093,9 +4093,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -4104,13 +4104,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_20 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4119,13 +4119,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_21 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4134,13 +4134,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_22 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4149,13 +4149,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_23 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4164,13 +4164,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_24 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4179,13 +4179,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_25 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4194,13 +4194,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_26 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -4211,13 +4211,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_27 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -4228,13 +4228,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_28 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -4245,13 +4245,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_29 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -4262,13 +4262,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_30 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -4279,13 +4279,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_31 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -4360,15 +4360,15 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   E_20 -> {
-///     observees: {Carol, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   E_21 -> {
-///     observees: {Carol, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   E_22 -> {
-///     observees: {Bob, Carol, Eric, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   E_23 -> {
@@ -4376,9 +4376,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -4387,13 +4387,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_24 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4402,13 +4402,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_25 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4417,13 +4417,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_26 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4432,13 +4432,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_27 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4447,13 +4447,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_28 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4462,13 +4462,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_29 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4477,13 +4477,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_30 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4492,13 +4492,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_31 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4507,13 +4507,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_32 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4522,13 +4522,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_33 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -4539,13 +4539,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_34 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -4556,13 +4556,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_35 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -4573,13 +4573,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_36 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -4590,13 +4590,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_37 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -4607,13 +4607,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_38 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -4624,13 +4624,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_39 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -4639,10 +4639,6 @@ digraph GossipGraph {
 ///          0/1   f   f   f   - 
 ///       H: 0/0   t   t   t   t 
 ///     }
-///   }
-///   F_0 -> {
-///     observees: {}
-///     interesting_content: []
 ///   }
 ///   F_1 -> {
 ///     observees: {}
@@ -4713,19 +4709,19 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   F_18 -> {
-///     observees: {Carol, Fred}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   F_19 -> {
-///     observees: {Carol, Fred}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   F_20 -> {
-///     observees: {Carol, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   F_21 -> {
-///     observees: {Bob, Carol, Eric, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   F_22 -> {
@@ -4733,9 +4729,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -4744,13 +4740,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_23 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -4759,13 +4755,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_24 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -4774,13 +4770,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_25 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -4789,13 +4785,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_26 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4804,13 +4800,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_27 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4819,13 +4815,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_28 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4834,13 +4830,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_29 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -4849,13 +4845,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_30 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -4866,13 +4862,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_31 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -4883,13 +4879,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_32 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -4900,13 +4896,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_33 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -4917,13 +4913,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_34 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -4934,13 +4930,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_35 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -4951,13 +4947,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   F_36 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -5032,15 +5028,15 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   G_21 -> {
-///     observees: {Carol, Fred}
+///     observees: {}
 ///     interesting_content: [OpaquePayload(0)]
 ///   }
 ///   G_22 -> {
-///     observees: {Bob, Carol, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   G_23 -> {
-///     observees: {Bob, Carol, Eric, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   G_24 -> {
@@ -5048,9 +5044,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -5059,13 +5055,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_25 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -5074,13 +5070,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_26 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -5089,13 +5085,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_27 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -5106,13 +5102,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_28 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -5123,13 +5119,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_29 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -5140,13 +5136,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_30 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -5157,13 +5153,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_31 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -5174,13 +5170,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   G_32 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -5247,23 +5243,23 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   H_16 -> {
-///     observees: {Carol, Fred}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   H_17 -> {
-///     observees: {Carol, Fred}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   H_18 -> {
-///     observees: {Carol, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   H_19 -> {
-///     observees: {Bob, Carol, Eric, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   H_20 -> {
-///     observees: {Bob, Carol, Eric, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   H_21 -> {
@@ -5271,9 +5267,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -5282,13 +5278,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_22 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -5297,13 +5293,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_23 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -5312,13 +5308,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_24 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -5327,13 +5323,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_25 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   -   -   - 
 ///       A: 0/0   t   -   -   - 
 ///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
 ///       D: 0/0   f   -   -   - 
 ///       E: 0/0   t   -   -   - 
 ///       F: 0/0   t   -   -   - 
@@ -5342,13 +5338,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_26 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -5357,13 +5353,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_27 -> {
-///     observees: {Alice, Bob, Carol, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   - 
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   f   f   f   - 
 ///       E: 0/0   t   t   t   - 
 ///       F: 0/0   t   t   t   - 
@@ -5372,13 +5368,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_28 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -5389,13 +5385,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_29 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -5406,13 +5402,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_30 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   -   -   - 
 ///       E: 0/0   t   t   t   t 
@@ -5423,13 +5419,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_31 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///       E: 0/0   t   t   t   t 
@@ -5440,13 +5436,13 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   H_32 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       C: 0/0   t   t   t   t 
 ///       A: 0/0   t   t   t   t 
 ///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   f 
 ///       E: 0/0   t   t   t   t 

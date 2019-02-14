@@ -364,7 +364,7 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 23, Bob: 21, Carol: 28, Dave: 22}
 
-  "A_24" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "A_24" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_24</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -544,7 +544,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 18, Bob: 21, Carol: 24, Dave: 20}
 
-  "B_22" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_22" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_22</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -793,7 +793,7 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 22, Bob: 21, Carol: 29, Dave: 23}
 
-  "C_30" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_30" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_30</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -995,7 +995,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 21, Bob: 21, Carol: 27, Dave: 23}
 
-  "D_24" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "D_24" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_24</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
@@ -1128,7 +1128,7 @@ digraph GossipGraph {
 ///     interesting_content: [OpaquePayload(9)]
 ///   }
 ///   A_23 -> {
-///     observees: {Bob, Dave}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   A_24 -> {
@@ -1143,7 +1143,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_25 -> {
-///     observees: {Alice, Bob, Carol, Dave}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -1154,7 +1154,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_26 -> {
-///     observees: {Alice, Bob, Carol, Dave}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -1253,7 +1253,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_23 -> {
-///     observees: {Alice, Bob, Carol, Dave}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -1264,7 +1264,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_24 -> {
-///     observees: {Alice, Bob, Carol, Dave}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -1275,7 +1275,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_25 -> {
-///     observees: {Alice, Bob, Carol, Dave}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -1287,7 +1287,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_26 -> {
-///     observees: {Alice, Bob, Carol, Dave}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -1395,11 +1395,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   C_28 -> {
-///     observees: {Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   C_29 -> {
-///     observees: {Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   C_30 -> {
@@ -1414,7 +1414,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_31 -> {
-///     observees: {Alice, Bob, Carol, Dave}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -1425,7 +1425,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_32 -> {
-///     observees: {Alice, Bob, Carol, Dave}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -1436,7 +1436,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_33 -> {
-///     observees: {Alice, Bob, Carol, Dave}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -1528,7 +1528,7 @@ digraph GossipGraph {
 ///     interesting_content: [OpaquePayload(9)]
 ///   }
 ///   D_23 -> {
-///     observees: {Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   D_24 -> {
@@ -1543,7 +1543,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_25 -> {
-///     observees: {Alice, Bob, Carol, Dave}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -1554,7 +1554,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_26 -> {
-///     observees: {Alice, Bob, Carol, Dave}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -1565,7 +1565,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_27 -> {
-///     observees: {Alice, Bob, Carol, Dave}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec

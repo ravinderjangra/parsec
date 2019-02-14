@@ -644,7 +644,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 31, Bob: 34, Carol: 30, Dave: 34, Eric: 28}
 
-  "A_32" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "A_32" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_32</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -936,7 +936,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 29, Bob: 37, Carol: 30, Dave: 36, Eric: 27}
 
-  "B_38" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_38" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_38</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -1213,7 +1213,7 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 28, Bob: 34, Carol: 31, Dave: 37, Eric: 27}
 
-  "C_32" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_32" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_32</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -1598,7 +1598,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 31, Bob: 34, Carol: 30, Dave: 39, Eric: 30}
 
-  "D_40" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "D_40" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_40</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -1922,7 +1922,7 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 31, Bob: 34, Carol: 30, Dave: 39, Eric: 31}
 
-  "E_32" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "E_32" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_32</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
@@ -2047,11 +2047,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   A_30 -> {
-///     observees: {Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   A_31 -> {
-///     observees: {Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   A_32 -> {
@@ -2067,7 +2067,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_33 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2079,7 +2079,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_34 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2092,7 +2092,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_35 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2105,7 +2105,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   A_36 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2154,15 +2154,15 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   B_35 -> {
-///     observees: {Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   B_36 -> {
-///     observees: {Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   B_37 -> {
-///     observees: {Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   B_38 -> {
@@ -2178,7 +2178,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_39 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2190,7 +2190,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_40 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2202,7 +2202,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_41 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2214,7 +2214,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_42 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2226,7 +2226,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_43 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2239,7 +2239,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   B_44 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2268,7 +2268,7 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   C_31 -> {
-///     observees: {Alice, Bob}
+///     observees: {}
 ///     interesting_content: [OpaquePayload(4)]
 ///   }
 ///   C_32 -> {
@@ -2284,7 +2284,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_33 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2296,7 +2296,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_34 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2308,7 +2308,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_35 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2320,7 +2320,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_36 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2332,7 +2332,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_37 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2345,7 +2345,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_38 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2358,7 +2358,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_39 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2371,7 +2371,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_40 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2384,7 +2384,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_41 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2397,7 +2397,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_42 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2410,7 +2410,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   C_43 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2451,19 +2451,19 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   D_36 -> {
-///     observees: {Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   D_37 -> {
-///     observees: {Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   D_38 -> {
-///     observees: {Alice, Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   D_39 -> {
-///     observees: {Alice, Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   D_40 -> {
@@ -2479,7 +2479,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_41 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2491,7 +2491,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_42 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2503,7 +2503,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_43 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2515,7 +2515,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_44 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2527,7 +2527,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_45 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2539,7 +2539,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_46 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2552,7 +2552,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_47 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2565,7 +2565,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_48 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2578,7 +2578,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_49 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2591,7 +2591,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   D_50 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2624,19 +2624,19 @@ digraph GossipGraph {
 ///     interesting_content: [OpaquePayload(4)]
 ///   }
 ///   E_28 -> {
-///     observees: {Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   E_29 -> {
-///     observees: {Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   E_30 -> {
-///     observees: {Alice, Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   E_31 -> {
-///     observees: {Alice, Bob}
+///     observees: {}
 ///     interesting_content: []
 ///   }
 ///   E_32 -> {
@@ -2652,7 +2652,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_33 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2664,7 +2664,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_34 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2676,7 +2676,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_35 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2688,7 +2688,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_36 -> {
-///     observees: {Alice, Bob, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2700,7 +2700,7 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   E_37 -> {
-///     observees: {Alice, Bob, Carol, Dave, Eric}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
