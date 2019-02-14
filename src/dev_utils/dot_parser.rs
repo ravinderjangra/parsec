@@ -19,7 +19,7 @@ use crate::gossip::EventContextRef;
 use crate::gossip::{CauseInput, Event, EventIndex, Graph, IndexedEventRef};
 use crate::hash::Hash;
 use crate::hash::HASH_LEN;
-use crate::meta_voting::{BoolSet, MetaElection, MetaEvent, MetaVote, Step};
+use crate::meta_voting::{BoolSet, MetaElection, MetaEvent, MetaVote, Observer, Step};
 use crate::mock::{PeerId, Transaction};
 #[cfg(any(
     all(test, feature = "malice-detection", feature = "mock"),
@@ -376,7 +376,7 @@ fn parse_hash() -> Parser<u8, Hash> {
 struct ParsedMetaElection {
     round_hashes: BTreeMap<PeerId, Vec<RoundHash>>,
     interesting_events: BTreeMap<PeerId, Vec<String>>,
-    all_voters: BTreeSet<PeerId>,
+    voters: BTreeSet<PeerId>,
     payload: Option<Observation<Transaction, PeerId>>,
     unconsensused_events: BTreeSet<String>,
     observation_map: BTreeMap<ObservationKey, Observation<Transaction, PeerId>>,
@@ -397,17 +397,14 @@ fn parse_meta_election(ctx: &Rc<ParserCtx>) -> Parser<u8, ParsedMetaElection> {
         * (parse_consensus_history() - next_line()
             + parse_round_hashes()
             + parse_interesting_events()
-            + parse_all_voters()
+            + parse_voters()
             + parse_payload().opt()
             + parse_unconsensused_events()
             + parse_meta_events(ctx))
         .map(
             |(
                 (
-                    (
-                        (((consensus_history, round_hashes), interesting_events), all_voters),
-                        payload,
-                    ),
+                    ((((consensus_history, round_hashes), interesting_events), voters), payload),
                     unconsensused_events,
                 ),
                 observation_map_and_meta_events,
@@ -422,7 +419,7 @@ fn parse_meta_election(ctx: &Rc<ParserCtx>) -> Parser<u8, ParsedMetaElection> {
                 ParsedMetaElection {
                     round_hashes,
                     interesting_events,
-                    all_voters,
+                    voters,
                     payload,
                     unconsensused_events,
                     observation_map,
@@ -490,7 +487,7 @@ fn parse_interesting_events_for_peer() -> Parser<u8, (PeerId, Vec<String>)> {
         - next_line()
 }
 
-fn parse_all_voters() -> Parser<u8, BTreeSet<PeerId>> {
+fn parse_voters() -> Parser<u8, BTreeSet<PeerId>> {
     comment_prefix() * seq(b"all_voters: ") * parse_peers() - next_line()
 }
 
@@ -720,11 +717,16 @@ impl ParsedContents {
     }
 
     #[cfg(all(feature = "malice-detection", feature = "mock"))]
-    /// Insert event into the `ParsedContents`. Note this does not perform any validations whatsoever,
-    /// so this is useful for simulating all kinds of invalid or malicious situations.
+    /// Insert event into the `ParsedContents`. Note this does not perform any validations
+    /// whatsoever, so this is useful for simulating all kinds of invalid or malicious situations.
     pub fn add_event(&mut self, event: Event<PeerId>) -> EventIndex {
         let indexed_event = self.graph.insert(event);
         self.peer_list.add_event(indexed_event);
+
+        let start_index = indexed_event.event_index().topological_index() + 1;
+        self.meta_election.new_consensus_start_index = start_index;
+        self.meta_election.continue_consensus_start_index = start_index;
+
         indexed_event.event_index()
     }
 
@@ -872,7 +874,7 @@ fn convert_to_meta_election(
             })
             .collect(),
         round_hashes: convert_peer_id_map(meta_election.round_hashes, peer_list),
-        all_voters: convert_peer_id_set(meta_election.all_voters, peer_list),
+        voters: convert_peer_id_set(meta_election.voters, peer_list),
         interesting_events: meta_election
             .interesting_events
             .into_iter()
@@ -900,12 +902,16 @@ fn convert_to_meta_election(
             .cloned()
             .collect(),
         consensus_history: meta_election.consensus_history,
+        continue_consensus_start_index: 0,
+        new_consensus_start_index: 0,
     }
 }
 
 fn convert_to_meta_event(meta_event: ParsedMetaEvent, peer_list: &PeerList<PeerId>) -> MetaEvent {
+    let observees = convert_peer_id_set(meta_event.observees, peer_list);
+
     MetaEvent {
-        observees: convert_peer_id_set(meta_event.observees, peer_list),
+        observer: Observer::new(observees),
         interesting_content: meta_event.interesting_content,
         meta_votes: convert_peer_id_map(meta_event.meta_votes, peer_list),
     }

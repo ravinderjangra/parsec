@@ -792,7 +792,7 @@ mod handle_malice {
         assert_eq!(*hash, a_5_hash);
     }
 
-    // TODO: enable this when InvalidGossipCreator malice handlind works again
+    // TODO: enable this when InvalidGossipCreator malice handling works again.
     #[ignore]
     #[test]
     fn invalid_gossip_creator() {

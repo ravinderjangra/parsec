@@ -6,16 +6,17 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use super::meta_event::MetaEvent;
+use super::meta_event::{MetaEvent, MetaEventBuilder};
 use super::meta_vote::MetaVote;
-use crate::gossip::EventIndex;
+use crate::gossip::{EventIndex, Graph};
 use crate::id::PublicId;
 use crate::observation::{ObservationHash, ObservationKey};
-use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet};
+use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerListChange};
 use crate::round_hash::RoundHash;
 use fnv::FnvHashMap;
-use std::collections::{BTreeSet, VecDeque};
-use std::usize;
+use itertools::Itertools;
+use std::collections::BTreeSet;
+use std::{cmp, usize};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct MetaElection {
@@ -23,15 +24,20 @@ pub(crate) struct MetaElection {
     // The "round hash" for each set of meta votes.  They are held in sequence in the `Vec`, i.e.
     // the one for round `x` is held at index `x`.
     pub(crate) round_hashes: PeerIndexMap<Vec<RoundHash>>,
-    // Set of peers participating in this meta-election, i.e. all voters at the time this
-    // meta-election has been created.
-    pub(crate) all_voters: PeerIndexSet,
+    // Set of peers participating in this meta-election, i.e. all voters at the time the current
+    // meta-election was started.
+    pub(crate) voters: PeerIndexSet,
     // The indices of events for each peer that have a non-empty set of `interesting_content`.
-    pub(crate) interesting_events: PeerIndexMap<VecDeque<EventIndex>>,
+    pub(crate) interesting_events: PeerIndexMap<Vec<EventIndex>>,
     // Set of all events that carry a payload that hasn't yet been consensused.
     pub(crate) unconsensused_events: BTreeSet<EventIndex>,
     // Keys of the consensused blocks' payloads in the order they were consensused.
     pub(crate) consensus_history: Vec<ObservationKey>,
+    // Topological index of the first unconsensused payload-carrying event or of the first observer
+    // event, whichever is the greater.
+    pub(crate) continue_consensus_start_index: usize,
+    // Topological index of the first unconsensused payload-carrying event.
+    pub(crate) new_consensus_start_index: usize,
 }
 
 impl MetaElection {
@@ -39,19 +45,20 @@ impl MetaElection {
         MetaElection {
             meta_events: FnvHashMap::default(),
             round_hashes: PeerIndexMap::default(),
-            all_voters: voters,
+            voters,
             interesting_events: PeerIndexMap::default(),
             unconsensused_events: BTreeSet::new(),
             consensus_history: Vec::new(),
+            continue_consensus_start_index: 0,
+            new_consensus_start_index: 0,
         }
     }
 
-    pub fn add_meta_event(
-        &mut self,
-        event_index: EventIndex,
-        creator: PeerIndex,
-        meta_event: MetaEvent,
-    ) {
+    pub fn add_meta_event<P: PublicId>(&mut self, builder: MetaEventBuilder<P>) {
+        let event_index = builder.event().event_index();
+        let creator = builder.event().creator();
+        let meta_event = builder.finish();
+
         // Update round hashes.
         for (peer_index, event_votes) in &meta_event.meta_votes {
             let hashes = if let Some(hashes) = self.round_hashes.get_mut(peer_index) {
@@ -68,12 +75,9 @@ impl MetaElection {
             }
         }
 
-        // Update interesting events
+        // Update interesting events.
         if !meta_event.interesting_content.is_empty() {
-            self.interesting_events
-                .entry(creator)
-                .or_insert_with(VecDeque::new)
-                .push_back(event_index);
+            self.add_interesting_event(creator, event_index);
         }
 
         // Insert the meta-event itself.
@@ -105,24 +109,24 @@ impl MetaElection {
 
     /// List of voters participating in the current meta-election.
     pub fn voters(&self) -> &PeerIndexSet {
-        &self.all_voters
+        &self.voters
     }
 
     pub fn consensus_history(&self) -> &[ObservationKey] {
         &self.consensus_history
     }
 
-    pub fn interesting_events(&self) -> impl Iterator<Item = (PeerIndex, &VecDeque<EventIndex>)> {
+    pub fn interesting_events(&self) -> impl Iterator<Item = (PeerIndex, &[EventIndex])> {
         self.interesting_events
             .iter()
-            .map(|(peer_index, event_indices)| (peer_index, event_indices))
+            .map(|(peer_index, event_indices)| (peer_index, &event_indices[..]))
     }
 
     pub fn first_interesting_content_by(&self, creator: PeerIndex) -> Option<&ObservationKey> {
         let event_index = self
             .interesting_events
             .get(creator)
-            .and_then(VecDeque::front)?;
+            .and_then(|indices| indices.first())?;
         let meta_event = self.meta_events.get(event_index)?;
 
         meta_event.interesting_content.first()
@@ -146,34 +150,30 @@ impl MetaElection {
             })
     }
 
-    /// Topological index of the first unconsensused payload-carrying event.
-    pub fn start_index(&self) -> Option<usize> {
-        // `unconsensused_events` are already sorted topologically, so just return the first one.
-        self.unconsensused_events
-            .iter()
-            .next()
-            .map(|event_index| event_index.topological_index())
+    pub fn continue_consensus_start_index(&self) -> usize {
+        self.continue_consensus_start_index
+    }
+
+    pub fn new_consensus_start_index(&self) -> usize {
+        self.new_consensus_start_index
     }
 
     /// Starts new election.
-    pub fn new_election(
+    pub fn new_election<P: PublicId>(
         &mut self,
-        payload_key: ObservationKey,
-        voters: PeerIndexSet,
-        unconsensused_events: BTreeSet<EventIndex>,
+        graph: &Graph<P>,
+        decided_key: ObservationKey,
+        peer_list_change: Option<PeerListChange>,
     ) {
-        self.round_hashes.clear();
-        self.all_voters = voters;
-        self.interesting_events.clear();
-        self.unconsensused_events = unconsensused_events;
-        self.consensus_history.push(payload_key);
+        self.update_voters(peer_list_change);
+        self.update_unconsensused_events(graph, &decided_key);
+        self.update_new_consensus_start_index();
+        self.update_continue_consensus_start_index(peer_list_change.is_some());
+        self.update_meta_events(&decided_key, peer_list_change.is_some());
+        self.update_interesting_content(graph);
 
-        if let Some(start_index) = self.start_index() {
-            self.meta_events
-                .retain(|event_index, _| event_index.topological_index() >= start_index)
-        } else {
-            self.meta_events.clear()
-        }
+        self.round_hashes.clear();
+        self.consensus_history.push(decided_key);
     }
 
     pub fn initialise_round_hashes<'a, I, P>(&mut self, peer_ids: I)
@@ -208,6 +208,112 @@ impl MetaElection {
     pub fn unconsensused_events<'a>(&'a self) -> impl Iterator<Item = EventIndex> + 'a {
         self.unconsensused_events.iter().cloned()
     }
+
+    fn add_interesting_event(&mut self, creator: PeerIndex, event_index: EventIndex) {
+        self.interesting_events
+            .entry(creator)
+            .or_insert_with(Vec::new)
+            .push(event_index)
+    }
+
+    // Updates unconsensused_events by removing those that became consensused.
+    fn update_unconsensused_events<P: PublicId>(
+        &mut self,
+        graph: &Graph<P>,
+        decided_key: &ObservationKey,
+    ) {
+        let remove = self
+            .unconsensused_events
+            .iter()
+            .filter(|event_index| {
+                graph
+                    .get(**event_index)
+                    .map(|event| event.payload_key() == Some(decided_key))
+                    .unwrap_or(false)
+            })
+            .cloned()
+            .collect_vec();
+
+        for event_index in remove {
+            let _ = self.unconsensused_events.remove(&event_index);
+        }
+    }
+
+    fn update_voters(&mut self, peer_list_change: Option<PeerListChange>) {
+        match peer_list_change {
+            Some(PeerListChange::Add(peer_index)) => {
+                if !self.voters.insert(peer_index) {
+                    log_or_panic!("Meta election already contains {:?}", peer_index);
+                }
+            }
+            Some(PeerListChange::Remove(peer_index)) => {
+                if !self.voters.remove(peer_index) {
+                    log_or_panic!("Meta election doesn't contain {:?}", peer_index);
+                }
+            }
+            None => (),
+        }
+    }
+
+    fn update_new_consensus_start_index(&mut self) {
+        self.new_consensus_start_index = self
+            .unconsensused_events
+            .iter()
+            .next()
+            .map(|event_index| event_index.topological_index())
+            .unwrap_or(usize::MAX);
+    }
+
+    fn update_continue_consensus_start_index(&mut self, peer_list_changed: bool) {
+        self.continue_consensus_start_index = if peer_list_changed {
+            self.new_consensus_start_index
+        } else {
+            cmp::max(
+                self.meta_events
+                    .iter()
+                    .filter(|(_, meta_event)| meta_event.is_observer())
+                    .map(|(event_index, _)| event_index.topological_index())
+                    .min()
+                    .unwrap_or(self.new_consensus_start_index),
+                self.new_consensus_start_index,
+            )
+        };
+    }
+
+    fn update_meta_events(&mut self, decided_key: &ObservationKey, peer_list_changed: bool) {
+        if peer_list_changed {
+            self.meta_events.clear();
+        } else {
+            let new_consensus_start_index = self.new_consensus_start_index;
+            self.meta_events.retain(|event_index, _| {
+                event_index.topological_index() >= new_consensus_start_index
+            });
+            for meta_event in self.meta_events.values_mut() {
+                meta_event
+                    .interesting_content
+                    .retain(|payload_key| payload_key != decided_key);
+            }
+        }
+    }
+
+    fn update_interesting_content<P: PublicId>(&mut self, graph: &Graph<P>) {
+        self.interesting_events.clear();
+
+        let continue_consensus_start_index = self.continue_consensus_start_index;
+        for event in graph
+            .iter_from(self.new_consensus_start_index)
+            .take_while(|event| event.topological_index() < continue_consensus_start_index)
+        {
+            let interesting = self
+                .meta_events
+                .get(&event.event_index())
+                .map(|meta_event| !meta_event.interesting_content.is_empty())
+                .unwrap_or(false);
+            if interesting {
+                self.add_interesting_event(event.creator(), event.event_index())
+            }
+        }
+    }
 }
 
 #[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
@@ -224,7 +330,7 @@ pub(crate) mod snapshot {
     pub(crate) struct MetaElectionSnapshot<P: PublicId> {
         meta_events: BTreeMap<EventHash, MetaEventSnapshot<P>>,
         round_hashes: BTreeMap<P, Vec<RoundHash>>,
-        all_voters: BTreeSet<P>,
+        voters: BTreeSet<P>,
         interesting_events: BTreeMap<P, Vec<EventHash>>,
     }
 
@@ -276,8 +382,8 @@ pub(crate) mod snapshot {
                             .map(|peer| (peer.id().clone(), hashes.clone()))
                     })
                     .collect(),
-                all_voters: meta_election
-                    .all_voters
+                voters: meta_election
+                    .voters
                     .iter()
                     .filter_map(|index| peer_list.get(index).map(|peer| peer.id().clone()))
                     .collect(),

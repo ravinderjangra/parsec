@@ -14,12 +14,53 @@ use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet};
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub(crate) struct MetaEvent {
-    // The set of peers for which this event can strongly-see an event by that peer which carries a
-    // valid block.  If there are a supermajority of peers here, this event is an "observer".
-    pub observees: PeerIndexSet,
+    pub observer: Observer,
     // Hashes of payloads of all the votes deemed interesting by this event.
     pub interesting_content: Vec<ObservationKey>,
     pub meta_votes: PeerIndexMap<Vec<MetaVote>>,
+}
+
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub(crate) enum Observer {
+    // This event is observer (it has supermajority of observees and it is the first such event of
+    // the same creator).
+    This(PeerIndexSet),
+    // This event isn't observer, but one of its self-ancestors is.
+    Ancestor,
+    // This event isn't observer and neither is any of its self-ancestors.
+    None,
+}
+
+impl Observer {
+    #[cfg(any(test, feature = "testing"))]
+    pub fn new(observees: PeerIndexSet) -> Self {
+        if observees.is_empty() {
+            Observer::None
+        } else {
+            Observer::This(observees)
+        }
+    }
+
+    fn is_observer(&self) -> bool {
+        match self {
+            Observer::This(_) => true,
+            Observer::Ancestor | Observer::None => false,
+        }
+    }
+
+    fn has_ancestor_observer(&self) -> bool {
+        match self {
+            Observer::Ancestor => true,
+            Observer::This(_) | Observer::None => false,
+        }
+    }
+
+    fn has_observee(&self, peer_index: PeerIndex) -> bool {
+        match self {
+            Observer::This(observees) => observees.contains(peer_index),
+            Observer::Ancestor | Observer::None => false,
+        }
+    }
 }
 
 impl MetaEvent {
@@ -27,7 +68,7 @@ impl MetaEvent {
         MetaEventBuilder {
             event,
             meta_event: MetaEvent {
-                observees: PeerIndexSet::default(),
+                observer: Observer::None,
                 interesting_content: Vec::new(),
                 meta_votes: PeerIndexMap::default(),
             },
@@ -36,8 +77,6 @@ impl MetaEvent {
     }
 
     pub fn rebuild<P: PublicId>(mut self, event: IndexedEventRef<P>) -> MetaEventBuilder<P> {
-        // Do not clear `interesting_content` as it can be reused in some cases.
-        self.observees.clear();
         self.meta_votes.clear();
 
         MetaEventBuilder {
@@ -45,6 +84,14 @@ impl MetaEvent {
             meta_event: self,
             new: false,
         }
+    }
+
+    pub fn is_observer(&self) -> bool {
+        self.observer.is_observer()
+    }
+
+    pub fn has_ancestor_observer(&self) -> bool {
+        self.observer.has_ancestor_observer()
     }
 }
 
@@ -63,32 +110,20 @@ impl<'a, P: PublicId + 'a> MetaEventBuilder<'a, P> {
         self.new
     }
 
-    pub fn observee_count(&self) -> usize {
-        self.meta_event.observees.len()
+    pub fn is_observer(&self) -> bool {
+        self.meta_event.is_observer()
     }
 
     pub fn has_observee(&self, peer_index: PeerIndex) -> bool {
-        self.meta_event.observees.contains(peer_index)
+        self.meta_event.observer.has_observee(peer_index)
     }
 
-    pub fn set_observees(&mut self, observees: PeerIndexSet) {
-        self.meta_event.observees = observees;
+    pub fn set_observer(&mut self, observer: Observer) {
+        self.meta_event.observer = observer;
     }
 
     pub fn set_interesting_content(&mut self, content: Vec<ObservationKey>) {
         self.meta_event.interesting_content = content;
-    }
-
-    /// Reuse the interesting content for which the given predicate returns true.
-    pub fn reuse_interesting_content<F>(&mut self, f: F)
-    where
-        F: FnMut(&ObservationKey) -> bool,
-    {
-        if self.new {
-            log_or_panic!("Can't reuse interesting content of new meta-event.");
-        }
-
-        self.meta_event.interesting_content.retain(f)
     }
 
     pub fn add_meta_votes(&mut self, peer_index: PeerIndex, votes: Vec<MetaVote>) {
@@ -121,13 +156,17 @@ pub(crate) mod snapshot {
         where
             S: SecretId<PublicId = P>,
         {
-            Self {
-                observees: meta_event
-                    .observees
+            let observees = match meta_event.observer {
+                Observer::This(ref observees) => observees
                     .iter()
                     .filter_map(|index| peer_list.get(index))
                     .map(|peer| peer.id().clone())
                     .collect(),
+                _ => BTreeSet::new(),
+            };
+
+            Self {
+                observees,
                 interesting_content: meta_event
                     .interesting_content
                     .iter()

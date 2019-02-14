@@ -61,11 +61,12 @@ pub use self::detail::DIR;
 mod detail {
     use crate::gossip::{Event, EventHash, EventIndex, Graph, GraphSnapshot, IndexedEventRef};
     use crate::id::{PublicId, SecretId};
-    use crate::meta_voting::{MetaElection, MetaElectionSnapshot, MetaEvent, MetaVote};
+    use crate::meta_voting::{MetaElection, MetaElectionSnapshot, MetaEvent, MetaVote, Observer};
     use crate::network_event::NetworkEvent;
     use crate::observation::ObservationStore;
     use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
     use crate::serialise;
+    use itertools::Itertools;
     use rand::{self, Rng};
     use std::cell::RefCell;
     use std::cmp;
@@ -289,8 +290,13 @@ mod detail {
                     .to_string(),
             );
         }
-        for (peer_index, meta_votes) in meta_votes {
-            let peer_id = unwrap!(peer_list.get(peer_index)).id();
+
+        let meta_votes = meta_votes
+            .iter()
+            .map(|(peer_index, meta_votes)| (unwrap!(peer_list.get(peer_index)).id(), meta_votes))
+            .sorted_by(|(lhs_peer_id, _), (rhs_peer_id, _)| Ord::cmp(lhs_peer_id, rhs_peer_id));
+
+        for (peer_id, meta_votes) in meta_votes {
             let mut prefix = format!("{}: ", first_char(peer_id).unwrap_or('?'));
             for mv in meta_votes {
                 let est = mv.estimates.as_short_string();
@@ -543,11 +549,7 @@ mod detail {
         fn write_peers(&mut self) -> io::Result<()> {
             self.writeln(format_args!("  {{"))?;
             self.writeln(format_args!("    rank=same"))?;
-            let mut peer_ids = self
-                .peer_list
-                .all_ids()
-                .map(|(_, id)| id)
-                .collect::<Vec<_>>();
+            let mut peer_ids = self.peer_list.all_ids().map(|(_, id)| id).sorted();
             for peer_id in &peer_ids {
                 self.writeln(format_args!(
                     "    \"{:?}\" [style=filled, color=white]",
@@ -682,7 +684,7 @@ mod detail {
                 "{}{}all_voters: {:?}",
                 Self::COMMENT,
                 self.indentation(),
-                convert_peer_index_set(&self.meta_election.all_voters, &self.peer_list)
+                convert_peer_index_set(&self.meta_election.voters, &self.peer_list)
             ));
 
             // write unconsensused events
@@ -730,11 +732,19 @@ mod detail {
                     short_name
                 ));
                 self.indent();
+
+                let observees = match mev.observer {
+                    Observer::This(ref observees) => {
+                        convert_peer_index_set(observees, &self.peer_list)
+                    }
+                    _ => BTreeSet::new(),
+                };
+
                 lines.push(format!(
                     "{}{}observees: {:?}",
                     Self::COMMENT,
                     self.indentation(),
-                    convert_peer_index_set(&mev.observees, &self.peer_list)
+                    observees
                 ));
                 let interesting_content = mev
                     .interesting_content
@@ -828,6 +838,11 @@ mod detail {
                     attr.fillcolor = "style=filled, fillcolor=crimson";
                     attr.is_rectangle = true;
                 }
+
+                if meta_event.is_observer() {
+                    attr.fillcolor = "style=filled, fillcolor=orange";
+                }
+
                 if !meta_event.meta_votes.is_empty() {
                     let meta_votes =
                         dump_meta_votes(peer_list, &meta_event.meta_votes, false).join("\n");
