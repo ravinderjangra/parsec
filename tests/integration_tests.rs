@@ -219,7 +219,7 @@ fn random_schedule_no_delays() {
 fn add_many_peers() {
     let mut env = Environment::new(SEED);
     let options = ScheduleOptions {
-        genesis_size: 2,
+        genesis_size: 3,
         peers_to_add: 8,
         opaque_to_add: 0,
         ..Default::default()
@@ -259,7 +259,7 @@ fn add_few_peers_and_vote() {
 fn add_many_peers_and_vote() {
     let mut env = Environment::new(SEED);
     let options = ScheduleOptions {
-        genesis_size: 2,
+        genesis_size: 3,
         peers_to_add: 8,
         opaque_to_add: 10,
         ..Default::default()
