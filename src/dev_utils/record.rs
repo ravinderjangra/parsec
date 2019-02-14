@@ -315,6 +315,15 @@ mod tests {
     }
 
     #[test]
+    fn smoke_routing() {
+        let ignore_last_events = 1;
+        smoke(
+            "input_graphs/dev_utils_record_tests_smoke_routing/minimal.dot",
+            ignore_last_events,
+        )
+    }
+
+    #[test]
     fn smoke_consensus_history_parsec() {
         smoke_consensus_history("input_graphs/benches/minimal.dot")
     }

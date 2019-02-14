@@ -201,6 +201,32 @@ fn main() {
         .file("Annie", "annie.dot");
 
     let _ = scenarios
+        .add("dev_utils::record::tests::smoke_routing", |env| {
+            let routing_peer_id = |name| format!("PublicId(name: {}..)", name);
+            let routing_transaction =
+                |prefix| format!("SectionInfo(SectionInfo(prefix: Prefix({}), ...))", prefix);
+
+            let obs = ObservationSchedule {
+                genesis: peer_ids!(
+                    &routing_peer_id("12abcd"),
+                    &routing_peer_id("ab4598"),
+                    &routing_peer_id("cdb63e"),
+                    &routing_peer_id("ef4fb9")
+                ),
+                schedule: vec![
+                    (0, Opaque(Transaction::new(routing_transaction("123")))),
+                    (0, Opaque(Transaction::new(routing_transaction("234")))),
+                    (0, AddPeer(PeerId::new(&routing_peer_id("ffffff")))),
+                    (0, RemovePeer(PeerId::new(&routing_peer_id("ef4fb9")))),
+                ],
+            };
+
+            Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+        })
+        .seed([1, 2, 3, 4])
+        .file("PublicIdname12abcd", "minimal.dot");
+
+    let _ = scenarios
         .add("benches", |env| {
             Schedule::new(
                 env,
