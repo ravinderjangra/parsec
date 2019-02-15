@@ -650,8 +650,15 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         self.create_meta_event(event_index)?;
 
-        if let Some(payload_key) = self.compute_consensus(event_index) {
-            self.output_consensus_info(&payload_key);
+        let payload_keys = self.compute_consensus(event_index);
+        if payload_keys.is_empty() {
+            return Ok(PostProcessAction::Continue);
+        }
+
+        let mut peer_list_changes = Vec::with_capacity(payload_keys.len());
+
+        for payload_key in &payload_keys {
+            self.output_consensus_info(payload_key);
 
             match self.create_block(&payload_key) {
                 Ok(block) => self.consensused_blocks.push_back(block),
@@ -660,19 +667,17 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             }
 
             self.mark_observation_as_consensused(&payload_key);
-            let peer_list_change = self.handle_consensus(&payload_key);
-
-            self.meta_election
-                .new_election(&self.graph, payload_key, peer_list_change);
-            self.meta_election
-                .initialise_round_hashes(self.peer_list.all_ids());
-
-            // Trigger reprocess.
-            let start_index = self.meta_election.continue_consensus_start_index();
-            return Ok(PostProcessAction::Restart(start_index));
+            peer_list_changes.extend(self.handle_consensus(payload_key));
         }
 
-        Ok(PostProcessAction::Continue)
+        self.meta_election
+            .new_election(&self.graph, payload_keys, peer_list_changes);
+        self.meta_election
+            .initialise_round_hashes(self.peer_list.all_ids());
+
+        // Trigger reprocess.
+        let start_index = self.meta_election.continue_consensus_start_index();
+        Ok(PostProcessAction::Restart(start_index))
     }
 
     fn output_consensus_info(&self, payload_key: &ObservationKey) {
@@ -1239,8 +1244,11 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .filter_map(move |index| self.get_known_event(index).ok())
     }
 
-    fn compute_consensus(&self, event_index: EventIndex) -> Option<ObservationKey> {
-        let last_meta_votes = self.meta_election.populated_meta_votes(event_index)?;
+    fn compute_consensus(&self, event_index: EventIndex) -> Vec<ObservationKey> {
+        let last_meta_votes = match self.meta_election.populated_meta_votes(event_index) {
+            Some(meta_votes) => meta_votes,
+            None => return Vec::new(),
+        };
 
         let decided_meta_votes = last_meta_votes
             .iter()
@@ -1252,17 +1260,19 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             });
 
         if decided_meta_votes.clone().count() < self.voter_count() {
-            return None;
+            return Vec::new();
         }
 
         self.compute_payload_for_consensus(decided_meta_votes)
     }
 
-    fn compute_payload_for_consensus<I>(&self, decided_meta_votes: I) -> Option<ObservationKey>
+    fn compute_payload_for_consensus<I>(&self, decided_meta_votes: I) -> Vec<ObservationKey>
     where
         I: IntoIterator<Item = (PeerIndex, bool)>,
     {
-        let mut payloads: Vec<_> = decided_meta_votes
+        // Sort the payloads first by the number of votes and in case of a tie, lexicographically
+        // by the observation keys. This is so every node will arrive at the same ordering.
+        let payloads = decided_meta_votes
             .into_iter()
             .filter_map(|(peer_index, decision)| {
                 if decision {
@@ -1273,26 +1283,20 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     None
                 }
             })
-            .collect();
+            .fold(BTreeMap::new(), |mut map, payload_key| {
+                *map.entry(payload_key).or_insert(0) += 1;
+                map
+            });
 
-        // IMPORTANT: We must sort this in consistent order, so when the tie breaking rule kicks in,
-        // the outcome is the same for everyone.
-        payloads.sort_by(|a, b| a.hash().cmp(b.hash()));
+        let mut payloads: Vec<_> = payloads.into_iter().collect();
+        payloads.sort_by(|(lhs_key, lhs_count), (rhs_key, rhs_count)| {
+            lhs_count
+                .cmp(rhs_count)
+                .reverse()
+                .then_with(|| lhs_key.consistent_cmp(rhs_key, &self.peer_list))
+        });
 
-        payloads
-            .iter()
-            .max_by(|lhs_payload, rhs_payload| {
-                let lhs_count = payloads
-                    .iter()
-                    .filter(|payload_carried| lhs_payload == payload_carried)
-                    .count();
-                let rhs_count = payloads
-                    .iter()
-                    .filter(|payload_carried| rhs_payload == payload_carried)
-                    .count();
-                lhs_count.cmp(&rhs_count)
-            })
-            .cloned()
+        payloads.into_iter().map(|(key, _)| key).collect()
     }
 
     fn create_block(&self, payload_key: &ObservationKey) -> Result<Block<T, S::PublicId>> {
