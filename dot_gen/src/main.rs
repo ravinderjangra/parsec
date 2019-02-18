@@ -186,6 +186,17 @@ fn main() {
         .file("Bob", "bob.dot")
         .file("Carol", "carol.dot");
 
+    // Do not edit below this line.
+    // -------------------------------------------------------------------------
+
+    add_dev_utils_record_smoke_tests(&mut scenarios);
+    add_benches(&mut scenarios);
+    add_bench_section_size(&mut scenarios);
+
+    run(scenarios)
+}
+
+fn add_dev_utils_record_smoke_tests(scenarios: &mut Scenarios) {
     let _ = scenarios
         .add("dev_utils::record::tests::smoke_other_peer_names", |env| {
             let obs = ObservationSchedule {
@@ -225,7 +236,9 @@ fn main() {
         })
         .seed([1, 2, 3, 4])
         .file("PublicIdname12abcd", "minimal.dot");
+}
 
+fn add_benches(scenarios: &mut Scenarios) {
     let _ = scenarios
         .add("benches", |env| {
             Schedule::new(
@@ -268,50 +281,40 @@ fn main() {
         })
         .seed([1, 2, 3, 4])
         .file("Alice", "dynamic.dot");
+}
 
-    let add_bench_scalability = |s: &mut Scenarios, opaque_to_add: usize, genesis_size: usize| {
-        let file_name_a = format!("a_node{}_opaque_evt{}.dot", genesis_size, opaque_to_add);
-        let file_name_b = format!("b_node{}_opaque_evt{}.dot", genesis_size, opaque_to_add);
-        let file_name_c = format!("c_node{}_opaque_evt{}.dot", genesis_size, opaque_to_add);
-        let bench_name = format!("bench_section_size_evt{}", opaque_to_add);
+fn add_bench_section_size(scenarios: &mut Scenarios) {
+    add_bench_scalability(scenarios, 8, 4);
+    add_bench_scalability(scenarios, 8, 8);
+    add_bench_scalability(scenarios, 8, 16);
+    add_bench_scalability(scenarios, 8, 32);
+    add_bench_scalability(scenarios, 8, 48);
 
-        let _ = s
-            .add(bench_name, move |env| {
-                Schedule::new(
-                    env,
-                    &ScheduleOptions {
-                        genesis_size,
-                        opaque_to_add,
-                        votes_before_gossip: true,
-                        ..Default::default()
-                    },
-                )
-            })
-            .seed([1, 2, 3, 4])
-            .file("Alice", &file_name_a)
-            .file("Bob", &file_name_b)
-            .file("Carol", &file_name_c);
-    };
+    add_bench_scalability(scenarios, 16, 4);
+    add_bench_scalability(scenarios, 16, 8);
+    add_bench_scalability(scenarios, 16, 16);
+    add_bench_scalability(scenarios, 16, 32);
+    add_bench_scalability(scenarios, 16, 48);
+}
 
-    add_bench_scalability(&mut scenarios, 8, 4);
-    add_bench_scalability(&mut scenarios, 8, 8);
-    add_bench_scalability(&mut scenarios, 8, 12);
-    add_bench_scalability(&mut scenarios, 8, 16);
-    add_bench_scalability(&mut scenarios, 8, 24);
-    add_bench_scalability(&mut scenarios, 8, 32);
-    add_bench_scalability(&mut scenarios, 8, 48);
+fn add_bench_scalability(s: &mut Scenarios, opaque_to_add: usize, genesis_size: usize) {
+    let file_name_a = format!("a_node{}_opaque_evt{}.dot", genesis_size, opaque_to_add);
+    let bench_name = format!("bench_section_size_evt{}", opaque_to_add);
 
-    add_bench_scalability(&mut scenarios, 16, 4);
-    add_bench_scalability(&mut scenarios, 16, 8);
-    add_bench_scalability(&mut scenarios, 16, 12);
-    add_bench_scalability(&mut scenarios, 16, 16);
-    add_bench_scalability(&mut scenarios, 16, 24);
-    add_bench_scalability(&mut scenarios, 16, 32);
-
-    // Do not edit below this line.
-    // -------------------------------------------------------------------------
-
-    run(scenarios)
+    let _ = s
+        .add(bench_name, move |env| {
+            Schedule::new(
+                env,
+                &ScheduleOptions {
+                    genesis_size,
+                    opaque_to_add,
+                    votes_before_gossip: true,
+                    ..Default::default()
+                },
+            )
+        })
+        .seed([1, 2, 3, 4])
+        .file("Alice", &file_name_a);
 }
 
 struct Scenario {
