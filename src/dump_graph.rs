@@ -203,7 +203,7 @@ mod detail {
             return;
         }
 
-        let id = sanitize_string(format!("{:?}", owner_id));
+        let id = sanitise_string(format!("{:?}", owner_id));
 
         if let Some(ref filter_peers) = *FILTER_PEERS {
             if !filter_peers.contains(&id) {
@@ -220,7 +220,7 @@ mod detail {
         let file_path = DIR.with(|dir| dir.join(format!("{}-{:03}.dot", id, call_count)));
         catch_dump(file_path.clone(), gossip_graph, peer_list, meta_election);
 
-        let peer_ids = sanitize_peer_ids(peer_list);
+        let peer_ids = sanitise_peer_ids(peer_list);
         let short_peer_ids = short_peer_id_names(&peer_ids);
 
         match DotWriter::new(
@@ -674,6 +674,15 @@ mod detail {
         ) -> io::Result<()> {
             let mut buffer;
             let cause = match event.cause() {
+                Cause::Requesting { recipient, .. } => {
+                    buffer = format!(
+                        "Requesting({:?})",
+                        self.peer_ids
+                            .get(*recipient)
+                            .unwrap_or(&DotPeerId::unknown())
+                    );
+                    buffer.as_str()
+                }
                 Cause::Request { .. } => "Request",
                 Cause::Response { .. } => "Response",
                 Cause::Observation { ref vote, .. } => {
@@ -1024,20 +1033,20 @@ mod detail {
             let value = match observation {
                 Observation::Genesis(group) => format!(
                     "Genesis({:?})",
-                    group.iter().map(sanitize_peer_id).collect::<BTreeSet<_>>()
+                    group.iter().map(sanitise_peer_id).collect::<BTreeSet<_>>()
                 ),
-                Observation::Add { peer_id, .. } => format!("Add({:?})", sanitize_peer_id(peer_id)),
+                Observation::Add { peer_id, .. } => format!("Add({:?})", sanitise_peer_id(peer_id)),
                 Observation::Remove { peer_id, .. } => {
-                    format!("Remove({:?})", sanitize_peer_id(peer_id))
+                    format!("Remove({:?})", sanitise_peer_id(peer_id))
                 }
                 Observation::Accusation { offender, malice } => format!(
                     "Accusation {{ {:?}, {:?} }}",
-                    sanitize_peer_id(offender),
+                    sanitise_peer_id(offender),
                     malice
                 ),
                 Observation::OpaquePayload(payload) => {
                     let max_length = 16;
-                    let mut payload_str = sanitize_string(format!("{:?}", payload));
+                    let mut payload_str = sanitise_string(format!("{:?}", payload));
 
                     // Make unique if cannot show all
                     if payload_str.len() > max_length {
@@ -1057,19 +1066,19 @@ mod detail {
         }
     }
 
-    fn sanitize_peer_ids<S: SecretId>(peer_list: &PeerList<S>) -> PeerIndexMap<DotPeerId> {
+    fn sanitise_peer_ids<S: SecretId>(peer_list: &PeerList<S>) -> PeerIndexMap<DotPeerId> {
         peer_list
             .iter()
-            .map(|(index, peer)| (index, sanitize_peer_id(peer.id())))
+            .map(|(index, peer)| (index, sanitise_peer_id(peer.id())))
             .collect()
     }
 
-    fn sanitize_peer_id<P: PublicId>(peer_id: &P) -> DotPeerId {
-        let value = sanitize_string(format!("{:?}", peer_id));
+    fn sanitise_peer_id<P: PublicId>(peer_id: &P) -> DotPeerId {
+        let value = sanitise_string(format!("{:?}", peer_id));
         DotPeerId { value }
     }
 
-    fn sanitize_string(mut value: String) -> String {
+    fn sanitise_string(mut value: String) -> String {
         value.retain(|c| c.is_ascii() && c.is_alphanumeric());
         value
     }

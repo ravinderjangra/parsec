@@ -253,10 +253,16 @@ mod tests {
         let contents = parse_test_dot_file("carol.dot");
         let graph = contents.graph;
 
-        let event = unwrap!(find_event_by_short_name(&graph, "B_4"));
+        let event = unwrap!(find_event_by_short_name(&graph, "C_8"));
 
         let expected = vec![
-            "B_4", "B_3", "D_2", "D_1", "D_0", "B_2", "B_1", "B_0", "A_1", "A_0",
+            "C_8", "C_7", "D_14", "B_26", "B_25", "B_24", "A_18", "B_23", "B_22", "D_13", "B_21",
+            "D_12", "D_11", "B_20", "B_19", "A_17", "B_18", "A_16", "A_15", "D_10", "B_17", "B_16",
+            "A_14", "B_15", "B_14", "D_9", "D_8", "A_13", "A_12", "A_11", "A_10", "D_7", "D_6",
+            "B_13", "A_9", "A_8", "D_5", "B_12", "B_11", "B_10", "C_6", "B_9", "B_8", "D_4", "D_3",
+            "A_7", "C_5", "C_4", "A_6", "A_5", "A_4", "D_2", "D_1", "D_0", "B_7", "B_6", "B_5",
+            "B_4", "A_3", "B_3", "C_3", "C_2", "B_2", "B_1", "B_0", "A_2", "A_1", "A_0", "C_1",
+            "C_0",
         ];
 
         let mut actual_names = Vec::new();

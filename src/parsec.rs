@@ -266,34 +266,19 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .map(|(_, peer)| peer.id())
     }
 
-    /// Creates a new message to be gossipped to a peer, containing all gossip events this peer
-    /// thinks that peer needs. If `peer_id` is `None`, a message containing all known gossip
-    /// events is returned. If `peer_id` is `Some` and the given peer is not an active node, an
-    /// error is returned.
+    /// Creates a new message to be gossiped to a peer, containing all gossip events this peer
+    /// thinks that peer needs.  If the given peer is not an active node, an error is returned.
     ///
     /// * `peer_id`: the intended recipient of the gossip message
     /// * returns a `Request` to be sent to the intended recipient
-    pub fn create_gossip(&self, peer_id: Option<&S::PublicId>) -> Result<Request<T, S::PublicId>> {
+    pub fn create_gossip(&mut self, peer_id: &S::PublicId) -> Result<Request<T, S::PublicId>> {
         self.confirm_self_state(PeerState::SEND)?;
 
-        if let Some(peer_id) = peer_id {
-            let peer_index = self.get_peer_index(peer_id)?;
-            // We require `PeerState::VOTE` in addition to `PeerState::RECV` here, because if the
-            // peer does not have `PeerState::VOTE`, it means we haven't yet reached consensus on
-            // adding them to the section so we shouldn't contact them yet.
-            self.confirm_peer_state(peer_index, PeerState::VOTE | PeerState::RECV)?;
-
-            if self.peer_list.last_event(peer_index).is_some() {
-                debug!(
-                    "{:?} creating gossip request for {:?}",
-                    self.our_pub_id(),
-                    peer_id
-                );
-
-                let events = self.events_to_gossip_to_peer(peer_index)?;
-                return self.pack_events(events).map(Request::new);
-            }
-        }
+        let peer_index = self.get_peer_index(peer_id)?;
+        // We require `PeerState::VOTE` in addition to `PeerState::RECV` here, because if the
+        // peer does not have `PeerState::VOTE`, it means we haven't yet reached consensus on
+        // adding them to the section so we shouldn't contact them yet.
+        self.confirm_peer_state(peer_index, PeerState::VOTE | PeerState::RECV)?;
 
         debug!(
             "{:?} creating gossip request for {:?}",
@@ -301,8 +286,21 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             peer_id
         );
 
-        self.pack_events(self.graph.iter().map(|e| e.inner()))
-            .map(Request::new)
+        let self_parent = self.peer_list.last_event(PeerIndex::OUR).ok_or_else(|| {
+            log_or_panic!("{:?} missing our own last event hash.", self.our_pub_id());
+            Error::Logic
+        })?;
+        let forking_peers = PeerIndexSet::default();
+        let sync_event =
+            Event::new_from_requesting(self_parent, peer_id, &forking_peers, self.event_context())?;
+        let _ = self.add_event(sync_event)?;
+
+        let events = if self.peer_list.last_event(peer_index).is_some() {
+            self.events_to_gossip_to_peer(peer_index)?
+        } else {
+            self.graph.iter().map(|e| e.inner()).collect()
+        };
+        self.pack_events(events).map(Request::new)
     }
 
     /// Handles a `Request` the owning peer received from the `src` peer.  Returns a `Response` to
@@ -2217,6 +2215,10 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
     #[cfg(feature = "malice-detection")]
     pub fn remove_last_event(&mut self) -> Option<(EventIndex, Event<S::PublicId>)> {
         let (event_index, event) = self.graph.remove_last()?;
+        assert_eq!(
+            event_index,
+            unwrap!(self.peer_list.remove_last_event(event.creator()))
+        );
         let _ = self
             .0
             .meta_election
@@ -2250,11 +2252,6 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
 
     pub fn event_creator_id(&self, event: &Event<S::PublicId>) -> &S::PublicId {
         unwrap!(self.0.event_creator_id(event))
-    }
-
-    #[cfg(feature = "malice-detection")]
-    pub fn event_context(&self) -> EventContextRef<T, S> {
-        self.0.event_context()
     }
 
     pub fn new_event_from_observation(

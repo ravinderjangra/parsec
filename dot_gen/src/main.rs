@@ -33,7 +33,7 @@
 //!   files are to be generated.
 //! - The body of the scenario is a lambda that returns `Schedule` according to which the scenario
 //!   runs.
-//! - Optionally, specify the seed to initialize the random number generator.
+//! - Optionally, specify the seed to initialise the random number generator.
 //!   If not specified, a randomly generated seed is used.
 //! - Optionally specify the peers whose graphs should be outputted and the names of the files the
 //!   graphs should be outputted to. If not specified, the default is to take Alice's graph and put
@@ -129,71 +129,196 @@ fn main() {
     // Define scenarios here:
 
     let _ = scenarios
-        .add("functional_tests::remove_peer", |env| {
+        .add("consensus_with_forks", |env| {
             let obs = ObservationSchedule {
                 genesis: peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric"),
-                schedule: vec![(1, RemovePeer(PeerId::new("Eric")))],
+                schedule: vec![],
             };
-
             Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
         })
-        .seed([1048220270, 1673192006, 3171321266, 2580820785]);
-
-    let _ = scenarios.add(
-        "functional_tests::handle_malice_genesis_event_not_after_initial",
-        |env| {
-            let obs = ObservationSchedule {
-                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
-                schedule: vec![
-                    (0, Fail(PeerId::new("Dave"))),
-                    (50, Opaque(Transaction::new("ABCD"))),
-                ],
-            };
-
-            Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
-        },
-    );
-
-    let _ = scenarios
-        .add(
-            "functional_tests::handle_malice_genesis_event_creator_not_genesis_member",
-            |env| {
-                let obs = ObservationSchedule {
-                    genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
-                    schedule: vec![(0, AddPeer(PeerId::new("Eric")))],
-                };
-
-                Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
-            },
-        )
-        .seed([848911612, 2362592349, 3178199135, 2458552022]);
-
-    let _ = scenarios
-        .add(
-            "parsec::functional_tests::handle_malice_accomplice",
-            |env| {
-                Schedule::new(
-                    env,
-                    &ScheduleOptions {
-                        genesis_size: 4,
-                        opaque_to_add: 1,
-                        ..Default::default()
-                    },
-                )
-            },
-        )
+        .seed([3138683280, 3174364583, 1286743511, 1450990187])
         .file("Alice", "alice.dot")
         .file("Bob", "bob.dot")
+        .file("Carol", "carol.dot")
+        .file("Dave", "dave.dot")
+        .file("Eric", "eric.dot");
+
+    let _ = scenarios
+        .add("gossip::graph::tests::ancestors_iterator", |env| {
+            let obs = ObservationSchedule {
+                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                schedule: vec![],
+            };
+            Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+        })
+        .seed([174994228, 1445633118, 3041276290, 90293447])
         .file("Carol", "carol.dot");
 
     // Do not edit below this line.
     // -------------------------------------------------------------------------
 
+    add_functional_tests(&mut scenarios);
     add_dev_utils_record_smoke_tests(&mut scenarios);
     add_benches(&mut scenarios);
     add_bench_section_size(&mut scenarios);
 
     run(scenarios)
+}
+
+fn add_functional_tests(scenarios: &mut Scenarios) {
+    let _ = scenarios
+        .add("functional_tests::from_parsed_contents", |env| {
+            let obs = ObservationSchedule {
+                genesis: peer_ids!("Alice", "Bob", "Carol"),
+                schedule: vec![(1, AddPeer(PeerId::new("Dave")))],
+            };
+            Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+        })
+        .file("Alice", "0.dot")
+        .file("Bob", "1.dot");
+
+    let _ = scenarios
+        .add("functional_tests::add_peer", |env| {
+            let obs = ObservationSchedule {
+                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric"),
+                schedule: vec![(1, AddPeer(PeerId::new("Fred")))],
+            };
+            Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+        })
+        .seed([411278735, 3293288956, 208850454, 2872654992])
+        .file("Alice", "alice.dot");
+
+    let _ = scenarios
+        .add("functional_tests::remove_peer", |env| {
+            let obs = ObservationSchedule {
+                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric"),
+                schedule: vec![(1, RemovePeer(PeerId::new("Eric")))],
+            };
+            Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+        })
+        .seed([1048220270, 1673192006, 3171321266, 2580820785])
+        .file("Alice", "alice.dot");
+
+    let _ = scenarios
+        .add(
+            "functional_tests::unpolled_and_unconsensused_observations",
+            |env| {
+                let obs = ObservationSchedule {
+                    genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                    schedule: vec![(1, AddPeer(PeerId::new("Eric")))],
+                };
+                Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+            },
+        )
+        .seed([3016139397, 1416620722, 2110786801, 3768414447])
+        .file("Alice-002", "alice.dot");
+
+    let _ = scenarios
+        .add(
+            "functional_tests::handle_malice_genesis_event_not_after_initial",
+            |env| {
+                let obs = ObservationSchedule {
+                    genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                    schedule: vec![],
+                };
+                Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+            },
+        )
+        .seed([926181213, 2524489310, 392196615, 406869071])
+        .file("Alice", "alice.dot");
+
+    let _ = scenarios
+        .add(
+            "functional_tests::handle_malice::genesis_event_creator_not_genesis_member",
+            |env| {
+                let obs = ObservationSchedule {
+                    genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                    schedule: vec![(0, AddPeer(PeerId::new("Eric")))],
+                };
+                Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+            },
+        )
+        .seed([848911612, 2362592349, 3178199135, 2458552022])
+        .file("Alice", "alice.dot");
+
+    let _ = scenarios
+        .add("functional_tests::handle_malice::duplicate_votes", |env| {
+            let obs = ObservationSchedule {
+                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                schedule: vec![(0, Opaque(Transaction::new("ABCD")))],
+            };
+            Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+        })
+        .seed([3987596322, 492026741, 1827755430, 3015390549])
+        .file("Alice", "alice.dot")
+        .file("Carol", "carol.dot");
+
+    let _ = scenarios
+        .add(
+            "functional_tests::handle_malice::invalid_accusation",
+            |env| {
+                let obs = ObservationSchedule {
+                    genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                    schedule: vec![],
+                };
+                Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+            },
+        )
+        .seed([935566334, 935694090, 88607029, 861330491])
+        .file("Alice", "alice.dot")
+        .file("Carol", "carol.dot");
+
+    let _ = scenarios
+        .add("functional_tests::handle_malice::accomplice", |env| {
+            let obs = ObservationSchedule {
+                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                schedule: vec![(0, Opaque(Transaction::new("EFGH")))],
+            };
+            Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+        })
+        .seed([3932887254, 691979681, 2029125979, 3359276664])
+        .file("Alice", "alice.dot")
+        .file("Bob", "bob.dot")
+        .file("Carol", "carol.dot");
+
+    let _ = scenarios
+        .add("functional_tests::handle_malice::handle_fork", |env| {
+            let obs = ObservationSchedule {
+                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                schedule: vec![(0, Opaque(Transaction::new("IJKL")))],
+            };
+            Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+        })
+        .seed([1573595827, 2035773878, 1331264098, 154770609])
+        .file("Alice", "alice.dot")
+        .file("Bob", "bob.dot")
+        .file("Dave", "dave.dot");
+
+    let _ = scenarios
+        .add(
+            "functional_tests::handle_malice::self_parent_by_different_creator",
+            |env| {
+                let obs = ObservationSchedule {
+                    genesis: peer_ids!("Alice", "Bob", "Carol"),
+                    schedule: vec![],
+                };
+                Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+            },
+        )
+        .seed([856368386, 135728199, 764559083, 3829746197])
+        .file("Alice", "alice.dot")
+        .file("Carol", "carol.dot");
+
+    let _ = scenarios
+        .add("functional_tests::handle_malice::premature_gossip", |env| {
+            let obs = ObservationSchedule {
+                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric"),
+                schedule: vec![(0, AddPeer(PeerId::new("Fred")))],
+            };
+            Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+        })
+        .seed([411278735, 3293288956, 208850454, 2872654992])
+        .file("Alice", "alice.dot");
 }
 
 fn add_dev_utils_record_smoke_tests(scenarios: &mut Scenarios) {

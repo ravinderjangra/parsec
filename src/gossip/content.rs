@@ -27,7 +27,7 @@ pub(super) struct Content<V, E, P> {
     pub creator: P,
     // Whether it was created by receiving a gossip request, response or by being given a network
     // event to vote for.
-    pub cause: Cause<V, E>,
+    pub cause: Cause<V, E, P>,
 }
 
 impl<V, E, P> Content<V, E, P> {
@@ -40,7 +40,7 @@ impl<V, E, P> Content<V, E, P> {
             | Cause::Response {
                 ref other_parent, ..
             } => Some(other_parent),
-            Cause::Observation { .. } | Cause::Initial => None,
+            Cause::Requesting { .. } | Cause::Observation { .. } | Cause::Initial => None,
         }
     }
 
@@ -48,7 +48,10 @@ impl<V, E, P> Content<V, E, P> {
     // `None`.
     pub fn self_parent(&self) -> Option<&E> {
         match self.cause {
-            Cause::Request {
+            Cause::Requesting {
+                ref self_parent, ..
+            }
+            | Cause::Request {
                 ref self_parent, ..
             }
             | Cause::Response {

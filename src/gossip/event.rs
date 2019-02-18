@@ -9,7 +9,7 @@
 #[cfg(test)]
 use super::graph::IndexedEventRef;
 use super::{
-    cause::{other_parent_hash, self_parent_hash, Cause},
+    cause::{self, Cause},
     content::Content,
     event_context::EventContextRef,
     event_hash::EventHash,
@@ -69,6 +69,39 @@ pub(crate) struct Event<P: PublicId> {
 }
 
 impl<P: PublicId> Event<P> {
+    // Creates a new event in preparation for sending a gossip request message.
+    pub fn new_from_requesting<T: NetworkEvent, S: SecretId<PublicId = P>>(
+        self_parent: EventIndex,
+        recipient: &P,
+        forking_peers: &PeerIndexSet,
+        ctx: EventContextRef<T, S>,
+    ) -> Result<Self, Error> {
+        let content: Content<Vote<T, _>, _, _> = Content {
+            creator: ctx.peer_list.our_pub_id().clone(),
+            cause: Cause::Requesting {
+                self_parent: cause::self_parent_hash(ctx.graph, self_parent)?,
+                recipient: recipient.clone(),
+            },
+        };
+        let (hash, signature) = compute_event_hash_and_signature(&content, ctx.peer_list.our_id());
+        let content = Content {
+            creator: PeerIndex::OUR,
+            cause: Cause::Requesting {
+                self_parent,
+                recipient: cause::recipient_index(ctx.peer_list, recipient)?,
+            },
+        };
+
+        Ok(Self::new(
+            hash,
+            signature,
+            content,
+            ctx.graph,
+            ctx.peer_list,
+            forking_peers,
+        ))
+    }
+
     // Creates a new event as the result of receiving a gossip request message.
     pub fn new_from_request<T: NetworkEvent, S: SecretId<PublicId = P>>(
         self_parent: EventIndex,
@@ -79,8 +112,8 @@ impl<P: PublicId> Event<P> {
         let content: Content<Vote<T, _>, _, _> = Content {
             creator: ctx.peer_list.our_pub_id().clone(),
             cause: Cause::Request {
-                self_parent: self_parent_hash(ctx.graph, self_parent)?,
-                other_parent: other_parent_hash(ctx.graph, other_parent)?,
+                self_parent: cause::self_parent_hash(ctx.graph, self_parent)?,
+                other_parent: cause::other_parent_hash(ctx.graph, other_parent)?,
             },
         };
         let (hash, signature) = compute_event_hash_and_signature(&content, ctx.peer_list.our_id());
@@ -113,8 +146,8 @@ impl<P: PublicId> Event<P> {
         let content: Content<Vote<T, _>, _, _> = Content {
             creator: ctx.peer_list.our_pub_id().clone(),
             cause: Cause::Response {
-                self_parent: self_parent_hash(ctx.graph, self_parent)?,
-                other_parent: other_parent_hash(ctx.graph, other_parent)?,
+                self_parent: cause::self_parent_hash(ctx.graph, self_parent)?,
+                other_parent: cause::other_parent_hash(ctx.graph, other_parent)?,
             },
         };
         let (hash, signature) = compute_event_hash_and_signature(&content, ctx.peer_list.our_id());
@@ -148,7 +181,7 @@ impl<P: PublicId> Event<P> {
         let content = Content {
             creator: ctx.peer_list.our_pub_id().clone(),
             cause: Cause::Observation {
-                self_parent: self_parent_hash(ctx.graph, self_parent)?,
+                self_parent: cause::self_parent_hash(ctx.graph, self_parent)?,
                 vote,
             },
         };
@@ -341,6 +374,14 @@ impl<P: PublicId> Event<P> {
         &self.cache.last_ancestors
     }
 
+    pub fn is_requesting(&self) -> bool {
+        if let Cause::Requesting { .. } = self.content.cause {
+            true
+        } else {
+            false
+        }
+    }
+
     pub fn is_request(&self) -> bool {
         if let Cause::Request { .. } = self.content.cause {
             true
@@ -378,8 +419,8 @@ impl<P: PublicId> Event<P> {
         }
     }
 
-    #[cfg(feature = "dump-graphs")]
-    pub fn cause(&self) -> &Cause<VoteKey<P>, EventIndex> {
+    #[cfg(any(feature = "testing", feature = "dump-graphs"))]
+    pub fn cause(&self) -> &Cause<VoteKey<P>, EventIndex, PeerIndex> {
         &self.content.cause
     }
 }
@@ -458,6 +499,10 @@ impl Event<PeerId> {
         peer_list: &PeerList<PeerId>,
         observations: &mut ObservationStore<Transaction, PeerId>,
     ) -> Self {
+        let recipient = match cause {
+            CauseInput::Requesting(ref recipient) => peer_list.get_index(recipient),
+            _ => None,
+        };
         let cause = Cause::new_from_dot_input(
             cause,
             creator,
@@ -474,6 +519,7 @@ impl Event<PeerId> {
         let cause = Cause::unpack_from_dot_input(
             content.cause,
             creator,
+            recipient,
             self_parent.map(|(i, _)| i),
             other_parent.map(|(i, _)| i),
             observations,
@@ -522,6 +568,7 @@ pub(crate) enum LastAncestor {
 #[derive(Debug)]
 pub(crate) enum CauseInput {
     Initial,
+    Requesting(PeerId),
     Request,
     Response,
     Observation(Observation<Transaction, PeerId>),
