@@ -17,7 +17,6 @@ use crate::gossip::EventHash;
 use crate::gossip::GraphSnapshot;
 use crate::gossip::{
     Event, EventContextRef, EventIndex, Graph, IndexedEventRef, PackedEvent, Request, Response,
-    UnpackedEvent,
 };
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]
 use crate::hash::Hash;
@@ -26,8 +25,6 @@ use crate::meta_voting::{MetaElection, MetaEvent, MetaEventBuilder, MetaVote, Ob
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]
 use crate::mock::{PeerId, Transaction};
 use crate::network_event::NetworkEvent;
-#[cfg(feature = "malice-detection")]
-use crate::observation::UnprovableMalice;
 use crate::observation::{
     is_more_than_two_thirds, ConsensusMode, Malice, Observation, ObservationHash, ObservationKey,
     ObservationStore,
@@ -95,8 +92,6 @@ pub struct Parsec<T: NetworkEvent, S: SecretId> {
     // Accusations to raise at the end of the processing of current gossip message.
     pending_accusations: Accusations<T, S::PublicId>,
     // Peers we accused of unprovable malice.
-    #[cfg(feature = "malice-detection")]
-    unprovable_offenders: PeerIndexSet,
 }
 
 impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
@@ -245,8 +240,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             meta_election: MetaElection::new(genesis_group),
             consensus_mode,
             pending_accusations: vec![],
-            #[cfg(feature = "malice-detection")]
-            unprovable_offenders: PeerIndexSet::default(),
         }
     }
 
@@ -516,47 +509,34 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         self.confirm_peer_state(src_index, PeerState::SEND)?;
 
         let mut forking_peers = PeerIndexSet::default();
-        let mut known = Vec::new();
-
         for packed_event in packed_events {
-            match self.unpack(packed_event, &forking_peers)? {
-                UnpackedEvent::New(event, _) => {
-                    if self
-                        .peer_list
-                        .events_by_index(event.creator(), event.index_by_creator())
-                        .next()
-                        .is_some()
-                    {
-                        let _ = forking_peers.insert(event.creator());
-                    }
-
-                    let event_creator = event.creator();
-                    let event_index = self.add_event(event)?;
-
-                    // We have received an event of a peer in the message. The peer can now receive
-                    // gossips from us as well.
-                    self.peer_list
-                        .change_peer_state(event_creator, PeerState::RECV);
-                    self.peer_list
-                        .record_gossiped_event_by(src_index, event_index);
-
-                    #[cfg(feature = "malice-detection")]
-                    self.detect_accomplice(event_index)?;
+            if let Some(event) = self.unpack(packed_event, &forking_peers)? {
+                if self
+                    .peer_list
+                    .events_by_index(event.creator(), event.index_by_creator())
+                    .next()
+                    .is_some()
+                {
+                    let _ = forking_peers.insert(event.creator());
                 }
-                UnpackedEvent::Known(index) => {
-                    known.push(index);
-                }
+
+                let event_creator = event.creator();
+                let event_index = self.add_event(event)?;
+
+                // We have received an event of a peer in the message. The peer can now receive
+                // gossips from us as well.
+                self.peer_list
+                    .change_peer_state(event_creator, PeerState::RECV);
+                self.peer_list
+                    .record_gossiped_event_by(src_index, event_index);
+
+                #[cfg(feature = "malice-detection")]
+                self.detect_accomplice(event_index)?;
             }
         }
 
         #[cfg(feature = "malice-detection")]
-        {
-            self.detect_premature_gossip()?;
-
-            for event_index in known {
-                self.detect_spam(src_index, event_index);
-            }
-        }
+        self.detect_premature_gossip()?;
 
         Ok(forking_peers)
     }
@@ -565,16 +545,20 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         &mut self,
         packed_event: PackedEvent<T, S::PublicId>,
         forking_peers: &PeerIndexSet,
-    ) -> Result<UnpackedEvent<T, S::PublicId>> {
-        let mut unpacked_event =
-            Event::unpack(packed_event, &forking_peers, &self.event_context())?;
-        if let Some((payload_key, observation_info)) = unpacked_event.take_observation() {
-            let _ = self
-                .observations
-                .entry(payload_key)
-                .or_insert_with(|| observation_info);
+    ) -> Result<Option<Event<S::PublicId>>> {
+        if let Some(unpacked_event) =
+            Event::unpack(packed_event, &forking_peers, &self.event_context())?
+        {
+            if let Some((payload_key, observation_info)) = unpacked_event.observation_for_store {
+                let _ = self
+                    .observations
+                    .entry(payload_key)
+                    .or_insert_with(|| observation_info);
+            }
+            Ok(Some(unpacked_event.event))
+        } else {
+            Ok(None)
         }
-        Ok(unpacked_event)
     }
 
     fn new_event_from_observation(
@@ -1817,41 +1801,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .map_err(|_| Error::PrematureGossip)
     }
 
-    fn detect_spam(&mut self, src_index: PeerIndex, known_event_index: EventIndex) {
-        if self.unprovable_offenders.contains(src_index) {
-            // Already accused.
-            return;
-        }
-
-        let spam = {
-            let their_event = self
-                .peer_list
-                .last_gossiped_event_by(src_index)
-                .and_then(|index| self.get_known_event(index).ok())
-                .and_then(|event| self.last_ancestor_by(event, src_index));
-            let their_event = if let Some(their_event) = their_event {
-                their_event
-            } else {
-                return;
-            };
-
-            let known_event = if let Ok(event) = self.get_known_event(known_event_index) {
-                event
-            } else {
-                return;
-            };
-
-            self.last_ancestor_by(their_event, PeerIndex::OUR)
-                .map(|our_event| self.graph.is_descendant(our_event, known_event))
-                .unwrap_or(false)
-        };
-
-        if spam {
-            let _ = self.unprovable_offenders.insert(src_index);
-            self.accuse(src_index, Malice::Unprovable(UnprovableMalice::Spam));
-        }
-    }
-
     fn accuse(&mut self, offender: PeerIndex, malice: Malice<T, S::PublicId>) {
         self.pending_accusations.push((offender, malice));
     }
@@ -2012,28 +1961,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .next()
             .unwrap_or_else(|| self.peer_list.voters().map(|(_, peer)| peer.id()).collect())
     }
-
-    // Returns the last ancestor of the given event created by the given peer, if any.
-    fn last_ancestor_by<'a>(
-        &'a self,
-        event: IndexedEventRef<'a, S::PublicId>,
-        creator: PeerIndex,
-    ) -> Option<IndexedEventRef<'a, S::PublicId>> {
-        use crate::gossip::LastAncestor;
-
-        match event.last_ancestor_by(creator) {
-            LastAncestor::Some(index) => self
-                .peer_list
-                .events_by_index(creator, index)
-                .next()
-                .and_then(|index| self.get_known_event(index).ok()),
-            LastAncestor::None => None,
-            LastAncestor::Fork => self
-                .graph
-                .ancestors(event)
-                .find(|ancestor| ancestor.creator() == creator),
-        }
-    }
 }
 
 impl<T: NetworkEvent, S: SecretId> Drop for Parsec<T, S> {
@@ -2184,11 +2111,11 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
 
     pub fn unpack_and_add_event(
         &mut self,
-        event: PackedEvent<T, S::PublicId>,
+        packed_event: PackedEvent<T, S::PublicId>,
     ) -> Result<EventIndex> {
-        match self.0.unpack(event, &PeerIndexSet::default())? {
-            UnpackedEvent::New(event, _) => self.0.add_event(event),
-            UnpackedEvent::Known(index) => Ok(index),
+        match self.0.unpack(packed_event, &PeerIndexSet::default())? {
+            Some(event) => self.0.add_event(event),
+            None => Err(Error::Logic),
         }
     }
 
