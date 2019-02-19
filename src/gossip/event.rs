@@ -222,14 +222,14 @@ impl<P: PublicId> Event<P> {
         packed_event: PackedEvent<T, P>,
         forking_peers: &PeerIndexSet,
         ctx: &EventContextRef<T, S>,
-    ) -> Result<UnpackedEvent<T, P>, Error> {
+    ) -> Result<Option<UnpackedEvent<T, P>>, Error> {
         let hash = compute_event_hash_and_verify_signature(
             &packed_event.content,
             &packed_event.signature,
         )?;
 
-        if let Some(index) = ctx.graph.get_index(&hash) {
-            return Ok(UnpackedEvent::Known(index));
+        if ctx.graph.contains(&hash) {
+            return Ok(None);
         }
 
         let graph = ctx.graph;
@@ -237,14 +237,14 @@ impl<P: PublicId> Event<P> {
         let (content, observation_for_store) = Content::unpack(packed_event.content, ctx)?;
         let cache = Cache::new(hash, &content, graph, peer_list, forking_peers);
 
-        Ok(UnpackedEvent::New(
-            Self {
+        Ok(Some(UnpackedEvent {
+            event: Self {
                 content,
                 signature: packed_event.signature,
                 cache,
             },
             observation_for_store,
-        ))
+        }))
     }
 
     // Creates a `PackedEvent` from this `Event`.
@@ -504,20 +504,9 @@ impl Event<PeerId> {
 }
 
 #[derive(Debug)]
-pub(crate) enum UnpackedEvent<T: NetworkEvent, P: PublicId> {
-    // Event is already in our gossip graph
-    Known(EventIndex),
-    // Event is not yet in our gossip graph
-    New(Event<P>, ObservationForStore<T, P>),
-}
-
-impl<T: NetworkEvent, P: PublicId> UnpackedEvent<T, P> {
-    pub fn take_observation(&mut self) -> ObservationForStore<T, P> {
-        match self {
-            UnpackedEvent::New(_, observation) => observation.take(),
-            UnpackedEvent::Known(_) => None,
-        }
-    }
+pub(crate) struct UnpackedEvent<T: NetworkEvent, P: PublicId> {
+    pub event: Event<P>,
+    pub observation_for_store: ObservationForStore<T, P>,
 }
 
 pub(crate) enum LastAncestor {
@@ -798,10 +787,7 @@ mod tests {
         dst: EventContextRef<Transaction, PeerId>,
     ) -> Event<PeerId> {
         let e = unwrap!(event.pack(src));
-        match unwrap!(Event::unpack(e, &PeerIndexSet::default(), &dst)) {
-            UnpackedEvent::New(e, _) => e,
-            UnpackedEvent::Known(_) => panic!("Unexpected known event"),
-        }
+        unwrap!(unwrap!(Event::unpack(e, &PeerIndexSet::default(), &dst))).event
     }
 
     #[test]
@@ -978,28 +964,24 @@ mod tests {
         let _ = alice.observations.insert(key, observation_info);
 
         let packed_event = unwrap!(event_from_observation.pack(alice.as_ref()));
-        let unpacked_event = match unwrap!(Event::unpack(
+        let unpacked_event = unwrap!(unwrap!(Event::unpack(
             packed_event.clone(),
             &PeerIndexSet::default(),
             &alice.as_ref()
-        )) {
-            UnpackedEvent::New(event, _) => event,
-            UnpackedEvent::Known(_) => panic!("Unexpected known event"),
-        };
+        )))
+        .event;
 
         assert_eq!(event_from_observation, unpacked_event);
         assert!(!alice.graph.contains(unpacked_event.hash()));
 
         let _ = alice.graph.insert(unpacked_event);
 
-        match unwrap!(Event::unpack(
+        assert!(unwrap!(Event::unpack(
             packed_event,
             &PeerIndexSet::default(),
             &alice.as_ref()
-        )) {
-            UnpackedEvent::New(_, _) => panic!("Unexpected new event"),
-            UnpackedEvent::Known(_) => (),
-        }
+        ))
+        .is_none());
     }
 
     #[test]

@@ -215,13 +215,6 @@ impl<S: SecretId> PeerList<S> {
             .flat_map(move |peer| peer.events_by_index(index_by_creator))
     }
 
-    /// Returns the index of the last event gossiped to us by the given peer.
-    #[cfg(feature = "malice-detection")]
-    pub fn last_gossiped_event_by(&self, peer_index: PeerIndex) -> Option<EventIndex> {
-        self.get(peer_index)
-            .and_then(|peer| peer.last_gossiped_event)
-    }
-
     /// Record that the given peer gossiped to us the given event.
     pub fn record_gossiped_event_by(&mut self, index: PeerIndex, event_index: EventIndex) {
         if let Some(peer) = self.get_known_mut(index) {
