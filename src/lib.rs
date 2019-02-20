@@ -206,7 +206,7 @@ pub mod mock;
 
 pub use crate::block::Block;
 #[cfg(feature = "dump-graphs")]
-pub use crate::dump_graph::DIR;
+pub use crate::dump_graph::{DumpGraphMode, DIR, DUMP_MODE};
 pub use crate::error::{Error, Result};
 pub use crate::gossip::{EventHash, PackedEvent, Request, Response};
 pub use crate::id::{Proof, PublicId, SecretId};

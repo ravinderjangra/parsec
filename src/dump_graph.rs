@@ -22,6 +22,12 @@ pub(crate) fn init() {
     detail::init()
 }
 
+#[derive(Clone)]
+pub enum DumpGraphContext {
+    ConsensusReached,
+    DroppingParsec,
+}
+
 /// This function will dump the graphs from the specified peer in dot format to a random folder in
 /// the system's temp dir.  It will also try to create an SVG from each such dot file, but will not
 /// fail or report failure if the SVG files can't be created.  The location of this folder will be
@@ -35,6 +41,7 @@ pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
     meta_election: &MetaElection,
     peer_list: &PeerList<S>,
     observations: &ObservationStore<T, S::PublicId>,
+    info: &DumpGraphContext,
 ) {
     detail::to_file(
         owner_id,
@@ -42,6 +49,7 @@ pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
         meta_election,
         peer_list,
         observations,
+        info,
     )
 }
 #[cfg(not(feature = "dump-graphs"))]
@@ -51,14 +59,16 @@ pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
     _: &MetaElection,
     _: &PeerList<S>,
     _: &ObservationStore<T, S::PublicId>,
+    _: &DumpGraphContext,
 ) {
 }
 
 #[cfg(feature = "dump-graphs")]
-pub use self::detail::DIR;
+pub use self::detail::{DumpGraphMode, DIR, DUMP_MODE};
 
 #[cfg(feature = "dump-graphs")]
 mod detail {
+    use super::DumpGraphContext;
     use crate::gossip::{
         Cause, Event, EventHash, EventIndex, Graph, GraphSnapshot, IndexedEventRef,
     };
@@ -102,6 +112,16 @@ mod detail {
                 x.split(',').map(|x | x.to_string()).collect::<Vec<String>>()
             })
         };
+
+        static ref DUMP_GRAPH_MODE: DumpGraphMode = {
+            // PARSEC_DUMP_GRAPH_MODE=on_parsec_drop to only dump graph when parsec is dropped.
+            env::var("PARSEC_DUMP_GRAPH_MODE").ok().and_then(|x| {
+                match x.as_ref() {
+                    "on_parsec_drop" => Some(DumpGraphMode::OnParsecDrop),
+                    _ => None
+                }
+            }).unwrap_or(DumpGraphMode::OnConsensus)
+        };
     }
 
     thread_local!(
@@ -124,10 +144,23 @@ mod detail {
             }
             dir
         };
+
+        /// Which dumps to output
+        pub static DUMP_MODE: RefCell<DumpGraphMode> = RefCell::new(DUMP_GRAPH_MODE.clone());
     );
 
     thread_local!(static DUMP_COUNTS: RefCell<BTreeMap<String, usize>> =
         RefCell::new(BTreeMap::new()));
+
+    /// To control the dump graph behaviour.
+    /// In all modes, also dump when parsec is dropped if panicking.
+    #[derive(Clone)]
+    pub enum DumpGraphMode {
+        /// Only dump on consensus.
+        OnConsensus,
+        /// Only dump when parsec is dropped.
+        OnParsecDrop,
+    }
 
     fn catch_dump<S: SecretId>(
         mut file_path: PathBuf,
@@ -158,7 +191,18 @@ mod detail {
         meta_election: &MetaElection,
         peer_list: &PeerList<S>,
         observations: &ObservationStore<T, S::PublicId>,
+        info: &DumpGraphContext,
     ) {
+        let need_process = DUMP_MODE.with(|mode| match (info, &*mode.borrow_mut()) {
+            (DumpGraphContext::DroppingParsec, DumpGraphMode::OnParsecDrop)
+            | (DumpGraphContext::ConsensusReached, DumpGraphMode::OnConsensus) => true,
+            (DumpGraphContext::DroppingParsec, _) if thread::panicking() => true,
+            _ => false,
+        });
+        if !need_process {
+            return;
+        }
+
         let id = sanitize_string(format!("{:?}", owner_id));
 
         if let Some(ref filter_peers) = *FILTER_PEERS {

@@ -104,7 +104,7 @@ use clap::{App, Arg};
 use parsec::dev_utils::ObservationEvent::*;
 use parsec::dev_utils::{Environment, ObservationSchedule, RngChoice, Schedule, ScheduleOptions};
 use parsec::mock::{PeerId, Transaction};
-use parsec::{Observation, DIR};
+use parsec::{DumpGraphMode, Observation, DIR, DUMP_MODE};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs::{self, File};
 use std::io::{self, Read};
@@ -251,7 +251,8 @@ fn add_benches(scenarios: &mut Scenarios) {
             )
         })
         .seed([1, 2, 3, 4])
-        .file("Alice", "minimal.dot");
+        .file("Alice", "minimal.dot")
+        .dump_mode(DumpGraphMode::OnParsecDrop);
 
     let _ = scenarios
         .add("benches", |env| {
@@ -265,7 +266,8 @@ fn add_benches(scenarios: &mut Scenarios) {
             )
         })
         .seed([1, 2, 3, 4])
-        .file("Alice", "static.dot");
+        .file("Alice", "static.dot")
+        .dump_mode(DumpGraphMode::OnParsecDrop);
 
     let _ = scenarios
         .add("benches", |env| {
@@ -280,7 +282,8 @@ fn add_benches(scenarios: &mut Scenarios) {
             )
         })
         .seed([1, 2, 3, 4])
-        .file("Alice", "dynamic.dot");
+        .file("Alice", "dynamic.dot")
+        .dump_mode(DumpGraphMode::OnParsecDrop);
 }
 
 fn add_bench_section_size(scenarios: &mut Scenarios) {
@@ -314,7 +317,8 @@ fn add_bench_scalability(s: &mut Scenarios, opaque_to_add: usize, genesis_size: 
             )
         })
         .seed([1, 2, 3, 4])
-        .file("Alice", &file_name_a);
+        .file("Alice", &file_name_a)
+        .dump_mode(DumpGraphMode::OnParsecDrop);
 }
 
 struct Scenario {
@@ -322,6 +326,7 @@ struct Scenario {
     seed: RngChoice,
     schedule_fn: Box<FnMut(&mut Environment) -> Schedule>,
     files: BTreeMap<String, String>,
+    dump_mode: DumpGraphMode,
 }
 
 impl Scenario {
@@ -335,6 +340,7 @@ impl Scenario {
             seed: RngChoice::SeededRandom,
             schedule_fn: Box::new(schedule),
             files: BTreeMap::new(),
+            dump_mode: DumpGraphMode::OnConsensus,
         }
     }
 
@@ -352,6 +358,13 @@ impl Scenario {
         self
     }
 
+    /// Use the given dump mode instead of DumpGraphMode::OnConsensus.
+    #[allow(unused)]
+    pub fn dump_mode(&mut self, dump_mode: DumpGraphMode) -> &mut Self {
+        self.dump_mode = dump_mode;
+        self
+    }
+
     fn matches(&self, pattern: &str) -> bool {
         if self.files.is_empty() {
             self.name.contains(pattern)
@@ -364,12 +377,17 @@ impl Scenario {
 
     fn run(&mut self, mode: Mode) {
         println!("Running scenario {}", self.name);
+        {
+            DUMP_MODE.with(|mode| {
+                *mode.borrow_mut() = self.dump_mode.clone();
+            });
 
-        let mut env = Environment::new(self.seed);
-        let schedule = (self.schedule_fn)(&mut env);
-        println!("Using {:?}", env.rng);
-        let result = env.network.execute_schedule(&mut env.rng, schedule);
-        assert!(result.is_ok(), "{:?}", result);
+            let mut env = Environment::new(self.seed);
+            let schedule = (self.schedule_fn)(&mut env);
+            println!("Using {:?}", env.rng);
+            let result = env.network.execute_schedule(&mut env.rng, schedule);
+            assert!(result.is_ok(), "{:?}", result);
+        }
 
         if self.files.is_empty() {
             self.collect_files(&default_file_map(), mode);

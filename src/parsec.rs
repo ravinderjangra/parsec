@@ -684,6 +684,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             &self.meta_election,
             &self.peer_list,
             &self.observations,
+            &dump_graph::DumpGraphContext::ConsensusReached,
         );
 
         let payload = self
@@ -1965,15 +1966,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
 impl<T: NetworkEvent, S: SecretId> Drop for Parsec<T, S> {
     fn drop(&mut self) {
-        if ::std::thread::panicking() {
-            dump_graph::to_file(
-                self.our_pub_id(),
-                &self.graph,
-                &self.meta_election,
-                &self.peer_list,
-                &self.observations,
-            );
-        }
+        dump_graph::to_file(
+            self.our_pub_id(),
+            &self.graph,
+            &self.meta_election,
+            &self.peer_list,
+            &self.observations,
+            &dump_graph::DumpGraphContext::DroppingParsec,
+        );
     }
 }
 
