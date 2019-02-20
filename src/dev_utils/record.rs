@@ -271,7 +271,7 @@ mod tests {
         }
     }
 
-    /// Run smoke test using given dot file
+    /// Run smoke test using given dot file.
     /// Use ignore_last_events to skip fake request that replay generates to send remaining gossip events.
     fn smoke(path: &str, ignore_last_events: usize) {
         let contents = unwrap!(parse_dot_file(path));
@@ -289,8 +289,9 @@ mod tests {
         assert_eq!(expected_events, actual_events);
     }
 
-    /// Run smoke test using given dot file checking the consensus history
-    fn smoke_consensus_history(path: &str) {
+    /// Run smoke test using given dot file checking the consensus history.
+    /// missing_one_consensus=true if the dump-graphs was taken when consensus is reached (last block missing).
+    fn smoke_consensus_history(path: &str, missing_one_consensus: bool) {
         let contents = unwrap!(parse_dot_file(path));
         let replay = Record::from(contents);
         let expected_history = replay.consensus_history();
@@ -298,10 +299,14 @@ mod tests {
         let actual = replay.play();
         let actual_history = actual.meta_election_consensus_history_hash();
 
-        assert_eq!(
-            TrucatedHashes::new_with_one_missing_element(&expected_history),
-            TrucatedHashes::new_with_one_trucated_element(&actual_history)
-        );
+        if missing_one_consensus {
+            assert_eq!(
+                TrucatedHashes::new_with_one_missing_element(&expected_history),
+                TrucatedHashes::new_with_one_trucated_element(&actual_history)
+            );
+        } else {
+            assert_eq!(expected_history, actual_history);
+        }
     }
 
     #[test]
@@ -330,13 +335,16 @@ mod tests {
 
     #[test]
     fn smoke_consensus_history_parsec() {
-        smoke_consensus_history("input_graphs/benches/minimal.dot")
+        let missing_one_consensus = false;
+        smoke_consensus_history("input_graphs/benches/minimal.dot", missing_one_consensus)
     }
 
     #[test]
     fn smoke_consensus_history_other_peer_names() {
+        let missing_one_consensus = true;
         smoke_consensus_history(
             "input_graphs/dev_utils_record_tests_smoke_other_peer_names/annie.dot",
+            missing_one_consensus,
         )
     }
 }

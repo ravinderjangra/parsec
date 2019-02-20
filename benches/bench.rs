@@ -67,9 +67,6 @@ use parsec::dev_utils::Record;
 use parsec::ConsensusMode;
 
 #[cfg(feature = "testing")]
-use std::cmp;
-
-#[cfg(feature = "testing")]
 fn bench(c: &mut Criterion) {
     for name in &["minimal", "static", "dynamic"] {
         bench_dot_file(c, "benches", name, ConsensusMode::Supermajority);
@@ -106,18 +103,23 @@ fn bench(c: &mut Criterion) {
     }
 
     for name in &[
-        "PublicIdname754598-054",
-        "PublicIdname754598-110",
-        "PublicIdname754598-111",
-        "PublicIdname93b63e-054",
-        "PublicIdname93b63e-113",
-        "PublicIdname93b63e-194",
+        "PublicIdname754598-001",
+        "PublicIdname754598-002",
+        "PublicIdname754598-003",
+        "PublicIdname93b63e-001",
+        "PublicIdname93b63e-002",
+        "PublicIdname93b63e-003",
+        "PublicIdname93b63e-004",
+        "PublicIdname93b63e-005",
     ] {
         // Benchmark generated using routing test with seed Some([0,1,2,4]).
-        // Only the last dumps before a section change were copied (last before drop in size).
         //
-        // PARSEC_DUMP_GRAPH_SVG=0 PARSEC_DUMP_GRAPH_PEERS=PublicIdname754598,PublicIdname93b63e
-        // RUSTFLAGS=-g cargo test --release --features=mock merge_three_sections_into_one
+        // PARSEC_DUMP_GRAPH_MODE=on_parsec_drop PARSEC_DUMP_GRAPH_SVG=0 PARSEC_DUMP_GRAPH_PEERS=PublicIdname754598,PublicIdname93b63e
+        // cargo test --release --features=mock merge_three_sections_into_one
+        //
+        // Remove assert and run cargo bench with dump-graphs to generate final version to commit:
+        // PARSEC_DUMP_GRAPH_MODE=on_parsec_drop PARSEC_DUMP_GRAPH_SVG=0
+        // cargo bench --features=testing,dump-graphs -- --test Public
         bench_dot_file(
             c,
             "bench_routing/mock_crust_merge_merge_three_sections_into_one",
@@ -147,23 +149,13 @@ fn bench_dot_file(
             || record.clone(),
             |record| {
                 let expected_history = record.consensus_history();
-                let missing_expected_element = 1;
 
                 let parsec = record.play();
                 let actual_history = parsec.meta_election_consensus_history_hash();
 
                 // Verify parsec reached the same consensus as in source dot file.
                 // The last consensused element is not in dot file as it is added after generating the file.
-                assert_eq!(
-                    (
-                        expected_history.len() + missing_expected_element,
-                        &expected_history[..]
-                    ),
-                    (
-                        actual_history.len(),
-                        &actual_history[0..cmp::min(actual_history.len(), expected_history.len())]
-                    )
-                );
+                assert_eq!(expected_history, actual_history);
             },
         )
     });
