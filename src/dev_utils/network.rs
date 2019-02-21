@@ -520,6 +520,9 @@ impl Network {
                 self.msg_queue.clear();
             }
             ScheduleEvent::AddPeer(peer_id) => {
+                if !self.allow_addition_of_peer() {
+                    return Ok(false);
+                }
                 let current_peers = self.active_peers().map(|peer| peer.id().clone()).collect();
                 let _ = self.peers.insert(
                     peer_id.clone(),
@@ -561,17 +564,32 @@ impl Network {
                 }
             }
             ScheduleEvent::VoteFor(voting_peer_id, observation) => {
-                // Skip voting by removed/failed peers.
-                if !self.peer(&voting_peer_id).is_running() {
-                    return Ok(true);
+                if let Some(voter) = self.peers.get(&voting_peer_id) {
+                    // Skip voting by removed/failed peers.
+                    if !voter.is_running() {
+                        return Ok(true);
+                    }
+                } else {
+                    // Retry voting once the voting peer has been added.
+                    return Ok(false);
                 }
 
-                if let ParsecObservation::Remove { ref peer_id, .. } = observation {
-                    if self.allow_removal_of_peer(&peer_id) {
-                        (*self.peer_mut(&peer_id)).mark_network_view_as_leaving();
-                    } else {
-                        return Ok(false);
+                match observation {
+                    ParsecObservation::Remove { ref peer_id, .. } => {
+                        if self.allow_removal_of_peer(&peer_id) {
+                            (*self.peer_mut(&peer_id)).mark_network_view_as_leaving();
+                        } else {
+                            return Ok(false);
+                        }
                     }
+                    ParsecObservation::Add { ref peer_id, .. } => {
+                        // If the peer to be added hasn't yet been inserted into `self.peers`, it
+                        // means we should postpone voting for its addition until it is inserted.
+                        if !self.peers.contains_key(peer_id) {
+                            return Ok(false);
+                        }
+                    }
+                    _ => (),
                 }
 
                 self.peer_mut(&voting_peer_id).vote_for(&observation);
@@ -581,15 +599,22 @@ impl Network {
     }
 
     fn allow_removal_of_peer(&self, peer_id: &PeerId) -> bool {
-        match self.peer(peer_id).network_view() {
-            NetworkView::Joining => false,
-            NetworkView::Joined => {
+        match self.peers.get(peer_id).map(Peer::network_view) {
+            None | Some(NetworkView::Joining) => false,
+            Some(NetworkView::Joined) => {
                 let joined_count = self.num_with_network_view(NetworkView::Joined);
                 let leaving_count = self.num_with_network_view(NetworkView::Leaving);
                 let current_count = joined_count + leaving_count;
                 is_more_than_two_thirds(joined_count - 1, current_count)
             }
-            NetworkView::Leaving | NetworkView::Left => true,
+            Some(NetworkView::Leaving) | Some(NetworkView::Left) => true,
         }
+    }
+
+    fn allow_addition_of_peer(&self) -> bool {
+        let joined_count = self.num_with_network_view(NetworkView::Joined);
+        // Increment by 1 to include the potential new joiner in the joining count.
+        let joining_count = self.num_with_network_view(NetworkView::Joining) + 1;
+        is_more_than_two_thirds(joined_count, joined_count + joining_count)
     }
 }
