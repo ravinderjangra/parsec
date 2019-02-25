@@ -6,10 +6,7 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-#[cfg(any(
-    all(test, feature = "malice-detection", feature = "mock"),
-    feature = "testing"
-))]
+#[cfg(all(test, feature = "malice-detection", feature = "mock"))]
 use crate::error::Error;
 #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 use crate::gossip::EventContextRef;
@@ -736,7 +733,7 @@ impl ParsedContents {
         Some(event)
     }
 
-    #[cfg(all(feature = "malice-detection", feature = "mock"))]
+    #[cfg(all(test, feature = "malice-detection", feature = "mock"))]
     /// Insert event into the `ParsedContents`. Note this does not perform any validations
     /// whatsoever, so this is useful for simulating all kinds of invalid or malicious situations.
     pub fn add_event(&mut self, event: Event<PeerId>) -> EventIndex {
@@ -760,10 +757,7 @@ impl ParsedContents {
         }
     }
 
-    #[cfg(any(
-        all(test, feature = "malice-detection", feature = "mock"),
-        feature = "testing"
-    ))]
+    #[cfg(all(test, feature = "malice-detection", feature = "mock"))]
     pub fn new_event_from_observation(
         &mut self,
         self_parent: EventIndex,

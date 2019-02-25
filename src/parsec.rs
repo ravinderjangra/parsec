@@ -11,8 +11,6 @@ use crate::block::{Block, BlockGroup};
 use crate::dev_utils::ParsedContents;
 use crate::dump_graph;
 use crate::error::{Error, Result};
-#[cfg(all(test, feature = "mock"))]
-use crate::gossip::EventHash;
 #[cfg(all(test, any(feature = "testing", feature = "mock")))]
 use crate::gossip::GraphSnapshot;
 use crate::gossip::{
@@ -25,6 +23,8 @@ use crate::meta_voting::{MetaElection, MetaEvent, MetaEventBuilder, MetaVote, Ob
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]
 use crate::mock::{PeerId, Transaction};
 use crate::network_event::NetworkEvent;
+#[cfg(feature = "malice-detection")]
+use crate::observation::UnprovableMalice;
 use crate::observation::{
     is_more_than_two_thirds, ConsensusMode, Malice, Observation, ObservationHash, ObservationKey,
     ObservationStore,
@@ -320,13 +320,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             self.our_pub_id(),
             src
         );
+
+        #[cfg(feature = "malice-detection")]
+        self.detect_invalid_request_message(&req, src)?;
+
         let src_index = self.get_peer_index(src)?;
-
-        let other_parent = req.hash_of_last_event_created_by(src)?;
-        let other_parent = other_parent.and_then(|hash| self.graph.get_index(&hash));
-
-        let forking_peers = self.unpack_and_add_events(src_index, req.packed_events)?;
-        self.create_sync_event(src_index, true, forking_peers, other_parent)?;
+        let (other_parent, forking_peers) =
+            self.unpack_and_add_events(src_index, req.packed_events)?;
+        self.create_sync_event(true, other_parent, forking_peers)?;
         self.create_accusation_events()?;
         self.flush_pending_events()?;
 
@@ -346,13 +347,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             self.our_pub_id(),
             src
         );
+
+        #[cfg(feature = "malice-detection")]
+        self.detect_invalid_response_message(&resp, src)?;
+
         let src_index = self.get_peer_index(src)?;
-
-        let other_parent = resp.hash_of_last_event_created_by(src)?;
-        let other_parent = other_parent.and_then(|hash| self.graph.get_index(&hash));
-
-        let forking_peers = self.unpack_and_add_events(src_index, resp.packed_events)?;
-        self.create_sync_event(src_index, false, forking_peers, other_parent)?;
+        let (other_parent, forking_peers) =
+            self.unpack_and_add_events(src_index, resp.packed_events)?;
+        self.create_sync_event(false, other_parent, forking_peers)?;
         self.create_accusation_events()?;
         self.flush_pending_events()
     }
@@ -514,14 +516,20 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .collect()
     }
 
+    // Returns the list peers which have created forked events, and the event to use as the
+    // other-parent when creating our sync event as a result of handling this message.
     fn unpack_and_add_events(
         &mut self,
         src_index: PeerIndex,
         packed_events: Vec<PackedEvent<T, S::PublicId>>,
-    ) -> Result<PeerIndexSet> {
+    ) -> Result<(EventIndex, PeerIndexSet)> {
         self.confirm_self_state(PeerState::RECV)?;
         self.confirm_peer_state(src_index, PeerState::SEND)?;
 
+        let hash_of_last_event = packed_events
+            .last()
+            .map(PackedEvent::compute_hash)
+            .ok_or_else(|| Error::InvalidMessage)?;
         let mut forking_peers = PeerIndexSet::default();
         for packed_event in packed_events {
             if let Some(event) = self.unpack(packed_event, &forking_peers)? {
@@ -552,7 +560,11 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         #[cfg(feature = "malice-detection")]
         self.detect_premature_gossip()?;
 
-        Ok(forking_peers)
+        let last_event_index = self
+            .graph
+            .get_index(&hash_of_last_event)
+            .ok_or_else(|| Error::InvalidMessage)?;
+        Ok((last_event_index, forking_peers))
     }
 
     fn unpack(
@@ -1426,19 +1438,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
     // Constructs a sync event to prove receipt of a `Request` or `Response` (depending on the value
     // of `is_request`) from `src`, then add it to our graph.
-    //
-    // `opt_other_parent` will contain the other-parent this new sync event should use, unless the
-    // gossip message from the peer was empty, in which case this will be `None` and we'll just use
-    // `src`'s most recent event we know of.
     fn create_sync_event(
         &mut self,
-        src_index: PeerIndex,
         is_request: bool,
+        other_parent: EventIndex,
         forking_peers: PeerIndexSet,
-        opt_other_parent: Option<EventIndex>,
     ) -> Result<()> {
-        let other_parent = self.other_parent_for_sync_event(src_index, opt_other_parent)?;
-
         if self.peer_list.last_event(PeerIndex::OUR).is_none() {
             self.pending_events.push(PendingEvent::Sync {
                 is_request,
@@ -1476,24 +1481,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         let _ = self.add_event(event)?;
         Ok(())
-    }
-
-    fn other_parent_for_sync_event(
-        &self,
-        src_index: PeerIndex,
-        opt_other_parent: Option<EventIndex>,
-    ) -> Result<EventIndex> {
-        match opt_other_parent {
-            Some(index) => Ok(index),
-            None => self.peer_list.last_event(src_index).ok_or_else(|| {
-                log_or_panic!(
-                    "{:?} missing last event index of {:?}.",
-                    self.our_pub_id(),
-                    src_index
-                );
-                Error::Logic
-            }),
-        }
     }
 
     // Returns an iterator over `self.events` which will yield all the events we think `peer_id`
@@ -1640,6 +1627,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         self.detect_duplicate_vote(event);
         self.detect_fork(event);
         self.detect_invalid_accusation(event);
+        self.detect_invalid_request_event(event);
+        self.detect_invalid_response_event(event);
 
         // TODO: detect other forms of malice here
 
@@ -1946,6 +1935,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             | Malice::MissingGenesis(hash)
             | Malice::IncorrectGenesis(hash)
             | Malice::InvalidAccusation(hash)
+            | Malice::InvalidRequest(hash)
+            | Malice::InvalidResponse(hash)
             | Malice::Accomplice(hash, _) => self
                 .graph
                 .get_index(hash)
@@ -2055,6 +2046,83 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             })
             .cloned()
             .collect())
+    }
+
+    fn detect_invalid_request_message(
+        &mut self,
+        request: &Request<T, S::PublicId>,
+        src: &S::PublicId,
+    ) -> Result<()> {
+        let result = request.validate(src, self.event_context());
+        if result.is_err() {
+            let sender = self.get_peer_index(src)?;
+            self.accuse(
+                sender,
+                Malice::Unprovable(UnprovableMalice::InvalidRequestMessage),
+            );
+        }
+        result
+    }
+
+    fn detect_invalid_response_message(
+        &mut self,
+        response: &Response<T, S::PublicId>,
+        src: &S::PublicId,
+    ) -> Result<()> {
+        let result = response.validate(src, self.event_context());
+        if result.is_err() {
+            let sender = self.get_peer_index(src)?;
+            self.accuse(
+                sender,
+                Malice::Unprovable(UnprovableMalice::InvalidResponseMessage),
+            );
+        }
+        result
+    }
+
+    fn detect_invalid_request_event(&mut self, event: &Event<S::PublicId>) {
+        if !event.is_request() {
+            return;
+        }
+
+        let is_valid = self
+            .graph
+            .other_parent(event)
+            .map(|other_parent| {
+                Some(event.creator()) == other_parent.requesting_recipient()
+                    && self.graph.is_awaiting_associated_event(other_parent)
+            })
+            .unwrap_or(false);
+
+        if !is_valid {
+            self.accuse(event.creator(), Malice::InvalidRequest(*event.hash()));
+        }
+    }
+
+    fn detect_invalid_response_event(&mut self, event: &Event<S::PublicId>) {
+        if !event.is_response() {
+            return;
+        }
+
+        let is_valid = self
+            .graph
+            .other_parent(event)
+            .and_then(|other_parent| self.graph.self_sync_ancestor(other_parent))
+            .and_then(|request_event| {
+                self.graph
+                    .other_parent(request_event)
+                    .map(|requesting_event| (request_event, requesting_event))
+            })
+            .map(|(request_event, requesting_event)| {
+                Some(request_event.creator()) == requesting_event.requesting_recipient()
+                    && requesting_event.creator() == event.creator()
+                    && self.graph.is_awaiting_associated_event(request_event)
+            })
+            .unwrap_or(false);
+
+        if !is_valid {
+            self.accuse(event.creator(), Malice::InvalidResponse(*event.hash()));
+        }
     }
 
     fn genesis_group(&self) -> BTreeSet<&S::PublicId> {
@@ -2222,23 +2290,6 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
     #[cfg(all(test, feature = "mock"))]
     pub fn consensused_blocks(&self) -> impl Iterator<Item = &Block<T, S::PublicId>> {
         self.0.consensused_blocks.iter().flatten()
-    }
-
-    #[cfg(all(test, feature = "mock"))]
-    pub fn create_sync_event(
-        &mut self,
-        src: &S::PublicId,
-        is_request: bool,
-        forking_peers: PeerIndexSet,
-        other_parent: Option<EventHash>,
-    ) -> Result<()> {
-        let src_index = unwrap!(self.0.peer_list.get_index(src));
-        let other_parent = other_parent
-            .as_ref()
-            .map(|hash| unwrap!(self.0.graph.get_index(hash)));
-
-        self.0
-            .create_sync_event(src_index, is_request, forking_peers, other_parent)
     }
 
     #[cfg(all(test, feature = "mock"))]
