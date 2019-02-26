@@ -20,6 +20,10 @@ use std::{cmp, usize};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct MetaElection {
+    // Index of this meta-election. Starts at 0 and is incremented by one when a new meta-election
+    // is started.
+    pub(crate) index: u64,
+    // Set of meta-events corresponding to the events in the gossip graph.
     pub(crate) meta_events: FnvHashMap<EventIndex, MetaEvent>,
     // The "round hash" for each set of meta votes.  They are held in sequence in the `Vec`, i.e.
     // the one for round `x` is held at index `x`.
@@ -43,6 +47,7 @@ pub(crate) struct MetaElection {
 impl MetaElection {
     pub fn new(voters: PeerIndexSet) -> Self {
         MetaElection {
+            index: 0,
             meta_events: FnvHashMap::default(),
             round_hashes: PeerIndexMap::default(),
             voters,
@@ -176,6 +181,7 @@ impl MetaElection {
 
         self.round_hashes.clear();
         self.consensus_history.extend(decided_keys);
+        self.index += 1;
     }
 
     pub fn initialise_round_hashes<'a, I, P>(&mut self, peer_ids: I)
@@ -209,6 +215,10 @@ impl MetaElection {
 
     pub fn unconsensused_events<'a>(&'a self) -> impl Iterator<Item = EventIndex> + 'a {
         self.unconsensused_events.iter().cloned()
+    }
+
+    pub fn index(&self) -> u64 {
+        self.index
     }
 
     fn add_interesting_event(&mut self, creator: PeerIndex, event_index: EventIndex) {

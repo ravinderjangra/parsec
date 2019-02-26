@@ -1315,7 +1315,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .map(|(_, vote, creator_id)| (creator_id.clone(), vote.clone()))
             .collect();
 
-        Block::new(&votes)
+        Block::new(&votes, self.meta_election.index())
     }
 
     // Returns the number of peers that created events which are seen by event X (descendant) and

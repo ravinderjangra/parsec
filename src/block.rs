@@ -19,11 +19,12 @@ use std::collections::{BTreeMap, BTreeSet};
 pub struct Block<T: NetworkEvent, P: PublicId> {
     payload: Observation<T, P>,
     proofs: BTreeSet<Proof<P>>,
+    election: u64,
 }
 
 impl<T: NetworkEvent, P: PublicId> Block<T, P> {
     /// Creates a `Block` from `votes`.
-    pub fn new(votes: &BTreeMap<P, Vote<T, P>>) -> Result<Self, Error> {
+    pub fn new(votes: &BTreeMap<P, Vote<T, P>>, election: u64) -> Result<Self, Error> {
         let payload = if let Some(vote) = votes.values().next() {
             vote.payload().clone()
         } else {
@@ -42,7 +43,11 @@ impl<T: NetworkEvent, P: PublicId> Block<T, P> {
             .collect();
         let proofs = proofs?;
 
-        Ok(Self { payload, proofs })
+        Ok(Self {
+            payload,
+            proofs,
+            election,
+        })
     }
 
     /// Returns the payload of this block.
@@ -53,6 +58,11 @@ impl<T: NetworkEvent, P: PublicId> Block<T, P> {
     /// Returns the proofs of this block.
     pub fn proofs(&self) -> &BTreeSet<Proof<P>> {
         &self.proofs
+    }
+
+    /// Return the index of the meta-election which decided this block.
+    pub fn election(&self) -> u64 {
+        self.election
     }
 
     /// Converts `vote` to a `Proof` and attempts to add it to the block.  Returns an error if

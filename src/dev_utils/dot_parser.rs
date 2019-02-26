@@ -864,6 +864,7 @@ fn convert_to_meta_election(
     peer_list: &PeerList<PeerId>,
 ) -> MetaElection {
     MetaElection {
+        index: 0,
         meta_events: meta_election
             .meta_events
             .into_iter()
