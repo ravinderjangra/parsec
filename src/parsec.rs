@@ -1944,6 +1944,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     .iter()
                     .any(|(off, mal)| (off, mal) == (offender, &malice))
             })
+            .filter(|(_, malice)| {
+                !self.pending_accusations.iter().any(|(off, mal)| match mal {
+                    Malice::Accomplice(_, ori_mal) => off == &creator && &**ori_mal == malice,
+                    _ => false,
+                })
+            })
             .cloned()
             .collect())
     }
