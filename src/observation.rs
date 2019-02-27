@@ -272,21 +272,26 @@ impl ObservationKey {
         }
     }
 
+    pub fn peer_index(&self) -> Option<PeerIndex> {
+        match *self {
+            ObservationKey::Single(_, peer_index) => Some(peer_index),
+            ObservationKey::Supermajority(_) => None,
+        }
+    }
+
     /// Compare `ObservationKey`s to achieve ordering that is consistent among different nodes.
     pub fn consistent_cmp<S: SecretId>(&self, other: &Self, peer_list: &PeerList<S>) -> Ordering {
-        if let (
-            ObservationKey::Single(lhs_hash, lhs_peer_index),
-            ObservationKey::Single(rhs_hash, rhs_peer_index),
-        ) = (*self, *other)
-        {
-            lhs_hash.cmp(&rhs_hash).then_with(|| {
-                let lhs_peer_id = peer_list.get(lhs_peer_index).map(|peer| peer.id());
-                let rhs_peer_id = peer_list.get(rhs_peer_index).map(|peer| peer.id());
-                lhs_peer_id.cmp(&rhs_peer_id)
-            })
-        } else {
-            self.hash().cmp(other.hash())
-        }
+        self.hash().cmp(other.hash()).then_with(|| {
+            let lhs_peer_id = self
+                .peer_index()
+                .and_then(|index| peer_list.get(index))
+                .map(|peer| peer.id());
+            let rhs_peer_id = other
+                .peer_index()
+                .and_then(|index| peer_list.get(index))
+                .map(|peer| peer.id());
+            lhs_peer_id.cmp(&rhs_peer_id)
+        })
     }
 }
 
