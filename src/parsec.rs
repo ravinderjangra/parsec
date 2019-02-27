@@ -6,7 +6,7 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use crate::block::Block;
+use crate::block::{Block, BlockGroup};
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]
 use crate::dev_utils::ParsedContents;
 use crate::dump_graph;
@@ -85,7 +85,7 @@ pub struct Parsec<T: NetworkEvent, S: SecretId> {
     // Information about observations stored in the graph, mapped to their hashes.
     observations: ObservationStore<T, S::PublicId>,
     // Consensused network events that have not been returned via `poll()` yet.
-    consensused_blocks: VecDeque<Block<T, S::PublicId>>,
+    consensused_blocks: VecDeque<BlockGroup<T, S::PublicId>>,
     // The map of meta votes of the events on each consensus block.
     meta_election: MetaElection,
     consensus_mode: ConsensusMode,
@@ -360,7 +360,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     /// Once the owning peer has been removed from the section (i.e. a block with payload
     /// `Observation::Remove(our_id)` has been made stable), then no further blocks will be
     /// enqueued. So, once `poll()` returns such a block, it will continue to return `None` forever.
-    pub fn poll(&mut self) -> Option<Block<T, S::PublicId>> {
+    pub fn poll(&mut self) -> Option<BlockGroup<T, S::PublicId>> {
         self.consensused_blocks.pop_front()
     }
 
@@ -405,6 +405,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 && self
                     .consensused_blocks
                     .iter()
+                    .flatten()
                     .any(|block| block.payload() == &info.observation)
             {
                 Some(&info.observation)
@@ -656,18 +657,23 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
 
         let mut peer_list_changes = Vec::with_capacity(payload_keys.len());
+        let mut blocks = Vec::with_capacity(payload_keys.len());
 
         for payload_key in &payload_keys {
             self.output_consensus_info(payload_key);
 
             match self.create_block(&payload_key) {
-                Ok(block) => self.consensused_blocks.push_back(block),
+                Ok(block) => blocks.push(block),
                 Err(Error::MissingVotes) => (),
                 Err(error) => return Err(error),
             }
 
             self.mark_observation_as_consensused(&payload_key);
             peer_list_changes.extend(self.handle_consensus(payload_key));
+        }
+
+        if !blocks.is_empty() {
+            self.consensused_blocks.push_back(BlockGroup(blocks));
         }
 
         self.meta_election
@@ -1315,7 +1321,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .map(|(_, vote, creator_id)| (creator_id.clone(), vote.clone()))
             .collect();
 
-        Block::new(&votes, self.meta_election.index())
+        Block::new(&votes)
     }
 
     // Returns the number of peers that created events which are seen by event X (descendant) and
@@ -2165,7 +2171,7 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
     }
 
     pub fn consensused_blocks(&self) -> impl Iterator<Item = &Block<T, S::PublicId>> {
-        self.0.consensused_blocks.iter()
+        self.0.consensused_blocks.iter().flatten()
     }
 
     pub fn create_sync_event(

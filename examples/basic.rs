@@ -158,8 +158,8 @@ impl Peer {
     }
 
     fn poll(&mut self) {
-        while let Some(block) = self.parsec.poll() {
-            self.blocks.push(block);
+        while let Some(blocks) = self.parsec.poll() {
+            self.blocks.extend(blocks);
         }
     }
 

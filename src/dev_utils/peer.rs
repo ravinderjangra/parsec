@@ -9,7 +9,7 @@
 use super::Observation;
 #[cfg(feature = "testing")]
 use super::ParsedContents;
-use crate::block::Block;
+use crate::block::{Block, BlockGroup};
 use crate::mock::{PeerId, Transaction};
 use crate::observation::{
     is_more_than_two_thirds, ConsensusMode, Malice, Observation as ParsecObservation,
@@ -82,7 +82,7 @@ pub struct Peer {
     id: PeerId,
     pub parsec: Parsec<Transaction, PeerId>,
     /// The blocks returned by `parsec.poll()`, held in the order in which they were returned.
-    blocks: Vec<Block<Transaction, PeerId>>,
+    grouped_blocks: Vec<BlockGroup<Transaction, PeerId>>,
     status: PeerStatus,
     network_view: NetworkView,
     votes_to_make: Vec<Observation>,
@@ -101,7 +101,7 @@ impl Peer {
         Self {
             id: id.clone(),
             parsec: Parsec::from_genesis(id, genesis_group, consensus_mode),
-            blocks: vec![],
+            grouped_blocks: vec![],
             status: PeerStatus::Active,
             network_view: NetworkView::Joined,
             votes_to_make: vec![],
@@ -119,7 +119,7 @@ impl Peer {
         Self {
             id: id.clone(),
             parsec: Parsec::from_existing(id, genesis_group, current_group, consensus_mode),
-            blocks: vec![],
+            grouped_blocks: vec![],
             status: PeerStatus::Pending,
             network_view: NetworkView::Joining,
             votes_to_make: vec![],
@@ -135,7 +135,7 @@ impl Peer {
         Self {
             id,
             parsec,
-            blocks: vec![],
+            grouped_blocks: vec![],
             status: PeerStatus::Active,
             network_view: NetworkView::Joined,
             votes_to_make: vec![],
@@ -166,18 +166,21 @@ impl Peer {
 
     /// Repeatedly calls `parsec.poll()` until `None` and returns the index of the first new block.
     pub fn poll_all(&mut self) {
-        while let Some(block) = self.parsec.poll() {
-            self.make_active_if_added(&block);
-            match block.payload() {
-                ParsecObservation::Add { peer_id, .. } => {
-                    assert!(self.added_peers_ids.insert(peer_id.clone()))
+        while let Some(block_group) = self.parsec.poll() {
+            for block in &block_group {
+                self.make_active_if_added(block);
+                match block.payload() {
+                    ParsecObservation::Add { peer_id, .. } => {
+                        assert!(self.added_peers_ids.insert(peer_id.clone()))
+                    }
+                    ParsecObservation::Remove { peer_id, .. } => {
+                        assert!(self.removed_peers_ids.insert(peer_id.clone()))
+                    }
+                    _ => (),
                 }
-                ParsecObservation::Remove { peer_id, .. } => {
-                    assert!(self.removed_peers_ids.insert(peer_id.clone()))
-                }
-                _ => (),
             }
-            self.blocks.push(block);
+
+            self.grouped_blocks.push(block_group);
         }
     }
 
@@ -185,8 +188,12 @@ impl Peer {
         &self.id
     }
 
-    pub fn blocks(&self) -> &[Block<Transaction, PeerId>] {
-        &self.blocks
+    pub fn grouped_blocks(&self) -> &[BlockGroup<Transaction, PeerId>] {
+        &self.grouped_blocks
+    }
+
+    pub fn blocks(&self) -> impl Iterator<Item = &Block<Transaction, PeerId>> {
+        self.grouped_blocks.iter().flatten()
     }
 
     pub fn status(&self) -> PeerStatus {
@@ -275,7 +282,7 @@ impl Peer {
 
     /// Returns the payloads of `self.blocks` in the order in which they were returned by `poll()`.
     pub fn blocks_payloads(&self) -> Vec<&Observation> {
-        self.blocks.iter().map(Block::payload).collect()
+        self.blocks().map(Block::payload).collect()
     }
 
     /// Returns an iterator over all accusations raised by this peer that haven't been retrieved by
@@ -295,8 +302,7 @@ impl Peer {
     }
 
     pub fn is_active_and_has_block(&self, payload: &Observation) -> bool {
-        self.status == PeerStatus::Active
-            && self.blocks.iter().any(|block| block.payload() == payload)
+        self.status == PeerStatus::Active && self.blocks().any(|block| block.payload() == payload)
     }
 }
 
