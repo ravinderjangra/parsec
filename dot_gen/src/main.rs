@@ -104,7 +104,7 @@ use clap::{App, Arg};
 use parsec::dev_utils::ObservationEvent::*;
 use parsec::dev_utils::{Environment, ObservationSchedule, RngChoice, Schedule, ScheduleOptions};
 use parsec::mock::{PeerId, Transaction};
-use parsec::{DumpGraphMode, Observation, DIR, DUMP_MODE};
+use parsec::{ConsensusMode, DumpGraphMode, Observation, DIR, DUMP_MODE};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs::{self, File};
 use std::io::{self, Read};
@@ -287,38 +287,57 @@ fn add_benches(scenarios: &mut Scenarios) {
 }
 
 fn add_bench_section_size(scenarios: &mut Scenarios) {
-    add_bench_scalability(scenarios, 8, 4);
-    add_bench_scalability(scenarios, 8, 8);
-    add_bench_scalability(scenarios, 8, 16);
-    add_bench_scalability(scenarios, 8, 32);
-    add_bench_scalability(scenarios, 8, 48);
+    let mut add_bench_one_event_batch = |opaque_to_add: usize, genesis_size: usize| {
+        let single_batch_options = ScheduleOptions {
+            genesis_size,
+            opaque_to_add,
+            votes_before_gossip: true,
+            ..Default::default()
+        };
 
-    add_bench_scalability(scenarios, 16, 4);
-    add_bench_scalability(scenarios, 16, 8);
-    add_bench_scalability(scenarios, 16, 16);
-    add_bench_scalability(scenarios, 16, 32);
-    add_bench_scalability(scenarios, 16, 48);
+        add_bench_scalability_common(
+            scenarios,
+            single_batch_options.clone(),
+            ConsensusMode::Supermajority,
+            &format!("{}", opaque_to_add),
+        );
+        add_bench_scalability_common(
+            scenarios,
+            single_batch_options.clone(),
+            ConsensusMode::Single,
+            &format!("{}_single", opaque_to_add),
+        );
+    };
+
+    for genesis_size in &[4, 8, 16, 32, 48] {
+        let opaque_to_add = 8;
+        add_bench_one_event_batch(opaque_to_add, *genesis_size);
+    }
+
+    for genesis_size in &[4, 8, 16, 32, 48] {
+        let opaque_to_add = 16;
+        add_bench_one_event_batch(opaque_to_add, *genesis_size);
+    }
 }
 
-fn add_bench_scalability(s: &mut Scenarios, opaque_to_add: usize, genesis_size: usize) {
-    let file_name_a = format!("a_node{}_opaque_evt{}.dot", genesis_size, opaque_to_add);
-    let bench_name = format!("bench_section_size_evt{}", opaque_to_add);
+fn add_bench_scalability_common(
+    s: &mut Scenarios,
+    options: ScheduleOptions,
+    consensus_mode: ConsensusMode,
+    bench_tag: &str,
+) {
+    let file_name_a = format!(
+        "a_node{}_opaque_evt{}.dot",
+        options.genesis_size, options.opaque_to_add
+    );
+    let bench_name = format!("bench_section_size_evt{}", bench_tag);
 
     let _ = s
-        .add(bench_name, move |env| {
-            Schedule::new(
-                env,
-                &ScheduleOptions {
-                    genesis_size,
-                    opaque_to_add,
-                    votes_before_gossip: true,
-                    ..Default::default()
-                },
-            )
-        })
+        .add(bench_name, move |env| Schedule::new(env, &options))
         .seed([1, 2, 3, 4])
-        .file("Alice", &file_name_a)
-        .dump_mode(DumpGraphMode::OnParsecDrop);
+        .consensus_mode(consensus_mode)
+        .dump_mode(DumpGraphMode::OnParsecDrop)
+        .file("Alice", &file_name_a);
 }
 
 struct Scenario {
@@ -326,6 +345,7 @@ struct Scenario {
     seed: RngChoice,
     schedule_fn: Box<FnMut(&mut Environment) -> Schedule>,
     files: BTreeMap<String, String>,
+    consensus_mode: ConsensusMode,
     dump_mode: DumpGraphMode,
 }
 
@@ -340,6 +360,7 @@ impl Scenario {
             seed: RngChoice::SeededRandom,
             schedule_fn: Box::new(schedule),
             files: BTreeMap::new(),
+            consensus_mode: ConsensusMode::Supermajority,
             dump_mode: DumpGraphMode::OnConsensus,
         }
     }
@@ -355,6 +376,13 @@ impl Scenario {
     #[allow(unused)]
     pub fn file(&mut self, peer_name: &str, dst_file: &str) -> &mut Self {
         let _ = self.files.insert(peer_name.into(), dst_file.into());
+        self
+    }
+
+    /// Use the given consensus mode instead of ConsensusMode::Supermajority.
+    #[allow(unused)]
+    pub fn consensus_mode(&mut self, consensus_mode: ConsensusMode) -> &mut Self {
+        self.consensus_mode = consensus_mode;
         self
     }
 
@@ -382,7 +410,7 @@ impl Scenario {
                 *mode.borrow_mut() = self.dump_mode.clone();
             });
 
-            let mut env = Environment::new(self.seed);
+            let mut env = Environment::with_consensus_mode(self.seed, self.consensus_mode);
             let schedule = (self.schedule_fn)(&mut env);
             println!("Using {:?}", env.rng);
             let result = env.network.execute_schedule(&mut env.rng, schedule);

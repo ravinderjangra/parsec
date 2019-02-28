@@ -85,6 +85,12 @@ fn bench(c: &mut Criterion) {
             name,
             ConsensusMode::Supermajority,
         );
+        bench_dot_file(
+            c,
+            "bench_section_size_evt8_single",
+            name,
+            ConsensusMode::Single,
+        );
     }
 
     for name in &[
@@ -99,6 +105,12 @@ fn bench(c: &mut Criterion) {
             "bench_section_size_evt16",
             name,
             ConsensusMode::Supermajority,
+        );
+        bench_dot_file(
+            c,
+            "bench_section_size_evt16_single",
+            name,
+            ConsensusMode::Single,
         );
     }
 
@@ -136,7 +148,8 @@ fn bench_dot_file(
     name: &'static str,
     consensus_mode: ConsensusMode,
 ) {
-    let _ = c.bench_function(name, move |b| {
+    let test_name = format!("{}::{}", group_name, name);
+    let _ = c.bench_function(&test_name, move |b| {
         let record = {
             let mut record = unwrap!(Record::parse(format!(
                 "input_graphs/{}/{}.dot",
@@ -164,7 +177,8 @@ fn bench_dot_file(
 #[cfg(feature = "testing")]
 criterion_group! {
     name = benches;
-    config = Criterion::default().sample_size(10);
+    // Use smallest sample size to allow bigger/more numerous benchmarks
+    config = Criterion::default().sample_size(3).noise_threshold(0.1);
     targets = bench
 }
 
