@@ -563,7 +563,7 @@ fn parse_meta_events(
     (comment_prefix()
         * seq(b"meta_events: {")
         * next_line()
-        * parse_single_meta_event(ctx).repeat(1..)
+        * parse_single_meta_event(ctx).repeat(0..)
         - comment_prefix()
         - sym(b'}')
         - next_line())

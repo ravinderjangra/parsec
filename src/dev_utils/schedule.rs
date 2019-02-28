@@ -13,6 +13,7 @@ use super::{PeerStatus, PeerStatuses};
 use crate::dump_graph::DIR;
 use crate::mock::{PeerId, Transaction, NAMES};
 use crate::observation::{ConsensusMode, Observation as ParsecObservation};
+use itertools::Itertools;
 use rand::seq;
 use rand::Rng;
 use std::collections::{BTreeMap, BTreeSet};
@@ -205,6 +206,8 @@ pub struct ScheduleOptions {
     pub opaque_voters: Sampling,
     /// Number of peers that vote on transparent payloads (Add, Remove, ...)
     pub transparent_voters: Sampling,
+    /// Intermediate consistency checks (Raise error closer to the source)
+    pub intermediate_consistency_checks: bool,
 }
 
 impl ScheduleOptions {
@@ -258,6 +261,7 @@ impl Default for ScheduleOptions {
             p_observation_delay: 0.45,
             opaque_voters: Sampling::Fraction(1.0, 1.0),
             transparent_voters: Sampling::Fraction(1.0, 1.0),
+            intermediate_consistency_checks: true,
         }
     }
 }
@@ -384,16 +388,6 @@ impl ObservationSchedule {
             .collect()
     }
 
-    fn for_step(&mut self, step: usize) -> Vec<ObservationEvent> {
-        let schedule = mem::replace(&mut self.schedule, vec![]);
-        let (current, rest): (Vec<_>, _) = schedule
-            .into_iter()
-            .partition(|&(scheduled_step, _)| scheduled_step <= step);
-        let current = current.into_iter().map(|(_, obs)| obs).collect();
-        self.schedule = rest;
-        current
-    }
-
     fn count_observations(&self) -> usize {
         self.schedule
             .iter()
@@ -405,6 +399,19 @@ impl ObservationSchedule {
     }
 }
 
+pub struct StepObservationSchedule {
+    /// A `sorted Vec` of pairs (step number, event), carrying information about what events happen at
+    /// which steps
+    schedule: Vec<(usize, ObservationEvent)>,
+}
+
+impl StepObservationSchedule {
+    fn new(mut schedule: Vec<(usize, ObservationEvent)>) -> Self {
+        schedule.sort_by_key(|(step, _)| *step);
+        Self { schedule }
+    }
+}
+
 /// Stores the list of network events to be simulated.
 #[derive(Clone)]
 pub struct Schedule {
@@ -412,6 +419,7 @@ pub struct Schedule {
     pub min_observations: usize,
     pub max_observations: usize,
     pub events: Vec<ScheduleEvent>,
+    pub additional_steps: std::ops::Range<usize>,
     pub options: ScheduleOptions,
 }
 
@@ -509,9 +517,14 @@ impl Schedule {
             }
         }
 
-        while !obs_schedule.schedule.is_empty() || !pending.queues_empty(peers.all_peers()) {
-            let obs_for_step = obs_schedule.for_step(step);
-            for observation in obs_for_step {
+        let obs_schedule = StepObservationSchedule::new(obs_schedule.schedule);
+        let schedule_by_step = obs_schedule
+            .schedule
+            .into_iter()
+            .group_by(|(step, _)| *step);
+
+        for (_, observations) in schedule_by_step.into_iter() {
+            for (_, observation) in observations {
                 match observation {
                     ObservationEvent::AddPeer(new_peer) => {
                         let observation = ParsecObservation::Add {
@@ -602,16 +615,16 @@ impl Schedule {
             step += 1;
         }
 
+        while !pending.queues_empty(peers.all_peers()) {
+            Self::perform_step(step, &mut peers, Some(&mut pending), &mut schedule);
+            step += 1;
+        }
+
         // Gossip should theoretically complete in O(log N) steps
         // The constant (adjustment_coeff) is for making the number big enough.
         let n = peers.present_peers().count() as f64;
-        let adjustment_coeff = 5000.0;
+        let adjustment_coeff = 250.0 / options.prob_gossip;
         let additional_steps = (adjustment_coeff * n.ln()) as usize;
-
-        for _ in 0..additional_steps {
-            Self::perform_step(step, &mut peers, None, &mut schedule);
-            step += 1;
-        }
 
         // Peers scheduled for removal / failure might not get a chance to vote for their scheduled
         // observations.
@@ -630,6 +643,7 @@ impl Schedule {
             min_observations,
             max_observations,
             events: schedule,
+            additional_steps: step..(step + additional_steps),
             options: options.clone(),
         };
         #[cfg(feature = "dump-graphs")]

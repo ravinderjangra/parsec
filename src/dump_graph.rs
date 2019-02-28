@@ -615,7 +615,12 @@ mod detail {
         fn write_peers(&mut self) -> io::Result<()> {
             self.writeln(format_args!("  {{"))?;
             self.writeln(format_args!("    rank=same"))?;
-            let mut peer_ids = self.peer_ids.iter().map(|(_, id)| id).sorted();
+            let mut peer_ids = self
+                .peer_ids
+                .iter()
+                .map(|(_, id)| id)
+                .sorted()
+                .collect_vec();
             for peer_id in &peer_ids {
                 self.writeln(format_args!(
                     "    \"{:?}\" [style=filled, color=white]",
@@ -1074,7 +1079,8 @@ mod detail {
         let sorted_ids = peer_ids
             .iter()
             .map(|(_index, id)| id.value.as_str())
-            .sorted();
+            .sorted()
+            .collect_vec();
 
         // Keep character after the longest adjacent mismatch so each truncated names is different
         let num_char_if_only_one_element = 1;
