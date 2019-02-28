@@ -115,6 +115,20 @@ fn bench(c: &mut Criterion) {
     }
 
     for name in &[
+        "a_node4_opaque_evt1024",
+        "a_node8_opaque_evt1024",
+        "a_node16_opaque_evt1024",
+        "a_node32_opaque_evt1024",
+    ] {
+        bench_dot_file(
+            c,
+            "bench_section_size_evt1024_interleave",
+            name,
+            ConsensusMode::Single,
+        );
+    }
+
+    for name in &[
         "PublicIdname754598-001",
         "PublicIdname754598-002",
         "PublicIdname754598-003",

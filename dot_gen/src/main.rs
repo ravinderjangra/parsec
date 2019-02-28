@@ -287,36 +287,60 @@ fn add_benches(scenarios: &mut Scenarios) {
 }
 
 fn add_bench_section_size(scenarios: &mut Scenarios) {
-    let mut add_bench_one_event_batch = |opaque_to_add: usize, genesis_size: usize| {
-        let single_batch_options = ScheduleOptions {
-            genesis_size,
-            opaque_to_add,
-            votes_before_gossip: true,
-            ..Default::default()
-        };
+    let mut add_bench_one_event_batch =
+        |scenarios: &mut Scenarios, opaque_to_add: usize, genesis_size: usize| {
+            let single_batch_options = ScheduleOptions {
+                genesis_size,
+                opaque_to_add,
+                votes_before_gossip: true,
+                intermediate_consistency_checks: false,
+                ..Default::default()
+            };
 
-        add_bench_scalability_common(
-            scenarios,
-            single_batch_options.clone(),
-            ConsensusMode::Supermajority,
-            &format!("{}", opaque_to_add),
-        );
-        add_bench_scalability_common(
-            scenarios,
-            single_batch_options.clone(),
-            ConsensusMode::Single,
-            &format!("{}_single", opaque_to_add),
-        );
-    };
+            add_bench_scalability_common(
+                scenarios,
+                single_batch_options.clone(),
+                ConsensusMode::Supermajority,
+                &format!("{}", opaque_to_add),
+            );
+            add_bench_scalability_common(
+                scenarios,
+                single_batch_options,
+                ConsensusMode::Single,
+                &format!("{}_single", opaque_to_add),
+            );
+        };
 
     for genesis_size in &[4, 8, 16, 32, 48] {
         let opaque_to_add = 8;
-        add_bench_one_event_batch(opaque_to_add, *genesis_size);
+        add_bench_one_event_batch(scenarios, opaque_to_add, *genesis_size);
     }
 
     for genesis_size in &[4, 8, 16, 32, 48] {
         let opaque_to_add = 16;
-        add_bench_one_event_batch(opaque_to_add, *genesis_size);
+        add_bench_one_event_batch(scenarios, opaque_to_add, *genesis_size);
+    }
+
+    for genesis_size in &[4, 8, 16, 32] {
+        let opaque_to_add = 1024;
+        add_bench_scalability_common(
+            scenarios,
+            ScheduleOptions {
+                genesis_size: *genesis_size,
+                opaque_to_add,
+                // 1 gossip event every 10 steps in one peer in the network
+                prob_gossip: 0.1 / *genesis_size as f64,
+                // 1 opaque event per 10 steps
+                prob_opaque: 0.1,
+                // Events will be seen within 2 gossip events
+                max_observation_delay: 20,
+                // For speed only check consistency at the end
+                intermediate_consistency_checks: false,
+                ..Default::default()
+            },
+            ConsensusMode::Single,
+            &format!("{}_interleave", opaque_to_add),
+        );
     }
 }
 

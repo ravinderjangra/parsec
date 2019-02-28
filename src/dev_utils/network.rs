@@ -18,6 +18,7 @@ use crate::mock::{PeerId, Transaction};
 use crate::observation::{
     is_more_than_two_thirds, ConsensusMode, Malice, Observation as ParsecObservation,
 };
+use itertools::Itertools;
 use rand::Rng;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
@@ -54,7 +55,8 @@ pub enum ConsensusError {
     WrongBlocksNumber {
         expected_min: usize,
         expected_max: usize,
-        got: usize,
+        got_min: usize,
+        got_max: usize,
     },
     WrongPeers {
         expected: BTreeMap<PeerId, PeerStatus>,
@@ -349,12 +351,17 @@ impl Network {
         max_expected_observations: usize,
     ) -> Result<(), ConsensusError> {
         // Check the number of consensused blocks.
-        let got = unwrap!(self.active_peers().next()).blocks_payloads().len();
-        if got < min_expected_observations || got > max_expected_observations {
+        let (got_min, got_max) = unwrap!(self
+            .active_peers()
+            .map(|peer| peer.blocks_payloads().len())
+            .minmax()
+            .into_option());
+        if got_min < min_expected_observations || got_max > max_expected_observations {
             return Err(ConsensusError::WrongBlocksNumber {
                 expected_min: min_expected_observations,
                 expected_max: max_expected_observations,
-                got,
+                got_min,
+                got_max,
             });
         }
 
@@ -467,18 +474,24 @@ impl Network {
             min_observations,
             max_observations,
             events,
+            additional_steps,
             options,
         } = schedule;
         let mut queue: VecDeque<_> = events.into_iter().collect();
         let mut retry = Vec::new();
+        let mut additional_steps = additional_steps;
+        let mut additional_step = || additional_steps.next().map(ScheduleEvent::LocalStep);
 
-        while let Some(event) = queue.pop_front() {
+        while let Some(event) = queue.pop_front().or_else(&mut additional_step) {
             if self.execute_event(rng, &options, event.clone())? {
                 for event in retry.drain(..).rev() {
                     queue.push_front(event)
                 }
 
-                self.check_consensus_broken()?;
+                if options.intermediate_consistency_checks {
+                    self.check_consensus_broken()?;
+                }
+
                 if self.consensus_complete(&peers, max_observations) {
                     break;
                 }
