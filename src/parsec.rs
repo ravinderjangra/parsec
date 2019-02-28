@@ -658,12 +658,13 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
 
         self.output_consensus_info(&payload_keys);
-        self.mark_observations_as_consensused(&payload_keys);
 
         let blocks = self.create_blocks(&payload_keys)?;
         if !blocks.is_empty() {
             self.consensused_blocks.push_back(blocks);
         }
+
+        self.mark_observations_as_consensused(&payload_keys);
 
         let peer_list_changes = payload_keys
             .iter()
@@ -1267,10 +1268,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             return Vec::new();
         }
 
-        self.compute_payload_for_consensus(decided_meta_votes)
+        self.compute_payloads_for_consensus(decided_meta_votes)
     }
 
-    fn compute_payload_for_consensus<I>(&self, decided_meta_votes: I) -> Vec<ObservationKey>
+    fn compute_payloads_for_consensus<I>(&self, decided_meta_votes: I) -> Vec<ObservationKey>
     where
         I: IntoIterator<Item = (PeerIndex, bool)>,
     {
