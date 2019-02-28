@@ -75,6 +75,12 @@ impl<T: NetworkEvent, P: PublicId> Block<T, P> {
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct BlockGroup<T: NetworkEvent, P: PublicId>(pub Vec<Block<T, P>>);
 
+impl<T: NetworkEvent, P: PublicId> BlockGroup<T, P> {
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+}
+
 impl<T: NetworkEvent, P: PublicId> IntoIterator for BlockGroup<T, P> {
     type Item = Block<T, P>;
     type IntoIter = vec::IntoIter<Block<T, P>>;

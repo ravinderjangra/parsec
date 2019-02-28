@@ -33,6 +33,7 @@ use crate::parsec_helpers::find_interesting_content_for_event;
 use crate::peer_list::{
     PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerListChange, PeerState,
 };
+use itertools::Itertools;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::mem;
 #[cfg(all(test, feature = "mock"))]
@@ -656,25 +657,18 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             return Ok(PostProcessAction::Continue);
         }
 
-        let mut peer_list_changes = Vec::with_capacity(payload_keys.len());
-        let mut blocks = Vec::with_capacity(payload_keys.len());
+        self.output_consensus_info(&payload_keys);
+        self.mark_observations_as_consensused(&payload_keys);
 
-        for payload_key in &payload_keys {
-            self.output_consensus_info(payload_key);
-
-            match self.create_block(&payload_key) {
-                Ok(block) => blocks.push(block),
-                Err(Error::MissingVotes) => (),
-                Err(error) => return Err(error),
-            }
-
-            self.mark_observation_as_consensused(&payload_key);
-            peer_list_changes.extend(self.handle_consensus(payload_key));
-        }
-
+        let blocks = self.create_blocks(&payload_keys)?;
         if !blocks.is_empty() {
-            self.consensused_blocks.push_back(BlockGroup(blocks));
+            self.consensused_blocks.push_back(blocks);
         }
+
+        let peer_list_changes = payload_keys
+            .iter()
+            .filter_map(|payload_key| self.handle_consensus(payload_key))
+            .collect();
 
         self.meta_election
             .new_election(&self.graph, payload_keys, peer_list_changes);
@@ -686,7 +680,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         Ok(PostProcessAction::Restart(start_index))
     }
 
-    fn output_consensus_info(&self, payload_key: &ObservationKey) {
+    fn output_consensus_info(&self, payload_keys: &[ObservationKey]) {
         dump_graph::to_file(
             self.our_pub_id(),
             &self.graph,
@@ -696,28 +690,32 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             &dump_graph::DumpGraphContext::ConsensusReached,
         );
 
-        let payload = self
-            .observations
-            .get(payload_key)
-            .map(|info| &info.observation);
-        info!(
-            "{:?} got consensus on block {} with payload {:?} and payload hash {:?}",
-            self.our_pub_id(),
-            self.meta_election.consensus_history().len(),
-            payload,
-            payload_key.hash()
-        )
+        for payload_key in payload_keys {
+            let payload = self
+                .observations
+                .get(payload_key)
+                .map(|info| &info.observation);
+            info!(
+                "{:?} got consensus on block {} with payload {:?} and payload hash {:?}",
+                self.our_pub_id(),
+                self.meta_election.consensus_history().len(),
+                payload,
+                payload_key.hash()
+            )
+        }
     }
 
-    fn mark_observation_as_consensused(&mut self, payload_key: &ObservationKey) {
-        if let Some(info) = self.observations.get_mut(payload_key) {
-            info.consensused = true;
-        } else {
-            log_or_panic!(
-                "{:?} doesn't know about observation with hash {:?}",
-                self.peer_list.our_pub_id(),
-                payload_key.hash()
-            );
+    fn mark_observations_as_consensused(&mut self, payload_keys: &[ObservationKey]) {
+        for payload_key in payload_keys {
+            if let Some(info) = self.observations.get_mut(payload_key) {
+                info.consensused = true;
+            } else {
+                log_or_panic!(
+                    "{:?} doesn't know about observation with hash {:?}",
+                    self.peer_list.our_pub_id(),
+                    payload_key.hash()
+                );
+            }
         }
     }
 
@@ -1294,34 +1292,47 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 map
             });
 
-        let mut payloads: Vec<_> = payloads.into_iter().collect();
-        payloads.sort_by(|(lhs_key, lhs_count), (rhs_key, rhs_count)| {
-            lhs_count
-                .cmp(rhs_count)
-                .reverse()
-                .then_with(|| lhs_key.consistent_cmp(rhs_key, &self.peer_list))
-        });
-
-        payloads.into_iter().map(|(key, _)| key).collect()
+        payloads
+            .into_iter()
+            .sorted_by(|(lhs_key, lhs_count), (rhs_key, rhs_count)| {
+                lhs_count
+                    .cmp(rhs_count)
+                    .reverse()
+                    .then_with(|| lhs_key.consistent_cmp(rhs_key, &self.peer_list))
+            })
+            .map(|(key, _)| key)
+            .collect()
     }
 
-    fn create_block(&self, payload_key: &ObservationKey) -> Result<Block<T, S::PublicId>> {
+    fn create_blocks(&self, payload_keys: &[ObservationKey]) -> Result<BlockGroup<T, S::PublicId>> {
         let voters = self.voters();
-        let votes = self
-            .graph
+        let blocks: Result<Vec<_>> = payload_keys
             .iter()
-            .map(|event| event.inner())
-            .filter(|event| voters.contains(event.creator()))
-            .filter_map(|event| {
-                let (vote, key) = event.vote_and_payload_key(&self.observations)?;
-                let creator_id = self.peer_list.get(event.creator()).map(|peer| peer.id())?;
-                Some((key, vote, creator_id))
+            .map(|payload_key| {
+                let votes = self
+                    .graph
+                    .iter()
+                    .map(|event| event.inner())
+                    .filter(|event| voters.contains(event.creator()))
+                    .filter_map(|event| {
+                        let (vote, key) = event.vote_and_payload_key(&self.observations)?;
+                        let creator_id =
+                            self.peer_list.get(event.creator()).map(|peer| peer.id())?;
+                        Some((key, vote, creator_id))
+                    })
+                    .filter(|(key, _, _)| payload_key == key)
+                    .map(|(_, vote, creator_id)| (creator_id.clone(), vote.clone()))
+                    .collect();
+
+                Block::new(&votes)
             })
-            .filter(|(key, _, _)| payload_key == key)
-            .map(|(_, vote, creator_id)| (creator_id.clone(), vote.clone()))
+            .filter(|block| match block {
+                Err(Error::MissingVotes) => false,
+                Err(_) | Ok(_) => true,
+            })
             .collect();
 
-        Block::new(&votes)
+        Ok(BlockGroup(blocks?))
     }
 
     // Returns the number of peers that created events which are seen by event X (descendant) and
