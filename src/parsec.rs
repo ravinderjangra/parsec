@@ -1771,12 +1771,25 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
     // Detect whether the event incurs a fork.
     fn detect_fork(&mut self, event: &Event<S::PublicId>) {
-        if self.peer_list.last_event(event.creator()) != event.self_parent() {
+        if self.is_first_fork(event) {
             if let Some(self_parent_hash) = self.graph.self_parent(event).map(|event| *event.hash())
             {
                 self.accuse(event.creator(), Malice::Fork(self_parent_hash));
             }
         }
+    }
+
+    fn is_first_fork(&self, event: &Event<S::PublicId>) -> bool {
+        let same_index_events = self
+            .peer_list
+            .events_by_index(event.creator(), event.index_by_creator());
+        // Having no event with the same index means no fork, meanwhile multiple and having the same
+        // self_parent means already cast forking accusation.
+        same_index_events
+            .filter_map(|other_event| self.graph.get(other_event))
+            .filter(|other_event| other_event.inner().self_parent() == event.self_parent())
+            .count()
+            == 1
     }
 
     fn detect_invalid_accusation(&mut self, event: &Event<S::PublicId>) {
