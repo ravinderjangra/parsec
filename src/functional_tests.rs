@@ -79,11 +79,8 @@ fn from_existing() {
     // Existing section + us
     assert_eq!(parsec.peer_list().all_ids().count(), peers.len() + 1);
 
-    // Only the initial event should be in the gossip graph.
-    assert_eq!(parsec.graph().len(), 1);
-    let event = nth_event(parsec.graph(), 0);
-    assert_eq!(*parsec.event_creator_id(&event), our_id);
-    assert!(event.is_initial());
+    // The gossip graph should be initially empty.
+    assert_eq!(parsec.graph().len(), 0);
 }
 
 // TODO: remove this `cfg` once the `maidsafe_utilities` crate with PR 130 is published.
@@ -222,7 +219,7 @@ fn add_peer() {
     // Now add D_18, which should result in Alice adding Fred.
     let d_18_hash = *d_18.hash();
     unwrap!(alice.add_event(d_18));
-    unwrap!(alice.create_sync_event(&dave_id, true, &PeerIndexSet::default(), Some(d_18_hash)));
+    unwrap!(alice.create_sync_event(&dave_id, true, PeerIndexSet::default(), Some(d_18_hash)));
     assert!(alice
         .peer_list()
         .all_ids()

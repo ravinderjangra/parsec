@@ -11,7 +11,11 @@ use crate::gossip::{EventIndex, IndexedEventRef};
 use crate::hash::Hash;
 use crate::id::PublicId;
 use crate::serialise;
-use std::iter::{self, FromIterator};
+use itertools::Itertools;
+use std::{
+    fmt::{self, Debug, Formatter},
+    iter::{self, FromIterator},
+};
 
 #[derive(Debug)]
 pub(crate) struct Peer<P: PublicId> {
@@ -152,7 +156,6 @@ where
     }
 }
 
-#[derive(Debug)]
 struct Slot {
     first: EventIndex,
     rest: Vec<EventIndex>,
@@ -172,5 +175,11 @@ impl Slot {
 
     fn iter<'a>(&'a self) -> impl DoubleEndedIterator<Item = EventIndex> + 'a {
         iter::once(self.first).chain(self.rest.iter().cloned())
+    }
+}
+
+impl Debug for Slot {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "{:?}", self.iter().format(", "))
     }
 }
