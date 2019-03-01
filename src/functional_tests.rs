@@ -426,7 +426,6 @@ mod handle_malice {
     use crate::network_event::NetworkEvent;
     use crate::observation::Malice;
     use crate::peer_list::{PeerIndex, PeerList, PeerState};
-    use std::collections::BTreeMap;
     use std::ops::Deref;
 
     // Returns iterator over all votes cast by the given node.
@@ -774,90 +773,6 @@ mod handle_malice {
             .next());
         assert_eq!(offender, alice.our_pub_id());
         assert_eq!(*hash, a_5_hash);
-    }
-
-    // TODO: enable this when InvalidGossipCreator malice handling works again.
-    #[ignore]
-    #[test]
-    fn invalid_gossip_creator() {
-        // Generated with RNG seed: [753134140, 4096687351, 2912528994, 2847063513].
-        //
-        // Alice reports gossip to Bob from Carol that isn't in their section.
-        let alice = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
-        let mut bob = TestParsec::from_parsed_contents(parse_test_dot_file("bob.dot"));
-
-        // Verify peer lists
-        let alice_id = PeerId::new("Alice");
-        let bob_id = PeerId::new("Bob");
-        let carol_id = PeerId::new("Carol");
-        let mut alice_peer_list = PeerList::new(alice_id.clone());
-        alice_peer_list.change_peer_state(PeerIndex::OUR, PeerState::active());
-        let _ = alice_peer_list.add_peer(bob_id.clone(), PeerState::active());
-        let _ = alice_peer_list.add_peer(carol_id, PeerState::active());
-        assert_eq!(
-            alice.peer_list().all_id_hashes().collect::<Vec<_>>(),
-            alice_peer_list.all_id_hashes().collect::<Vec<_>>()
-        );
-        let mut bob_peer_list = PeerList::new(bob_id.clone());
-        bob_peer_list.change_peer_state(PeerIndex::OUR, PeerState::active());
-        let _ = bob_peer_list.add_peer(alice_id.clone(), PeerState::active());
-        assert_eq!(
-            bob.peer_list().all_id_hashes().collect::<Vec<_>>(),
-            bob_peer_list.all_id_hashes().collect::<Vec<_>>()
-        );
-
-        // Read the dot file again so we have a set of events we can manually add to Bob instead
-        // of sending gossip.
-        let alice_parsed_contents = parse_test_dot_file("alice.dot");
-
-        let c_0_index = unwrap!(find_event_by_short_name(
-            &alice_parsed_contents.graph,
-            "C_0"
-        ))
-        .event_index();
-
-        let (a_2_index, a_2_hash) = {
-            let ie = unwrap!(find_event_by_short_name(
-                &alice_parsed_contents.graph,
-                "A_2"
-            ));
-            (ie.event_index(), *ie.hash())
-        };
-
-        let b_2_index = unwrap!(find_event_by_short_name(
-            &alice_parsed_contents.graph,
-            "B_2"
-        ))
-        .event_index();
-
-        // Carol is marked as active peer so that Bob's peer_list will accept C_0, but Carol is
-        // not part of the membership_list
-        let carol_id = PeerId::new("Carol");
-        bob.add_peer(carol_id, PeerState::active());
-
-        let mut alice_events: BTreeMap<_, _> = alice_parsed_contents.graph.into_iter().collect();
-
-        let c_0 = unwrap!(alice_events.remove(&c_0_index));
-        unwrap!(bob.add_event(c_0));
-
-        // This malice is setup in two events.
-        // A_2 has C_0 from Carol as other parent as Carol has gossiped to Alice. Carol is
-        // however not part of the section and Alice should not have accepted it.
-        let a_2 = unwrap!(alice_events.remove(&a_2_index));
-        let a_2_packed = alice.pack_event(&a_2);
-        unwrap!(bob.unpack_and_add_event(a_2_packed));
-
-        // B_2 is the sync event created by Bob when he receives A_2 from Alice.
-        let b_2 = unwrap!(alice_events.remove(&b_2_index));
-        let b_2_packed = alice.pack_event(&b_2);
-        unwrap!(bob.unpack_and_add_event(b_2_packed));
-
-        // Bob should now have seen that Alice in A_2 incorrectly reported gossip from Carol.
-        // Check that this triggers an accusation
-        let alice_index = unwrap!(bob.peer_list().get_index(alice.our_pub_id()));
-        let expected_accusations = (alice_index, Malice::InvalidGossipCreator(a_2_hash));
-        assert!(bob.pending_accusations().contains(&expected_accusations));
-        assert!(bob.graph().contains(&a_2_hash));
     }
 
     fn create_invalid_accusation() -> (EventHash, TestParsec<Transaction, PeerId>) {

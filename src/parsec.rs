@@ -571,7 +571,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let our = event.creator() == PeerIndex::OUR;
         if !our {
             #[cfg(feature = "malice-detection")]
-            self.detect_malice_before_process(&event)?;
+            self.detect_malice(&event)?;
         }
 
         self.peer_list.confirm_can_add_event(&event)?;
@@ -606,11 +606,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         });
 
         self.process_events(event_index.topological_index())?;
-
-        if !our {
-            #[cfg(feature = "malice-detection")]
-            self.detect_malice_after_process(event_index);
-        }
 
         Ok(event_index)
     }
@@ -1585,7 +1580,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
 #[cfg(feature = "malice-detection")]
 impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
-    fn detect_malice_before_process(&mut self, event: &Event<S::PublicId>) -> Result<()> {
+    fn detect_malice(&mut self, event: &Event<S::PublicId>) -> Result<()> {
         // NOTE: `detect_incorrect_genesis` must come first.
         self.detect_incorrect_genesis(event)?;
 
@@ -1601,10 +1596,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         // TODO: detect other forms of malice here
 
         Ok(())
-    }
-
-    fn detect_malice_after_process(&mut self, event_index: EventIndex) {
-        self.detect_invalid_gossip_creator(event_index);
     }
 
     // Detect if the event carries an `Observation::Genesis` that doesn't match what we'd expect.
@@ -1862,46 +1853,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         self.accuse(event.creator(), Malice::InvalidAccusation(*event.hash()))
     }
 
-    fn detect_invalid_gossip_creator(&mut self, _event_index: EventIndex) {
-        /* TODO: bring this back somehow
-        let accusation = {
-            let event = if let Ok(event) = self.get_known_event(event_index) {
-                event
-            } else {
-                return;
-            };
-
-            let other_parent = if let Some(parent) = self.graph.other_parent(event) {
-                parent
-            } else {
-                return;
-            };
-
-            let membership_list = if let Some(list) = self
-                .peer_list
-                .peer_membership_list_snapshot_excluding_last_remove(
-                    event.creator(),
-                    event.index_by_creator(),
-                ) {
-                list
-            } else {
-                // The membership list is not yet initialised - skip the detection.
-                return;
-            };
-
-            if membership_list.contains(other_parent.creator()) {
-                None
-            } else {
-                Some((event.creator(), *event.hash()))
-            }
-        };
-
-        if let Some((offender, event_hash)) = accusation {
-            self.accuse(offender, Malice::InvalidGossipCreator(event_hash))
-        }
-        */
-    }
-
     fn detect_premature_gossip(&self) -> Result<()> {
         self.confirm_self_state(PeerState::VOTE)
             .map_err(|_| Error::PrematureGossip)
@@ -1947,7 +1898,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             | Malice::MissingGenesis(hash)
             | Malice::IncorrectGenesis(hash)
             | Malice::InvalidAccusation(hash)
-            | Malice::InvalidGossipCreator(hash)
             | Malice::Accomplice(hash, _) => self
                 .graph
                 .get_index(hash)
