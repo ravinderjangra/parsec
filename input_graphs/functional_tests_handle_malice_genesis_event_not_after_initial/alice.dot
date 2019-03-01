@@ -355,7 +355,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 23, Bob: 18, Carol: 21, Dave: 6}
 
-  "B_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_0" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_0</td></tr>
 </table>>]
 /// cause: Initial
@@ -517,7 +517,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 21, Bob: 18, Carol: 18, Dave: 6}
 
-  "C_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_0" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_0</td></tr>
 </table>>]
 /// cause: Initial
@@ -713,7 +713,7 @@ digraph GossipGraph {
 /// cause: Requesting(Alice)
 /// last_ancestors: {Alice: 20, Bob: 17, Carol: 21, Dave: 6}
 
-  "D_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "D_0" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_0</td></tr>
 </table>>]
 /// cause: Initial
@@ -981,6 +981,10 @@ digraph GossipGraph {
 ///          0/1   f   f   f   f 
 ///     }
 ///   }
+///   B_0 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
 ///   B_1 -> {
 ///     observees: {}
 ///     interesting_content: []
@@ -1132,6 +1136,10 @@ digraph GossipGraph {
 ///       D: 0/0   b   f   f   - 
 ///          0/1   f   f   f   - 
 ///     }
+///   }
+///   C_0 -> {
+///     observees: {}
+///     interesting_content: []
 ///   }
 ///   C_1 -> {
 ///     observees: {}
@@ -1321,6 +1329,10 @@ digraph GossipGraph {
 ///       D: 0/0   f   f   f   - 
 ///          0/1   f   f   f   - 
 ///     }
+///   }
+///   D_0 -> {
+///     observees: {}
+///     interesting_content: []
 ///   }
 ///   D_1 -> {
 ///     observees: {}

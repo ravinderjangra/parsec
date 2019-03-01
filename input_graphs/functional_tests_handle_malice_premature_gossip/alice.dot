@@ -900,7 +900,7 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 28, Bob: 25, Carol: 27, Dave: 21, Eric: 21}
 
-  "D_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "D_0" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_0</td></tr>
 </table>>]
 /// cause: Initial
@@ -1686,6 +1686,10 @@ digraph GossipGraph {
 ///       D: 0/0   t   t   t   - 
 ///       E: 0/0   t   t   t   - 
 ///     }
+///   }
+///   D_0 -> {
+///     observees: {}
+///     interesting_content: []
 ///   }
 ///   D_1 -> {
 ///     observees: {}

@@ -15,44 +15,42 @@ digraph GossipGraph {
     "Alice" [style=invis]
     "Alice" -> "A_0" [style=invis]
     "A_0" -> "A_1" [minlen=1]
-    "A_1" -> "A_2" [minlen=2]
+    "A_1" -> "A_2" [minlen=1]
     "A_2" -> "A_3" [minlen=1]
-    "A_3" -> "A_4" [minlen=2]
+    "A_3" -> "A_4" [minlen=6]
     "A_4" -> "A_5" [minlen=1]
-    "A_5" -> "A_6" [minlen=2]
-    "A_6" -> "A_7" [minlen=1]
-    "A_7" -> "A_8" [minlen=3]
+    "A_5" -> "A_6" [minlen=1]
+    "A_6" -> "A_7" [minlen=3]
+    "A_7" -> "A_8" [minlen=1]
     "A_8" -> "A_9" [minlen=1]
     "A_9" -> "A_10" [minlen=1]
     "A_10" -> "A_11" [minlen=1]
-    "A_11" -> "A_12" [minlen=1]
-    "A_12" -> "A_13" [minlen=2]
-    "A_13" -> "A_14" [minlen=4]
-    "A_14" -> "A_15" [minlen=5]
-    "A_15" -> "A_16" [minlen=1]
-    "A_16" -> "A_17" [minlen=2]
+    "A_11" -> "A_12" [minlen=2]
+    "A_12" -> "A_13" [minlen=4]
+    "A_13" -> "A_14" [minlen=5]
+    "A_14" -> "A_15" [minlen=1]
+    "A_15" -> "A_16" [minlen=2]
+    "A_16" -> "A_17" [minlen=1]
     "A_17" -> "A_18" [minlen=1]
-    "A_18" -> "A_19" [minlen=1]
-    "A_19" -> "A_20" [minlen=3]
-    "A_20" -> "A_21" [minlen=1]
-    "A_21" -> "A_22" [minlen=2]
+    "A_18" -> "A_19" [minlen=3]
+    "A_19" -> "A_20" [minlen=1]
+    "A_20" -> "A_21" [minlen=2]
+    "A_21" -> "A_22" [minlen=1]
     "A_22" -> "A_23" [minlen=1]
-    "A_23" -> "A_24" [minlen=1]
   }
-  "C_2" -> "A_2" [constraint=false]
-  "C_3" -> "A_4" [constraint=false]
-  "D_5" -> "A_6" [constraint=false]
-  "D_8" -> "A_8" [constraint=false]
-  "D_9" -> "A_10" [constraint=false]
-  "B_8" -> "A_11" [constraint=false]
-  "B_9" -> "A_13" [constraint=false]
-  "B_13" -> "A_14" [constraint=false]
-  "B_17" -> "A_15" [constraint=false]
-  "D_17" -> "A_17" [constraint=false]
-  "C_15" -> "A_19" [constraint=false]
-  "C_18" -> "A_20" [constraint=false]
-  "B_22" -> "A_22" [constraint=false]
-  "C_20" -> "A_23" [constraint=false]
+  "D_5" -> "A_4" [constraint=false]
+  "D_6" -> "A_5" [constraint=false]
+  "D_9" -> "A_7" [constraint=false]
+  "D_10" -> "A_9" [constraint=false]
+  "B_9" -> "A_10" [constraint=false]
+  "B_10" -> "A_12" [constraint=false]
+  "B_14" -> "A_13" [constraint=false]
+  "B_18" -> "A_14" [constraint=false]
+  "D_18" -> "A_16" [constraint=false]
+  "C_14" -> "A_18" [constraint=false]
+  "C_17" -> "A_19" [constraint=false]
+  "B_23" -> "A_21" [constraint=false]
+  "C_19" -> "A_22" [constraint=false]
 
   style=invis
   subgraph cluster_Bob {
@@ -60,40 +58,41 @@ digraph GossipGraph {
     "Bob" [style=invis]
     "Bob" -> "B_0" [style=invis]
     "B_0" -> "B_1" [minlen=1]
-    "B_1" -> "B_2" [minlen=2]
-    "B_2" -> "B_3" [minlen=1]
-    "B_3" -> "B_4" [minlen=2]
-    "B_4" -> "B_5" [minlen=1]
-    "B_5" -> "B_6" [minlen=2]
-    "B_6" -> "B_7" [minlen=1]
+    "B_1" -> "B_2" [minlen=1]
+    "B_2" -> "B_3" [minlen=3]
+    "B_3" -> "B_4" [minlen=1]
+    "B_4" -> "B_5" [minlen=2]
+    "B_5" -> "B_6" [minlen=1]
+    "B_6" -> "B_7" [minlen=2]
     "B_7" -> "B_8" [minlen=1]
-    "B_8" -> "B_9" [minlen=7]
-    "B_9" -> "B_10" [minlen=1]
+    "B_8" -> "B_9" [minlen=1]
+    "B_9" -> "B_10" [minlen=6]
     "B_10" -> "B_11" [minlen=1]
     "B_11" -> "B_12" [minlen=1]
     "B_12" -> "B_13" [minlen=1]
-    "B_13" -> "B_14" [minlen=2]
-    "B_14" -> "B_15" [minlen=1]
+    "B_13" -> "B_14" [minlen=1]
+    "B_14" -> "B_15" [minlen=2]
     "B_15" -> "B_16" [minlen=1]
     "B_16" -> "B_17" [minlen=1]
-    "B_17" -> "B_18" [minlen=2]
-    "B_18" -> "B_19" [minlen=1]
-    "B_19" -> "B_20" [minlen=2]
+    "B_17" -> "B_18" [minlen=1]
+    "B_18" -> "B_19" [minlen=2]
+    "B_19" -> "B_20" [minlen=1]
     "B_20" -> "B_21" [minlen=2]
-    "B_21" -> "B_22" [minlen=4]
+    "B_21" -> "B_22" [minlen=2]
+    "B_22" -> "B_23" [minlen=4]
   }
-  "D_2" -> "B_2" [constraint=false]
-  "D_4" -> "B_4" [constraint=false]
-  "C_5" -> "B_6" [constraint=false]
-  "A_12" -> "B_9" [constraint=false]
+  "C_3" -> "B_3" [constraint=false]
+  "D_4" -> "B_5" [constraint=false]
+  "C_4" -> "B_7" [constraint=false]
   "A_11" -> "B_10" [constraint=false]
-  "A_14" -> "B_14" [constraint=false]
-  "C_10" -> "B_15" [constraint=false]
-  "C_11" -> "B_16" [constraint=false]
-  "A_15" -> "B_18" [constraint=false]
-  "C_14" -> "B_20" [constraint=false]
-  "C_16" -> "B_21" [constraint=false]
-  "A_21" -> "B_22" [constraint=false]
+  "A_10" -> "B_11" [constraint=false]
+  "A_13" -> "B_15" [constraint=false]
+  "C_9" -> "B_16" [constraint=false]
+  "C_10" -> "B_17" [constraint=false]
+  "A_14" -> "B_19" [constraint=false]
+  "C_13" -> "B_21" [constraint=false]
+  "C_15" -> "B_22" [constraint=false]
+  "A_20" -> "B_23" [constraint=false]
 
   style=invis
   subgraph cluster_Carol {
@@ -101,43 +100,42 @@ digraph GossipGraph {
     "Carol" [style=invis]
     "Carol" -> "C_0" [style=invis]
     "C_0" -> "C_1" [minlen=1]
-    "C_1" -> "C_2" [minlen=1]
-    "C_2" -> "C_3" [minlen=3]
-    "C_3" -> "C_4" [minlen=1]
-    "C_4" -> "C_5" [minlen=2]
-    "C_5" -> "C_6" [minlen=2]
-    "C_6" -> "C_7" [minlen=1]
-    "C_7" -> "C_8" [minlen=6]
-    "C_8" -> "C_9" [minlen=3]
-    "C_9" -> "C_10" [minlen=2]
+    "C_1" -> "C_2" [minlen=2]
+    "C_2" -> "C_3" [minlen=1]
+    "C_3" -> "C_4" [minlen=6]
+    "C_4" -> "C_5" [minlen=1]
+    "C_5" -> "C_6" [minlen=1]
+    "C_6" -> "C_7" [minlen=6]
+    "C_7" -> "C_8" [minlen=3]
+    "C_8" -> "C_9" [minlen=2]
+    "C_9" -> "C_10" [minlen=1]
     "C_10" -> "C_11" [minlen=1]
-    "C_11" -> "C_12" [minlen=1]
-    "C_12" -> "C_13" [minlen=2]
-    "C_13" -> "C_14" [minlen=5]
+    "C_11" -> "C_12" [minlen=2]
+    "C_12" -> "C_13" [minlen=5]
+    "C_13" -> "C_14" [minlen=1]
     "C_14" -> "C_15" [minlen=1]
     "C_15" -> "C_16" [minlen=1]
     "C_16" -> "C_17" [minlen=1]
     "C_17" -> "C_18" [minlen=1]
     "C_18" -> "C_19" [minlen=1]
-    "C_19" -> "C_20" [minlen=1]
-    "C_20" -> "C_21" [minlen=4]
-    "C_21" -> "C_22" [minlen=1]
+    "C_19" -> "C_20" [minlen=4]
+    "C_20" -> "C_21" [minlen=1]
   }
-  "A_3" -> "C_3" [constraint=false]
-  "A_2" -> "C_4" [constraint=false]
-  "B_5" -> "C_5" [constraint=false]
-  "D_6" -> "C_6" [constraint=false]
-  "D_12" -> "C_8" [constraint=false]
-  "D_14" -> "C_9" [constraint=false]
+  "D_2" -> "C_2" [constraint=false]
+  "B_2" -> "C_3" [constraint=false]
+  "B_6" -> "C_4" [constraint=false]
+  "D_7" -> "C_5" [constraint=false]
+  "D_13" -> "C_7" [constraint=false]
+  "D_15" -> "C_8" [constraint=false]
+  "B_13" -> "C_9" [constraint=false]
   "B_12" -> "C_10" [constraint=false]
-  "B_11" -> "C_11" [constraint=false]
-  "D_16" -> "C_13" [constraint=false]
-  "B_19" -> "C_14" [constraint=false]
-  "A_19" -> "C_17" [constraint=false]
-  "A_18" -> "C_18" [constraint=false]
-  "B_21" -> "C_19" [constraint=false]
-  "A_23" -> "C_21" [constraint=false]
-  "D_18" -> "C_22" [constraint=false]
+  "D_17" -> "C_12" [constraint=false]
+  "B_20" -> "C_13" [constraint=false]
+  "A_18" -> "C_16" [constraint=false]
+  "A_17" -> "C_17" [constraint=false]
+  "B_22" -> "C_18" [constraint=false]
+  "A_22" -> "C_20" [constraint=false]
+  "D_19" -> "C_21" [constraint=false]
 
   style=invis
   subgraph cluster_Dave {
@@ -147,35 +145,37 @@ digraph GossipGraph {
     "D_0" -> "D_1" [minlen=1]
     "D_1" -> "D_2" [minlen=1]
     "D_2" -> "D_3" [minlen=2]
-    "D_3" -> "D_4" [minlen=1]
-    "D_4" -> "D_5" [minlen=3]
+    "D_3" -> "D_4" [minlen=3]
+    "D_4" -> "D_5" [minlen=1]
     "D_5" -> "D_6" [minlen=1]
-    "D_6" -> "D_7" [minlen=2]
-    "D_7" -> "D_8" [minlen=1]
+    "D_6" -> "D_7" [minlen=1]
+    "D_7" -> "D_8" [minlen=2]
     "D_8" -> "D_9" [minlen=1]
     "D_9" -> "D_10" [minlen=1]
     "D_10" -> "D_11" [minlen=1]
     "D_11" -> "D_12" [minlen=1]
-    "D_12" -> "D_13" [minlen=2]
-    "D_13" -> "D_14" [minlen=1]
-    "D_14" -> "D_15" [minlen=2]
-    "D_15" -> "D_16" [minlen=4]
-    "D_16" -> "D_17" [minlen=5]
-    "D_17" -> "D_18" [minlen=1]
+    "D_12" -> "D_13" [minlen=1]
+    "D_13" -> "D_14" [minlen=2]
+    "D_14" -> "D_15" [minlen=1]
+    "D_15" -> "D_16" [minlen=2]
+    "D_16" -> "D_17" [minlen=4]
+    "D_17" -> "D_18" [minlen=5]
     "D_18" -> "D_19" [minlen=1]
-    "D_19" -> "D_20" [minlen=11]
+    "D_19" -> "D_20" [minlen=1]
+    "D_20" -> "D_21" [minlen=11]
   }
-  "B_2" -> "D_3" [constraint=false]
-  "B_3" -> "D_4" [constraint=false]
-  "A_5" -> "D_5" [constraint=false]
-  "C_6" -> "D_7" [constraint=false]
-  "A_7" -> "D_9" [constraint=false]
-  "A_8" -> "D_10" [constraint=false]
-  "C_8" -> "D_13" [constraint=false]
-  "C_9" -> "D_15" [constraint=false]
-  "C_12" -> "D_16" [constraint=false]
-  "A_16" -> "D_17" [constraint=false]
-  "C_22" -> "D_20" [constraint=false]
+  "C_2" -> "D_3" [constraint=false]
+  "B_4" -> "D_4" [constraint=false]
+  "A_2" -> "D_5" [constraint=false]
+  "A_3" -> "D_6" [constraint=false]
+  "C_5" -> "D_8" [constraint=false]
+  "A_6" -> "D_10" [constraint=false]
+  "A_7" -> "D_11" [constraint=false]
+  "C_7" -> "D_14" [constraint=false]
+  "C_8" -> "D_16" [constraint=false]
+  "C_11" -> "D_17" [constraint=false]
+  "A_15" -> "D_18" [constraint=false]
+  "C_21" -> "D_21" [constraint=false]
 
   {
     rank=same
@@ -203,115 +203,119 @@ digraph GossipGraph {
   "A_2" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_2</td></tr>
 </table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 2, Carol: 2}
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 2}
 
   "A_3" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_3</td></tr>
 </table>>]
-/// cause: Requesting(Carol)
-/// last_ancestors: {Alice: 3, Carol: 2}
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 3}
 
   "A_4" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_4</td></tr>
 </table>>]
 /// cause: Response
-/// last_ancestors: {Alice: 4, Carol: 3}
+/// last_ancestors: {Alice: 4, Bob: 4, Carol: 3, Dave: 5}
 
   "A_5" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_5</td></tr>
 </table>>]
-/// cause: Requesting(Dave)
-/// last_ancestors: {Alice: 5, Carol: 3}
+/// cause: Response
+/// last_ancestors: {Alice: 5, Bob: 4, Carol: 3, Dave: 6}
 
   "A_6" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_6</td></tr>
 </table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 6, Bob: 3, Carol: 3, Dave: 5}
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 6, Bob: 4, Carol: 3, Dave: 6}
 
   "A_7" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_7</td></tr>
 </table>>]
-/// cause: Requesting(Dave)
-/// last_ancestors: {Alice: 7, Bob: 3, Carol: 3, Dave: 5}
-
-  "A_8" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_8</td></tr>
-</table>>]
 /// cause: Request
-/// last_ancestors: {Alice: 8, Bob: 5, Carol: 6, Dave: 8}
+/// last_ancestors: {Alice: 7, Bob: 6, Carol: 5, Dave: 9}
 
-  "A_9" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_9</td></tr>
+  "A_8" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_8</td></tr>
 <tr><td colspan="6">Add(Eric)</td></tr>
 </table>>]
 /// cause: Observation(Add(Eric))
-/// last_ancestors: {Alice: 9, Bob: 5, Carol: 6, Dave: 8}
+/// last_ancestors: {Alice: 8, Bob: 6, Carol: 5, Dave: 9}
+
+  "A_9" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_9</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 9, Bob: 6, Carol: 5, Dave: 10}
 
   "A_10" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_10</td></tr>
 </table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 10, Bob: 5, Carol: 6, Dave: 9}
+/// cause: Request
+/// last_ancestors: {Alice: 10, Bob: 9, Carol: 5, Dave: 10}
 
   "A_11" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_11</td></tr>
 </table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 11, Bob: 8, Carol: 6, Dave: 9}
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 11, Bob: 9, Carol: 5, Dave: 10}
 
   "A_12" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_12</td></tr>
 </table>>]
-/// cause: Requesting(Bob)
-/// last_ancestors: {Alice: 12, Bob: 8, Carol: 6, Dave: 9}
+/// cause: Response
+/// last_ancestors: {Alice: 12, Bob: 10, Carol: 5, Dave: 10}
 
   "A_13" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_13</td></tr>
 </table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 13, Bob: 9, Carol: 6, Dave: 9}
-
-  "A_14" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_14</td></tr>
-</table>>]
 /// cause: Request
-/// last_ancestors: {Alice: 14, Bob: 13, Carol: 6, Dave: 9}
+/// last_ancestors: {Alice: 13, Bob: 14, Carol: 5, Dave: 10}
 
-  "A_15" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_15</td></tr>
+  "A_14" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_14</td></tr>
 <tr><td colspan="6">[Add(Eric)]</td></tr></table>>]
 /// cause: Request
-/// last_ancestors: {Alice: 15, Bob: 17, Carol: 11, Dave: 14}
+/// last_ancestors: {Alice: 14, Bob: 18, Carol: 10, Dave: 15}
+
+  "A_15" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_15</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 15, Bob: 18, Carol: 10, Dave: 15}
 
   "A_16" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_16</td></tr>
 </table>>]
-/// cause: Requesting(Dave)
-/// last_ancestors: {Alice: 16, Bob: 17, Carol: 11, Dave: 14}
+/// cause: Response
+/// last_ancestors: {Alice: 16, Bob: 18, Carol: 11, Dave: 18}
 
   "A_17" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_17</td></tr>
 </table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 17, Bob: 17, Carol: 12, Dave: 17}
-
-  "A_18" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_18</td></tr>
-</table>>]
 /// cause: Requesting(Carol)
-/// last_ancestors: {Alice: 18, Bob: 17, Carol: 12, Dave: 17}
+/// last_ancestors: {Alice: 17, Bob: 18, Carol: 11, Dave: 18}
 
-  "A_19" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_19</td></tr>
+  "A_18" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_18</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
 /// cause: Request
-/// last_ancestors: {Alice: 19, Bob: 19, Carol: 15, Dave: 17}
+/// last_ancestors: {Alice: 18, Bob: 20, Carol: 14, Dave: 18}
+
+  "A_19" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_19</td></tr>
+<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>D: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 19, Bob: 20, Carol: 17, Dave: 18}
 
   "A_20" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_20</td></tr>
@@ -320,28 +324,28 @@ digraph GossipGraph {
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 20, Bob: 19, Carol: 18, Dave: 17}
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 20, Bob: 20, Carol: 17, Dave: 18}
 
   "A_21" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_21</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>D: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
-/// cause: Requesting(Bob)
-/// last_ancestors: {Alice: 21, Bob: 19, Carol: 18, Dave: 17}
-
-  "A_22" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_22</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
 /// cause: Response
-/// last_ancestors: {Alice: 22, Bob: 22, Carol: 18, Dave: 17}
+/// last_ancestors: {Alice: 21, Bob: 23, Carol: 17, Dave: 18}
+
+  "A_22" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_22</td></tr>
+<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>D: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr></table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 22, Bob: 23, Carol: 19, Dave: 18}
 
   "A_23" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_23</td></tr>
@@ -350,18 +354,8 @@ digraph GossipGraph {
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr></table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 23, Bob: 22, Carol: 20, Dave: 17}
-
-  "A_24" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_24</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
-<tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
-<tr><td>D: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr></table>>]
 /// cause: Requesting(Dave)
-/// last_ancestors: {Alice: 24, Bob: 22, Carol: 20, Dave: 17}
+/// last_ancestors: {Alice: 23, Bob: 23, Carol: 19, Dave: 18}
 
   "B_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_0</td></tr>
@@ -379,141 +373,147 @@ digraph GossipGraph {
   "B_2" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_2</td></tr>
 </table>>]
-/// cause: Request
-/// last_ancestors: {Bob: 2, Dave: 2}
+/// cause: Requesting(Carol)
+/// last_ancestors: {Bob: 2}
 
   "B_3" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_3</td></tr>
 </table>>]
-/// cause: Requesting(Dave)
-/// last_ancestors: {Bob: 3, Dave: 2}
+/// cause: Response
+/// last_ancestors: {Bob: 3, Carol: 3, Dave: 2}
 
   "B_4" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_4</td></tr>
 </table>>]
-/// cause: Response
-/// last_ancestors: {Bob: 4, Dave: 4}
+/// cause: Requesting(Dave)
+/// last_ancestors: {Bob: 4, Carol: 3, Dave: 2}
 
   "B_5" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_5</td></tr>
 </table>>]
-/// cause: Requesting(Carol)
-/// last_ancestors: {Bob: 5, Dave: 4}
+/// cause: Response
+/// last_ancestors: {Bob: 5, Carol: 3, Dave: 4}
 
-  "B_6" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_6" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_6</td></tr>
 </table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 3, Bob: 6, Carol: 5, Dave: 4}
+/// cause: Requesting(Carol)
+/// last_ancestors: {Bob: 6, Carol: 3, Dave: 4}
 
-  "B_7" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_7" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_7</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Bob: 7, Carol: 4, Dave: 4}
+
+  "B_8" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_8</td></tr>
 <tr><td colspan="6">Add(Eric)</td></tr>
 </table>>]
 /// cause: Observation(Add(Eric))
-/// last_ancestors: {Alice: 3, Bob: 7, Carol: 5, Dave: 4}
-
-  "B_8" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">B_8</td></tr>
-</table>>]
-/// cause: Requesting(Alice)
-/// last_ancestors: {Alice: 3, Bob: 8, Carol: 5, Dave: 4}
+/// last_ancestors: {Bob: 8, Carol: 4, Dave: 4}
 
   "B_9" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_9</td></tr>
 </table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 12, Bob: 9, Carol: 6, Dave: 9}
+/// cause: Requesting(Alice)
+/// last_ancestors: {Bob: 9, Carol: 4, Dave: 4}
 
   "B_10" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_10</td></tr>
 </table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 12, Bob: 10, Carol: 6, Dave: 9}
+/// cause: Request
+/// last_ancestors: {Alice: 11, Bob: 10, Carol: 5, Dave: 10}
 
   "B_11" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_11</td></tr>
 </table>>]
-/// cause: Requesting(Carol)
-/// last_ancestors: {Alice: 12, Bob: 11, Carol: 6, Dave: 9}
+/// cause: Response
+/// last_ancestors: {Alice: 11, Bob: 11, Carol: 5, Dave: 10}
 
   "B_12" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_12</td></tr>
 </table>>]
 /// cause: Requesting(Carol)
-/// last_ancestors: {Alice: 12, Bob: 12, Carol: 6, Dave: 9}
+/// last_ancestors: {Alice: 11, Bob: 12, Carol: 5, Dave: 10}
 
   "B_13" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_13</td></tr>
 </table>>]
-/// cause: Requesting(Alice)
-/// last_ancestors: {Alice: 12, Bob: 13, Carol: 6, Dave: 9}
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 11, Bob: 13, Carol: 5, Dave: 10}
 
   "B_14" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_14</td></tr>
 </table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 14, Bob: 14, Carol: 6, Dave: 9}
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 11, Bob: 14, Carol: 5, Dave: 10}
 
-  "B_15" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_15" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_15</td></tr>
-<tr><td colspan="6">[Add(Eric)]</td></tr></table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 14, Bob: 15, Carol: 10, Dave: 14}
-
-  "B_16" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">B_16</td></tr>
 </table>>]
 /// cause: Response
-/// last_ancestors: {Alice: 14, Bob: 16, Carol: 11, Dave: 14}
+/// last_ancestors: {Alice: 13, Bob: 15, Carol: 5, Dave: 10}
+
+  "B_16" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_16</td></tr>
+<tr><td colspan="6">[Add(Eric)]</td></tr></table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 13, Bob: 16, Carol: 9, Dave: 15}
 
   "B_17" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_17</td></tr>
 </table>>]
-/// cause: Requesting(Alice)
-/// last_ancestors: {Alice: 14, Bob: 17, Carol: 11, Dave: 14}
+/// cause: Response
+/// last_ancestors: {Alice: 13, Bob: 17, Carol: 10, Dave: 15}
 
   "B_18" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_18</td></tr>
 </table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 15, Bob: 18, Carol: 11, Dave: 14}
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 13, Bob: 18, Carol: 10, Dave: 15}
 
   "B_19" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_19</td></tr>
 </table>>]
-/// cause: Requesting(Carol)
-/// last_ancestors: {Alice: 15, Bob: 19, Carol: 11, Dave: 14}
-
-  "B_20" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">B_20</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>D: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
 /// cause: Response
-/// last_ancestors: {Alice: 15, Bob: 20, Carol: 14, Dave: 16}
+/// last_ancestors: {Alice: 14, Bob: 19, Carol: 10, Dave: 15}
 
-  "B_21" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_20" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_20</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 14, Bob: 20, Carol: 10, Dave: 15}
+
+  "B_21" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_21</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 15, Bob: 21, Carol: 16, Dave: 16}
+/// cause: Response
+/// last_ancestors: {Alice: 14, Bob: 21, Carol: 13, Dave: 17}
 
   "B_22" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_22</td></tr>
+<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>D: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 14, Bob: 22, Carol: 15, Dave: 17}
+
+  "B_23" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_23</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
 /// cause: Request
-/// last_ancestors: {Alice: 21, Bob: 22, Carol: 18, Dave: 17}
+/// last_ancestors: {Alice: 20, Bob: 23, Carol: 17, Dave: 18}
 
   "C_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_0</td></tr>
@@ -531,85 +531,89 @@ digraph GossipGraph {
   "C_2" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_2</td></tr>
 </table>>]
-/// cause: Requesting(Alice)
-/// last_ancestors: {Carol: 2}
+/// cause: Request
+/// last_ancestors: {Carol: 2, Dave: 2}
 
   "C_3" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_3</td></tr>
 </table>>]
 /// cause: Request
-/// last_ancestors: {Alice: 3, Carol: 3}
+/// last_ancestors: {Bob: 2, Carol: 3, Dave: 2}
 
   "C_4" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_4</td></tr>
 </table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 3, Carol: 4}
+/// cause: Request
+/// last_ancestors: {Bob: 6, Carol: 4, Dave: 4}
 
   "C_5" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_5</td></tr>
 </table>>]
 /// cause: Request
-/// last_ancestors: {Alice: 3, Bob: 5, Carol: 5, Dave: 4}
+/// last_ancestors: {Alice: 3, Bob: 6, Carol: 5, Dave: 7}
 
-  "C_6" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_6" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_6</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 5, Bob: 5, Carol: 6, Dave: 6}
-
-  "C_7" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">C_7</td></tr>
 <tr><td colspan="6">Add(Eric)</td></tr>
 </table>>]
 /// cause: Observation(Add(Eric))
-/// last_ancestors: {Alice: 5, Bob: 5, Carol: 7, Dave: 6}
+/// last_ancestors: {Alice: 3, Bob: 6, Carol: 6, Dave: 7}
+
+  "C_7" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_7</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 7, Bob: 6, Carol: 7, Dave: 13}
 
   "C_8" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_8</td></tr>
 </table>>]
 /// cause: Request
-/// last_ancestors: {Alice: 8, Bob: 5, Carol: 8, Dave: 12}
+/// last_ancestors: {Alice: 7, Bob: 6, Carol: 8, Dave: 15}
 
-  "C_9" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_9" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_9</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 8, Bob: 5, Carol: 9, Dave: 14}
-
-  "C_10" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">C_10</td></tr>
 <tr><td colspan="6">[Add(Eric)]</td></tr></table>>]
 /// cause: Request
-/// last_ancestors: {Alice: 12, Bob: 12, Carol: 10, Dave: 14}
+/// last_ancestors: {Alice: 11, Bob: 13, Carol: 9, Dave: 15}
+
+  "C_10" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_10</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 11, Bob: 13, Carol: 10, Dave: 15}
 
   "C_11" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_11</td></tr>
 </table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 12, Bob: 12, Carol: 11, Dave: 14}
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 11, Bob: 13, Carol: 11, Dave: 15}
 
   "C_12" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_12</td></tr>
 </table>>]
-/// cause: Requesting(Dave)
-/// last_ancestors: {Alice: 12, Bob: 12, Carol: 12, Dave: 14}
-
-  "C_13" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">C_13</td></tr>
-</table>>]
 /// cause: Response
-/// last_ancestors: {Alice: 12, Bob: 12, Carol: 13, Dave: 16}
+/// last_ancestors: {Alice: 11, Bob: 13, Carol: 12, Dave: 17}
 
-  "C_14" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">C_14</td></tr>
+  "C_13" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_13</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr></table>>]
 /// cause: Request
-/// last_ancestors: {Alice: 15, Bob: 19, Carol: 14, Dave: 16}
+/// last_ancestors: {Alice: 14, Bob: 20, Carol: 13, Dave: 17}
+
+  "C_14" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_14</td></tr>
+<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr></table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 14, Bob: 20, Carol: 14, Dave: 17}
 
   "C_15" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_15</td></tr>
@@ -618,8 +622,8 @@ digraph GossipGraph {
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr></table>>]
-/// cause: Requesting(Alice)
-/// last_ancestors: {Alice: 15, Bob: 19, Carol: 15, Dave: 16}
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 14, Bob: 20, Carol: 15, Dave: 17}
 
   "C_16" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_16</td></tr>
@@ -628,8 +632,8 @@ digraph GossipGraph {
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr></table>>]
-/// cause: Requesting(Bob)
-/// last_ancestors: {Alice: 15, Bob: 19, Carol: 16, Dave: 16}
+/// cause: Response
+/// last_ancestors: {Alice: 18, Bob: 20, Carol: 16, Dave: 18}
 
   "C_17" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_17</td></tr>
@@ -638,18 +642,18 @@ digraph GossipGraph {
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr></table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 19, Bob: 19, Carol: 17, Dave: 17}
+/// cause: Request
+/// last_ancestors: {Alice: 18, Bob: 20, Carol: 17, Dave: 18}
 
   "C_18" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_18</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>D: </td><td>0/0</td><td>f</td><td>-</td><td>-</td><td>-</td></tr></table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 19, Bob: 19, Carol: 18, Dave: 17}
+<tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>D: </td><td>0/0</td><td>b</td><td>t</td><td>t</td><td>-</td></tr></table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 18, Bob: 22, Carol: 18, Dave: 18}
 
   "C_19" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_19</td></tr>
@@ -658,18 +662,18 @@ digraph GossipGraph {
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
 <tr><td>D: </td><td>0/0</td><td>b</td><td>t</td><td>t</td><td>-</td></tr></table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 19, Bob: 21, Carol: 19, Dave: 17}
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 18, Bob: 22, Carol: 19, Dave: 18}
 
   "C_20" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_20</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
-<tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>b</td><td>t</td><td>t</td><td>-</td></tr></table>>]
-/// cause: Requesting(Alice)
-/// last_ancestors: {Alice: 19, Bob: 21, Carol: 20, Dave: 17}
+/// cause: Response
+/// last_ancestors: {Alice: 22, Bob: 23, Carol: 20, Dave: 18}
 
   "C_21" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_21</td></tr>
@@ -678,18 +682,8 @@ digraph GossipGraph {
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>b</td><td>t</td><td>t</td><td>-</td></tr></table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 23, Bob: 22, Carol: 21, Dave: 17}
-
-  "C_22" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">C_22</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
-<tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
-<tr><td>D: </td><td>0/0</td><td>b</td><td>t</td><td>t</td><td>-</td></tr></table>>]
 /// cause: Request
-/// last_ancestors: {Alice: 23, Bob: 22, Carol: 22, Dave: 18}
+/// last_ancestors: {Alice: 22, Bob: 23, Carol: 21, Dave: 19}
 
   "D_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_0</td></tr>
@@ -707,121 +701,127 @@ digraph GossipGraph {
   "D_2" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_2</td></tr>
 </table>>]
-/// cause: Requesting(Bob)
+/// cause: Requesting(Carol)
 /// last_ancestors: {Dave: 2}
 
   "D_3" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_3</td></tr>
 </table>>]
 /// cause: Response
-/// last_ancestors: {Bob: 2, Dave: 3}
+/// last_ancestors: {Carol: 2, Dave: 3}
 
   "D_4" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_4</td></tr>
 </table>>]
 /// cause: Request
-/// last_ancestors: {Bob: 3, Dave: 4}
+/// last_ancestors: {Bob: 4, Carol: 3, Dave: 4}
 
   "D_5" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_5</td></tr>
 </table>>]
 /// cause: Request
-/// last_ancestors: {Alice: 5, Bob: 3, Carol: 3, Dave: 5}
+/// last_ancestors: {Alice: 2, Bob: 4, Carol: 3, Dave: 5}
 
   "D_6" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_6</td></tr>
 </table>>]
-/// cause: Requesting(Carol)
-/// last_ancestors: {Alice: 5, Bob: 3, Carol: 3, Dave: 6}
+/// cause: Request
+/// last_ancestors: {Alice: 3, Bob: 4, Carol: 3, Dave: 6}
 
   "D_7" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_7</td></tr>
 </table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 5, Bob: 5, Carol: 6, Dave: 7}
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 3, Bob: 4, Carol: 3, Dave: 7}
 
   "D_8" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_8</td></tr>
 </table>>]
-/// cause: Requesting(Alice)
-/// last_ancestors: {Alice: 5, Bob: 5, Carol: 6, Dave: 8}
+/// cause: Response
+/// last_ancestors: {Alice: 3, Bob: 6, Carol: 5, Dave: 8}
 
-  "D_9" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "D_9" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_9</td></tr>
 </table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 7, Bob: 5, Carol: 6, Dave: 9}
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 3, Bob: 6, Carol: 5, Dave: 9}
 
   "D_10" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_10</td></tr>
 </table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 8, Bob: 5, Carol: 6, Dave: 10}
+/// cause: Request
+/// last_ancestors: {Alice: 6, Bob: 6, Carol: 5, Dave: 10}
 
-  "D_11" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "D_11" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_11</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 7, Bob: 6, Carol: 5, Dave: 11}
+
+  "D_12" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_12</td></tr>
 <tr><td colspan="6">Add(Eric)</td></tr>
 </table>>]
 /// cause: Observation(Add(Eric))
-/// last_ancestors: {Alice: 8, Bob: 5, Carol: 6, Dave: 11}
-
-  "D_12" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_12</td></tr>
-</table>>]
-/// cause: Requesting(Carol)
-/// last_ancestors: {Alice: 8, Bob: 5, Carol: 6, Dave: 12}
+/// last_ancestors: {Alice: 7, Bob: 6, Carol: 5, Dave: 12}
 
   "D_13" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_13</td></tr>
 </table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 8, Bob: 5, Carol: 8, Dave: 13}
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 7, Bob: 6, Carol: 5, Dave: 13}
 
   "D_14" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_14</td></tr>
 </table>>]
-/// cause: Requesting(Carol)
-/// last_ancestors: {Alice: 8, Bob: 5, Carol: 8, Dave: 14}
+/// cause: Response
+/// last_ancestors: {Alice: 7, Bob: 6, Carol: 7, Dave: 14}
 
   "D_15" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_15</td></tr>
 </table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 8, Bob: 5, Carol: 9, Dave: 15}
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 7, Bob: 6, Carol: 7, Dave: 15}
 
-  "D_16" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "D_16" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_16</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 7, Bob: 6, Carol: 8, Dave: 16}
+
+  "D_17" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_17</td></tr>
 <tr><td colspan="6">[Add(Eric)]</td></tr></table>>]
 /// cause: Request
-/// last_ancestors: {Alice: 12, Bob: 12, Carol: 12, Dave: 16}
-
-  "D_17" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_17</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 16, Bob: 17, Carol: 12, Dave: 17}
+/// last_ancestors: {Alice: 11, Bob: 13, Carol: 11, Dave: 17}
 
   "D_18" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_18</td></tr>
 </table>>]
-/// cause: Requesting(Carol)
-/// last_ancestors: {Alice: 16, Bob: 17, Carol: 12, Dave: 18}
+/// cause: Request
+/// last_ancestors: {Alice: 15, Bob: 18, Carol: 11, Dave: 18}
 
   "D_19" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_19</td></tr>
 </table>>]
 /// cause: Requesting(Carol)
-/// last_ancestors: {Alice: 16, Bob: 17, Carol: 12, Dave: 19}
+/// last_ancestors: {Alice: 15, Bob: 18, Carol: 11, Dave: 19}
 
-  "D_20" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "D_20" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_20</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 15, Bob: 18, Carol: 11, Dave: 20}
+
+  "D_21" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_21</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
 <tr><td>D: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr></table>>]
 /// cause: Response
-/// last_ancestors: {Alice: 23, Bob: 22, Carol: 22, Dave: 20}
+/// last_ancestors: {Alice: 22, Bob: 23, Carol: 21, Dave: 21}
 
 }
 
@@ -844,14 +844,18 @@ digraph GossipGraph {
 ///   ]
 /// }
 /// interesting_events: {
-///   Alice -> ["A_15"]
-///   Bob -> ["B_15"]
-///   Carol -> ["C_10"]
-///   Dave -> ["D_16"]
+///   Alice -> ["A_14"]
+///   Bob -> ["B_16"]
+///   Carol -> ["C_9"]
+///   Dave -> ["D_17"]
 /// }
 /// all_voters: {Alice, Bob, Carol, Dave}
-/// unconsensused_events: {"A_9", "B_7", "C_7", "D_11"}
+/// unconsensused_events: {"A_8", "B_8", "C_6", "D_12"}
 /// meta_events: {
+///   A_8 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
 ///   A_9 -> {
 ///     observees: {}
 ///     interesting_content: []
@@ -874,11 +878,11 @@ digraph GossipGraph {
 ///   }
 ///   A_14 -> {
 ///     observees: {}
-///     interesting_content: []
+///     interesting_content: [Add(Eric)]
 ///   }
 ///   A_15 -> {
 ///     observees: {}
-///     interesting_content: [Add(Eric)]
+///     interesting_content: []
 ///   }
 ///   A_16 -> {
 ///     observees: {}
@@ -889,11 +893,18 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   A_18 -> {
-///     observees: {}
+///     observees: {Alice, Bob, Carol, Dave}
 ///     interesting_content: []
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   -   -   - 
+///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
+///       D: 0/0   t   -   -   - 
+///     }
 ///   }
 ///   A_19 -> {
-///     observees: {Alice, Bob, Carol, Dave}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -919,9 +930,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
+///       A: 0/0   t   t   t   - 
+///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///       D: 0/0   t   -   -   - 
 ///     }
 ///   }
@@ -930,10 +941,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   - 
-///       B: 0/0   t   t   t   - 
-///       C: 0/0   t   t   t   - 
-///       D: 0/0   t   -   -   - 
+///       A: 0/0   t   t   t   t 
+///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
+///       D: 0/0   t   t   t   - 
 ///     }
 ///   }
 ///   A_23 -> {
@@ -946,21 +957,6 @@ digraph GossipGraph {
 ///       C: 0/0   t   t   t   t 
 ///       D: 0/0   t   t   t   - 
 ///     }
-///   }
-///   A_24 -> {
-///     observees: {}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   t   t   t   - 
-///     }
-///   }
-///   B_6 -> {
-///     observees: {}
-///     interesting_content: []
 ///   }
 ///   B_7 -> {
 ///     observees: {}
@@ -996,11 +992,11 @@ digraph GossipGraph {
 ///   }
 ///   B_15 -> {
 ///     observees: {}
-///     interesting_content: [Add(Eric)]
+///     interesting_content: []
 ///   }
 ///   B_16 -> {
 ///     observees: {}
-///     interesting_content: []
+///     interesting_content: [Add(Eric)]
 ///   }
 ///   B_17 -> {
 ///     observees: {}
@@ -1015,18 +1011,11 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   B_20 -> {
-///     observees: {Alice, Bob, Carol, Dave}
+///     observees: {}
 ///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   t   -   -   - 
-///     }
 ///   }
 ///   B_21 -> {
-///     observees: {}
+///     observees: {Alice, Bob, Carol, Dave}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -1041,11 +1030,26 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
+///       A: 0/0   t   -   -   - 
+///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
+///       D: 0/0   t   -   -   - 
+///     }
+///   }
+///   B_23 -> {
+///     observees: {}
+///     interesting_content: []
+///     meta_votes: {
+///         stage est bin aux dec
 ///       A: 0/0   t   t   t   - 
 ///       B: 0/0   t   t   t   - 
 ///       C: 0/0   t   t   t   - 
 ///       D: 0/0   t   -   -   - 
 ///     }
+///   }
+///   C_6 -> {
+///     observees: {}
+///     interesting_content: []
 ///   }
 ///   C_7 -> {
 ///     observees: {}
@@ -1057,11 +1061,11 @@ digraph GossipGraph {
 ///   }
 ///   C_9 -> {
 ///     observees: {}
-///     interesting_content: []
+///     interesting_content: [Add(Eric)]
 ///   }
 ///   C_10 -> {
 ///     observees: {}
-///     interesting_content: [Add(Eric)]
+///     interesting_content: []
 ///   }
 ///   C_11 -> {
 ///     observees: {}
@@ -1072,11 +1076,18 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   C_13 -> {
-///     observees: {}
+///     observees: {Alice, Bob, Carol}
 ///     interesting_content: []
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   -   -   - 
+///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
+///       D: 0/0   f   -   -   - 
+///     }
 ///   }
 ///   C_14 -> {
-///     observees: {Alice, Bob, Carol}
+///     observees: {}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -1124,10 +1135,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///       D: 0/0   f   -   -   - 
+///       A: 0/0   t   t   t   - 
+///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
+///       D: 0/0   b   t   t   - 
 ///     }
 ///   }
 ///   C_19 -> {
@@ -1146,9 +1157,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   t   t   - 
-///       B: 0/0   t   t   t   - 
-///       C: 0/0   t   t   t   - 
+///       A: 0/0   t   t   t   t 
+///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
 ///       D: 0/0   b   t   t   - 
 ///     }
 ///   }
@@ -1162,21 +1173,6 @@ digraph GossipGraph {
 ///       C: 0/0   t   t   t   t 
 ///       D: 0/0   b   t   t   - 
 ///     }
-///   }
-///   C_22 -> {
-///     observees: {}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       A: 0/0   t   t   t   t 
-///       B: 0/0   t   t   t   t 
-///       C: 0/0   t   t   t   t 
-///       D: 0/0   b   t   t   - 
-///     }
-///   }
-///   D_9 -> {
-///     observees: {}
-///     interesting_content: []
 ///   }
 ///   D_10 -> {
 ///     observees: {}
@@ -1204,11 +1200,11 @@ digraph GossipGraph {
 ///   }
 ///   D_16 -> {
 ///     observees: {}
-///     interesting_content: [Add(Eric)]
+///     interesting_content: []
 ///   }
 ///   D_17 -> {
 ///     observees: {}
-///     interesting_content: []
+///     interesting_content: [Add(Eric)]
 ///   }
 ///   D_18 -> {
 ///     observees: {}
@@ -1219,6 +1215,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   D_20 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   D_21 -> {
 ///     observees: {Alice, Bob, Carol, Dave}
 ///     interesting_content: []
 ///     meta_votes: {

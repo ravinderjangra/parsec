@@ -215,7 +215,7 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
 
     let _ = scenarios
         .add(
-            "functional_tests::handle_malice_genesis_event_not_after_initial",
+            "functional_tests::handle_malice::genesis_event_not_after_initial",
             |env| {
                 let obs = ObservationSchedule {
                     genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
@@ -399,7 +399,7 @@ fn add_benches(scenarios: &mut Scenarios) {
             Schedule::new(
                 env,
                 &ScheduleOptions {
-                    genesis_size: 2,
+                    genesis_size: 3,
                     peers_to_add: 3,
                     opaque_to_add: 5,
                     ..Default::default()

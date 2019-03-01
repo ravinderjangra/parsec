@@ -33880,7 +33880,7 @@ digraph GossipGraph {
 /// cause: Requesting(PublicIdnamecdfb7c)
 /// last_ancestors: {PublicIdname48840d: 436, PublicIdname4b4fb9: 531, PublicIdname5c8502: 627, PublicIdname70ccc7: 535, PublicIdname754598: 637, PublicIdname93b63e: 647, PublicIdnamecdfb7c: 36, PublicIdnamee2d762: 312, PublicIdnamee5945a: 147, PublicIdnamee870b5: 234}
 
-  "PublicIdnamecd_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamecd_0" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamecd_0</td></tr>
 </table>>]
 /// cause: Initial
@@ -37098,6 +37098,10 @@ digraph GossipGraph {
 ///       PublicIdnamee8: 0/0   f   f   f   - 
 ///                       0/1   f   f   f   f 
 ///     }
+///   }
+///   PublicIdnamecd_0 -> {
+///     observees: {}
+///     interesting_content: []
 ///   }
 ///   PublicIdnamecd_1 -> {
 ///     observees: {}
