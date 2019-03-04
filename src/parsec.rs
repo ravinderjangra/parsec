@@ -1999,9 +1999,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 })
                 .unwrap_or(false);
 
-            // If this is a Request or an accusation for another malice then the peer might not
-            // have raised the accusation yet.
-            if event.is_request() || is_accusation {
+            // If this is a Request, Response or an accusation for another malice then the peer
+            // might not have raised the accusation yet.
+            if event.is_request() || event.is_response() || is_accusation {
                 return Ok(());
             }
 
