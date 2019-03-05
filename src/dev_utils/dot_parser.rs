@@ -326,12 +326,14 @@ fn parse_single_event_detail() -> Parser<u8, (String, EventDetails)> {
 fn parse_cause() -> Parser<u8, CauseInput> {
     let prefix = comment_prefix() * seq(b"cause: ");
     let initial = seq(b"Initial").map(|_| CauseInput::Initial);
+    let requesting =
+        (seq(b"Requesting(") * parse_peer_id() - sym(b')')).map(CauseInput::Requesting);
     let request = seq(b"Request").map(|_| CauseInput::Request);
     let response = seq(b"Response").map(|_| CauseInput::Response);
     let observation =
         (seq(b"Observation(") * parse_observation() - sym(b')')).map(CauseInput::Observation);
 
-    prefix * (initial | request | response | observation) - newline()
+    prefix * (initial | requesting | request | response | observation) - newline()
 }
 
 fn parse_last_ancestors() -> Parser<u8, BTreeMap<PeerId, usize>> {

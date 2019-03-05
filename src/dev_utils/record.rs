@@ -8,7 +8,7 @@
 
 use super::dot_parser::{parse_dot_file, ParsedContents};
 use crate::gossip::IndexedEventRef;
-use crate::gossip::{Event, Request, Response};
+use crate::gossip::{Cause, Event, Request, Response};
 use crate::hash::Hash;
 use crate::mock::{PeerId, Transaction};
 use crate::observation::{ConsensusMode, Observation, ObservationKey, ObservationStore};
@@ -179,6 +179,16 @@ impl From<ParsedContents> for Record {
                     // Skip all accusations directly following our sync event, as they will be
                     // created during replay.
                     skip_our_accusations = true;
+                } else if event.is_requesting() {
+                    known[event.topological_index()] = true;
+                    let recipient_id = match event.cause() {
+                        Cause::Requesting { recipient, .. } => {
+                            unwrap!(contents.peer_list.get(*recipient)).id().clone()
+                        }
+                        _ => unreachable!(),
+                    };
+                    actions.push(Action::Requesting(recipient_id));
+                    skip_our_accusations = true;
                 } else {
                     panic!("Unexpected event {:?}", *event);
                 }
@@ -210,6 +220,7 @@ impl From<ParsedContents> for Record {
 #[derive(Clone)]
 enum Action {
     Vote(Observation<Transaction, PeerId>),
+    Requesting(PeerId),
     Request(PeerId, Request<Transaction, PeerId>),
     Response(PeerId, Response<Transaction, PeerId>),
 }
@@ -218,6 +229,9 @@ impl Action {
     fn run(self, parsec: &mut Parsec<Transaction, PeerId>) {
         match self {
             Action::Vote(observation) => unwrap!(parsec.vote_for(observation)),
+            Action::Requesting(recipient) => {
+                let _ = unwrap!(parsec.create_gossip(&recipient));
+            }
             Action::Request(src, request) => {
                 let _ = unwrap!(parsec.handle_request(&src, request));
             }

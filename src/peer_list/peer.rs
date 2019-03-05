@@ -61,7 +61,7 @@ impl<P: PublicId> Peer<P> {
         self.events.iter()
     }
 
-    #[cfg(test)]
+    #[cfg(all(test, feature = "mock"))]
     pub fn indexed_events<'a>(
         &'a self,
     ) -> impl DoubleEndedIterator<Item = (usize, EventIndex)> + 'a {
@@ -120,7 +120,7 @@ impl Events {
         self.0.iter().flat_map(|slot| slot.iter())
     }
 
-    #[cfg(test)]
+    #[cfg(all(test, feature = "mock"))]
     fn indexed<'a>(&'a self) -> impl DoubleEndedIterator<Item = (usize, EventIndex)> + 'a {
         self.0
             .iter()

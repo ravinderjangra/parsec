@@ -68,6 +68,7 @@ mod full {
     use super::*;
     use std::fmt::Display;
 
+    #[cfg(feature = "dump-graphs")]
     impl Hash {
         pub fn full_display(&self) -> FullDisplay {
             FullDisplay(self)

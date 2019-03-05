@@ -213,7 +213,7 @@ fn add_peer() {
     let alice_snapshot = Snapshot::new(&alice);
 
     // Try calling `create_gossip()` for a peer which doesn't exist yet.
-    assert_err!(Error::UnknownPeer, alice.create_gossip(Some(&fred_id)));
+    assert_err!(Error::UnknownPeer, alice.create_gossip(&fred_id));
     assert_eq!(alice_snapshot, Snapshot::new(&alice));
 
     // Now add D_18, which should result in Alice adding Fred.
@@ -226,27 +226,14 @@ fn add_peer() {
         .any(|(_, peer_id)| *peer_id == fred_id));
 
     // Construct Fred's Parsec instance.
-    let mut fred = TestParsec::from_existing(fred_id, &genesis_group, &genesis_group);
-
-    // Create a "naughty Carol" instance where the graph only shows four peers existing before
-    // adding Fred.
-    #[cfg(feature = "malice-detection")]
-    {
-        parsed_contents = parse_test_dot_file("carol.dot");
-        let naughty_carol = TestParsec::from_parsed_contents(parsed_contents);
-        let malicious_message = unwrap!(naughty_carol.create_gossip(None));
-        assert_err!(
-            Error::InvalidEvent,
-            fred.handle_request(&alice_id, malicious_message)
-        );
-    }
+    let mut fred = TestParsec::from_existing(fred_id.clone(), &genesis_group, &genesis_group);
 
     // Now pass a valid initial request from Alice to Fred.  The generated response would
     // normally only contain Fred's initial event, and the one recording receipt of Alice's
     // request.  However this graph doesn't represent the state it would be in if Alice were
     // actually sending such a request - it should have an event by Alice as the latest.  We
     // really only need to check here though that Fred doesn't respond with the full graph.
-    let message = unwrap!(alice.create_gossip(None));
+    let message = unwrap!(alice.create_gossip(&fred_id));
     let response = unwrap!(fred.handle_request(&alice_id, message));
     assert!(response.packed_events.len() < fred.graph().len());
 }
@@ -281,7 +268,7 @@ fn remove_peer() {
     );
 
     // Try calling `create_gossip()` for Eric shall result in error.
-    assert_err!(Error::InvalidPeerState { .. }, alice.create_gossip(Some(&eric_id)));
+    assert_err!(Error::InvalidPeerState { .. }, alice.create_gossip(&eric_id));
 
     // Construct Eric's parsec instance.
     let mut section: BTreeSet<_> = alice
@@ -301,7 +288,7 @@ fn remove_peer() {
     // Eric can no longer gossip to anyone.
     assert_err!(
         Error::InvalidSelfState { .. },
-        eric.create_gossip(Some(&PeerId::new("Alice")))
+        eric.create_gossip(&PeerId::new("Alice"))
     );
 }
 
@@ -404,7 +391,7 @@ fn gossip_after_fork() {
     let mut bob = TestParsec::from_genesis(bob_id.clone(), &genesis_group);
 
     // Alice sends a gossip request to Bob and receives a response back.
-    let req = unwrap!(alice.create_gossip(Some(&bob_id)));
+    let req = unwrap!(alice.create_gossip(&bob_id));
     let res = unwrap!(bob.handle_request(&alice_id, req));
     unwrap!(alice.handle_response(&bob_id, res));
 
@@ -422,7 +409,7 @@ fn gossip_after_fork() {
     unwrap!(alice.add_event(a_2_fork));
 
     // Alice sends another gossip request to Bob.
-    let req = unwrap!(alice.create_gossip(Some(&bob_id)));
+    let req = unwrap!(alice.create_gossip(&bob_id));
     let _ = unwrap!(bob.handle_request(&alice_id, req));
 
     // Verify that Bob now has the forked event.
@@ -503,10 +490,10 @@ mod handle_malice {
         let d_2_hash = *d_2.hash();
         let _ = dave_contents.add_event(d_2);
 
-        let dave = TestParsec::from_parsed_contents(dave_contents);
+        let mut dave = TestParsec::from_parsed_contents(dave_contents);
 
         // Dave sends malicious gossip to Alice.
-        let request = unwrap!(dave.create_gossip(Some(&alice_id)));
+        let request = unwrap!(dave.create_gossip(&alice_id));
         unwrap!(alice.handle_request(&dave_id, request));
 
         // Verify that Alice detected the malice and accused Dave.
@@ -558,10 +545,10 @@ mod handle_malice {
         let e_1_hash = *e_1.hash();
         let _ = eric_contents.add_event(e_1);
 
-        let eric = TestParsec::from_parsed_contents(eric_contents);
+        let mut eric = TestParsec::from_parsed_contents(eric_contents);
 
         // Eric sends malicious gossip to Alice.
-        let request = unwrap!(eric.create_gossip(Some(&alice_id)));
+        let request = unwrap!(eric.create_gossip(&alice_id));
         unwrap!(alice.handle_request(&eric_id, request));
 
         // Verify that Alice detected the malice and accused Eric.
@@ -617,7 +604,7 @@ mod handle_malice {
         let genesis = btree_set![alice_id.clone(), dave_id.clone()];
 
         // Create Alice where the first event is not a genesis event (malice)
-        let alice = initialise_parsec(
+        let mut alice = initialise_parsec(
             alice_id.clone(),
             &genesis,
             Some(Observation::OpaquePayload(Transaction::new("Foo"))),
@@ -631,7 +618,7 @@ mod handle_malice {
         assert!(!dave.graph().contains(&a_1_hash));
 
         // Send gossip from Alice to Dave.
-        let message = unwrap!(alice.create_gossip(Some(&dave_id)));
+        let message = unwrap!(alice.create_gossip(&dave_id));
         unwrap!(dave.handle_request(&alice_id, message));
         assert!(dave.graph().contains(&a_0_hash));
         assert!(dave.graph().contains(&a_1_hash));
@@ -659,7 +646,7 @@ mod handle_malice {
         let false_genesis = btree_set![alice_id.clone(), PeerId::new("Derp")];
 
         // Create Alice where the first event is an incorrect genesis event (malice)
-        let alice = initialise_parsec(
+        let mut alice = initialise_parsec(
             alice_id.clone(),
             &genesis,
             Some(Observation::Genesis(false_genesis)),
@@ -673,7 +660,7 @@ mod handle_malice {
         assert!(!dave.graph().contains(&a_1_hash));
 
         // Send gossip from Alice to Dave.
-        let message = unwrap!(alice.create_gossip(Some(&dave_id)));
+        let message = unwrap!(alice.create_gossip(&dave_id));
         // Alice's genesis should be rejected as invalid
         assert_err!(Error::InvalidEvent, dave.handle_request(&alice_id, message));
         assert!(dave.graph().contains(&a_0_hash));
@@ -725,7 +712,7 @@ mod handle_malice {
         // duplicate is still added to the graph.
         let mut alice = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
         let carols_valid_vote_hash =
-            *unwrap!(find_event_by_short_name(alice.graph(), "C_4")).hash();
+            *unwrap!(find_event_by_short_name(alice.graph(), "C_5")).hash();
         unwrap!(alice.unpack_and_add_event(first_duplicate_clone_packed));
 
         let carol_index = unwrap!(alice.peer_list().get_index(carol.our_pub_id()));
@@ -763,14 +750,14 @@ mod handle_malice {
         ));
         let a_5_hash = *a_5.hash();
         let _ = alice_contents.add_event(a_5);
-        let alice = TestParsec::from_parsed_contents(alice_contents);
+        let mut alice = TestParsec::from_parsed_contents(alice_contents);
         assert!(alice.graph().contains(&a_5_hash));
 
         let mut carol = TestParsec::from_parsed_contents(parse_test_dot_file("carol.dot"));
         assert!(!carol.graph().contains(&a_5_hash));
 
         // Send gossip from Alice to Carol
-        let message = unwrap!(alice.create_gossip(Some(carol.our_pub_id())));
+        let message = unwrap!(alice.create_gossip(carol.our_pub_id()));
 
         unwrap!(carol.handle_request(alice.our_pub_id(), message));
         assert!(carol.graph().contains(&a_5_hash));
@@ -878,23 +865,23 @@ mod handle_malice {
         let mut alice_contents =
             parse_dot_file_with_test_name("alice.dot", "functional_tests_handle_malice_accomplice");
 
-        let a_26_index =
-            unwrap!(find_event_by_short_name(&alice_contents.graph, "A_26")).event_index();
+        let a_18_index =
+            unwrap!(find_event_by_short_name(&alice_contents.graph, "A_18")).event_index();
         let d_1_hash = *unwrap!(find_event_by_short_name(&alice_contents.graph, "D_1")).hash();
 
         // Create an invalid accusation from Alice
-        let a_27 = unwrap!(alice_contents.new_event_from_observation(
-            a_26_index,
+        let a_19 = unwrap!(alice_contents.new_event_from_observation(
+            a_18_index,
             Observation::Accusation {
                 offender: PeerId::new("Dave"),
                 malice: Malice::Fork(d_1_hash),
             },
         ));
-        let a_27_hash = *a_27.hash();
-        let _ = alice_contents.add_event(a_27);
+        let a_19_hash = *a_19.hash();
+        let _ = alice_contents.add_event(a_19);
         let alice = TestParsec::from_parsed_contents(alice_contents);
-        assert!(alice.graph().contains(&a_27_hash));
-        (a_27_hash, alice)
+        assert!(alice.graph().contains(&a_19_hash));
+        (a_19_hash, alice)
     }
 
     fn verify_accused_accomplice(
@@ -926,8 +913,8 @@ mod handle_malice {
     #[test]
     // Carol received gossip from Bob, which should have raised an accomplice accusation against
     // Alice but didn't.
-    fn accomplice() {
-        let (invalid_accusation, alice) = create_invalid_accusation();
+    fn accomplice_basic() {
+        let (invalid_accusation, mut alice) = create_invalid_accusation();
 
         let mut bob = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(
             "bob.dot",
@@ -936,10 +923,10 @@ mod handle_malice {
         assert!(!bob.graph().contains(&invalid_accusation));
 
         // Send gossip from Alice to Bob
-        let message = unwrap!(alice.create_gossip(Some(&PeerId::new("Bob"))));
+        let message = unwrap!(alice.create_gossip(&PeerId::new("Bob")));
         unwrap!(bob.handle_request(alice.our_pub_id(), message));
         assert!(bob.graph().contains(&invalid_accusation));
-        // Remove the invalid accusation event (B_31)
+        // Remove the invalid accusation event (B_20)
         unwrap!(bob.remove_last_event());
 
         let mut carol = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(
@@ -949,32 +936,11 @@ mod handle_malice {
         assert!(!carol.graph().contains(&invalid_accusation));
 
         // Send gossip from Bob to Carol, with the accusation event missing. Carol will see that
-        // the accusation event is missing, but is not going acuse Bob yet until she's sure.
-        let message = unwrap!(bob.create_gossip(Some(&PeerId::new("Carol"))));
+        // the accusation event is missing, and since Bob has now created a `Requesting` event is
+        // sure that Bob didn't create the accusation he should have.
+        let message = unwrap!(bob.create_gossip(&PeerId::new("Carol")));
         unwrap!(carol.handle_request(bob.our_pub_id(), message));
         assert!(carol.graph().contains(&invalid_accusation));
-        assert!(our_votes(&carol)
-            .filter_map(|payload| match payload {
-                Observation::Accusation {
-                    malice: Malice::Accomplice(_, _),
-                    ..
-                } => Some(()),
-                _ => None,
-            })
-            .next()
-            .is_none());
-
-        // Bob adds another event which he then sends to Carol, who now becomes sure that Bob
-        // didn't create the accusation he should have.
-        let b_30_index = unwrap!(find_event_by_short_name(bob.graph(), "B_30")).event_index();
-        let b_31_replacement = unwrap!(bob.new_event_from_observation(
-            b_30_index,
-            Observation::OpaquePayload(Transaction::new("ABCD")),
-        ));
-        let b_31_hash = *b_31_replacement.hash();
-        unwrap!(bob.add_event(b_31_replacement));
-        let message = unwrap!(bob.create_gossip(Some(&PeerId::new("Carol"))));
-        unwrap!(carol.handle_request(bob.our_pub_id(), message));
 
         // Verify that Carol detected malice and accused Alice of `InvalidAccusation` and Bob of
         // `Accomplice`.
@@ -991,14 +957,15 @@ mod handle_malice {
         assert_eq!(*hash, invalid_accusation);
         assert!(our_accusations.next().is_none());
 
-        verify_accused_accomplice(&carol, bob.our_pub_id(), &b_31_hash, &invalid_accusation);
+        let b_20_hash = *unwrap!(bob.graph().get(bob.our_last_event_index())).hash();
+        verify_accused_accomplice(&carol, bob.our_pub_id(), &b_20_hash, &invalid_accusation);
     }
 
     #[test]
     // Carol received `invalid_accusation` from Alice first, then received gossip from Bob,
     // which should have raised an accomplice accusation against Alice but didn't.
     fn accomplice_separate() {
-        let (invalid_accusation, alice) = create_invalid_accusation();
+        let (invalid_accusation, mut alice) = create_invalid_accusation();
 
         let mut carol = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(
             "carol.dot",
@@ -1007,7 +974,7 @@ mod handle_malice {
         assert!(!carol.graph().contains(&invalid_accusation));
 
         // Send gossip from Alice to Carol
-        let message = unwrap!(alice.create_gossip(Some(&PeerId::new("Carol"))));
+        let message = unwrap!(alice.create_gossip(&PeerId::new("Carol")));
         unwrap!(carol.handle_request(alice.our_pub_id(), message));
         assert!(carol.graph().contains(&invalid_accusation));
 
@@ -1018,46 +985,29 @@ mod handle_malice {
         assert!(!bob.graph().contains(&invalid_accusation));
 
         // Send gossip from Alice to Bob
-        let message = unwrap!(alice.create_gossip(Some(&PeerId::new("Bob"))));
+        let message = unwrap!(alice.create_gossip(&PeerId::new("Bob")));
         unwrap!(bob.handle_request(alice.our_pub_id(), message));
         assert!(bob.graph().contains(&invalid_accusation));
-        // Remove the invalid accusation event (B_31), making Bob an accomplice.
+        // Remove the invalid accusation event (B_20), making Bob an accomplice.
         unwrap!(bob.remove_last_event());
 
         // Send gossip from Bob to Carol, with the accusation event missing. Carol will see that
-        // the accusation event is missing, but is not going acuse Bob yet until she's sure.
-        let message = unwrap!(bob.create_gossip(Some(&PeerId::new("Carol"))));
+        // the accusation event is missing, and since Bob has now created a `Requesting` event is
+        // sure that Bob didn't create the accusation he should have.
+        let message = unwrap!(bob.create_gossip(&PeerId::new("Carol")));
         unwrap!(carol.handle_request(bob.our_pub_id(), message));
         assert!(carol.graph().contains(&invalid_accusation));
-        assert!(our_votes(&carol).all(|payload| match payload {
-            Observation::Accusation {
-                malice: Malice::Accomplice(_, _),
-                ..
-            } => false,
-            _ => true,
-        }));
-
-        // Bob adds another event which he then sends to Carol, who now becomes sure that Bob
-        // didn't create the accusation he should have.
-        let b_30_index = unwrap!(find_event_by_short_name(bob.graph(), "B_30")).event_index();
-        let b_31_replacement = unwrap!(bob.new_event_from_observation(
-            b_30_index,
-            Observation::OpaquePayload(Transaction::new("ABCD")),
-        ));
-        let b_31_hash = *b_31_replacement.hash();
-        unwrap!(bob.add_event(b_31_replacement));
-        let message = unwrap!(bob.create_gossip(Some(&PeerId::new("Carol"))));
-        unwrap!(carol.handle_request(bob.our_pub_id(), message));
 
         // Verify that Carol detected malice and accused Bob of `Accomplice`.
-        verify_accused_accomplice(&carol, bob.our_pub_id(), &b_31_hash, &invalid_accusation);
+        let b_20_hash = *unwrap!(bob.graph().get(bob.our_last_event_index())).hash();
+        verify_accused_accomplice(&carol, bob.our_pub_id(), &b_20_hash, &invalid_accusation);
     }
 
     #[test]
     // Carol received `invalid_accusation` from Alice first, then receive gossip from Bob, which
     // doesn't contain the malice of Alice. Carol shall not raise accusation against Bob.
     fn accomplice_negative() {
-        let (invalid_accusation, alice) = create_invalid_accusation();
+        let (invalid_accusation, mut alice) = create_invalid_accusation();
 
         let mut carol = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(
             "carol.dot",
@@ -1066,34 +1016,9 @@ mod handle_malice {
         assert!(!carol.graph().contains(&invalid_accusation));
 
         // Send gossip from Alice to Carol
-        let message = unwrap!(alice.create_gossip(Some(&PeerId::new("Carol"))));
+        let message = unwrap!(alice.create_gossip(&PeerId::new("Carol")));
         unwrap!(carol.handle_request(alice.our_pub_id(), message));
         assert!(carol.graph().contains(&invalid_accusation));
-
-        let bob = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(
-            "bob.dot",
-            "functional_tests_handle_malice_accomplice",
-        ));
-        assert!(!bob.graph().contains(&invalid_accusation));
-
-        // Send gossip from Bob to Carol
-        let message = unwrap!(bob.create_gossip(Some(&PeerId::new("Carol"))));
-        unwrap!(carol.handle_request(bob.our_pub_id(), message));
-
-        // Verify that Carol didn't accuse Bob of `Accomplice`.
-        assert!(our_votes(&carol).all(|payload| match payload {
-            Observation::Accusation {
-                malice: Malice::Accomplice(_, _),
-                ..
-            } => false,
-            _ => true,
-        }));
-    }
-
-    #[test]
-    // Alice tries to frame Bob by gossiping to Carol with Bob's InvalidAccusation removed.
-    fn accomplice_framing_attempt() {
-        let (invalid_accusation, mut alice) = create_invalid_accusation();
 
         let mut bob = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(
             "bob.dot",
@@ -1101,54 +1026,9 @@ mod handle_malice {
         ));
         assert!(!bob.graph().contains(&invalid_accusation));
 
-        // Send gossip from Alice to Bob
-        let message = unwrap!(alice.create_gossip(Some(&PeerId::new("Bob"))));
-        unwrap!(bob.handle_request(alice.our_pub_id(), message));
-        assert!(bob.graph().contains(&invalid_accusation));
-        // ..and back to Alice
-        let message = unwrap!(bob.create_gossip(Some(&PeerId::new("Alice"))));
-        unwrap!(alice.handle_request(bob.our_pub_id(), message));
-
-        // Alice raises an InvalidAccusation (A_29) against Bob's InvalidAccusation (B_31), remove
-        // it as we're not interested in it.
-        let (_, _alice_accusation_event_against_bob) = unwrap!(alice.remove_last_event());
-
-        // Then replace the sync event with one against B_30, effectively hiding Bob's accusation.
-        let (_, _a_28) = unwrap!(alice.remove_last_event());
-        let (_, _b_31) = unwrap!(alice.remove_last_event());
-        let b_30_index = unwrap!(find_event_by_short_name(alice.graph(), "B_30")).event_index();
-        let a_27_index = unwrap!(find_event_by_short_name(alice.graph(), "A_27")).event_index();
-
-        let a_28_replacement = unwrap!(Event::new_from_request(
-            a_27_index,
-            b_30_index,
-            &PeerIndexSet::default(),
-            alice.event_context()
-        ));
-
-        unwrap!(alice.add_event(a_28_replacement));
-
-        let mut carol = TestParsec::from_parsed_contents(parse_dot_file_with_test_name(
-            "carol.dot",
-            "functional_tests_handle_malice_accomplice",
-        ));
-        assert!(!carol.graph().contains(&invalid_accusation));
-
-        // Send gossip from Alice to Carol
-        let message = unwrap!(alice.create_gossip(Some(&PeerId::new("Carol"))));
-        unwrap!(carol.handle_request(alice.our_pub_id(), message));
-        assert!(carol.graph().contains(&invalid_accusation));
-        assert!(our_votes(&carol).all(|payload| match payload {
-            Observation::Accusation {
-                malice: Malice::Accomplice(_, _),
-                ..
-            } => false,
-            _ => true,
-        }));
-
-        // Bob sends his side of the story, the honest side, to Carol
-        let message = unwrap!(bob.create_gossip(Some(&PeerId::new("Carol"))));
-        unwrap!(carol.handle_request(alice.our_pub_id(), message));
+        // Send gossip from Bob to Carol
+        let message = unwrap!(bob.create_gossip(&PeerId::new("Carol")));
+        unwrap!(carol.handle_request(bob.our_pub_id(), message));
 
         // Verify that Carol didn't accuse Bob of `Accomplice`.
         assert!(our_votes(&carol).all(|payload| match payload {
@@ -1162,30 +1042,36 @@ mod handle_malice {
 
     #[test]
     fn handle_fork() {
-        // In this scenario, Alice creates two descendants of A_3 and sends one of them to Bob,
+        // Generated with RNG seed: [1573595827, 2035773878, 1331264098, 154770609].
+        //
+        // In this scenario, Alice creates two descendants of A_20 and sends one of them to Bob,
         // and the other one to Dave. When Bob gossips to Dave afterwards, Dave is made aware of
         // both sides of the fork and should raise an accusation.
-        let bob_contents = parse_test_dot_file("bob.dot");
-        let dave_contents = parse_test_dot_file("dave.dot");
-        let a_3_hash = *unwrap!(find_event_by_short_name(&bob_contents.graph, "A_3")).hash();
-        // Bob and Dave have different notions of which event is the fourth one by Alice - here
-        // we save the hashes of these two events that could be considered A_4.
-        let a_4_bob_hash = *unwrap!(find_event_by_short_name(&bob_contents.graph, "A_4")).hash();
-        let a_4_dave_hash = *unwrap!(find_event_by_short_name(&dave_contents.graph, "A_4")).hash();
+        let mut alice0 = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
+        let mut bob = TestParsec::from_parsed_contents(parse_test_dot_file("bob.dot"));
+        let message0 = unwrap!(alice0.create_gossip(bob.our_pub_id()));
+        unwrap!(bob.handle_request(alice0.our_pub_id(), message0));
 
-        let bob = TestParsec::from_parsed_contents(bob_contents);
-        let mut dave = TestParsec::from_parsed_contents(dave_contents);
-        assert!(bob.graph().contains(&a_3_hash));
-        assert!(dave.graph().contains(&a_3_hash));
-        // Bob doesn't know Dave's A_4, and Dave doesn't know Bob's
-        assert!(!bob.graph().contains(&a_4_dave_hash));
-        assert!(!dave.graph().contains(&a_4_bob_hash));
+        let mut alice1 = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
+        let mut dave = TestParsec::from_parsed_contents(parse_test_dot_file("dave.dot"));
+        let message1 = unwrap!(alice1.create_gossip(dave.our_pub_id()));
+        unwrap!(dave.handle_request(alice1.our_pub_id(), message1));
 
-        // Send gossip from Bob to Dave
-        let message = unwrap!(bob.create_gossip(Some(dave.our_pub_id())));
+        // Bob and Dave have different notions of which event is the 21st one by Alice - here
+        // we save the hashes of these two events that could be considered A_21.
+        let bob_a_21_hash = *unwrap!(find_event_by_short_name(bob.graph(), "A_21")).hash();
+        let dave_a_21_hash = *unwrap!(find_event_by_short_name(dave.graph(), "A_21")).hash();
+        assert_ne!(bob_a_21_hash, dave_a_21_hash);
+
+        // Bob doesn't know Dave's A_21, and Dave doesn't know Bob's.
+        assert!(!bob.graph().contains(&dave_a_21_hash));
+        assert!(!dave.graph().contains(&bob_a_21_hash));
+
+        // Send gossip from Bob to Dave.
+        let message = unwrap!(bob.create_gossip(dave.our_pub_id()));
         unwrap!(dave.handle_request(bob.our_pub_id(), message));
-        // Dave should now become aware of the other branch of the fork
-        assert!(dave.graph().contains(&a_4_bob_hash));
+        // Dave should now be aware of the other branch of the fork.
+        assert!(dave.graph().contains(&bob_a_21_hash));
 
         // Verify that Dave detected malice and accused Alice of it.
         let (offender, hash) = unwrap!(our_votes(&dave)
@@ -1197,8 +1083,11 @@ mod handle_malice {
                 _ => None,
             })
             .next());
-        assert_eq!(offender, &PeerId::new("Alice"));
-        assert_eq!(*hash, a_3_hash);
+        assert_eq!(offender, alice0.our_pub_id());
+        assert_eq!(
+            hash,
+            unwrap!(find_event_by_short_name(bob.graph(), "A_20")).hash()
+        );
     }
 
     #[test]
@@ -1207,32 +1096,32 @@ mod handle_malice {
         let mut carol = TestParsec::from_parsed_contents(parse_test_dot_file("carol.dot"));
 
         // Carol creates an event with one of Bob's as the self-parent.
-        let b_2_index = unwrap!(find_event_by_short_name(carol.graph(), "B_2")).event_index();
-        let c_4 = unwrap!(carol.new_event_from_observation(
-            b_2_index,
+        let b_12_index = unwrap!(find_event_by_short_name(carol.graph(), "B_12")).event_index();
+        let c_25 = unwrap!(carol.new_event_from_observation(
+            b_12_index,
             Observation::OpaquePayload(Transaction::new("ABCD")),
         ));
-        let c_4_hash = *c_4.hash();
-        let c_4_packed = carol.pack_event(&c_4);
+        let c_25_hash = *c_25.hash();
+        let c_25_packed = carol.pack_event(&c_25);
 
         let mut alice = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
 
         // Try to add the event.
         assert_err!(
             Error::InvalidEvent,
-            alice.unpack_and_add_event(c_4_packed.clone())
+            alice.unpack_and_add_event(c_25_packed.clone())
         );
 
         // The invalid event should trigger an accusation vote to be raised immediately, and the
         // invalid event should not be added to the graph.
-        let a_2 = unwrap!(find_event_by_short_name(alice.graph(), "A_2"));
+        let a_21 = unwrap!(find_event_by_short_name(alice.graph(), "A_21"));
         let expected_observation = Observation::Accusation {
             offender: carol.our_pub_id().clone(),
-            malice: Malice::SelfParentByDifferentCreator(Box::new(c_4_packed)),
+            malice: Malice::SelfParentByDifferentCreator(Box::new(c_25_packed)),
         };
 
-        assert_eq!(*unwrap!(alice.event_payload(&a_2)), expected_observation);
-        assert!(!alice.graph().contains(&c_4_hash));
+        assert_eq!(*unwrap!(alice.event_payload(&a_21)), expected_observation);
+        assert!(!alice.graph().contains(&c_25_hash));
     }
 
     #[test]
@@ -1301,8 +1190,8 @@ mod handle_malice {
         // Copied from add_peer
         let mut parsed_contents = parse_test_dot_file("alice.dot");
 
-        // The final decision to add Frank is reached in D_18, so we remove this event.
-        let _d_18 = unwrap!(parsed_contents.remove_last_event());
+        // The final decision to add Frank is reached in E_25, so we remove this event.
+        let _e_25 = unwrap!(parsed_contents.remove_last_event());
 
         let mut alice = TestParsec::from_parsed_contents(parsed_contents);
         let genesis_group: BTreeSet<_> = alice
@@ -1321,7 +1210,7 @@ mod handle_malice {
         let alice_snapshot = Snapshot::new(&alice);
 
         // Try calling `create_gossip()` for a peer which doesn't exist yet.
-        assert_err!(Error::UnknownPeer, alice.create_gossip(Some(&fred_id)));
+        assert_err!(Error::UnknownPeer, alice.create_gossip(&fred_id));
         assert_eq!(alice_snapshot, Snapshot::new(&alice));
 
         // We'll modify Alice's peer list to allow her to create gossip for Fred
@@ -1337,7 +1226,7 @@ mod handle_malice {
             .all(|ev| !fred.graph().contains(ev.inner().hash())));
 
         // Now Alice will prematurely gossip to Fred
-        let request = unwrap!(alice.create_gossip(Some(&fred_id)));
+        let request = unwrap!(alice.create_gossip(&fred_id));
         let result = fred.handle_request(&alice_id, request);
 
         // check that Fred detected premature gossip

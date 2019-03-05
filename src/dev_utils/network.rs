@@ -263,7 +263,7 @@ impl Network {
             .parsec
             .gossip_recipients()
             .any(|valid_recipient| valid_recipient == recipient);
-        let result = self.peer(sender).parsec.create_gossip(Some(recipient));
+        let result = self.peer_mut(sender).parsec.create_gossip(recipient);
 
         if valid {
             // Recipient is valid. `create_gossip` must have succeeded.

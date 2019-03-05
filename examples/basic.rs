@@ -571,16 +571,14 @@ impl Environment {
     }
 
     fn get_receiver_and_message(
-        &self,
+        &mut self,
         sender_index: usize,
     ) -> (usize, Request<Transaction, PeerId>) {
         let mut receiver_index = (sender_index + 1) % self.peers.len();
 
         loop {
-            match self.peers[sender_index]
-                .parsec
-                .create_gossip(Some(&self.peers[receiver_index].id))
-            {
+            let receiver_id = self.peers[receiver_index].id.clone();
+            match self.peers[sender_index].parsec.create_gossip(&receiver_id) {
                 Ok(request) => {
                     return (receiver_index, request);
                 }

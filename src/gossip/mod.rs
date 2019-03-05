@@ -15,7 +15,7 @@ mod graph;
 mod messages;
 mod packed_event;
 
-#[cfg(feature = "dump-graphs")]
+#[cfg(any(feature = "testing", feature = "dump-graphs"))]
 pub(super) use self::cause::Cause;
 #[cfg(test)]
 pub(super) use self::event::find_event_by_short_name;
