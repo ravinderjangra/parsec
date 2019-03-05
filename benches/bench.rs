@@ -162,7 +162,7 @@ fn bench_dot_file(
     name: &'static str,
     consensus_mode: ConsensusMode,
 ) {
-    let test_name = format!("{}::{}", group_name, name);
+    let test_name = format!("{} - {}", name, group_name);
     let _ = c.bench_function(&test_name, move |b| {
         let record = {
             let mut record = unwrap!(Record::parse(format!(
