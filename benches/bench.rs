@@ -138,14 +138,40 @@ fn bench(c: &mut Criterion) {
         "PublicIdname93b63e-004",
         "PublicIdname93b63e-005",
     ] {
-        // Benchmark generated using routing test with seed Some([0,1,2,4]).
+        // To generate these benchmarks:
         //
-        // PARSEC_DUMP_GRAPH_MODE=on_parsec_drop PARSEC_DUMP_GRAPH_SVG=0 PARSEC_DUMP_GRAPH_PEERS=PublicIdname754598,PublicIdname93b63e
-        // cargo test --release --features=mock merge_three_sections_into_one
+        // 1. In routing, edit Cargo.toml and change the parsec dependency to enable
+        //    feature="dump-graphs":
         //
-        // Remove assert and run cargo bench with dump-graphs to generate final version to commit:
-        // PARSEC_DUMP_GRAPH_MODE=on_parsec_drop PARSEC_DUMP_GRAPH_SVG=0
-        // cargo bench --features=testing,dump-graphs -- --test Public
+        //     parsec = { version = "...", features = ["dump-graphs"] }
+        //
+        // 2. In routing, edit tests/mock_crust/merge.rs and change the second parameter of
+        //    `Network::new` to `Some([0, 1, 2, 4])` (to set the random seed).
+        //
+        // 3. Run routing tests:
+        //
+        //     PARSEC_DUMP_GRAPH_MODE=on_parsec_drop PARSEC_DUMP_GRAPH_SVG=0 PARSEC_DUMP_GRAPH_PEERS=PublicIdname754598,PublicIdname93b63e cargo test --release --features=mock merge_three_sections_into_one
+        //
+        // 4. Copy the generated dot files over to parsec's input_graphs (overwriting the existing ones):
+        //
+        //     cd [parsec dir]
+        //     cp /tmp/parsec_graphs/latest/mock_crust_merge_merge_three_sections_into_one/* input_graphs/bench_routing/mock_crust_merge_merge_three_sections_into_one/
+        //
+        // 5. In parsec, edit benches/bench.rs (this file) and temporarily comment out the assert
+        //    at the end of `bench_dot_file`.
+        //
+        // 6. Run the benchmarks with dump-graphs to generate the final version of the dot files:
+        //
+        //     PARSEC_DUMP_GRAPH_MODE=on_parsec_drop PARSEC_DUMP_GRAPH_SVG=0 cargo bench --features=testing,dump-graphs -- --test PublicIdname
+        //
+        // 7. Copy the generated dot files again:
+        //
+        //     cd [parsec dir]
+        //     cp /tmp/parsec_graphs/latest/* input_graphs/bench_routing/mock_crust_merge_merge_three_sections_into_one/
+        //
+        // 8. Revert the changes to parsec from step 5.
+        // 9. Revert the changes to routing from steps 1 and 2.
+        //
         bench_dot_file(
             c,
             "bench_routing/mock_crust_merge_merge_three_sections_into_one",
