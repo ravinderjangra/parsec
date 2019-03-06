@@ -20,6 +20,7 @@ use std::{cmp, usize};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct MetaElection {
+    // Set of meta-events corresponding to the events in the gossip graph.
     pub(crate) meta_events: FnvHashMap<EventIndex, MetaEvent>,
     // The "round hash" for each set of meta votes.  They are held in sequence in the `Vec`, i.e.
     // the one for round `x` is held at index `x`.
@@ -162,18 +163,20 @@ impl MetaElection {
     pub fn new_election<P: PublicId>(
         &mut self,
         graph: &Graph<P>,
-        decided_key: ObservationKey,
-        peer_list_change: Option<PeerListChange>,
+        decided_keys: Vec<ObservationKey>,
+        peer_list_changes: Vec<PeerListChange>,
     ) {
-        self.update_voters(peer_list_change);
-        self.update_unconsensused_events(graph, &decided_key);
+        let peer_list_changed = !peer_list_changes.is_empty();
+
+        self.update_voters(peer_list_changes);
+        self.update_unconsensused_events(graph, &decided_keys);
         self.update_new_consensus_start_index();
-        self.update_continue_consensus_start_index(peer_list_change.is_some());
-        self.update_meta_events(&decided_key, peer_list_change.is_some());
+        self.update_continue_consensus_start_index(peer_list_changed);
+        self.update_meta_events(&decided_keys, peer_list_changed);
         self.update_interesting_content(graph);
 
         self.round_hashes.clear();
-        self.consensus_history.push(decided_key);
+        self.consensus_history.extend(decided_keys);
     }
 
     pub fn initialise_round_hashes<'a, I, P>(&mut self, peer_ids: I)
@@ -220,7 +223,7 @@ impl MetaElection {
     fn update_unconsensused_events<P: PublicId>(
         &mut self,
         graph: &Graph<P>,
-        decided_key: &ObservationKey,
+        decided_keys: &[ObservationKey],
     ) {
         let remove = self
             .unconsensused_events
@@ -228,7 +231,8 @@ impl MetaElection {
             .filter(|event_index| {
                 graph
                     .get(**event_index)
-                    .map(|event| event.payload_key() == Some(decided_key))
+                    .and_then(|event| event.inner().payload_key())
+                    .map(|payload_key| decided_keys.contains(payload_key))
                     .unwrap_or(false)
             })
             .cloned()
@@ -239,19 +243,20 @@ impl MetaElection {
         }
     }
 
-    fn update_voters(&mut self, peer_list_change: Option<PeerListChange>) {
-        match peer_list_change {
-            Some(PeerListChange::Add(peer_index)) => {
-                if !self.voters.insert(peer_index) {
-                    log_or_panic!("Meta election already contains {:?}", peer_index);
+    fn update_voters(&mut self, peer_list_changes: Vec<PeerListChange>) {
+        for peer_list_change in peer_list_changes {
+            match peer_list_change {
+                PeerListChange::Add(peer_index) => {
+                    if !self.voters.insert(peer_index) {
+                        log_or_panic!("Meta election already contains {:?}", peer_index);
+                    }
+                }
+                PeerListChange::Remove(peer_index) => {
+                    if !self.voters.remove(peer_index) {
+                        log_or_panic!("Meta election doesn't contain {:?}", peer_index);
+                    }
                 }
             }
-            Some(PeerListChange::Remove(peer_index)) => {
-                if !self.voters.remove(peer_index) {
-                    log_or_panic!("Meta election doesn't contain {:?}", peer_index);
-                }
-            }
-            None => (),
         }
     }
 
@@ -280,7 +285,7 @@ impl MetaElection {
         };
     }
 
-    fn update_meta_events(&mut self, decided_key: &ObservationKey, peer_list_changed: bool) {
+    fn update_meta_events(&mut self, decided_keys: &[ObservationKey], peer_list_changed: bool) {
         if peer_list_changed {
             self.meta_events.clear();
         } else {
@@ -291,7 +296,7 @@ impl MetaElection {
             for meta_event in self.meta_events.values_mut() {
                 meta_event
                     .interesting_content
-                    .retain(|payload_key| payload_key != decided_key);
+                    .retain(|payload_key| !decided_keys.contains(payload_key));
             }
         }
     }

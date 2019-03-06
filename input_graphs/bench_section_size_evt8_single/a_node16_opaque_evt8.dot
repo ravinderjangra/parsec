@@ -2561,7 +2561,7 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 36, Bob: 47, Carol: 62, Dave: 49, Eric: 39, Fred: 52, Gina: 55, Hank: 42, Iris: 49, Judy: 37, Kent: 39, Lucy: 41, Mike: 35, Nina: 66, Oran: 54, Paul: 40}
 
-  "C_63" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_63" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_63</td></tr>
 </table>>]
 /// cause: Response
@@ -5697,7 +5697,7 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {Alice: 38, Bob: 52, Carol: 59, Dave: 54, Eric: 47, Fred: 54, Gina: 55, Hank: 43, Iris: 48, Judy: 41, Kent: 44, Lucy: 45, Mike: 44, Nina: 61, Oran: 52, Paul: 40}
 
-  "M_45" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "M_45" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">M_45</td></tr>
 </table>>]
 /// cause: Request
@@ -6734,61 +6734,61 @@ digraph GossipGraph {
 /// a9d4c41b696c052e3eb1e7333b41d2549d66c940765cd3fe03a439351336af99
 /// 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1
 /// acf6a951fa5e0d6e7cc063561d85ffd4016646a9eafce6bd4f5d178a1a3e6f48
-/// d08b8bc9517399162af34ab2bc4a0717ad0a737d8f012cf349eae356468e4e16
 /// 2de98dadad369c1db05f5d6bd01b5dc84d4e926cd2f246eff5aebc2fbe50b7d5
-/// 536064db2b5377cf11e48ecceb446f92caf827a0cbe406f8d950f528ebcd7118
 /// 8df8111faf7e72d9dbf6dbd9b1a341797050c7f876721fd36e38df2ccfec3e71
-/// c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f
 /// e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84
+/// d08b8bc9517399162af34ab2bc4a0717ad0a737d8f012cf349eae356468e4e16
+/// 536064db2b5377cf11e48ecceb446f92caf827a0cbe406f8d950f528ebcd7118
+/// c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f
 
 /// round_hashes: {
 ///   Alice -> [
-///     RoundHash { round: 0, latest_block_hash: e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84 }
+///     RoundHash { round: 0, latest_block_hash: c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f }
 ///   ]
 ///   Bob -> [
-///     RoundHash { round: 0, latest_block_hash: e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84 }
+///     RoundHash { round: 0, latest_block_hash: c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f }
 ///   ]
 ///   Carol -> [
-///     RoundHash { round: 0, latest_block_hash: e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84 }
+///     RoundHash { round: 0, latest_block_hash: c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f }
 ///   ]
 ///   Dave -> [
-///     RoundHash { round: 0, latest_block_hash: e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84 }
+///     RoundHash { round: 0, latest_block_hash: c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f }
 ///   ]
 ///   Eric -> [
-///     RoundHash { round: 0, latest_block_hash: e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84 }
+///     RoundHash { round: 0, latest_block_hash: c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f }
 ///   ]
 ///   Fred -> [
-///     RoundHash { round: 0, latest_block_hash: e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84 }
+///     RoundHash { round: 0, latest_block_hash: c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f }
 ///   ]
 ///   Gina -> [
-///     RoundHash { round: 0, latest_block_hash: e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84 }
+///     RoundHash { round: 0, latest_block_hash: c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f }
 ///   ]
 ///   Hank -> [
-///     RoundHash { round: 0, latest_block_hash: e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84 }
+///     RoundHash { round: 0, latest_block_hash: c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f }
 ///   ]
 ///   Iris -> [
-///     RoundHash { round: 0, latest_block_hash: e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84 }
+///     RoundHash { round: 0, latest_block_hash: c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f }
 ///   ]
 ///   Judy -> [
-///     RoundHash { round: 0, latest_block_hash: e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84 }
+///     RoundHash { round: 0, latest_block_hash: c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f }
 ///   ]
 ///   Kent -> [
-///     RoundHash { round: 0, latest_block_hash: e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84 }
+///     RoundHash { round: 0, latest_block_hash: c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f }
 ///   ]
 ///   Lucy -> [
-///     RoundHash { round: 0, latest_block_hash: e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84 }
+///     RoundHash { round: 0, latest_block_hash: c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f }
 ///   ]
 ///   Mike -> [
-///     RoundHash { round: 0, latest_block_hash: e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84 }
+///     RoundHash { round: 0, latest_block_hash: c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f }
 ///   ]
 ///   Nina -> [
-///     RoundHash { round: 0, latest_block_hash: e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84 }
+///     RoundHash { round: 0, latest_block_hash: c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f }
 ///   ]
 ///   Oran -> [
-///     RoundHash { round: 0, latest_block_hash: e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84 }
+///     RoundHash { round: 0, latest_block_hash: c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f }
 ///   ]
 ///   Paul -> [
-///     RoundHash { round: 0, latest_block_hash: e2eabbc898c3843c03ae34aeb04e160e874e4bb0ae236b9bc528b0051cdafb84 }
+///     RoundHash { round: 0, latest_block_hash: c93ff2cda7e9dd6a49b12c4fccdbaa0fe1b25b1e92421f288b06bfe53122be0f }
 ///   ]
 /// }
 /// interesting_events: {
@@ -6821,6 +6821,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   A_52 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   C_63 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
@@ -6933,6 +6937,10 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   L_49 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   M_45 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }

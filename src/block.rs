@@ -11,7 +11,10 @@ use crate::id::{Proof, PublicId};
 use crate::network_event::NetworkEvent;
 use crate::observation::Observation;
 use crate::vote::Vote;
-use std::collections::{BTreeMap, BTreeSet};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    slice, vec,
+};
 
 /// A struct representing a collection of votes by peers for an `Observation`.
 #[serde(bound = "")]
@@ -65,5 +68,33 @@ impl<T: NetworkEvent, P: PublicId> Block<T, P> {
         }
         let proof = vote.create_proof(peer_id)?;
         Ok(self.proofs.insert(proof))
+    }
+}
+
+/// Group of blocks that were all created within the same meta-election.
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
+pub struct BlockGroup<T: NetworkEvent, P: PublicId>(pub Vec<Block<T, P>>);
+
+impl<T: NetworkEvent, P: PublicId> BlockGroup<T, P> {
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+}
+
+impl<T: NetworkEvent, P: PublicId> IntoIterator for BlockGroup<T, P> {
+    type Item = Block<T, P>;
+    type IntoIter = vec::IntoIter<Block<T, P>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
+impl<'a, T: NetworkEvent, P: PublicId> IntoIterator for &'a BlockGroup<T, P> {
+    type Item = &'a Block<T, P>;
+    type IntoIter = slice::Iter<'a, Block<T, P>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.iter()
     }
 }

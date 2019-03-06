@@ -8,9 +8,9 @@
 
 use crate::gossip::{EventHash, PackedEvent};
 use crate::hash::Hash;
-use crate::id::PublicId;
+use crate::id::{PublicId, SecretId};
 use crate::network_event::NetworkEvent;
-use crate::peer_list::PeerIndex;
+use crate::peer_list::{PeerIndex, PeerList};
 use crate::serialise;
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 use std::cmp::Ordering;
@@ -270,6 +270,28 @@ impl ObservationKey {
             ObservationKey::Single(..) => ConsensusMode::Single,
             ObservationKey::Supermajority(..) => ConsensusMode::Supermajority,
         }
+    }
+
+    pub fn peer_index(&self) -> Option<PeerIndex> {
+        match *self {
+            ObservationKey::Single(_, peer_index) => Some(peer_index),
+            ObservationKey::Supermajority(_) => None,
+        }
+    }
+
+    /// Compare `ObservationKey`s to achieve ordering that is consistent among different nodes.
+    pub fn consistent_cmp<S: SecretId>(&self, other: &Self, peer_list: &PeerList<S>) -> Ordering {
+        self.hash().cmp(other.hash()).then_with(|| {
+            let lhs_peer_id = self
+                .peer_index()
+                .and_then(|index| peer_list.get(index))
+                .map(|peer| peer.id());
+            let rhs_peer_id = other
+                .peer_index()
+                .and_then(|index| peer_list.get(index))
+                .map(|peer| peer.id());
+            lhs_peer_id.cmp(&rhs_peer_id)
+        })
     }
 }
 

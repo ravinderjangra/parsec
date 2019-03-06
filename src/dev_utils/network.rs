@@ -290,7 +290,7 @@ impl Network {
     fn check_consensus_broken(&self) -> Result<(), ConsensusError> {
         let mut block_order = BTreeMap::new();
         for peer in self.active_peers() {
-            for (index, block) in peer.blocks().iter().enumerate() {
+            for (index, block) in peer.blocks().enumerate() {
                 let key = self.block_key(block);
 
                 if let Some((old_peer, old_index)) = block_order.insert(key, (peer, index)) {
@@ -421,25 +421,32 @@ impl Network {
 
     /// Checks if the blocks are only signed by valid voters.
     fn check_blocks_signatories(&self) -> Result<(), ConsensusError> {
-        let blocks = unwrap!(self.active_peers().next()).blocks();
+        let block_groups = unwrap!(self.active_peers().next()).grouped_blocks();
         let mut valid_voters = BTreeSet::new();
-        for block in blocks {
-            match *block.payload() {
-                ParsecObservation::Genesis(ref g) => {
+
+        for block_group in block_groups {
+            for block in block_group {
+                if let ParsecObservation::Genesis(_) = *block.payload() {
                     // Explicitly don't check signatories - the list of valid voters should be empty
                     // at this point.
-                    valid_voters = g.clone();
+                    continue;
                 }
-                ParsecObservation::Add { ref peer_id, .. } => {
-                    self.check_block_signatories(block, &valid_voters)?;
-                    let _ = valid_voters.insert(peer_id.clone());
-                }
-                ParsecObservation::Remove { ref peer_id, .. } => {
-                    self.check_block_signatories(block, &valid_voters)?;
-                    let _ = valid_voters.remove(peer_id);
-                }
-                _ => {
-                    self.check_block_signatories(block, &valid_voters)?;
+
+                self.check_block_signatories(block, &valid_voters)?;
+            }
+
+            for block in block_group {
+                match *block.payload() {
+                    ParsecObservation::Genesis(ref g) => {
+                        valid_voters = g.clone();
+                    }
+                    ParsecObservation::Add { ref peer_id, .. } => {
+                        let _ = valid_voters.insert(peer_id.clone());
+                    }
+                    ParsecObservation::Remove { ref peer_id, .. } => {
+                        let _ = valid_voters.remove(peer_id);
+                    }
+                    _ => {}
                 }
             }
         }
