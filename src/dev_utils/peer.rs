@@ -7,16 +7,21 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::Observation;
-#[cfg(feature = "testing")]
-use super::ParsedContents;
 use crate::block::{Block, BlockGroup};
+use crate::error::Result;
+use crate::gossip::{Cause, Event, EventIndex, Request, Response};
 use crate::mock::{PeerId, Transaction};
 use crate::observation::{
     is_more_than_two_thirds, ConsensusMode, Malice, Observation as ParsecObservation,
 };
-use crate::parsec::Parsec;
+use crate::parsec::{Parsec, TestParsec};
+use crate::peer_list::PeerIndex;
+use itertools::Itertools;
+use rand::Rng;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::{self, Debug, Formatter};
+use std::iter;
+use std::ops::{Deref, DerefMut};
 
 /// This represents the peer's own view of its current status.
 ///
@@ -78,9 +83,149 @@ pub enum NetworkView {
     Left,
 }
 
+struct ForkedEvent {
+    // The EventIndex of the first event we created with the same self-parent as this forked event.
+    // The partner will have been added to our graph.
+    partner_event_index: EventIndex,
+    // The second event we created with the same self-parent as the partner event.
+    event: Event<PeerId>,
+}
+
+struct MaliciousComponents {
+    test_parsec: TestParsec<Transaction, PeerId>,
+    // A forked event, mapped to the EventIndex of the first event we created with the same
+    // self-parent.  This forked event is not added to our graph when we create it.
+    forked_event: Option<ForkedEvent>,
+}
+
+impl MaliciousComponents {
+    fn create_gossip_with_fork<R: Rng>(
+        &mut self,
+        recipient_id: &PeerId,
+        rng: &mut R,
+    ) -> Result<Request<Transaction, PeerId>> {
+        assert!(self.forked_event.is_none());
+        let recipient_index = self.test_parsec.get_peer_index(recipient_id)?;
+        self.test_parsec
+            .confirm_allowed_to_gossip_to(recipient_index)?;
+
+        let self_id = self.test_parsec.our_pub_id().clone();
+        let common_self_parent_index = self.test_parsec.our_last_event_index();
+
+        // Add a `Requesting` event to our graph to a dummy recipient.
+        let dummy_recipient_id = {
+            let mut gossip_recipients = self
+                .test_parsec
+                .peer_list()
+                .gossip_recipients()
+                .collect_vec();
+            rng.shuffle(&mut gossip_recipients);
+
+            unwrap!(gossip_recipients
+                .iter()
+                .filter(|(_, peer)| peer.id() != &self_id && peer.id() != recipient_id)
+                .map(|(_, peer)| peer.id().clone())
+                .next())
+        };
+        let _ = unwrap!(self.test_parsec.create_gossip(&dummy_recipient_id));
+
+        // Create the forking event.
+        let forking_peers = Default::default();
+        let event = unwrap!(Event::new_from_requesting(
+            common_self_parent_index,
+            recipient_id,
+            &forking_peers,
+            self.test_parsec.event_context()
+        ));
+        let forked_event = ForkedEvent {
+            partner_event_index: self.test_parsec.our_last_event_index(),
+            event,
+        };
+        self.forked_event = Some(forked_event);
+
+        let events = self.events_to_gossip_to_peer(recipient_index);
+
+        Ok(Request::new(
+            events
+                .into_iter()
+                .map(|event| unwrap!(event.pack(self.test_parsec.event_context())))
+                .collect_vec(),
+        ))
+    }
+
+    // If the forked event should be sent to `recipient_id`, then we return the list of events which
+    // would normally be sent to the peer (those returned by `Parsec::events_to_gossip_to_peer`),
+    // but replace all from the first forked one with the forked event.
+    //
+    // If the forked event doesn't relate to this recipient, the normal list of events is returned.
+    fn events_to_gossip_to_peer(&self, recipient_index: PeerIndex) -> Vec<&Event<PeerId>> {
+        let events = if self
+            .test_parsec
+            .peer_list()
+            .last_event(recipient_index)
+            .is_some()
+        {
+            unwrap!(self.test_parsec.events_to_gossip_to_peer(recipient_index))
+        } else {
+            self.test_parsec.graph().iter().map(|e| e.inner()).collect()
+        };
+
+        let use_fork = self
+            .forked_event
+            .as_ref()
+            .map(|forked_event| match forked_event.event.cause() {
+                Cause::Requesting { recipient, .. } => recipient == &recipient_index,
+                _ => false,
+            })
+            .unwrap_or(false);
+
+        if use_fork {
+            let forked_event = unwrap!(self.forked_event.as_ref());
+            events
+                .into_iter()
+                .take_while(|event| {
+                    unwrap!(self.test_parsec.graph().get_index(event.hash()))
+                        != forked_event.partner_event_index
+                })
+                .chain(iter::once(&forked_event.event))
+                .collect()
+        } else {
+            events
+        }
+    }
+}
+
+#[allow(clippy::large_enum_variant)]
+enum WrappedParsec {
+    Good(Parsec<Transaction, PeerId>),
+    Malicious(MaliciousComponents),
+}
+
+impl Deref for WrappedParsec {
+    type Target = Parsec<Transaction, PeerId>;
+
+    fn deref(&self) -> &Self::Target {
+        match self {
+            WrappedParsec::Good(parsec) => &parsec,
+            WrappedParsec::Malicious(MaliciousComponents { test_parsec, .. }) => &*test_parsec,
+        }
+    }
+}
+
+impl DerefMut for WrappedParsec {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        match self {
+            WrappedParsec::Good(ref mut parsec) => parsec,
+            WrappedParsec::Malicious(MaliciousComponents {
+                ref mut test_parsec,
+                ..
+            }) => test_parsec,
+        }
+    }
+}
+
 pub struct Peer {
-    id: PeerId,
-    pub parsec: Parsec<Transaction, PeerId>,
+    parsec: WrappedParsec,
     /// The blocks returned by `parsec.poll()`, held in the order in which they were returned.
     grouped_blocks: Vec<BlockGroup<Transaction, PeerId>>,
     status: PeerStatus,
@@ -98,16 +243,22 @@ impl Peer {
         genesis_group: &BTreeSet<PeerId>,
         consensus_mode: ConsensusMode,
     ) -> Self {
-        Self {
-            id: id.clone(),
-            parsec: Parsec::from_genesis(id, genesis_group, consensus_mode),
-            grouped_blocks: vec![],
-            status: PeerStatus::Active,
-            network_view: NetworkView::Joined,
-            votes_to_make: vec![],
-            added_peers_ids: BTreeSet::new(),
-            removed_peers_ids: BTreeSet::new(),
-        }
+        Self::new(WrappedParsec::Good(Parsec::from_genesis(
+            id,
+            genesis_group,
+            consensus_mode,
+        )))
+    }
+
+    pub fn malicious_from_genesis(
+        id: PeerId,
+        genesis_group: &BTreeSet<PeerId>,
+        consensus_mode: ConsensusMode,
+    ) -> Self {
+        Self::new(WrappedParsec::Malicious(MaliciousComponents {
+            test_parsec: TestParsec::from_genesis(id, genesis_group, consensus_mode),
+            forked_event: None,
+        }))
     }
 
     pub fn from_existing(
@@ -116,28 +267,42 @@ impl Peer {
         current_group: &BTreeSet<PeerId>,
         consensus_mode: ConsensusMode,
     ) -> Self {
-        Self {
-            id: id.clone(),
-            parsec: Parsec::from_existing(id, genesis_group, current_group, consensus_mode),
-            grouped_blocks: vec![],
-            status: PeerStatus::Pending,
-            network_view: NetworkView::Joining,
-            votes_to_make: vec![],
-            added_peers_ids: BTreeSet::new(),
-            removed_peers_ids: BTreeSet::new(),
-        }
+        Self::new(WrappedParsec::Good(Parsec::from_existing(
+            id,
+            genesis_group,
+            current_group,
+            consensus_mode,
+        )))
     }
 
-    #[cfg(feature = "testing")]
-    pub(crate) fn from_parsed_contents(contents: ParsedContents) -> Self {
-        let id = contents.our_id.clone();
-        let parsec = Parsec::from_parsed_contents(contents);
+    pub fn malicious_from_existing(
+        id: PeerId,
+        genesis_group: &BTreeSet<PeerId>,
+        current_group: &BTreeSet<PeerId>,
+        consensus_mode: ConsensusMode,
+    ) -> Self {
+        Self::new(WrappedParsec::Malicious(MaliciousComponents {
+            test_parsec: TestParsec::from_existing(
+                id,
+                genesis_group,
+                current_group,
+                consensus_mode,
+            ),
+            forked_event: None,
+        }))
+    }
+
+    fn new(parsec: WrappedParsec) -> Self {
+        let (status, network_view) = if parsec.can_vote() {
+            (PeerStatus::Active, NetworkView::Joined)
+        } else {
+            (PeerStatus::Pending, NetworkView::Joining)
+        };
         Self {
-            id,
             parsec,
             grouped_blocks: vec![],
-            status: PeerStatus::Active,
-            network_view: NetworkView::Joined,
+            status,
+            network_view,
             votes_to_make: vec![],
             added_peers_ids: BTreeSet::new(),
             removed_peers_ids: BTreeSet::new(),
@@ -154,10 +319,34 @@ impl Peer {
             .retain(|obs| !parsec.have_voted_for(obs) && parsec.vote_for(obs.clone()).is_err());
     }
 
+    pub fn gossip_recipients(&self) -> impl Iterator<Item = &PeerId> {
+        self.parsec.gossip_recipients()
+    }
+
+    pub fn create_gossip(&mut self, peer_id: &PeerId) -> Result<Request<Transaction, PeerId>> {
+        self.parsec.create_gossip(peer_id)
+    }
+
+    pub fn handle_request(
+        &mut self,
+        src: &PeerId,
+        req: Request<Transaction, PeerId>,
+    ) -> Result<Response<Transaction, PeerId>> {
+        self.parsec.handle_request(src, req)
+    }
+
+    pub fn handle_response(
+        &mut self,
+        src: &PeerId,
+        resp: Response<Transaction, PeerId>,
+    ) -> Result<()> {
+        self.parsec.handle_response(src, resp)
+    }
+
     fn make_active_if_added(&mut self, block: &Block<Transaction, PeerId>) {
         if self.status == PeerStatus::Pending {
             if let ParsecObservation::Add { ref peer_id, .. } = *block.payload() {
-                if self.id == *peer_id {
+                if self.id() == peer_id {
                     self.status = PeerStatus::Active;
                 }
             }
@@ -185,7 +374,7 @@ impl Peer {
     }
 
     pub fn id(&self) -> &PeerId {
-        &self.id
+        self.parsec.our_pub_id()
     }
 
     pub fn grouped_blocks(&self) -> &[BlockGroup<Transaction, PeerId>] {
@@ -223,7 +412,7 @@ impl Peer {
     /// if the node in question isn't yet viewed by the network as being `Joined`.
     pub fn mark_as_removed(&mut self) {
         if self.status == PeerStatus::Failed {
-            panic!("{:?} already has status Failed.", self.id);
+            panic!("{:?} already has status Failed.", self.id());
         }
         self.mark_network_view_as_leaving();
         self.status = PeerStatus::Removed;
@@ -233,7 +422,7 @@ impl Peer {
     /// the node in question isn't yet viewed by the network as being `Joined`.
     pub fn mark_as_failed(&mut self) {
         if self.status == PeerStatus::Removed {
-            panic!("{:?} already has status Removed.", self.id);
+            panic!("{:?} already has status Removed.", self.id());
         }
         self.mark_network_view_as_leaving();
         self.status = PeerStatus::Failed;
@@ -244,7 +433,9 @@ impl Peer {
     /// Panics if the node in question isn't yet viewed by the network as being `Joined`.
     pub fn mark_network_view_as_leaving(&mut self) {
         match self.network_view {
-            NetworkView::Joining => panic!("Network views {:?} as not yet having joined.", self.id),
+            NetworkView::Joining => {
+                panic!("Network views {:?} as not yet having joined.", self.id())
+            }
             NetworkView::Joined => (),
             NetworkView::Leaving | NetworkView::Left => return,
         }
@@ -312,14 +503,58 @@ impl Peer {
     pub fn is_active_and_has_block(&self, payload: &Observation) -> bool {
         self.status == PeerStatus::Active && self.blocks().any(|block| block.payload() == payload)
     }
+
+    pub fn is_malicious(&self) -> bool {
+        match self.parsec {
+            WrappedParsec::Good(..) => false,
+            WrappedParsec::Malicious(..) => true,
+        }
+    }
+
+    pub fn has_misbehaved(&self) -> bool {
+        match self.parsec {
+            WrappedParsec::Good(..) => false,
+            WrappedParsec::Malicious(ref malicious_components) => {
+                malicious_components.forked_event.is_some()
+            }
+        }
+    }
+
+    /// This will create a `Request` where the final `Requesting` sync event is a fork.
+    ///
+    /// First we create a `Requesting` event to a random peer other than `recipient_id`, then we
+    /// create a `Requesting` fork to `recipient_id`.
+    ///
+    /// Panics if this peer is not malicious.
+    pub fn create_gossip_with_fork<R: Rng>(
+        &mut self,
+        recipient_id: &PeerId,
+        rng: &mut R,
+    ) -> Result<Request<Transaction, PeerId>> {
+        self.malicious_components_mut()
+            .create_gossip_with_fork(recipient_id, rng)
+    }
+
+    fn malicious_components_mut(&mut self) -> &mut MaliciousComponents {
+        match self.parsec {
+            WrappedParsec::Good(..) => panic!("{:?} is not a malicious test peer", self.id()),
+            WrappedParsec::Malicious(ref mut malicious_components) => malicious_components,
+        }
+    }
 }
 
 impl Debug for Peer {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        let malicious = if self.is_malicious() {
+            "(MALICIOUS) "
+        } else {
+            ""
+        };
         write!(
             formatter,
-            "{:?} [{:?}/{:?}]: Blocks: {:?}",
-            self.id,
+            "{:?} {}[{:?}/{:?}]: Blocks: {:?}",
+            self.id(),
+            malicious,
             self.status,
             self.network_view,
             self.blocks_payloads()

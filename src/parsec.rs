@@ -7,7 +7,7 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use crate::block::{Block, BlockGroup};
-#[cfg(any(feature = "testing", all(test, feature = "mock")))]
+#[cfg(all(test, feature = "mock"))]
 use crate::dev_utils::ParsedContents;
 use crate::dump_graph;
 use crate::error::{Error, Result};
@@ -37,7 +37,7 @@ use fnv::FnvHashSet;
 use itertools::Itertools;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::mem;
-#[cfg(all(test, feature = "mock"))]
+#[cfg(any(test, feature = "testing"))]
 use std::ops::{Deref, DerefMut};
 use std::usize;
 
@@ -281,13 +281,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     /// * `peer_id`: the intended recipient of the gossip message
     /// * returns a `Request` to be sent to the intended recipient
     pub fn create_gossip(&mut self, peer_id: &S::PublicId) -> Result<Request<T, S::PublicId>> {
-        self.confirm_self_state(PeerState::SEND)?;
-
         let peer_index = self.get_peer_index(peer_id)?;
-        // We require `PeerState::VOTE` in addition to `PeerState::RECV` here, because if the
-        // peer does not have `PeerState::VOTE`, it means we haven't yet reached consensus on
-        // adding them to the section so we shouldn't contact them yet.
-        self.confirm_peer_state(peer_index, PeerState::VOTE | PeerState::RECV)?;
+        self.confirm_allowed_to_gossip_to(peer_index)?;
 
         debug!(
             "{:?} creating gossip request for {:?}",
@@ -437,6 +432,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     /// Must only be used for events which have already been added to our graph.
     fn get_known_event(&self, event_index: EventIndex) -> Result<IndexedEventRef<S::PublicId>> {
         get_known_event(self.our_pub_id(), &self.graph, event_index)
+    }
+
+    fn confirm_allowed_to_gossip_to(&self, peer_index: PeerIndex) -> Result<()> {
+        self.confirm_self_state(PeerState::SEND)?;
+        // We require `PeerState::VOTE` in addition to `PeerState::RECV` here, because if the
+        // peer does not have `PeerState::VOTE`, it means we haven't yet reached consensus on
+        // adding them to the section so we shouldn't contact them yet.
+        self.confirm_peer_state(peer_index, PeerState::VOTE | PeerState::RECV)
     }
 
     fn confirm_peer_state(&self, peer_index: PeerIndex, required: PeerState) -> Result<()> {
@@ -2139,6 +2142,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]
 impl Parsec<Transaction, PeerId> {
+    #[cfg(all(test, feature = "mock"))]
     pub(crate) fn from_parsed_contents(mut parsed_contents: ParsedContents) -> Self {
         let peer_list = PeerList::new(parsed_contents.our_id);
         let mut parsec = Parsec::empty(
@@ -2182,29 +2186,30 @@ impl Parsec<Transaction, PeerId> {
 }
 
 /// Wrapper around `Parsec` that exposes additional functionality useful for testing.
-#[cfg(all(test, feature = "mock"))]
+#[cfg(any(test, feature = "testing"))]
 pub(crate) struct TestParsec<T: NetworkEvent, S: SecretId>(Parsec<T, S>);
 
-#[cfg(all(test, feature = "mock"))]
+#[cfg(any(test, feature = "testing"))]
 impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
-    pub fn from_genesis(our_id: S, genesis_group: &BTreeSet<S::PublicId>) -> Self {
-        TestParsec(Parsec::from_genesis(
-            our_id,
-            genesis_group,
-            ConsensusMode::Supermajority,
-        ))
+    pub fn from_genesis(
+        our_id: S,
+        genesis_group: &BTreeSet<S::PublicId>,
+        consensus_mode: ConsensusMode,
+    ) -> Self {
+        TestParsec(Parsec::from_genesis(our_id, genesis_group, consensus_mode))
     }
 
     pub fn from_existing(
         our_id: S,
         genesis_group: &BTreeSet<S::PublicId>,
         section: &BTreeSet<S::PublicId>,
+        consensus_mode: ConsensusMode,
     ) -> Self {
         TestParsec(Parsec::from_existing(
             our_id,
             genesis_group,
             section,
-            ConsensusMode::Supermajority,
+            consensus_mode,
         ))
     }
 
@@ -2216,14 +2221,17 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         &self.0.peer_list
     }
 
+    #[cfg(all(test, feature = "mock"))]
     pub fn meta_election(&self) -> &MetaElection {
         &self.meta_election
     }
 
+    #[cfg(all(test, feature = "mock"))]
     pub fn consensused_blocks(&self) -> impl Iterator<Item = &Block<T, S::PublicId>> {
         self.0.consensused_blocks.iter().flatten()
     }
 
+    #[cfg(all(test, feature = "mock"))]
     pub fn create_sync_event(
         &mut self,
         src: &S::PublicId,
@@ -2240,15 +2248,18 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
             .create_sync_event(src_index, is_request, forking_peers, other_parent)
     }
 
+    #[cfg(all(test, feature = "mock"))]
     pub fn change_peer_state(&mut self, peer_id: &S::PublicId, state: PeerState) {
         let peer_index = unwrap!(self.0.peer_list.get_index(peer_id));
         self.0.peer_list.change_peer_state(peer_index, state)
     }
 
+    #[cfg(all(test, feature = "mock"))]
     pub fn pack_event(&self, event: &Event<S::PublicId>) -> PackedEvent<T, S::PublicId> {
         unwrap!(event.pack(self.0.event_context()))
     }
 
+    #[cfg(all(test, feature = "mock"))]
     pub fn unpack_and_add_event(
         &mut self,
         packed_event: PackedEvent<T, S::PublicId>,
@@ -2263,16 +2274,16 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
     // instance is not detectable and might lead to incorrect test results. To add event from other
     // instance, first `pack_event` it using that other instance, then add it using
     // `unpack_and_add_event`.
+    #[cfg(all(test, feature = "mock"))]
     pub fn add_event(&mut self, event: Event<S::PublicId>) -> Result<EventIndex> {
         self.0.add_event(event)
     }
 
-    #[cfg(feature = "malice-detection")]
     pub fn our_last_event_index(&self) -> EventIndex {
         unwrap!(self.0.our_last_event_index())
     }
 
-    #[cfg(feature = "malice-detection")]
+    #[cfg(all(test, feature = "malice-detection"))]
     pub fn remove_last_event(&mut self) -> Option<(EventIndex, Event<S::PublicId>)> {
         let (event_index, event) = self.graph.remove_last()?;
         assert_eq!(
@@ -2299,21 +2310,22 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         Some((event_index, event))
     }
 
-    #[cfg(feature = "malice-detection")]
+    #[cfg(all(test, feature = "malice-detection"))]
     pub fn pending_accusations(&self) -> &Accusations<T, S::PublicId> {
         &self.0.pending_accusations
     }
 
-    #[cfg(feature = "malice-detection")]
+    #[cfg(all(test, feature = "malice-detection"))]
     pub fn add_peer(&mut self, peer_id: S::PublicId, state: PeerState) {
         let _ = self.0.peer_list.add_peer(peer_id, state);
     }
 
-    #[cfg(feature = "malice-detection")]
+    #[cfg(all(test, feature = "malice-detection"))]
     pub fn restart_consensus(&mut self) -> Result<()> {
         self.0.process_events(0)
     }
 
+    #[cfg(all(test, any(feature = "malice-detection", feature = "mock")))]
     pub fn event_payload(
         &self,
         event: &Event<S::PublicId>,
@@ -2321,16 +2333,37 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         self.0.event_payload(event)
     }
 
+    #[cfg(all(test, any(feature = "malice-detection", feature = "mock")))]
     pub fn event_creator_id(&self, event: &Event<S::PublicId>) -> &S::PublicId {
         unwrap!(self.0.event_creator_id(event))
     }
 
+    #[cfg(all(test, feature = "mock"))]
     pub fn new_event_from_observation(
         &mut self,
         self_parent: EventIndex,
         observation: Observation<T, S::PublicId>,
     ) -> Result<Event<S::PublicId>> {
         self.0.new_event_from_observation(self_parent, observation)
+    }
+
+    pub fn event_context(&self) -> EventContextRef<T, S> {
+        self.0.event_context()
+    }
+
+    pub fn events_to_gossip_to_peer(
+        &self,
+        peer_index: PeerIndex,
+    ) -> Result<Vec<&Event<S::PublicId>>> {
+        self.0.events_to_gossip_to_peer(peer_index)
+    }
+
+    pub fn get_peer_index(&self, peer_id: &S::PublicId) -> Result<PeerIndex> {
+        self.0.get_peer_index(peer_id)
+    }
+
+    pub fn confirm_allowed_to_gossip_to(&self, peer_index: PeerIndex) -> Result<()> {
+        self.0.confirm_allowed_to_gossip_to(peer_index)
     }
 }
 
@@ -2341,7 +2374,7 @@ impl TestParsec<Transaction, PeerId> {
     }
 }
 
-#[cfg(all(test, feature = "mock"))]
+#[cfg(any(test, feature = "testing"))]
 impl<T: NetworkEvent, S: SecretId> Deref for TestParsec<T, S> {
     type Target = Parsec<T, S>;
 
@@ -2350,7 +2383,7 @@ impl<T: NetworkEvent, S: SecretId> Deref for TestParsec<T, S> {
     }
 }
 
-#[cfg(all(test, feature = "mock"))]
+#[cfg(any(test, feature = "testing"))]
 impl<T: NetworkEvent, S: SecretId> DerefMut for TestParsec<T, S> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0

@@ -426,7 +426,7 @@ impl<P: PublicId> Event<P> {
         }
     }
 
-    #[cfg(any(feature = "testing", feature = "dump-graphs"))]
+    #[cfg(any(test, feature = "testing", feature = "dump-graphs"))]
     pub fn cause(&self) -> &Cause<VoteKey<P>, EventIndex, PeerIndex> {
         &self.content.cause
     }

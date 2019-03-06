@@ -102,7 +102,9 @@ extern crate unwrap;
 
 use clap::{App, Arg};
 use parsec::dev_utils::ObservationEvent::*;
-use parsec::dev_utils::{Environment, ObservationSchedule, RngChoice, Schedule, ScheduleOptions};
+use parsec::dev_utils::{
+    Environment, Genesis, ObservationSchedule, RngChoice, Schedule, ScheduleOptions,
+};
 use parsec::mock::{PeerId, Transaction};
 use parsec::{ConsensusMode, DumpGraphMode, Observation, DIR, DUMP_MODE};
 use std::collections::{BTreeMap, BTreeSet};
@@ -131,7 +133,7 @@ fn main() {
     let _ = scenarios
         .add("consensus_with_forks", |env| {
             let obs = ObservationSchedule {
-                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric"),
+                genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric")),
                 schedule: vec![],
             };
             Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
@@ -146,7 +148,7 @@ fn main() {
     let _ = scenarios
         .add("gossip::graph::tests::ancestors_iterator", |env| {
             let obs = ObservationSchedule {
-                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave")),
                 schedule: vec![],
             };
             Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
@@ -169,7 +171,7 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
     let _ = scenarios
         .add("functional_tests::from_parsed_contents", |env| {
             let obs = ObservationSchedule {
-                genesis: peer_ids!("Alice", "Bob", "Carol"),
+                genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol")),
                 schedule: vec![(1, AddPeer(PeerId::new("Dave")))],
             };
             Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
@@ -180,7 +182,7 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
     let _ = scenarios
         .add("functional_tests::add_peer", |env| {
             let obs = ObservationSchedule {
-                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric"),
+                genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric")),
                 schedule: vec![(1, AddPeer(PeerId::new("Fred")))],
             };
             Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
@@ -191,7 +193,7 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
     let _ = scenarios
         .add("functional_tests::remove_peer", |env| {
             let obs = ObservationSchedule {
-                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric"),
+                genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric")),
                 schedule: vec![(1, RemovePeer(PeerId::new("Eric")))],
             };
             Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
@@ -204,7 +206,7 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
             "functional_tests::unpolled_and_unconsensused_observations",
             |env| {
                 let obs = ObservationSchedule {
-                    genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                    genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave")),
                     schedule: vec![(1, AddPeer(PeerId::new("Eric")))],
                 };
                 Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
@@ -218,7 +220,7 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
             "functional_tests::handle_malice::genesis_event_not_after_initial",
             |env| {
                 let obs = ObservationSchedule {
-                    genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                    genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave")),
                     schedule: vec![],
                 };
                 Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
@@ -232,7 +234,7 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
             "functional_tests::handle_malice::genesis_event_creator_not_genesis_member",
             |env| {
                 let obs = ObservationSchedule {
-                    genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                    genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave")),
                     schedule: vec![(0, AddPeer(PeerId::new("Eric")))],
                 };
                 Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
@@ -244,7 +246,7 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
     let _ = scenarios
         .add("functional_tests::handle_malice::duplicate_votes", |env| {
             let obs = ObservationSchedule {
-                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave")),
                 schedule: vec![(0, Opaque(Transaction::new("ABCD")))],
             };
             Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
@@ -258,7 +260,7 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
             "functional_tests::handle_malice::invalid_accusation",
             |env| {
                 let obs = ObservationSchedule {
-                    genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                    genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave")),
                     schedule: vec![],
                 };
                 Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
@@ -271,7 +273,7 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
     let _ = scenarios
         .add("functional_tests::handle_malice::accomplice", |env| {
             let obs = ObservationSchedule {
-                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave")),
                 schedule: vec![(0, Opaque(Transaction::new("EFGH")))],
             };
             Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
@@ -284,7 +286,7 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
     let _ = scenarios
         .add("functional_tests::handle_malice::handle_fork", |env| {
             let obs = ObservationSchedule {
-                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave"),
+                genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave")),
                 schedule: vec![(0, Opaque(Transaction::new("IJKL")))],
             };
             Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
@@ -299,7 +301,7 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
             "functional_tests::handle_malice::self_parent_by_different_creator",
             |env| {
                 let obs = ObservationSchedule {
-                    genesis: peer_ids!("Alice", "Bob", "Carol"),
+                    genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol")),
                     schedule: vec![],
                 };
                 Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
@@ -312,7 +314,7 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
     let _ = scenarios
         .add("functional_tests::handle_malice::premature_gossip", |env| {
             let obs = ObservationSchedule {
-                genesis: peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric"),
+                genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric")),
                 schedule: vec![(0, AddPeer(PeerId::new("Fred")))],
             };
             Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
@@ -327,7 +329,7 @@ fn add_dev_utils_record_smoke_tests(scenarios: &mut Scenarios) {
             let obs = ObservationSchedule {
                 // Non hard-coded name, 2 with same initial, one smaller than short name
                 // Last consensus reached in event not from Annie.
-                genesis: peer_ids!("Annie", "B", "Claire", "Carol"),
+                genesis: Genesis::new(peer_ids!("Annie", "B", "Claire", "Carol")),
                 schedule: vec![(0, Opaque(Transaction::new("1")))],
             };
 
@@ -343,12 +345,12 @@ fn add_dev_utils_record_smoke_tests(scenarios: &mut Scenarios) {
                 |prefix| format!("SectionInfo(SectionInfo(prefix: Prefix({}), ...))", prefix);
 
             let obs = ObservationSchedule {
-                genesis: peer_ids!(
+                genesis: Genesis::new(peer_ids!(
                     &routing_peer_id("12abcd"),
                     &routing_peer_id("ab4598"),
                     &routing_peer_id("cdb63e"),
                     &routing_peer_id("ef4fb9")
-                ),
+                )),
                 schedule: vec![
                     (0, Opaque(Transaction::new(routing_transaction("123")))),
                     (0, Opaque(Transaction::new(routing_transaction("234")))),

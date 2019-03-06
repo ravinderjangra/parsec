@@ -6,8 +6,6 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-#[cfg(feature = "testing")]
-use super::parse_test_dot_file;
 use super::peer::{NetworkView, Peer, PeerStatus};
 use super::schedule::{Schedule, ScheduleEvent, ScheduleOptions};
 use super::Observation;
@@ -113,50 +111,6 @@ impl Network {
         }
     }
 
-    /// Create a test network with initial peers constructed from the given IDs.
-    pub fn with_peers<I: IntoIterator<Item = PeerId>>(
-        all_ids: I,
-        consensus_mode: ConsensusMode,
-    ) -> Self {
-        let genesis_group = all_ids.into_iter().collect::<BTreeSet<_>>();
-        let peers = genesis_group
-            .iter()
-            .map(|id| {
-                (
-                    id.clone(),
-                    Peer::from_genesis(id.clone(), &genesis_group, consensus_mode),
-                )
-            })
-            .collect();
-        Network {
-            genesis: genesis_group,
-            peers,
-            msg_queue: BTreeMap::new(),
-            consensus_mode,
-        }
-    }
-
-    #[cfg(feature = "testing")]
-    pub fn from_graphs<I: IntoIterator<Item = &'static str>>(
-        consensus_mode: ConsensusMode,
-        genesis: BTreeSet<PeerId>,
-        names: I,
-    ) -> Self {
-        let mut peers = BTreeMap::new();
-        for name in names {
-            let filename = format!("{}.dot", name.to_lowercase());
-            let parsed_contents = parse_test_dot_file(&filename);
-            let id = parsed_contents.our_id.clone();
-            let _ = peers.insert(id, Peer::from_parsed_contents(parsed_contents));
-        }
-        Network {
-            peers,
-            genesis,
-            msg_queue: BTreeMap::new(),
-            consensus_mode,
-        }
-    }
-
     pub fn consensus_mode(&self) -> ConsensusMode {
         self.consensus_mode
     }
@@ -165,6 +119,12 @@ impl Network {
         self.peers
             .values()
             .filter(|peer| peer.status() == PeerStatus::Active && !peer.ignore_process_events())
+    }
+
+    fn active_non_malicious_peers(&self) -> impl Iterator<Item = &Peer> {
+        self.peers
+            .values()
+            .filter(|peer| peer.status() == PeerStatus::Active && !peer.is_malicious())
     }
 
     /// Returns the IDs of peers which consider themselves to be still running correctly, i.e. those
@@ -192,10 +152,10 @@ impl Network {
 
     /// Returns true if all peers hold the same sequence of stable blocks.
     fn check_blocks_all_in_sequence(&self) -> Result<(), ConsensusError> {
-        let first_peer = unwrap!(self.active_peers().next());
+        let first_peer = unwrap!(self.active_non_malicious_peers().next());
         let payloads = first_peer.blocks_payloads();
         if let Some(peer) = self
-            .active_peers()
+            .active_non_malicious_peers()
             .find(|peer| peer.blocks_payloads() != payloads)
         {
             Err(ConsensusError::DifferingBlocksOrder(DifferingBlocksOrder {
@@ -242,28 +202,30 @@ impl Network {
                 .into_iter()
                 .partition(|entry| entry.deliver_after <= step);
             let _ = self.msg_queue.insert(peer.clone(), rest);
+            // If this is a malicious peer which has already created a fork, ignore all incoming
+            // messages.
+            if self.peer(peer).has_misbehaved() {
+                return;
+            }
             for entry in to_handle {
                 match entry.message {
-                    Message::Request(req, resp_delay) => match self
-                        .peer_mut(peer)
-                        .parsec
-                        .handle_request(&entry.sender, req)
-                    {
-                        Ok(response) => {
-                            self.send_message(
-                                peer.clone(),
-                                &entry.sender,
-                                Message::Response(response),
-                                step + resp_delay,
-                            );
+                    Message::Request(req, resp_delay) => {
+                        match self.peer_mut(peer).handle_request(&entry.sender, req) {
+                            Ok(response) => {
+                                self.send_message(
+                                    peer.clone(),
+                                    &entry.sender,
+                                    Message::Response(response),
+                                    step + resp_delay,
+                                );
+                            }
+                            Err(Error::UnknownPeer) | Err(Error::InvalidPeerState { .. }) => (),
+                            Err(e) => panic!("{:?}", e),
                         }
-                        Err(Error::UnknownPeer) | Err(Error::InvalidPeerState { .. }) => (),
-                        Err(e) => panic!("{:?}", e),
-                    },
-                    Message::Response(resp) => unwrap!(self
-                        .peer_mut(peer)
-                        .parsec
-                        .handle_response(&entry.sender, resp)),
+                    }
+                    Message::Response(resp) => {
+                        unwrap!(self.peer_mut(peer).handle_response(&entry.sender, resp))
+                    }
                 }
             }
         }
@@ -285,10 +247,14 @@ impl Network {
         };
         let valid = self
             .peer(sender)
-            .parsec
             .gossip_recipients()
             .any(|valid_recipient| valid_recipient == recipient);
-        let result = self.peer_mut(sender).parsec.create_gossip(recipient);
+        let result = if self.peer(sender).is_malicious() && !self.peer(sender).has_misbehaved() {
+            self.peer_mut(sender)
+                .create_gossip_with_fork(recipient, rng)
+        } else {
+            self.peer_mut(sender).create_gossip(recipient)
+        };
 
         if valid {
             // Recipient is valid. `create_gossip` must have succeeded.
@@ -314,7 +280,7 @@ impl Network {
 
     fn check_consensus_broken(&self) -> Result<(), ConsensusError> {
         let mut block_order = BTreeMap::new();
-        for peer in self.active_peers() {
+        for peer in self.active_non_malicious_peers() {
             for (index, block) in peer.blocks().enumerate() {
                 let key = self.block_key(block);
 
@@ -377,7 +343,7 @@ impl Network {
     ) -> Result<(), ConsensusError> {
         // Check the number of consensused blocks.
         let (got_min, got_max) = unwrap!(self
-            .active_peers()
+            .active_non_malicious_peers()
             .map(|peer| peer.blocks_payloads().len())
             .minmax()
             .into_option());
@@ -446,7 +412,7 @@ impl Network {
 
     /// Checks if the blocks are only signed by valid voters.
     fn check_blocks_signatories(&self) -> Result<(), ConsensusError> {
-        let block_groups = unwrap!(self.active_peers().next()).grouped_blocks();
+        let block_groups = unwrap!(self.active_non_malicious_peers().next()).grouped_blocks();
         let mut valid_voters = BTreeSet::new();
 
         for block_group in block_groups {
@@ -474,18 +440,22 @@ impl Network {
         Ok(())
     }
 
-    /// Check that no node has been accused of malice.
+    /// Check that no well-behaved peer has been accused of malice.
     fn check_unexpected_accusations(&self, peer_id: &PeerId) -> Result<(), ConsensusError> {
-        let peer = self.peer(peer_id);
-        let accusation = peer
+        let accusation = self
+            .peer(peer_id)
             .unpolled_accusations()
-            .find(|(_, malice)| malice.is_provable());
+            .find(|(offender, malice)| match malice {
+                Malice::Fork(..) => !self.peer(offender).has_misbehaved(),
+                _ => malice.is_provable(),
+            });
+
         if let Some((offender, malice)) = accusation {
-            return Err(ConsensusError::UnexpectedAccusation {
-                accuser: peer.id().clone(),
+            Err(ConsensusError::UnexpectedAccusation {
+                accuser: peer_id.clone(),
                 accused: offender.clone(),
                 malice: malice.clone(),
-            });
+            })
         } else {
             Ok(())
         }
@@ -545,35 +515,37 @@ impl Network {
         event: ScheduleEvent,
     ) -> Result<bool, ConsensusError> {
         match event {
-            ScheduleEvent::Genesis(genesis_group) => {
+            ScheduleEvent::Genesis(genesis) => {
                 if !self.peers.is_empty() {
                     // If the peers are already initialised, we won't initialise them again.
                     return Ok(true);
                 }
 
-                let mut peers: BTreeMap<_, _> = genesis_group
-                    .iter()
-                    .map(|id| {
-                        (
-                            id.clone(),
-                            Peer::from_genesis(id.clone(), &genesis_group, self.consensus_mode),
-                        )
-                    })
+                let genesis_ids = genesis.all_ids();
+                let good_peers = genesis
+                    .ids_of_good_peers()
+                    .map(|id| Peer::from_genesis(id.clone(), &genesis_ids, self.consensus_mode));
+                let malicious_peers = genesis.ids_of_malicious_peers().map(|id| {
+                    Peer::malicious_from_genesis(id.clone(), &genesis_ids, self.consensus_mode)
+                });
+
+                self.peers = good_peers
+                    .chain(malicious_peers)
+                    .map(|peer| (peer.id().clone(), peer))
                     .collect();
 
                 if let Some(keep_consensus) = &options.genesis_restrict_consensus_to {
                     assert!(
-                        !keep_consensus.is_empty() && keep_consensus.iter().all(|id| genesis_group.contains(id)),
-                        "genesis_restrict_consensus_to must be None or not empty and contain only ids from the genesis group.: {:?} - {:?}", keep_consensus, genesis_group );
+                        !keep_consensus.is_empty() && keep_consensus.iter().all(|id| genesis_ids.contains(id)),
+                        "genesis_restrict_consensus_to must be None or not empty and contain only ids from the genesis group.: {:?} - {:?}", keep_consensus, genesis_ids);
 
-                    peers
+                    self.peers
                         .iter_mut()
                         .filter(|(id, _)| !keep_consensus.contains(id))
                         .for_each(|(_, peer)| peer.set_ignore_process_events());
                 }
 
-                self.peers = peers;
-                self.genesis = genesis_group;
+                self.genesis = genesis_ids;
                 // Do a full reset while we're at it.
                 self.msg_queue.clear();
             }
