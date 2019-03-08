@@ -888,21 +888,23 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         peers_that_can_vote: &PeerIndexSet,
         payload_key: &ObservationKey,
     ) -> bool {
-        let num_peers_that_did_vote = self.num_creators_of_ancestors_carrying_payload(
-            peers_that_can_vote,
-            &*builder.event(),
-            payload_key,
-        );
+        let num_peers_that_did_vote = || {
+            self.num_creators_of_ancestors_carrying_payload(
+                peers_that_can_vote,
+                &*builder.event(),
+                payload_key,
+            )
+        };
 
         match payload_key.consensus_mode() {
             ConsensusMode::Single => {
                 let num_ancestor_peers =
                     self.num_creators_of_ancestors(peers_that_can_vote, &*builder.event());
                 is_more_than_two_thirds(num_ancestor_peers, peers_that_can_vote.len())
-                    && num_peers_that_did_vote > 0
+                    && num_peers_that_did_vote() > 0
             }
             ConsensusMode::Supermajority => {
-                is_more_than_two_thirds(num_peers_that_did_vote, peers_that_can_vote.len())
+                is_more_than_two_thirds(num_peers_that_did_vote(), peers_that_can_vote.len())
             }
         }
     }
@@ -928,16 +930,18 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         event: &Event<S::PublicId>,
         payload_key: &ObservationKey,
     ) -> usize {
+        let unconsensused_events = self
+            .unconsensused_events()
+            .map(|that_event| that_event.inner())
+            .filter(|that_event| that_event.payload_key() == Some(payload_key))
+            .collect_vec();
+
         peers_that_can_vote
             .iter()
             .filter(|peer_index| {
-                self.unconsensused_events()
-                    .map(|that_event| that_event.inner())
-                    .filter(|that_event| that_event.creator() == *peer_index)
-                    .filter_map(|that_event| that_event.payload_key().map(|key| (that_event, key)))
-                    .any(|(that_event, that_payload_key)| {
-                        payload_key == that_payload_key && event.sees(that_event)
-                    })
+                unconsensused_events
+                    .iter()
+                    .any(|that_event| that_event.creator() == *peer_index && event.sees(that_event))
             })
             .count()
     }
