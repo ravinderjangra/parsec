@@ -31,6 +31,8 @@ use crate::observation::{
 };
 use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerState};
 use crate::round_hash::RoundHash;
+use fnv::{FnvHashMap, FnvHashSet};
+use itertools::Itertools;
 use pom::char_class::{alphanum, digit, hex_digit, multispace, space};
 use pom::parser::*;
 use pom::Result as PomResult;
@@ -863,40 +865,49 @@ fn convert_to_meta_election(
     event_indices: &mut BTreeMap<String, EventIndex>,
     peer_list: &PeerList<PeerId>,
 ) -> MetaElection {
+    let meta_events: FnvHashMap<_, _> = meta_election
+        .meta_events
+        .into_iter()
+        .map(|(ev_id, mev)| {
+            let event_index = *event_indices
+                .entry(ev_id.clone())
+                .or_insert_with(|| EventIndex::PHONY);
+            let meta_event = convert_to_meta_event(mev, peer_list);
+            (event_index, meta_event)
+        })
+        .collect();
+
+    let interesting_events = meta_election
+        .interesting_events
+        .into_iter()
+        .map(|(peer_id, events)| {
+            let indices = events
+                .into_iter()
+                .map(|ev_id| {
+                    *unwrap!(
+                        event_indices.get(&ev_id),
+                        "Missing {:?} from meta_events section of meta election.  \
+                         This meta-event must be defined here as it's an Interesting Event.",
+                        ev_id,
+                    )
+                })
+                .collect_vec();
+            let contents: FnvHashSet<_> = indices
+                .iter()
+                .filter_map(|index| meta_events.get(index))
+                .flat_map(|meta_event| &meta_event.interesting_content)
+                .cloned()
+                .collect();
+
+            (unwrap!(peer_list.get_index(&peer_id)), (indices, contents))
+        })
+        .collect();
+
     MetaElection {
-        meta_events: meta_election
-            .meta_events
-            .into_iter()
-            .map(|(ev_id, mev)| {
-                let event_index = *event_indices
-                    .entry(ev_id.clone())
-                    .or_insert_with(|| EventIndex::PHONY);
-                let meta_event = convert_to_meta_event(mev, peer_list);
-                (event_index, meta_event)
-            })
-            .collect(),
+        meta_events,
         round_hashes: convert_peer_id_map(meta_election.round_hashes, peer_list),
         voters: convert_peer_id_set(meta_election.voters, peer_list),
-        interesting_events: meta_election
-            .interesting_events
-            .into_iter()
-            .map(|(peer_id, events)| {
-                (
-                    unwrap!(peer_list.get_index(&peer_id)),
-                    events
-                        .into_iter()
-                        .map(|ev_id| {
-                            *unwrap!(
-                                event_indices.get(&ev_id),
-                                "Missing {:?} from meta_events section of meta election.  \
-                                This meta-event must be defined here as it's an Interesting Event.",
-                                ev_id,
-                            )
-                        })
-                        .collect(),
-                )
-            })
-            .collect(),
+        interesting_events,
         unconsensused_events: meta_election
             .unconsensused_events
             .into_iter()

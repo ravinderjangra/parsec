@@ -764,7 +764,7 @@ mod detail {
 
             let interesting_events =
                 self.convert_peer_index_map(&self.meta_election.interesting_events);
-            for (peer, events) in interesting_events {
+            for (peer, (events, _)) in &interesting_events {
                 let event_names: Vec<String> = events
                     .iter()
                     .filter_map(|index| self.index_to_short_name(*index))

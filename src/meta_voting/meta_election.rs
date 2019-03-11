@@ -13,7 +13,7 @@ use crate::id::PublicId;
 use crate::observation::{ObservationHash, ObservationKey};
 use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerListChange};
 use crate::round_hash::RoundHash;
-use fnv::FnvHashMap;
+use fnv::{FnvHashMap, FnvHashSet};
 use itertools::Itertools;
 use std::collections::BTreeSet;
 use std::{cmp, usize};
@@ -29,7 +29,8 @@ pub(crate) struct MetaElection {
     // meta-election was started.
     pub(crate) voters: PeerIndexSet,
     // The indices of events for each peer that have a non-empty set of `interesting_content`.
-    pub(crate) interesting_events: PeerIndexMap<Vec<EventIndex>>,
+    // The second element allow fast lookup for existing interesting_content.
+    pub(crate) interesting_events: PeerIndexMap<(Vec<EventIndex>, FnvHashSet<ObservationKey>)>,
     // Set of all events that carry a payload that hasn't yet been consensused.
     pub(crate) unconsensused_events: BTreeSet<EventIndex>,
     // Keys of the consensused blocks' payloads in the order they were consensused.
@@ -78,7 +79,7 @@ impl MetaElection {
 
         // Update interesting events.
         if !meta_event.interesting_content.is_empty() {
-            self.add_interesting_event(creator, event_index);
+            self.add_interesting_event(creator, event_index, &meta_event.interesting_content);
         }
 
         // Insert the meta-event itself.
@@ -120,14 +121,14 @@ impl MetaElection {
     pub fn interesting_events(&self) -> impl Iterator<Item = (PeerIndex, &[EventIndex])> {
         self.interesting_events
             .iter()
-            .map(|(peer_index, event_indices)| (peer_index, &event_indices[..]))
+            .map(|(peer_index, (event_indices, _))| (peer_index, &event_indices[..]))
     }
 
     pub fn first_interesting_content_by(&self, creator: PeerIndex) -> Option<&ObservationKey> {
         let event_index = self
             .interesting_events
             .get(creator)
-            .and_then(|indices| indices.first())?;
+            .and_then(|(indices, _)| indices.first())?;
         let meta_event = self.meta_events.get(event_index)?;
 
         meta_event.interesting_content.first()
@@ -140,15 +141,7 @@ impl MetaElection {
     ) -> bool {
         self.interesting_events
             .get(creator)
-            .map_or(false, |indices| {
-                indices.iter().any(|index| {
-                    if let Some(meta_event) = self.meta_events.get(index) {
-                        meta_event.interesting_content.contains(payload_key)
-                    } else {
-                        false
-                    }
-                })
-            })
+            .map_or(false, |(_, contents)| contents.contains(payload_key))
     }
 
     pub fn continue_consensus_start_index(&self) -> usize {
@@ -212,11 +205,18 @@ impl MetaElection {
         self.unconsensused_events.iter().cloned()
     }
 
-    fn add_interesting_event(&mut self, creator: PeerIndex, event_index: EventIndex) {
-        self.interesting_events
+    fn add_interesting_event(
+        &mut self,
+        creator: PeerIndex,
+        event_index: EventIndex,
+        interesting_content: &[ObservationKey],
+    ) {
+        let (indices, contents) = self
+            .interesting_events
             .entry(creator)
-            .or_insert_with(Vec::new)
-            .push(event_index)
+            .or_insert_with(|| (Vec::new(), FnvHashSet::default()));
+        indices.push(event_index);
+        contents.extend(interesting_content);
     }
 
     // Updates unconsensused_events by removing those that became consensused.
@@ -312,10 +312,11 @@ impl MetaElection {
             let interesting = self
                 .meta_events
                 .get(&event.event_index())
-                .map(|meta_event| !meta_event.interesting_content.is_empty())
-                .unwrap_or(false);
-            if interesting {
-                self.add_interesting_event(event.creator(), event.event_index())
+                .map(|meta_event| &meta_event.interesting_content)
+                .filter(|interesting_content| !interesting_content.is_empty())
+                .cloned();
+            if let Some(interesting) = interesting {
+                self.add_interesting_event(event.creator(), event.event_index(), &interesting)
             }
         }
     }
@@ -367,7 +368,7 @@ pub(crate) mod snapshot {
                         .get(peer_index)
                         .map(|peer| (peer.id(), event_indices))
                 })
-                .map(|(peer_id, indices)| {
+                .map(|(peer_id, (indices, _))| {
                     let hashes = indices
                         .iter()
                         .filter_map(|index| graph.get(*index).map(|event| *event.hash()))
