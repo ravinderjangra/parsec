@@ -792,6 +792,7 @@ mod detail {
             let unconsensused_events: BTreeSet<_> = self
                 .meta_election
                 .unconsensused_events
+                .ordered_indices
                 .iter()
                 .filter_map(|index| self.index_to_short_name(*index))
                 .collect();

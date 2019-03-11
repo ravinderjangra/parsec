@@ -19,7 +19,9 @@ use crate::gossip::EventContextRef;
 use crate::gossip::{CauseInput, Event, EventIndex, Graph, IndexedEventRef};
 use crate::hash::Hash;
 use crate::hash::HASH_LEN;
-use crate::meta_voting::{BoolSet, MetaElection, MetaEvent, MetaVote, Observer, Step};
+use crate::meta_voting::{
+    BoolSet, MetaElection, MetaEvent, MetaVote, Observer, Step, UnconsensusedEvents,
+};
 use crate::mock::{PeerId, Transaction};
 #[cfg(any(
     all(test, feature = "malice-detection", feature = "mock"),
@@ -853,7 +855,12 @@ fn convert_into_parsed_contents(result: ParsedFile) -> ParsedContents {
             .iter()
             .map(|(key, obs)| (*key, ObservationInfo::new(obs.clone()))),
     );
-    let meta_election = convert_to_meta_election(meta_election, &mut event_hashes, &peer_list);
+    let meta_election = convert_to_meta_election(
+        meta_election,
+        &mut event_hashes,
+        &peer_list,
+        &parsed_contents.graph,
+    );
 
     parsed_contents.peer_list = peer_list;
     parsed_contents.meta_election = meta_election;
@@ -864,6 +871,7 @@ fn convert_to_meta_election(
     meta_election: ParsedMetaElection,
     event_indices: &mut BTreeMap<String, EventIndex>,
     peer_list: &PeerList<PeerId>,
+    graph: &Graph<PeerId>,
 ) -> MetaElection {
     let meta_events: FnvHashMap<_, _> = meta_election
         .meta_events
@@ -903,17 +911,43 @@ fn convert_to_meta_election(
         })
         .collect();
 
+    let unconsensused_events_indices: BTreeSet<_> = meta_election
+        .unconsensused_events
+        .into_iter()
+        .filter_map(|id| event_indices.get(&id))
+        .cloned()
+        .collect();
+    let unconsensused_events_keyed_indices = unconsensused_events_indices
+        .iter()
+        .filter_map(|index| graph.get(*index))
+        .map(|indexed_event| {
+            (
+                indexed_event.event_index(),
+                indexed_event.payload_key().cloned(),
+            )
+        })
+        .filter_map(|(event_index, payload_key)| payload_key.map(|key| (event_index, key)))
+        .fold(
+            FnvHashMap::default(),
+            |mut map, (event_index, payload_key)| {
+                let _ = map
+                    .entry(payload_key)
+                    .or_insert_with(BTreeSet::new)
+                    .insert(event_index);
+                map
+            },
+        );
+    let unconsensused_events = UnconsensusedEvents {
+        ordered_indices: unconsensused_events_indices,
+        indices_by_key: unconsensused_events_keyed_indices,
+    };
+
     MetaElection {
         meta_events,
         round_hashes: convert_peer_id_map(meta_election.round_hashes, peer_list),
         voters: convert_peer_id_set(meta_election.voters, peer_list),
         interesting_events,
-        unconsensused_events: meta_election
-            .unconsensused_events
-            .into_iter()
-            .filter_map(|id| event_indices.get(&id))
-            .cloned()
-            .collect(),
+        unconsensused_events,
         consensus_history: meta_election.consensus_history,
         continue_consensus_start_index: 0,
         new_consensus_start_index: 0,

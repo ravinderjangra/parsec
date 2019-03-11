@@ -14,9 +14,20 @@ use crate::observation::{ObservationHash, ObservationKey};
 use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerListChange};
 use crate::round_hash::RoundHash;
 use fnv::{FnvHashMap, FnvHashSet};
-use itertools::Itertools;
 use std::collections::BTreeSet;
 use std::{cmp, usize};
+
+lazy_static! {
+    static ref EMPTY_BTREESET_EVENT_INDEX: BTreeSet<EventIndex> = BTreeSet::new();
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub(crate) struct UnconsensusedEvents {
+    // Set of all events that carry a payload that hasn't yet been consensused.
+    pub(crate) ordered_indices: BTreeSet<EventIndex>,
+    // Same events grouped by ObservationKey for lookup performance,
+    pub(crate) indices_by_key: FnvHashMap<ObservationKey, BTreeSet<EventIndex>>,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct MetaElection {
@@ -31,8 +42,8 @@ pub(crate) struct MetaElection {
     // The indices of events for each peer that have a non-empty set of `interesting_content`.
     // The second element allow fast lookup for existing interesting_content.
     pub(crate) interesting_events: PeerIndexMap<(Vec<EventIndex>, FnvHashSet<ObservationKey>)>,
-    // Set of all events that carry a payload that hasn't yet been consensused.
-    pub(crate) unconsensused_events: BTreeSet<EventIndex>,
+    // All events that carry a payload that hasn't yet been consensused.
+    pub(crate) unconsensused_events: UnconsensusedEvents,
     // Keys of the consensused blocks' payloads in the order they were consensused.
     pub(crate) consensus_history: Vec<ObservationKey>,
     // Topological index of the first unconsensused payload-carrying event or of the first observer
@@ -49,7 +60,7 @@ impl MetaElection {
             round_hashes: PeerIndexMap::default(),
             voters,
             interesting_events: PeerIndexMap::default(),
-            unconsensused_events: BTreeSet::new(),
+            unconsensused_events: UnconsensusedEvents::default(),
             consensus_history: Vec::new(),
             continue_consensus_start_index: 0,
             new_consensus_start_index: 0,
@@ -162,7 +173,7 @@ impl MetaElection {
         let peer_list_changed = !peer_list_changes.is_empty();
 
         self.update_voters(peer_list_changes);
-        self.update_unconsensused_events(graph, &decided_keys);
+        self.update_unconsensused_events(&decided_keys);
         self.update_new_consensus_start_index();
         self.update_continue_consensus_start_index(peer_list_changed);
         self.update_meta_events(&decided_keys, peer_list_changed);
@@ -197,12 +208,33 @@ impl MetaElection {
         &self.meta_events
     }
 
-    pub fn add_unconsensused_event(&mut self, event_index: EventIndex) {
-        let _ = self.unconsensused_events.insert(event_index);
+    pub fn add_unconsensused_event(&mut self, event_index: EventIndex, key: ObservationKey) {
+        let _ = self
+            .unconsensused_events
+            .ordered_indices
+            .insert(event_index);
+        let _ = self
+            .unconsensused_events
+            .indices_by_key
+            .entry(key)
+            .or_insert_with(BTreeSet::new)
+            .insert(event_index);
     }
 
-    pub fn unconsensused_events<'a>(&'a self) -> impl Iterator<Item = EventIndex> + 'a {
-        self.unconsensused_events.iter().cloned()
+    pub fn unconsensused_events<'a>(
+        &'a self,
+        filter_key: Option<&ObservationKey>,
+    ) -> impl Iterator<Item = EventIndex> + 'a {
+        let indices = if let Some(filter_key) = filter_key {
+            self.unconsensused_events
+                .indices_by_key
+                .get(filter_key)
+                .unwrap_or(&*EMPTY_BTREESET_EVENT_INDEX)
+        } else {
+            &self.unconsensused_events.ordered_indices
+        };
+
+        indices.iter().cloned()
     }
 
     fn add_interesting_event(
@@ -220,26 +252,16 @@ impl MetaElection {
     }
 
     // Updates unconsensused_events by removing those that became consensused.
-    fn update_unconsensused_events<P: PublicId>(
-        &mut self,
-        graph: &Graph<P>,
-        decided_keys: &[ObservationKey],
-    ) {
-        let remove = self
-            .unconsensused_events
-            .iter()
-            .filter(|event_index| {
-                graph
-                    .get(**event_index)
-                    .and_then(|event| event.inner().payload_key())
-                    .map(|payload_key| decided_keys.contains(payload_key))
-                    .unwrap_or(false)
-            })
-            .cloned()
-            .collect_vec();
-
-        for event_index in remove {
-            let _ = self.unconsensused_events.remove(&event_index);
+    fn update_unconsensused_events(&mut self, decided_keys: &[ObservationKey]) {
+        for key in decided_keys {
+            if let Some(remove) = self.unconsensused_events.indices_by_key.remove(key) {
+                for event_index in remove {
+                    let _ = self
+                        .unconsensused_events
+                        .ordered_indices
+                        .remove(&event_index);
+                }
+            }
         }
     }
 
@@ -263,6 +285,7 @@ impl MetaElection {
     fn update_new_consensus_start_index(&mut self) {
         self.new_consensus_start_index = self
             .unconsensused_events
+            .ordered_indices
             .iter()
             .next()
             .map(|event_index| event_index.topological_index())
