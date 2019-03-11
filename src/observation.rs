@@ -92,9 +92,6 @@ pub enum Malice<T: NetworkEvent, P: PublicId> {
     /// A node incorrectly accused other node of malice. Contains hash of the invalid Accusation
     /// event.
     InvalidAccusation(EventHash),
-    /// We receive a gossip containing an event whose creator should not be known to the sender.
-    /// Contains hash of the sync event whose ancestor has the invalid creator.
-    InvalidGossipCreator(EventHash),
     /// Event's creator is the same to its other_parent's creator. The accusation contains the
     /// original event so other peers can verify the accusation directly.
     OtherParentBySameCreator(Box<PackedEvent<T, P>>),
@@ -126,7 +123,6 @@ impl<T: NetworkEvent, P: PublicId> Malice<T, P> {
             | Malice::IncorrectGenesis(hash)
             | Malice::Fork(hash)
             | Malice::InvalidAccusation(hash)
-            | Malice::InvalidGossipCreator(hash)
             | Malice::Accomplice(hash, _) => Some(hash),
             Malice::DuplicateVote(_, _)
             | Malice::OtherParentBySameCreator(_)
