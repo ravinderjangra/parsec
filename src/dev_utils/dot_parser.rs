@@ -19,7 +19,9 @@ use crate::gossip::EventContextRef;
 use crate::gossip::{CauseInput, Event, EventIndex, Graph, IndexedEventRef};
 use crate::hash::Hash;
 use crate::hash::HASH_LEN;
-use crate::meta_voting::{BoolSet, MetaElection, MetaEvent, MetaVote, Observer, Step};
+use crate::meta_voting::{
+    BoolSet, MetaElection, MetaEvent, MetaVote, Observer, Step, UnconsensusedEvents,
+};
 use crate::mock::{PeerId, Transaction};
 #[cfg(any(
     all(test, feature = "malice-detection", feature = "mock"),
@@ -31,6 +33,8 @@ use crate::observation::{
 };
 use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerState};
 use crate::round_hash::RoundHash;
+use fnv::{FnvHashMap, FnvHashSet};
+use itertools::Itertools;
 use pom::char_class::{alphanum, digit, hex_digit, multispace, space};
 use pom::parser::*;
 use pom::Result as PomResult;
@@ -851,7 +855,12 @@ fn convert_into_parsed_contents(result: ParsedFile) -> ParsedContents {
             .iter()
             .map(|(key, obs)| (*key, ObservationInfo::new(obs.clone()))),
     );
-    let meta_election = convert_to_meta_election(meta_election, &mut event_hashes, &peer_list);
+    let meta_election = convert_to_meta_election(
+        meta_election,
+        &mut event_hashes,
+        &peer_list,
+        &parsed_contents.graph,
+    );
 
     parsed_contents.peer_list = peer_list;
     parsed_contents.meta_election = meta_election;
@@ -862,47 +871,83 @@ fn convert_to_meta_election(
     meta_election: ParsedMetaElection,
     event_indices: &mut BTreeMap<String, EventIndex>,
     peer_list: &PeerList<PeerId>,
+    graph: &Graph<PeerId>,
 ) -> MetaElection {
+    let meta_events: FnvHashMap<_, _> = meta_election
+        .meta_events
+        .into_iter()
+        .map(|(ev_id, mev)| {
+            let event_index = *event_indices
+                .entry(ev_id.clone())
+                .or_insert_with(|| EventIndex::PHONY);
+            let meta_event = convert_to_meta_event(mev, peer_list);
+            (event_index, meta_event)
+        })
+        .collect();
+
+    let interesting_events = meta_election
+        .interesting_events
+        .into_iter()
+        .map(|(peer_id, events)| {
+            let indices = events
+                .into_iter()
+                .map(|ev_id| {
+                    *unwrap!(
+                        event_indices.get(&ev_id),
+                        "Missing {:?} from meta_events section of meta election.  \
+                         This meta-event must be defined here as it's an Interesting Event.",
+                        ev_id,
+                    )
+                })
+                .collect_vec();
+            let contents: FnvHashSet<_> = indices
+                .iter()
+                .filter_map(|index| meta_events.get(index))
+                .flat_map(|meta_event| &meta_event.interesting_content)
+                .cloned()
+                .collect();
+
+            (unwrap!(peer_list.get_index(&peer_id)), (indices, contents))
+        })
+        .collect();
+
+    let unconsensused_events_indices: BTreeSet<_> = meta_election
+        .unconsensused_events
+        .into_iter()
+        .filter_map(|id| event_indices.get(&id))
+        .cloned()
+        .collect();
+    let unconsensused_events_keyed_indices = unconsensused_events_indices
+        .iter()
+        .filter_map(|index| graph.get(*index))
+        .map(|indexed_event| {
+            (
+                indexed_event.event_index(),
+                indexed_event.payload_key().cloned(),
+            )
+        })
+        .filter_map(|(event_index, payload_key)| payload_key.map(|key| (event_index, key)))
+        .fold(
+            FnvHashMap::default(),
+            |mut map, (event_index, payload_key)| {
+                let _ = map
+                    .entry(payload_key)
+                    .or_insert_with(BTreeSet::new)
+                    .insert(event_index);
+                map
+            },
+        );
+    let unconsensused_events = UnconsensusedEvents {
+        ordered_indices: unconsensused_events_indices,
+        indices_by_key: unconsensused_events_keyed_indices,
+    };
+
     MetaElection {
-        meta_events: meta_election
-            .meta_events
-            .into_iter()
-            .map(|(ev_id, mev)| {
-                let event_index = *event_indices
-                    .entry(ev_id.clone())
-                    .or_insert_with(|| EventIndex::PHONY);
-                let meta_event = convert_to_meta_event(mev, peer_list);
-                (event_index, meta_event)
-            })
-            .collect(),
+        meta_events,
         round_hashes: convert_peer_id_map(meta_election.round_hashes, peer_list),
         voters: convert_peer_id_set(meta_election.voters, peer_list),
-        interesting_events: meta_election
-            .interesting_events
-            .into_iter()
-            .map(|(peer_id, events)| {
-                (
-                    unwrap!(peer_list.get_index(&peer_id)),
-                    events
-                        .into_iter()
-                        .map(|ev_id| {
-                            *unwrap!(
-                                event_indices.get(&ev_id),
-                                "Missing {:?} from meta_events section of meta election.  \
-                                This meta-event must be defined here as it's an Interesting Event.",
-                                ev_id,
-                            )
-                        })
-                        .collect(),
-                )
-            })
-            .collect(),
-        unconsensused_events: meta_election
-            .unconsensused_events
-            .into_iter()
-            .filter_map(|id| event_indices.get(&id))
-            .cloned()
-            .collect(),
+        interesting_events,
+        unconsensused_events,
         consensus_history: meta_election.consensus_history,
         continue_consensus_start_index: 0,
         new_consensus_start_index: 0,

@@ -157,7 +157,6 @@
     clippy::new_ret_no_self
 )]
 
-#[cfg(any(test, feature = "dump-graphs", feature = "mock"))]
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]

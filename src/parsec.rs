@@ -584,23 +584,26 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             return Err(Error::InvalidEvent);
         }
 
-        let has_unconsensused_payload = if let Some(info) = event
+        let unconsensused_payload_key = event
             .payload_key()
-            .and_then(|key| self.observations.get_mut(key))
-        {
-            if our {
-                info.created_by_us = true;
-            }
-            !info.consensused
-        } else {
-            false
-        };
+            .and_then(|key| self.observations.get_mut(key).map(|info| (key, info)))
+            .and_then(|(key, info)| {
+                if our {
+                    info.created_by_us = true;
+                }
+                if info.consensused {
+                    None
+                } else {
+                    Some(*key)
+                }
+            });
 
         let event_index = self.insert_event(event);
 
-        if has_unconsensused_payload {
-            self.meta_election.add_unconsensused_event(event_index);
-        }
+        let _ = unconsensused_payload_key.map(|payload_key| {
+            self.meta_election
+                .add_unconsensused_event(event_index, payload_key);
+        });
 
         self.process_events(event_index.topological_index())?;
 
@@ -850,7 +853,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         let payloads = find_interesting_content_for_event(
             builder.event().as_ref(),
-            self.unconsensused_events().map(|event| event.inner()),
+            self.unconsensused_events(None).map(|event| event.inner()),
             is_already_interesting_content,
             is_interesting_payload,
             has_interesting_ancestor,
@@ -931,9 +934,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         payload_key: &ObservationKey,
     ) -> usize {
         let unconsensused_events = self
-            .unconsensused_events()
+            .unconsensused_events(Some(payload_key))
             .map(|that_event| that_event.inner())
-            .filter(|that_event| that_event.payload_key() == Some(payload_key))
             .collect_vec();
 
         peers_that_can_vote
@@ -1247,9 +1249,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         self.meta_election.voters().len()
     }
 
-    fn unconsensused_events(&self) -> impl Iterator<Item = IndexedEventRef<S::PublicId>> {
+    fn unconsensused_events(
+        &self,
+        filter_key: Option<&ObservationKey>,
+    ) -> impl Iterator<Item = IndexedEventRef<S::PublicId>> {
         self.meta_election
-            .unconsensused_events()
+            .unconsensused_events(filter_key)
             .filter_map(move |index| self.get_known_event(index).ok())
     }
 
@@ -1319,13 +1324,13 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     .iter()
                     .map(|event| event.inner())
                     .filter(|event| voters.contains(event.creator()))
+                    .filter(|event| event.payload_key() == Some(payload_key))
                     .filter_map(|event| {
                         let (vote, key) = event.vote_and_payload_key(&self.observations)?;
                         let creator_id =
                             self.peer_list.get(event.creator()).map(|peer| peer.id())?;
                         Some((key, vote, creator_id))
                     })
-                    .filter(|(key, _, _)| payload_key == key)
                     .map(|(_, vote, creator_id)| (creator_id.clone(), vote.clone()))
                     .collect();
 
@@ -2258,11 +2263,22 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
             event_index,
             unwrap!(self.peer_list.remove_last_event(event.creator()))
         );
-        let _ = self
-            .0
-            .meta_election
-            .unconsensused_events
-            .remove(&event_index);
+
+        if let Some(payload_key) = event.payload_key() {
+            let _ = self
+                .0
+                .meta_election
+                .unconsensused_events
+                .ordered_indices
+                .remove(&event_index);
+            let _ = self
+                .0
+                .meta_election
+                .unconsensused_events
+                .indices_by_key
+                .get_mut(payload_key)
+                .map(|indices| indices.remove(&event_index));
+        }
 
         Some((event_index, event))
     }

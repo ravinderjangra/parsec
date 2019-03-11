@@ -235,7 +235,7 @@ pub(crate) type ObservationStore<T, P> = BTreeMap<ObservationKey, ObservationInf
 pub(crate) type ObservationForStore<T, P> = Option<(ObservationKey, ObservationInfo<T, P>)>;
 
 // Key to compare observations.
-#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Debug)]
+#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(crate) enum ObservationKey {
     Single(ObservationHash, PeerIndex),
     Supermajority(ObservationHash),
