@@ -1319,13 +1319,13 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     .iter()
                     .map(|event| event.inner())
                     .filter(|event| voters.contains(event.creator()))
+                    .filter(|event| event.payload_key() == Some(payload_key))
                     .filter_map(|event| {
                         let (vote, key) = event.vote_and_payload_key(&self.observations)?;
                         let creator_id =
                             self.peer_list.get(event.creator()).map(|peer| peer.id())?;
                         Some((key, vote, creator_id))
                     })
-                    .filter(|(key, _, _)| payload_key == key)
                     .map(|(_, vote, creator_id)| (creator_id.clone(), vote.clone()))
                     .collect();
 
