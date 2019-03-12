@@ -3,7 +3,6 @@
 set -e -x
 
 cargo fmt -- --check
-( cd dot_gen ; cargo fmt -- --check )
 cargo clippy --verbose --all-targets
 cargo clippy --verbose --all-targets --features=dump-graphs
 cargo clippy --verbose --all-targets --features=testing
