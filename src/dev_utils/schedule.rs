@@ -208,6 +208,8 @@ pub struct ScheduleOptions {
     pub transparent_voters: Sampling,
     /// Intermediate consistency checks (Raise error closer to the source)
     pub intermediate_consistency_checks: bool,
+    /// The only genesis members that will compute consensus if provided. All if none.
+    pub genesis_restrict_consensus_to: Option<BTreeSet<PeerId>>,
 }
 
 impl ScheduleOptions {
@@ -262,6 +264,7 @@ impl Default for ScheduleOptions {
             opaque_voters: Sampling::Fraction(1.0, 1.0),
             transparent_voters: Sampling::Fraction(1.0, 1.0),
             intermediate_consistency_checks: true,
+            genesis_restrict_consensus_to: None,
         }
     }
 }

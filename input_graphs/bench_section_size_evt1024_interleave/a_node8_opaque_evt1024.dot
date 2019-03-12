@@ -236,10 +236,6 @@ digraph GossipGraph {
     "A_215" -> "A_216" [minlen=6]
     "A_216" -> "A_217" [minlen=1]
     "A_217" -> "A_218" [minlen=2]
-    "A_218" -> "A_219" [minlen=1]
-    "A_219" -> "A_220" [minlen=2]
-    "A_220" -> "A_221" [minlen=1]
-    "A_221" -> "A_222" [minlen=2]
   }
   "G_23" -> "A_21" [constraint=false]
   "C_11" -> "A_22" [constraint=false]
@@ -302,8 +298,6 @@ digraph GossipGraph {
   "D_214" -> "A_214" [constraint=false]
   "H_231" -> "A_216" [constraint=false]
   "C_204" -> "A_218" [constraint=false]
-  "H_232" -> "A_220" [constraint=false]
-  "G_216" -> "A_222" [constraint=false]
 
   style=invis
   subgraph cluster_Bob {
@@ -781,7 +775,6 @@ digraph GossipGraph {
     "C_201" -> "C_202" [minlen=1]
     "C_202" -> "C_203" [minlen=1]
     "C_203" -> "C_204" [minlen=10]
-    "C_204" -> "C_205" [minlen=1]
   }
   "A_20" -> "C_11" [constraint=false]
   "A_25" -> "C_14" [constraint=false]
@@ -1067,7 +1060,6 @@ digraph GossipGraph {
     "D_215" -> "D_216" [minlen=2]
     "D_216" -> "D_217" [minlen=1]
     "D_217" -> "D_218" [minlen=1]
-    "D_218" -> "D_219" [minlen=1]
   }
   "B_2" -> "D_2" [constraint=false]
   "B_3" -> "D_4" [constraint=false]
@@ -1338,11 +1330,6 @@ digraph GossipGraph {
     "E_205" -> "E_206" [minlen=2]
     "E_206" -> "E_207" [minlen=1]
     "E_207" -> "E_208" [minlen=5]
-    "E_208" -> "E_209" [minlen=4]
-    "E_209" -> "E_210" [minlen=1]
-    "E_210" -> "E_211" [minlen=12]
-    "E_211" -> "E_212" [minlen=3]
-    "E_212" -> "E_213" [minlen=1]
   }
   "G_19" -> "E_11" [constraint=false]
   "G_21" -> "E_15" [constraint=false]
@@ -1390,10 +1377,6 @@ digraph GossipGraph {
   "G_203" -> "E_206" [constraint=false]
   "C_197" -> "E_207" [constraint=false]
   "H_220" -> "E_208" [constraint=false]
-  "B_203" -> "E_209" [constraint=false]
-  "G_212" -> "E_211" [constraint=false]
-  "D_219" -> "E_212" [constraint=false]
-  "G_213" -> "E_213" [constraint=false]
 
   style=invis
   subgraph cluster_Fred {
@@ -1865,11 +1848,6 @@ digraph GossipGraph {
     "G_208" -> "G_209" [minlen=2]
     "G_209" -> "G_210" [minlen=9]
     "G_210" -> "G_211" [minlen=3]
-    "G_211" -> "G_212" [minlen=1]
-    "G_212" -> "G_213" [minlen=1]
-    "G_213" -> "G_214" [minlen=5]
-    "G_214" -> "G_215" [minlen=3]
-    "G_215" -> "G_216" [minlen=4]
   }
   "B_12" -> "G_8" [constraint=false]
   "H_11" -> "G_14" [constraint=false]
@@ -1926,10 +1904,6 @@ digraph GossipGraph {
   "B_202" -> "G_209" [constraint=false]
   "F_201" -> "G_210" [constraint=false]
   "D_215" -> "G_211" [constraint=false]
-  "E_210" -> "G_212" [constraint=false]
-  "E_213" -> "G_214" [constraint=false]
-  "C_205" -> "G_215" [constraint=false]
-  "A_221" -> "G_216" [constraint=false]
 
   style=invis
   subgraph cluster_Hank {
@@ -2167,7 +2141,6 @@ digraph GossipGraph {
     "H_228" -> "H_229" [minlen=1]
     "H_229" -> "H_230" [minlen=5]
     "H_230" -> "H_231" [minlen=1]
-    "H_231" -> "H_232" [minlen=6]
   }
   "F_6" -> "H_8" [constraint=false]
   "G_9" -> "H_11" [constraint=false]
@@ -2234,7 +2207,6 @@ digraph GossipGraph {
   "C_202" -> "H_228" [constraint=false]
   "D_218" -> "H_230" [constraint=false]
   "A_215" -> "H_231" [constraint=false]
-  "A_219" -> "H_232" [constraint=false]
 
   {
     rank=same
@@ -3689,30 +3661,6 @@ digraph GossipGraph {
 </table>>]
 /// cause: Response
 /// last_ancestors: {Alice: 218, Bob: 204, Carol: 204, Dave: 218, Eric: 208, Fred: 203, Gina: 211, Hank: 231}
-
-  "A_219" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_219</td></tr>
-</table>>]
-/// cause: Requesting(Hank)
-/// last_ancestors: {Alice: 219, Bob: 204, Carol: 204, Dave: 218, Eric: 208, Fred: 203, Gina: 211, Hank: 231}
-
-  "A_220" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_220</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 220, Bob: 204, Carol: 204, Dave: 218, Eric: 208, Fred: 203, Gina: 211, Hank: 232}
-
-  "A_221" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_221</td></tr>
-</table>>]
-/// cause: Requesting(Gina)
-/// last_ancestors: {Alice: 221, Bob: 204, Carol: 204, Dave: 218, Eric: 208, Fred: 203, Gina: 211, Hank: 232}
-
-  "A_222" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_222</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 222, Bob: 204, Carol: 205, Dave: 219, Eric: 213, Fred: 203, Gina: 216, Hank: 232}
 
   "B_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_0</td></tr>
@@ -6410,12 +6358,6 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 217, Bob: 204, Carol: 204, Dave: 218, Eric: 208, Fred: 203, Gina: 211, Hank: 231}
 
-  "C_205" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">C_205</td></tr>
-</table>>]
-/// cause: Requesting(Gina)
-/// last_ancestors: {Alice: 217, Bob: 204, Carol: 205, Dave: 218, Eric: 208, Fred: 203, Gina: 211, Hank: 231}
-
   "D_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_0</td></tr>
 </table>>]
@@ -7860,12 +7802,6 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 213, Bob: 202, Carol: 202, Dave: 218, Eric: 208, Fred: 203, Gina: 211, Hank: 229}
 
-  "D_219" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_219</td></tr>
-</table>>]
-/// cause: Requesting(Eric)
-/// last_ancestors: {Alice: 213, Bob: 202, Carol: 202, Dave: 219, Eric: 208, Fred: 203, Gina: 211, Hank: 229}
-
   "E_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_0</td></tr>
 </table>>]
@@ -9259,36 +9195,6 @@ digraph GossipGraph {
 </table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 208, Bob: 194, Carol: 197, Dave: 207, Eric: 208, Fred: 193, Gina: 205, Hank: 220}
-
-  "E_209" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">E_209</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 210, Bob: 203, Carol: 199, Dave: 207, Eric: 209, Fred: 193, Gina: 208, Hank: 220}
-
-  "E_210" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">E_210</td></tr>
-</table>>]
-/// cause: Requesting(Gina)
-/// last_ancestors: {Alice: 210, Bob: 203, Carol: 199, Dave: 207, Eric: 210, Fred: 193, Gina: 208, Hank: 220}
-
-  "E_211" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">E_211</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 213, Bob: 203, Carol: 201, Dave: 215, Eric: 211, Fred: 201, Gina: 212, Hank: 225}
-
-  "E_212" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">E_212</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 213, Bob: 203, Carol: 202, Dave: 219, Eric: 212, Fred: 203, Gina: 212, Hank: 229}
-
-  "E_213" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">E_213</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 213, Bob: 203, Carol: 202, Dave: 219, Eric: 213, Fred: 203, Gina: 213, Hank: 229}
 
   "F_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_0</td></tr>
@@ -12052,36 +11958,6 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 213, Bob: 202, Carol: 201, Dave: 215, Eric: 208, Fred: 201, Gina: 211, Hank: 225}
 
-  "G_212" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">G_212</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 213, Bob: 203, Carol: 201, Dave: 215, Eric: 210, Fred: 201, Gina: 212, Hank: 225}
-
-  "G_213" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">G_213</td></tr>
-</table>>]
-/// cause: Requesting(Eric)
-/// last_ancestors: {Alice: 213, Bob: 203, Carol: 201, Dave: 215, Eric: 210, Fred: 201, Gina: 213, Hank: 225}
-
-  "G_214" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">G_214</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 213, Bob: 203, Carol: 202, Dave: 219, Eric: 213, Fred: 203, Gina: 214, Hank: 229}
-
-  "G_215" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">G_215</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 217, Bob: 204, Carol: 205, Dave: 219, Eric: 213, Fred: 203, Gina: 215, Hank: 231}
-
-  "G_216" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">G_216</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 221, Bob: 204, Carol: 205, Dave: 219, Eric: 213, Fred: 203, Gina: 216, Hank: 232}
-
   "H_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">H_0</td></tr>
 </table>>]
@@ -13608,12 +13484,6 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 215, Bob: 202, Carol: 202, Dave: 218, Eric: 208, Fred: 203, Gina: 211, Hank: 231}
 
-  "H_232" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">H_232</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 219, Bob: 204, Carol: 204, Dave: 218, Eric: 208, Fred: 203, Gina: 211, Hank: 232}
-
 }
 
 /// ===== meta-elections =====
@@ -14676,74 +14546,6 @@ digraph GossipGraph {
 /// unconsensused_events: {}
 /// meta_events: {
 ///   A_218 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   A_219 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   A_220 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   A_221 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   A_222 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   C_205 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   D_219 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   E_209 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   E_210 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   E_211 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   E_212 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   E_213 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   G_212 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   G_213 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   G_214 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   G_215 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   G_216 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   H_232 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }

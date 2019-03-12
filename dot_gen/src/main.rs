@@ -418,7 +418,6 @@ fn add_bench_section_size(scenarios: &mut Scenarios) {
                 genesis_size,
                 opaque_to_add,
                 votes_before_gossip: true,
-                intermediate_consistency_checks: false,
                 ..Default::default()
             };
 
@@ -459,8 +458,6 @@ fn add_bench_section_size(scenarios: &mut Scenarios) {
                 prob_opaque: 0.1,
                 // Events will be seen within 2 gossip events
                 max_observation_delay: 20,
-                // For speed only check consistency at the end
-                intermediate_consistency_checks: false,
                 ..Default::default()
             },
             ConsensusMode::Single,
@@ -481,8 +478,6 @@ fn add_bench_section_size(scenarios: &mut Scenarios) {
                 prob_opaque: 0.1,
                 // Events will be seen within 2 gossip events
                 max_observation_delay: 20 * 8,
-                // For speed only check consistency at the end
-                intermediate_consistency_checks: false,
                 ..Default::default()
             },
             ConsensusMode::Single,
@@ -502,6 +497,12 @@ fn add_bench_scalability_common(
         options.genesis_size, options.opaque_to_add
     );
     let bench_name = format!("bench_section_size_evt{}", bench_tag);
+
+    let options = ScheduleOptions {
+        intermediate_consistency_checks: false,
+        genesis_restrict_consensus_to: Some(peer_ids!("Alice")),
+        ..options
+    };
 
     let _ = s
         .add(bench_name, move |env| Schedule::new(env, &options))
