@@ -17902,23 +17902,23 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {PublicIdname48840d: 358, PublicIdname4b4fb9: 513, PublicIdname5c8502: 546, PublicIdname70ccc7: 464, PublicIdname754598: 571, PublicIdname93b63e: 559, PublicIdnamee2d762: 274, PublicIdnamee5945a: 106, PublicIdnamee870b5: 204}
 
-  "PublicIdname5c_547" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname5c_547" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname5c_547</td></tr>
 <tr><td colspan="6">OpaquePayload(5a06fde420Sectio)</td></tr>
-<tr><td colspan="6">[OpaquePayload(5a06fde420Sectio)]</td></tr></table>>]
+</table>>]
 /// cause: Observation(OpaquePayload(5a06fde420Sectio))
 /// last_ancestors: {PublicIdname48840d: 358, PublicIdname4b4fb9: 513, PublicIdname5c8502: 547, PublicIdname70ccc7: 464, PublicIdname754598: 571, PublicIdname93b63e: 559, PublicIdnamee2d762: 274, PublicIdnamee5945a: 106, PublicIdnamee870b5: 204}
 
-  "PublicIdname5c_548" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname5c_548" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname5c_548</td></tr>
 <tr><td colspan="6">OpaquePayload(75f3e55401Sectio)</td></tr>
-<tr><td colspan="6">[OpaquePayload(75f3e55401Sectio)]</td></tr></table>>]
+</table>>]
 /// cause: Observation(OpaquePayload(75f3e55401Sectio))
 /// last_ancestors: {PublicIdname48840d: 358, PublicIdname4b4fb9: 513, PublicIdname5c8502: 548, PublicIdname70ccc7: 464, PublicIdname754598: 571, PublicIdname93b63e: 559, PublicIdnamee2d762: 274, PublicIdnamee5945a: 106, PublicIdnamee870b5: 204}
 
-  "PublicIdname5c_549" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname5c_549" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname5c_549</td></tr>
-</table>>]
+<tr><td colspan="6">[OpaquePayload(5a06fde420Sectio), OpaquePayload(75f3e55401Sectio)]</td></tr></table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname48840d: 358, PublicIdname4b4fb9: 518, PublicIdname5c8502: 549, PublicIdname70ccc7: 464, PublicIdname754598: 573, PublicIdname93b63e: 559, PublicIdnamee2d762: 276, PublicIdnamee5945a: 106, PublicIdnamee870b5: 209}
 
@@ -31832,23 +31832,23 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {PublicIdname48840d: 355, PublicIdname4b4fb9: 512, PublicIdname5c8502: 543, PublicIdname70ccc7: 462, PublicIdname754598: 573, PublicIdname93b63e: 559, PublicIdnamee2d762: 276, PublicIdnamee5945a: 109, PublicIdnamee870b5: 211}
 
-  "PublicIdnamee5_110" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamee5_110" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamee5_110</td></tr>
 <tr><td colspan="6">OpaquePayload(75f3e55401Sectio)</td></tr>
-<tr><td colspan="6">[OpaquePayload(75f3e55401Sectio)]</td></tr></table>>]
+</table>>]
 /// cause: Observation(OpaquePayload(75f3e55401Sectio))
 /// last_ancestors: {PublicIdname48840d: 355, PublicIdname4b4fb9: 512, PublicIdname5c8502: 543, PublicIdname70ccc7: 462, PublicIdname754598: 573, PublicIdname93b63e: 559, PublicIdnamee2d762: 276, PublicIdnamee5945a: 110, PublicIdnamee870b5: 211}
 
-  "PublicIdnamee5_111" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamee5_111" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamee5_111</td></tr>
 <tr><td colspan="6">OpaquePayload(5a06fde420Sectio)</td></tr>
-<tr><td colspan="6">[OpaquePayload(5a06fde420Sectio)]</td></tr></table>>]
+</table>>]
 /// cause: Observation(OpaquePayload(5a06fde420Sectio))
 /// last_ancestors: {PublicIdname48840d: 355, PublicIdname4b4fb9: 512, PublicIdname5c8502: 543, PublicIdname70ccc7: 462, PublicIdname754598: 573, PublicIdname93b63e: 559, PublicIdnamee2d762: 276, PublicIdnamee5945a: 111, PublicIdnamee870b5: 211}
 
-  "PublicIdnamee5_112" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamee5_112" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamee5_112</td></tr>
-</table>>]
+<tr><td colspan="6">[OpaquePayload(75f3e55401Sectio), OpaquePayload(5a06fde420Sectio)]</td></tr></table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname48840d: 357, PublicIdname4b4fb9: 512, PublicIdname5c8502: 543, PublicIdname70ccc7: 462, PublicIdname754598: 574, PublicIdname93b63e: 567, PublicIdnamee2d762: 276, PublicIdnamee5945a: 112, PublicIdnamee870b5: 211}
 
@@ -32519,12 +32519,12 @@ digraph GossipGraph {
 /// d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279
 /// d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279
 /// d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279
-/// d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279
-/// c4db2f62d1c1586f6ff062b8b25c05f9684e09f2c3cf251a5818612dcf9ab895
-/// d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279
 /// c4db2f62d1c1586f6ff062b8b25c05f9684e09f2c3cf251a5818612dcf9ab895
 /// c4db2f62d1c1586f6ff062b8b25c05f9684e09f2c3cf251a5818612dcf9ab895
 /// d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279
+/// d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279
+/// d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279
+/// c4db2f62d1c1586f6ff062b8b25c05f9684e09f2c3cf251a5818612dcf9ab895
 /// d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279
 
 /// round_hashes: {
@@ -32562,27 +32562,19 @@ digraph GossipGraph {
 /// interesting_events: {
 ///   PublicIdname48840d -> ["PublicIdname48_368", "PublicIdname48_372"]
 ///   PublicIdname4b4fb9 -> ["PublicIdname4b_531"]
-///   PublicIdname5c8502 -> ["PublicIdname5c_547", "PublicIdname5c_548", "PublicIdname5c_554"]
+///   PublicIdname5c8502 -> ["PublicIdname5c_549", "PublicIdname5c_554"]
 ///   PublicIdname70ccc7 -> ["PublicIdname70_470", "PublicIdname70_477"]
 ///   PublicIdname754598 -> ["PublicIdname75_589", "PublicIdname75_590"]
 ///   PublicIdname93b63e -> ["PublicIdname93_572", "PublicIdname93_577"]
 ///   PublicIdnamecdfb7c -> ["PublicIdnamecd_9"]
 ///   PublicIdnamee2d762 -> ["PublicIdnamee2_284", "PublicIdnamee2_288"]
-///   PublicIdnamee5945a -> ["PublicIdnamee5_110", "PublicIdnamee5_111", "PublicIdnamee5_118"]
+///   PublicIdnamee5945a -> ["PublicIdnamee5_112", "PublicIdnamee5_118"]
 ///   PublicIdnamee870b5 -> ["PublicIdnamee8_219", "PublicIdnamee8_221"]
 /// }
 /// all_voters: {PublicIdname48840d, PublicIdname4b4fb9, PublicIdname5c8502, PublicIdname70ccc7, PublicIdname754598, PublicIdname93b63e, PublicIdnamecdfb7c, PublicIdnamee2d762, PublicIdnamee5945a, PublicIdnamee870b5}
 /// unconsensused_events: {"PublicIdname5c_547", "PublicIdname5c_548", "PublicIdnamee5_110", "PublicIdnamee5_111"}
 /// meta_events: {
 ///   PublicIdname48_359 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdname48_360 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdname48_361 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
@@ -33223,17 +33215,9 @@ digraph GossipGraph {
 ///                       0/1   f   -   -   - 
 ///     }
 ///   }
-///   PublicIdname5c_547 -> {
-///     observees: {}
-///     interesting_content: [OpaquePayload(5a06fde420Sectio)]
-///   }
-///   PublicIdname5c_548 -> {
-///     observees: {}
-///     interesting_content: [OpaquePayload(75f3e55401Sectio)]
-///   }
 ///   PublicIdname5c_549 -> {
 ///     observees: {}
-///     interesting_content: []
+///     interesting_content: [OpaquePayload(5a06fde420Sectio), OpaquePayload(75f3e55401Sectio)]
 ///   }
 ///   PublicIdname5c_550 -> {
 ///     observees: {}
@@ -33581,14 +33565,6 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   PublicIdname70_465 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdname70_466 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdname70_467 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
@@ -33975,14 +33951,6 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   PublicIdname75_575 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdname75_576 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdname75_577 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
@@ -35588,17 +35556,9 @@ digraph GossipGraph {
 ///                       0/1   f   -   -   - 
 ///     }
 ///   }
-///   PublicIdnamee5_110 -> {
-///     observees: {}
-///     interesting_content: [OpaquePayload(75f3e55401Sectio)]
-///   }
-///   PublicIdnamee5_111 -> {
-///     observees: {}
-///     interesting_content: [OpaquePayload(5a06fde420Sectio)]
-///   }
 ///   PublicIdnamee5_112 -> {
 ///     observees: {}
-///     interesting_content: []
+///     interesting_content: [OpaquePayload(75f3e55401Sectio), OpaquePayload(5a06fde420Sectio)]
 ///   }
 ///   PublicIdnamee5_113 -> {
 ///     observees: {}

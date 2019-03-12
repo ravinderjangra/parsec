@@ -120,6 +120,18 @@ impl<P: PublicId> Graph<P> {
             .and_then(|index| self.get(index))
     }
 
+    /// Returns the first self-parent of the given event, that is a sync_event.
+    pub fn self_sync_parent<E: AsRef<Event<P>>>(&self, event: E) -> Option<IndexedEventRef<P>> {
+        let mut event = event.as_ref();
+        while let Some(parent) = event.self_parent().and_then(|index| self.get(index)) {
+            if parent.is_sync_event() {
+                return Some(parent);
+            }
+            event = parent.inner();
+        }
+        None
+    }
+
     /// Iterator over all ancestors of the given event (including itself) in reverse topological
     /// order.
     pub fn ancestors<'a>(&'a self, event: IndexedEventRef<'a, P>) -> Ancestors<'a, P> {

@@ -374,6 +374,13 @@ impl<P: PublicId> Event<P> {
         &self.cache.last_ancestors
     }
 
+    pub fn is_sync_event(&self) -> bool {
+        match self.content.cause {
+            Cause::Requesting { .. } | Cause::Request { .. } | Cause::Response { .. } => true,
+            Cause::Initial | Cause::Observation { .. } => false,
+        }
+    }
+
     pub fn is_requesting(&self) -> bool {
         if let Cause::Requesting { .. } = self.content.cause {
             true

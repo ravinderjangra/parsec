@@ -2480,16 +2480,16 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {PublicIdname931a51: 79, PublicIdname93b63e: 84, PublicIdnameacee77: 84, PublicIdnameb0b36e: 69, PublicIdnameb0e91c: 83, PublicIdnamecdfb7c: 80, PublicIdnamee2d762: 85, PublicIdnamee5945a: 87, PublicIdnamee870b5: 82, PublicIdnameed283c: 80}
 
-  "PublicIdname93b_85" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname93b_85" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname93b_85</td></tr>
 <tr><td colspan="6">OpaquePayload(bbb8d5a8baSectio)</td></tr>
-<tr><td colspan="6">[OpaquePayload(bbb8d5a8baSectio)]</td></tr></table>>]
+</table>>]
 /// cause: Observation(OpaquePayload(bbb8d5a8baSectio))
 /// last_ancestors: {PublicIdname931a51: 79, PublicIdname93b63e: 85, PublicIdnameacee77: 84, PublicIdnameb0b36e: 69, PublicIdnameb0e91c: 83, PublicIdnamecdfb7c: 80, PublicIdnamee2d762: 85, PublicIdnamee5945a: 87, PublicIdnamee870b5: 82, PublicIdnameed283c: 80}
 
-  "PublicIdname93b_86" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname93b_86" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname93b_86</td></tr>
-</table>>]
+<tr><td colspan="6">[OpaquePayload(bbb8d5a8baSectio)]</td></tr></table>>]
 /// cause: Requesting(PublicIdnamee2d762)
 /// last_ancestors: {PublicIdname931a51: 79, PublicIdname93b63e: 86, PublicIdnameacee77: 84, PublicIdnameb0b36e: 69, PublicIdnameb0e91c: 83, PublicIdnamecdfb7c: 80, PublicIdnamee2d762: 85, PublicIdnamee5945a: 87, PublicIdnamee870b5: 82, PublicIdnameed283c: 80}
 
@@ -4277,16 +4277,16 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {PublicIdname931a51: 76, PublicIdname93b63e: 78, PublicIdnameacee77: 85, PublicIdnameb0b36e: 69, PublicIdnameb0e91c: 83, PublicIdnamecdfb7c: 80, PublicIdnamee2d762: 85, PublicIdnamee5945a: 87, PublicIdnamee870b5: 82, PublicIdnameed283c: 79}
 
-  "PublicIdnameace_86" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnameace_86" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnameace_86</td></tr>
 <tr><td colspan="6">OpaquePayload(bbb8d5a8baSectio)</td></tr>
-<tr><td colspan="6">[OpaquePayload(bbb8d5a8baSectio)]</td></tr></table>>]
+</table>>]
 /// cause: Observation(OpaquePayload(bbb8d5a8baSectio))
 /// last_ancestors: {PublicIdname931a51: 76, PublicIdname93b63e: 78, PublicIdnameacee77: 86, PublicIdnameb0b36e: 69, PublicIdnameb0e91c: 83, PublicIdnamecdfb7c: 80, PublicIdnamee2d762: 85, PublicIdnamee5945a: 87, PublicIdnamee870b5: 82, PublicIdnameed283c: 79}
 
-  "PublicIdnameace_87" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnameace_87" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnameace_87</td></tr>
-</table>>]
+<tr><td colspan="6">[OpaquePayload(bbb8d5a8baSectio)]</td></tr></table>>]
 /// cause: Requesting(PublicIdname931a51)
 /// last_ancestors: {PublicIdname931a51: 76, PublicIdname93b63e: 78, PublicIdnameacee77: 87, PublicIdnameb0b36e: 69, PublicIdnameb0e91c: 83, PublicIdnamecdfb7c: 80, PublicIdnamee2d762: 85, PublicIdnamee5945a: 87, PublicIdnamee870b5: 82, PublicIdnameed283c: 79}
 
@@ -6828,16 +6828,16 @@ digraph GossipGraph {
 /// cause: Response
 /// last_ancestors: {PublicIdname931a51: 73, PublicIdname93b63e: 78, PublicIdnameacee77: 80, PublicIdnameb0b36e: 69, PublicIdnameb0e91c: 78, PublicIdnamecdfb7c: 81, PublicIdnamee2d762: 85, PublicIdnamee5945a: 86, PublicIdnamee870b5: 77, PublicIdnameed283c: 69}
 
-  "PublicIdnamecdf_82" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamecdf_82" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamecdf_82</td></tr>
 <tr><td colspan="6">OpaquePayload(bbb8d5a8baSectio)</td></tr>
-<tr><td colspan="6">[OpaquePayload(bbb8d5a8baSectio)]</td></tr></table>>]
+</table>>]
 /// cause: Observation(OpaquePayload(bbb8d5a8baSectio))
 /// last_ancestors: {PublicIdname931a51: 73, PublicIdname93b63e: 78, PublicIdnameacee77: 80, PublicIdnameb0b36e: 69, PublicIdnameb0e91c: 78, PublicIdnamecdfb7c: 82, PublicIdnamee2d762: 85, PublicIdnamee5945a: 86, PublicIdnamee870b5: 77, PublicIdnameed283c: 69}
 
-  "PublicIdnamecdf_83" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamecdf_83" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamecdf_83</td></tr>
-</table>>]
+<tr><td colspan="6">[OpaquePayload(bbb8d5a8baSectio)]</td></tr></table>>]
 /// cause: Requesting(PublicIdnameb0b36e)
 /// last_ancestors: {PublicIdname931a51: 73, PublicIdname93b63e: 78, PublicIdnameacee77: 80, PublicIdnameb0b36e: 69, PublicIdnameb0e91c: 78, PublicIdnamecdfb7c: 83, PublicIdnamee2d762: 85, PublicIdnamee5945a: 86, PublicIdnamee870b5: 77, PublicIdnameed283c: 69}
 
@@ -10688,11 +10688,11 @@ digraph GossipGraph {
 /// }
 /// interesting_events: {
 ///   PublicIdname931a51 -> ["PublicIdname931_87", "PublicIdname931_90"]
-///   PublicIdname93b63e -> ["PublicIdname93b_85", "PublicIdname93b_87", "PublicIdname93b_89"]
-///   PublicIdnameacee77 -> ["PublicIdnameace_86", "PublicIdnameace_91"]
+///   PublicIdname93b63e -> ["PublicIdname93b_86", "PublicIdname93b_87", "PublicIdname93b_89"]
+///   PublicIdnameacee77 -> ["PublicIdnameace_87", "PublicIdnameace_91"]
 ///   PublicIdnameb0b36e -> ["PublicIdnameb0b_78", "PublicIdnameb0b_83", "PublicIdnameb0b_85"]
 ///   PublicIdnameb0e91c -> ["PublicIdnameb0e_89", "PublicIdnameb0e_96", "PublicIdnameb0e_98"]
-///   PublicIdnamecdfb7c -> ["PublicIdnamecdf_82", "PublicIdnamecdf_87", "PublicIdnamecdf_90"]
+///   PublicIdnamecdfb7c -> ["PublicIdnamecdf_83", "PublicIdnamecdf_87", "PublicIdnamecdf_90"]
 ///   PublicIdnamee2d762 -> ["PublicIdnamee2d_89", "PublicIdnamee2d_91", "PublicIdnamee2d_100"]
 ///   PublicIdnamee5945a -> ["PublicIdnamee59_94", "PublicIdnamee59_96"]
 ///   PublicIdnamee870b5 -> ["PublicIdnamee87_94", "PublicIdnamee87_97"]
@@ -10702,10 +10702,6 @@ digraph GossipGraph {
 /// unconsensused_events: {"PublicIdname93b_85", "PublicIdnameace_86", "PublicIdnamecdf_82"}
 /// meta_events: {
 ///   PublicIdname931_80 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdname931_81 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
@@ -10978,13 +10974,9 @@ digraph GossipGraph {
 ///       PublicIdnameed2: 0/0   b   b   t   - 
 ///     }
 ///   }
-///   PublicIdname93b_85 -> {
-///     observees: {}
-///     interesting_content: [OpaquePayload(bbb8d5a8baSectio)]
-///   }
 ///   PublicIdname93b_86 -> {
 ///     observees: {}
-///     interesting_content: []
+///     interesting_content: [OpaquePayload(bbb8d5a8baSectio)]
 ///   }
 ///   PublicIdname93b_87 -> {
 ///     observees: {}
@@ -11471,13 +11463,9 @@ digraph GossipGraph {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
-///   PublicIdnameace_86 -> {
-///     observees: {}
-///     interesting_content: [OpaquePayload(bbb8d5a8baSectio)]
-///   }
 ///   PublicIdnameace_87 -> {
 ///     observees: {}
-///     interesting_content: []
+///     interesting_content: [OpaquePayload(bbb8d5a8baSectio)]
 ///   }
 ///   PublicIdnameace_88 -> {
 ///     observees: {}
@@ -11809,10 +11797,6 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   PublicIdnameb0b_72 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnameb0b_73 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
@@ -12188,10 +12172,6 @@ digraph GossipGraph {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
-///   PublicIdnameb0e_85 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
 ///   PublicIdnameb0e_86 -> {
 ///     observees: {}
 ///     interesting_content: []
@@ -12543,13 +12523,9 @@ digraph GossipGraph {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
-///   PublicIdnamecdf_82 -> {
-///     observees: {}
-///     interesting_content: [OpaquePayload(bbb8d5a8baSectio)]
-///   }
 ///   PublicIdnamecdf_83 -> {
 ///     observees: {}
-///     interesting_content: []
+///     interesting_content: [OpaquePayload(bbb8d5a8baSectio)]
 ///   }
 ///   PublicIdnamecdf_84 -> {
 ///     observees: {}
@@ -12993,10 +12969,6 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   PublicIdnamee2d_86 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamee2d_87 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
@@ -13688,10 +13660,6 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///   }
 ///   PublicIdnamee87_85 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamee87_86 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
