@@ -20,9 +20,6 @@ jobs:
     - script: scripts/clippy
       env: CACHE_NAME=clippy_linux
       os: linux
-    - script: scripts/clippy
-      env: CACHE_NAME=clippy_osx
-      os: osx
     - script: scripts/tests
       env: CACHE_NAME=tests_linux
       os: linux

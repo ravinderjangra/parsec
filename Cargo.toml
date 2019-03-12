@@ -24,10 +24,10 @@ safe_crypto = { version = "~0.4.0", optional = true }
 serde = "~1.0.66"
 serde_derive = "~1.0.66"
 tiny-keccak = "~1.4.2"
-unwrap = "~1.2.0"
+unwrap = "~1.2.1"
 
 [dev-dependencies]
-clap = "~2.31.2"
+clap = "~2.32.0"
 criterion = "~0.2.5"
 pom = "~1.1.0"
 safe_crypto = "~0.4.0"
@@ -37,6 +37,9 @@ dump-graphs = []
 mock = ["safe_crypto/mock"]
 testing = ["maidsafe_utilities/testing", "proptest", "mock", "pom"]
 malice-detection = []
+
+[workspace]
+members = ["dot_gen"]
 
 [lib]
 # https://japaric.github.io/criterion.rs/book/faq.html#cargo-bench-gives-unrecognized-option-errors-for-valid-command-line-options
