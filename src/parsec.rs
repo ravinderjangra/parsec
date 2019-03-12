@@ -33,6 +33,7 @@ use crate::parsec_helpers::find_interesting_content_for_event;
 use crate::peer_list::{
     PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerListChange, PeerState,
 };
+use fnv::FnvHashSet;
 use itertools::Itertools;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::mem;
@@ -1275,38 +1276,70 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         self.compute_payloads_for_consensus(decided_meta_votes)
     }
 
+    // Produce the consensused `ObservationKey`in consensus order.
     fn compute_payloads_for_consensus<I>(&self, decided_meta_votes: I) -> Vec<ObservationKey>
     where
         I: IntoIterator<Item = (PeerIndex, bool)>,
     {
-        // Sort the payloads first by the number of votes and in case of a tie, lexicographically
-        // by the observation keys. This is so every node will arrive at the same ordering.
-        let payloads = decided_meta_votes
+        let mut payload_iters = decided_meta_votes
             .into_iter()
-            .filter_map(|(peer_index, decision)| {
-                if decision {
-                    self.meta_election
-                        .first_interesting_content_by(peer_index)
-                        .cloned()
-                } else {
-                    None
-                }
-            })
+            .filter(|(_, decision)| *decision)
+            .filter_map(|(peer_index, _)| self.meta_election.interesting_content_by(peer_index))
+            .map(|payload_keys| payload_keys.iter())
+            .collect_vec();
+
+        let mut all_payloads_in_order = Vec::new();
+        let mut all_payloads_lookup: FnvHashSet<&ObservationKey> = FnvHashSet::default();
+
+        // First, process the first payloads from each decided meta events and append the ordered result to
+        // the end of `all_payloads_in_order`. Then, skipping any payload already in `all_payloads_in_order`/
+        // `all_payloads_lookup`, process the next payloads from each decided meta events similarly.
+        while let Some(payloads_counts) = self
+            .next_payload_batch_for_consensus_with_count(&mut payload_iters, &all_payloads_lookup)
+        {
+            let new_payloads = self.sort_payload_batch_for_consensus(&payloads_counts);
+            all_payloads_in_order.extend(new_payloads.iter().cloned());
+            all_payloads_lookup.extend(new_payloads.iter());
+        }
+
+        all_payloads_in_order
+    }
+
+    // Iterate the payload iterators skipping processed payloads and accumulate this batch of payload count.
+    fn next_payload_batch_for_consensus_with_count<'a>(
+        &self,
+        payload_iters: &mut [impl Iterator<Item = &'a ObservationKey>],
+        processed_payloads: &FnvHashSet<&ObservationKey>,
+    ) -> Option<BTreeMap<&'a ObservationKey, i32>> {
+        let payloads_counts = payload_iters
+            .iter_mut()
+            .filter_map(|iter| iter.find(|key| !processed_payloads.contains(key)))
             .fold(BTreeMap::new(), |mut map, payload_key| {
                 *map.entry(payload_key).or_insert(0) += 1;
                 map
             });
+        if payloads_counts.is_empty() {
+            None
+        } else {
+            Some(payloads_counts)
+        }
+    }
 
-        payloads
-            .into_iter()
+    // Sort the payload batch by count, and then a consistent tie breaker.
+    fn sort_payload_batch_for_consensus<'a>(
+        &self,
+        payloads_counts: &BTreeMap<&'a ObservationKey, i32>,
+    ) -> Vec<&'a ObservationKey> {
+        payloads_counts
+            .iter()
             .sorted_by(|(lhs_key, lhs_count), (rhs_key, rhs_count)| {
                 lhs_count
                     .cmp(rhs_count)
                     .reverse()
                     .then_with(|| lhs_key.consistent_cmp(rhs_key, &self.peer_list))
             })
-            .map(|(key, _)| key)
-            .collect()
+            .map(|(&key, _)| key)
+            .collect_vec()
     }
 
     fn create_blocks(&self, payload_keys: &[ObservationKey]) -> Result<BlockGroup<T, S::PublicId>> {
