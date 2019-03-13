@@ -164,7 +164,7 @@ impl Network {
     fn active_peers(&self) -> impl Iterator<Item = &Peer> {
         self.peers
             .values()
-            .filter(|peer| peer.status() == PeerStatus::Active)
+            .filter(|peer| peer.status() == PeerStatus::Active && !peer.ignore_process_events())
     }
 
     /// Returns the IDs of peers which consider themselves to be still running correctly, i.e. those
@@ -550,7 +550,8 @@ impl Network {
                     // If the peers are already initialised, we won't initialise them again.
                     return Ok(true);
                 }
-                let peers = genesis_group
+
+                let mut peers: BTreeMap<_, _> = genesis_group
                     .iter()
                     .map(|id| {
                         (
@@ -559,6 +560,19 @@ impl Network {
                         )
                     })
                     .collect();
+
+                if let Some(keep_consensus) = &options.genesis_restrict_consensus_to {
+                    assert!(
+                        !keep_consensus.is_empty() && keep_consensus.iter().all(|id| genesis_group.contains(id)),
+                        "genesis_restrict_consensus_to must be None or not empty and contain only ids from the genesis group.: {:?} - {:?}", keep_consensus, genesis_group );
+
+                    keep_consensus.iter().for_each(|id| {
+                        let _ = peers
+                            .get_mut(id)
+                            .map(|peer| peer.set_ignore_process_events());
+                    });
+                }
+
                 self.peers = peers;
                 self.genesis = genesis_group;
                 // Do a full reset while we're at it.

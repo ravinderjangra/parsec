@@ -118,12 +118,6 @@ digraph GossipGraph {
     "A_89" -> "A_90" [minlen=1]
     "A_90" -> "A_91" [minlen=1]
     "A_91" -> "A_92" [minlen=1]
-    "A_92" -> "A_93" [minlen=1]
-    "A_93" -> "A_94" [minlen=5]
-    "A_94" -> "A_95" [minlen=1]
-    "A_95" -> "A_96" [minlen=2]
-    "A_96" -> "A_97" [minlen=1]
-    "A_97" -> "A_98" [minlen=3]
   }
   "J_2" -> "A_3" [constraint=false]
   "E_2" -> "A_4" [constraint=false]
@@ -177,10 +171,6 @@ digraph GossipGraph {
   "G_67" -> "A_87" [constraint=false]
   "B_57" -> "A_91" [constraint=false]
   "L_72" -> "A_92" [constraint=false]
-  "I_79" -> "A_94" [constraint=false]
-  "J_84" -> "A_95" [constraint=false]
-  "L_74" -> "A_96" [constraint=false]
-  "D_81" -> "A_98" [constraint=false]
 
   style=invis
   subgraph cluster_Bob {
@@ -346,15 +336,6 @@ digraph GossipGraph {
     "C_64" -> "C_65" [minlen=7]
     "C_65" -> "C_66" [minlen=1]
     "C_66" -> "C_67" [minlen=7]
-    "C_67" -> "C_68" [minlen=1]
-    "C_68" -> "C_69" [minlen=1]
-    "C_69" -> "C_70" [minlen=5]
-    "C_70" -> "C_71" [minlen=1]
-    "C_71" -> "C_72" [minlen=1]
-    "C_72" -> "C_73" [minlen=1]
-    "C_73" -> "C_74" [minlen=1]
-    "C_74" -> "C_75" [minlen=1]
-    "C_75" -> "C_76" [minlen=1]
   }
   "P_4" -> "C_4" [constraint=false]
   "B_4" -> "C_7" [constraint=false]
@@ -387,10 +368,6 @@ digraph GossipGraph {
   "A_84" -> "C_65" [constraint=false]
   "L_64" -> "C_66" [constraint=false]
   "L_69" -> "C_67" [constraint=false]
-  "O_66" -> "C_70" [constraint=false]
-  "K_70" -> "C_71" [constraint=false]
-  "G_72" -> "C_72" [constraint=false]
-  "D_77" -> "C_76" [constraint=false]
 
   style=invis
   subgraph cluster_Dave {
@@ -463,21 +440,6 @@ digraph GossipGraph {
     "D_63" -> "D_64" [minlen=3]
     "D_64" -> "D_65" [minlen=1]
     "D_65" -> "D_66" [minlen=1]
-    "D_66" -> "D_67" [minlen=1]
-    "D_67" -> "D_68" [minlen=5]
-    "D_68" -> "D_69" [minlen=1]
-    "D_69" -> "D_70" [minlen=1]
-    "D_70" -> "D_71" [minlen=5]
-    "D_71" -> "D_72" [minlen=8]
-    "D_72" -> "D_73" [minlen=1]
-    "D_73" -> "D_74" [minlen=1]
-    "D_74" -> "D_75" [minlen=2]
-    "D_75" -> "D_76" [minlen=1]
-    "D_76" -> "D_77" [minlen=1]
-    "D_77" -> "D_78" [minlen=1]
-    "D_78" -> "D_79" [minlen=5]
-    "D_79" -> "D_80" [minlen=1]
-    "D_80" -> "D_81" [minlen=1]
   }
   "M_2" -> "D_2" [constraint=false]
   "N_2" -> "D_3" [constraint=false]
@@ -512,15 +474,6 @@ digraph GossipGraph {
   "M_52" -> "D_63" [constraint=false]
   "H_59" -> "D_64" [constraint=false]
   "N_58" -> "D_66" [constraint=false]
-  "C_60" -> "D_67" [constraint=false]
-  "J_70" -> "D_68" [constraint=false]
-  "H_72" -> "D_71" [constraint=false]
-  "J_76" -> "D_72" [constraint=false]
-  "N_68" -> "D_73" [constraint=false]
-  "F_68" -> "D_75" [constraint=false]
-  "C_76" -> "D_79" [constraint=false]
-  "L_75" -> "D_80" [constraint=false]
-  "A_97" -> "D_81" [constraint=false]
 
   style=invis
   subgraph cluster_Eric {
@@ -581,10 +534,6 @@ digraph GossipGraph {
     "E_51" -> "E_52" [minlen=5]
     "E_52" -> "E_53" [minlen=1]
     "E_53" -> "E_54" [minlen=4]
-    "E_54" -> "E_55" [minlen=1]
-    "E_55" -> "E_56" [minlen=2]
-    "E_56" -> "E_57" [minlen=1]
-    "E_57" -> "E_58" [minlen=7]
   }
   "A_4" -> "E_3" [constraint=false]
   "O_3" -> "E_5" [constraint=false]
@@ -612,8 +561,6 @@ digraph GossipGraph {
   "H_68" -> "E_52" [constraint=false]
   "B_52" -> "E_53" [constraint=false]
   "A_85" -> "E_54" [constraint=false]
-  "H_73" -> "E_56" [constraint=false]
-  "J_78" -> "E_58" [constraint=false]
 
   style=invis
   subgraph cluster_Fred {
@@ -685,9 +632,6 @@ digraph GossipGraph {
     "F_62" -> "F_63" [minlen=13]
     "F_63" -> "F_64" [minlen=3]
     "F_64" -> "F_65" [minlen=6]
-    "F_65" -> "F_66" [minlen=1]
-    "F_66" -> "F_67" [minlen=1]
-    "F_67" -> "F_68" [minlen=8]
   }
   "L_2" -> "F_3" [constraint=false]
   "L_3" -> "F_5" [constraint=false]
@@ -721,8 +665,6 @@ digraph GossipGraph {
   "K_59" -> "F_63" [constraint=false]
   "G_58" -> "F_64" [constraint=false]
   "G_64" -> "F_65" [constraint=false]
-  "I_70" -> "F_66" [constraint=false]
-  "D_74" -> "F_68" [constraint=false]
 
   style=invis
   subgraph cluster_Gina {
@@ -796,12 +738,6 @@ digraph GossipGraph {
     "G_64" -> "G_65" [minlen=2]
     "G_65" -> "G_66" [minlen=1]
     "G_66" -> "G_67" [minlen=1]
-    "G_67" -> "G_68" [minlen=1]
-    "G_68" -> "G_69" [minlen=1]
-    "G_69" -> "G_70" [minlen=5]
-    "G_70" -> "G_71" [minlen=1]
-    "G_71" -> "G_72" [minlen=1]
-    "G_72" -> "G_73" [minlen=1]
   }
   "J_3" -> "G_4" [constraint=false]
   "D_4" -> "G_5" [constraint=false]
@@ -833,11 +769,6 @@ digraph GossipGraph {
   "I_68" -> "G_63" [constraint=false]
   "F_65" -> "G_65" [constraint=false]
   "N_65" -> "G_66" [constraint=false]
-  "A_87" -> "G_69" [constraint=false]
-  "O_64" -> "G_70" [constraint=false]
-  "I_75" -> "G_71" [constraint=false]
-  "C_69" -> "G_72" [constraint=false]
-  "J_77" -> "G_73" [constraint=false]
 
   style=invis
   subgraph cluster_Hank {
@@ -913,10 +844,6 @@ digraph GossipGraph {
     "H_66" -> "H_67" [minlen=1]
     "H_67" -> "H_68" [minlen=1]
     "H_68" -> "H_69" [minlen=3]
-    "H_69" -> "H_70" [minlen=1]
-    "H_70" -> "H_71" [minlen=1]
-    "H_71" -> "H_72" [minlen=1]
-    "H_72" -> "H_73" [minlen=2]
   }
   "B_3" -> "H_3" [constraint=false]
   "M_11" -> "H_18" [constraint=false]
@@ -951,8 +878,6 @@ digraph GossipGraph {
   "A_81" -> "H_67" [constraint=false]
   "E_51" -> "H_68" [constraint=false]
   "P_63" -> "H_69" [constraint=false]
-  "J_72" -> "H_71" [constraint=false]
-  "E_55" -> "H_73" [constraint=false]
 
   style=invis
   subgraph cluster_Iris {
@@ -1028,16 +953,6 @@ digraph GossipGraph {
     "I_66" -> "I_67" [minlen=8]
     "I_67" -> "I_68" [minlen=1]
     "I_68" -> "I_69" [minlen=1]
-    "I_69" -> "I_70" [minlen=1]
-    "I_70" -> "I_71" [minlen=1]
-    "I_71" -> "I_72" [minlen=2]
-    "I_72" -> "I_73" [minlen=1]
-    "I_73" -> "I_74" [minlen=1]
-    "I_74" -> "I_75" [minlen=1]
-    "I_75" -> "I_76" [minlen=4]
-    "I_76" -> "I_77" [minlen=3]
-    "I_77" -> "I_78" [minlen=1]
-    "I_78" -> "I_79" [minlen=1]
   }
   "C_5" -> "I_3" [constraint=false]
   "N_7" -> "I_5" [constraint=false]
@@ -1072,13 +987,6 @@ digraph GossipGraph {
   "P_64" -> "I_67" [constraint=false]
   "G_60" -> "I_68" [constraint=false]
   "N_63" -> "I_69" [constraint=false]
-  "N_66" -> "I_72" [constraint=false]
-  "F_66" -> "I_73" [constraint=false]
-  "H_70" -> "I_74" [constraint=false]
-  "M_65" -> "I_76" [constraint=false]
-  "G_71" -> "I_77" [constraint=false]
-  "P_71" -> "I_78" [constraint=false]
-  "A_90" -> "I_79" [constraint=false]
 
   style=invis
   subgraph cluster_Judy {
@@ -1156,19 +1064,6 @@ digraph GossipGraph {
     "J_68" -> "J_69" [minlen=7]
     "J_69" -> "J_70" [minlen=1]
     "J_70" -> "J_71" [minlen=1]
-    "J_71" -> "J_72" [minlen=1]
-    "J_72" -> "J_73" [minlen=10]
-    "J_73" -> "J_74" [minlen=1]
-    "J_74" -> "J_75" [minlen=1]
-    "J_75" -> "J_76" [minlen=1]
-    "J_76" -> "J_77" [minlen=1]
-    "J_77" -> "J_78" [minlen=1]
-    "J_78" -> "J_79" [minlen=1]
-    "J_79" -> "J_80" [minlen=1]
-    "J_80" -> "J_81" [minlen=2]
-    "J_81" -> "J_82" [minlen=1]
-    "J_82" -> "J_83" [minlen=1]
-    "J_83" -> "J_84" [minlen=1]
   }
   "A_2" -> "J_2" [constraint=false]
   "G_2" -> "J_3" [constraint=false]
@@ -1207,15 +1102,6 @@ digraph GossipGraph {
   "P_60" -> "J_67" [constraint=false]
   "B_50" -> "J_68" [constraint=false]
   "K_58" -> "J_69" [constraint=false]
-  "B_56" -> "J_73" [constraint=false]
-  "D_68" -> "J_74" [constraint=false]
-  "H_71" -> "J_75" [constraint=false]
-  "D_70" -> "J_76" [constraint=false]
-  "P_70" -> "J_80" [constraint=false]
-  "M_67" -> "J_81" [constraint=false]
-  "E_58" -> "J_82" [constraint=false]
-  "G_73" -> "J_83" [constraint=false]
-  "A_89" -> "J_84" [constraint=false]
 
   style=invis
   subgraph cluster_Kent {
@@ -1287,11 +1173,6 @@ digraph GossipGraph {
     "K_62" -> "K_63" [minlen=1]
     "K_63" -> "K_64" [minlen=1]
     "K_64" -> "K_65" [minlen=1]
-    "K_65" -> "K_66" [minlen=1]
-    "K_66" -> "K_67" [minlen=7]
-    "K_67" -> "K_68" [minlen=1]
-    "K_68" -> "K_69" [minlen=1]
-    "K_69" -> "K_70" [minlen=1]
   }
   "A_6" -> "K_4" [constraint=false]
   "L_4" -> "K_6" [constraint=false]
@@ -1325,9 +1206,6 @@ digraph GossipGraph {
   "J_69" -> "K_63" [constraint=false]
   "P_62" -> "K_64" [constraint=false]
   "O_56" -> "K_65" [constraint=false]
-  "O_59" -> "K_67" [constraint=false]
-  "O_60" -> "K_68" [constraint=false]
-  "C_68" -> "K_70" [constraint=false]
 
   style=invis
   subgraph cluster_Lucy {
@@ -1406,9 +1284,6 @@ digraph GossipGraph {
     "L_69" -> "L_70" [minlen=2]
     "L_70" -> "L_71" [minlen=1]
     "L_71" -> "L_72" [minlen=1]
-    "L_72" -> "L_73" [minlen=8]
-    "L_73" -> "L_74" [minlen=1]
-    "L_74" -> "L_75" [minlen=1]
   }
   "F_2" -> "L_2" [constraint=false]
   "F_4" -> "L_3" [constraint=false]
@@ -1445,9 +1320,6 @@ digraph GossipGraph {
   "O_58" -> "L_68" [constraint=false]
   "C_67" -> "L_70" [constraint=false]
   "A_88" -> "L_72" [constraint=false]
-  "O_70" -> "L_73" [constraint=false]
-  "A_93" -> "L_74" [constraint=false]
-  "D_76" -> "L_75" [constraint=false]
 
   style=invis
   subgraph cluster_Mike {
@@ -1516,11 +1388,6 @@ digraph GossipGraph {
     "M_59" -> "M_60" [minlen=1]
     "M_60" -> "M_61" [minlen=2]
     "M_61" -> "M_62" [minlen=1]
-    "M_62" -> "M_63" [minlen=8]
-    "M_63" -> "M_64" [minlen=5]
-    "M_64" -> "M_65" [minlen=1]
-    "M_65" -> "M_66" [minlen=2]
-    "M_66" -> "M_67" [minlen=1]
   }
   "D_2" -> "M_3" [constraint=false]
   "F_6" -> "M_4" [constraint=false]
@@ -1551,10 +1418,6 @@ digraph GossipGraph {
   "K_57" -> "M_58" [constraint=false]
   "C_62" -> "M_59" [constraint=false]
   "A_82" -> "M_61" [constraint=false]
-  "B_55" -> "M_63" [constraint=false]
-  "O_62" -> "M_64" [constraint=false]
-  "I_76" -> "M_66" [constraint=false]
-  "J_79" -> "M_67" [constraint=false]
 
   style=invis
   subgraph cluster_Nina {
@@ -1626,9 +1489,6 @@ digraph GossipGraph {
     "N_62" -> "N_63" [minlen=1]
     "N_63" -> "N_64" [minlen=4]
     "N_64" -> "N_65" [minlen=1]
-    "N_65" -> "N_66" [minlen=1]
-    "N_66" -> "N_67" [minlen=1]
-    "N_67" -> "N_68" [minlen=1]
   }
   "P_2" -> "N_4" [constraint=false]
   "D_3" -> "N_5" [constraint=false]
@@ -1659,8 +1519,6 @@ digraph GossipGraph {
   "D_66" -> "N_60" [constraint=false]
   "O_55" -> "N_62" [constraint=false]
   "I_69" -> "N_64" [constraint=false]
-  "I_71" -> "N_66" [constraint=false]
-  "D_69" -> "N_68" [constraint=false]
 
   style=invis
   subgraph cluster_Oran {
@@ -1725,18 +1583,6 @@ digraph GossipGraph {
     "O_55" -> "O_56" [minlen=1]
     "O_56" -> "O_57" [minlen=3]
     "O_57" -> "O_58" [minlen=5]
-    "O_58" -> "O_59" [minlen=1]
-    "O_59" -> "O_60" [minlen=1]
-    "O_60" -> "O_61" [minlen=1]
-    "O_61" -> "O_62" [minlen=1]
-    "O_62" -> "O_63" [minlen=2]
-    "O_63" -> "O_64" [minlen=1]
-    "O_64" -> "O_65" [minlen=1]
-    "O_65" -> "O_66" [minlen=1]
-    "O_66" -> "O_67" [minlen=1]
-    "O_67" -> "O_68" [minlen=1]
-    "O_68" -> "O_69" [minlen=1]
-    "O_69" -> "O_70" [minlen=1]
   }
   "P_3" -> "O_2" [constraint=false]
   "E_4" -> "O_3" [constraint=false]
@@ -1767,15 +1613,6 @@ digraph GossipGraph {
   "N_61" -> "O_55" [constraint=false]
   "K_65" -> "O_57" [constraint=false]
   "L_67" -> "O_58" [constraint=false]
-  "K_66" -> "O_60" [constraint=false]
-  "N_67" -> "O_61" [constraint=false]
-  "M_64" -> "O_63" [constraint=false]
-  "G_68" -> "O_64" [constraint=false]
-  "K_67" -> "O_65" [constraint=false]
-  "K_69" -> "O_67" [constraint=false]
-  "C_70" -> "O_68" [constraint=false]
-  "E_57" -> "O_69" [constraint=false]
-  "L_71" -> "O_70" [constraint=false]
 
   style=invis
   subgraph cluster_Paul {
@@ -1850,9 +1687,6 @@ digraph GossipGraph {
     "P_65" -> "P_66" [minlen=1]
     "P_66" -> "P_67" [minlen=1]
     "P_67" -> "P_68" [minlen=1]
-    "P_68" -> "P_69" [minlen=1]
-    "P_69" -> "P_70" [minlen=1]
-    "P_70" -> "P_71" [minlen=1]
   }
   "C_2" -> "P_4" [constraint=false]
   "N_4" -> "P_6" [constraint=false]
@@ -1890,7 +1724,6 @@ digraph GossipGraph {
   "H_69" -> "P_65" [constraint=false]
   "I_67" -> "P_66" [constraint=false]
   "L_65" -> "P_68" [constraint=false]
-  "B_53" -> "P_69" [constraint=false]
 
   {
     rank=same
@@ -2488,42 +2321,6 @@ digraph GossipGraph {
 </table>>]
 /// cause: Response
 /// last_ancestors: {Alice: 92, Bob: 57, Carol: 67, Dave: 66, Eric: 54, Fred: 65, Gina: 67, Hank: 69, Iris: 69, Judy: 71, Kent: 65, Lucy: 72, Mike: 62, Nina: 65, Oran: 58, Paul: 68}
-
-  "A_93" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_93</td></tr>
-</table>>]
-/// cause: Requesting(Lucy)
-/// last_ancestors: {Alice: 93, Bob: 57, Carol: 67, Dave: 66, Eric: 54, Fred: 65, Gina: 67, Hank: 69, Iris: 69, Judy: 71, Kent: 65, Lucy: 72, Mike: 62, Nina: 65, Oran: 58, Paul: 68}
-
-  "A_94" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_94</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 94, Bob: 57, Carol: 67, Dave: 66, Eric: 54, Fred: 66, Gina: 71, Hank: 70, Iris: 79, Judy: 71, Kent: 66, Lucy: 72, Mike: 65, Nina: 67, Oran: 64, Paul: 71}
-
-  "A_95" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_95</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 95, Bob: 57, Carol: 69, Dave: 70, Eric: 58, Fred: 66, Gina: 73, Hank: 73, Iris: 79, Judy: 84, Kent: 66, Lucy: 72, Mike: 67, Nina: 67, Oran: 64, Paul: 71}
-
-  "A_96" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_96</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 96, Bob: 57, Carol: 70, Dave: 70, Eric: 58, Fred: 66, Gina: 73, Hank: 73, Iris: 79, Judy: 84, Kent: 69, Lucy: 74, Mike: 67, Nina: 67, Oran: 70, Paul: 71}
-
-  "A_97" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_97</td></tr>
-</table>>]
-/// cause: Requesting(Dave)
-/// last_ancestors: {Alice: 97, Bob: 57, Carol: 70, Dave: 70, Eric: 58, Fred: 66, Gina: 73, Hank: 73, Iris: 79, Judy: 84, Kent: 69, Lucy: 74, Mike: 67, Nina: 67, Oran: 70, Paul: 71}
-
-  "A_98" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_98</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 98, Bob: 57, Carol: 76, Dave: 81, Eric: 58, Fred: 68, Gina: 73, Hank: 73, Iris: 79, Judy: 84, Kent: 70, Lucy: 75, Mike: 67, Nina: 68, Oran: 70, Paul: 71}
 
   "B_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_0</td></tr>
@@ -3315,60 +3112,6 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 84, Bob: 50, Carol: 67, Dave: 66, Eric: 51, Fred: 63, Gina: 59, Hank: 69, Iris: 67, Judy: 69, Kent: 65, Lucy: 69, Mike: 60, Nina: 61, Oran: 58, Paul: 68}
 
-  "C_68" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">C_68</td></tr>
-</table>>]
-/// cause: Requesting(Kent)
-/// last_ancestors: {Alice: 84, Bob: 50, Carol: 68, Dave: 66, Eric: 51, Fred: 63, Gina: 59, Hank: 69, Iris: 67, Judy: 69, Kent: 65, Lucy: 69, Mike: 60, Nina: 61, Oran: 58, Paul: 68}
-
-  "C_69" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">C_69</td></tr>
-</table>>]
-/// cause: Requesting(Gina)
-/// last_ancestors: {Alice: 84, Bob: 50, Carol: 69, Dave: 66, Eric: 51, Fred: 63, Gina: 59, Hank: 69, Iris: 67, Judy: 69, Kent: 65, Lucy: 69, Mike: 60, Nina: 61, Oran: 58, Paul: 68}
-
-  "C_70" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">C_70</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 84, Bob: 55, Carol: 70, Dave: 66, Eric: 53, Fred: 65, Gina: 68, Hank: 69, Iris: 71, Judy: 69, Kent: 67, Lucy: 69, Mike: 64, Nina: 67, Oran: 66, Paul: 68}
-
-  "C_71" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">C_71</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 84, Bob: 55, Carol: 71, Dave: 66, Eric: 53, Fred: 65, Gina: 68, Hank: 69, Iris: 71, Judy: 69, Kent: 70, Lucy: 69, Mike: 64, Nina: 67, Oran: 66, Paul: 68}
-
-  "C_72" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">C_72</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 87, Bob: 55, Carol: 72, Dave: 66, Eric: 54, Fred: 66, Gina: 72, Hank: 70, Iris: 75, Judy: 69, Kent: 70, Lucy: 69, Mike: 64, Nina: 67, Oran: 66, Paul: 68}
-
-  "C_73" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">C_73</td></tr>
-</table>>]
-/// cause: Requesting(Iris)
-/// last_ancestors: {Alice: 87, Bob: 55, Carol: 73, Dave: 66, Eric: 54, Fred: 66, Gina: 72, Hank: 70, Iris: 75, Judy: 69, Kent: 70, Lucy: 69, Mike: 64, Nina: 67, Oran: 66, Paul: 68}
-
-  "C_74" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">C_74</td></tr>
-</table>>]
-/// cause: Requesting(Paul)
-/// last_ancestors: {Alice: 87, Bob: 55, Carol: 74, Dave: 66, Eric: 54, Fred: 66, Gina: 72, Hank: 70, Iris: 75, Judy: 69, Kent: 70, Lucy: 69, Mike: 64, Nina: 67, Oran: 66, Paul: 68}
-
-  "C_75" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">C_75</td></tr>
-</table>>]
-/// cause: Requesting(Mike)
-/// last_ancestors: {Alice: 87, Bob: 55, Carol: 75, Dave: 66, Eric: 54, Fred: 66, Gina: 72, Hank: 70, Iris: 75, Judy: 69, Kent: 70, Lucy: 69, Mike: 64, Nina: 67, Oran: 66, Paul: 68}
-
-  "C_76" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">C_76</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 87, Bob: 56, Carol: 76, Dave: 77, Eric: 54, Fred: 68, Gina: 72, Hank: 72, Iris: 75, Judy: 76, Kent: 70, Lucy: 69, Mike: 64, Nina: 68, Oran: 66, Paul: 68}
-
   "D_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">D_0</td></tr>
 </table>>]
@@ -3788,96 +3531,6 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 79, Bob: 48, Carol: 58, Dave: 66, Eric: 45, Fred: 57, Gina: 47, Hank: 59, Iris: 56, Judy: 64, Kent: 52, Lucy: 57, Mike: 52, Nina: 58, Oran: 49, Paul: 55}
 
-  "D_67" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_67</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 79, Bob: 48, Carol: 60, Dave: 67, Eric: 45, Fred: 57, Gina: 47, Hank: 59, Iris: 56, Judy: 64, Kent: 52, Lucy: 57, Mike: 52, Nina: 58, Oran: 49, Paul: 55}
-
-  "D_68" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_68</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 79, Bob: 50, Carol: 60, Dave: 68, Eric: 48, Fred: 59, Gina: 48, Hank: 62, Iris: 57, Judy: 70, Kent: 58, Lucy: 60, Mike: 52, Nina: 58, Oran: 53, Paul: 60}
-
-  "D_69" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_69</td></tr>
-</table>>]
-/// cause: Requesting(Nina)
-/// last_ancestors: {Alice: 79, Bob: 50, Carol: 60, Dave: 69, Eric: 48, Fred: 59, Gina: 48, Hank: 62, Iris: 57, Judy: 70, Kent: 58, Lucy: 60, Mike: 52, Nina: 58, Oran: 53, Paul: 60}
-
-  "D_70" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_70</td></tr>
-</table>>]
-/// cause: Requesting(Judy)
-/// last_ancestors: {Alice: 79, Bob: 50, Carol: 60, Dave: 70, Eric: 48, Fred: 59, Gina: 48, Hank: 62, Iris: 57, Judy: 70, Kent: 58, Lucy: 60, Mike: 52, Nina: 58, Oran: 53, Paul: 60}
-
-  "D_71" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_71</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 81, Bob: 50, Carol: 60, Dave: 71, Eric: 51, Fred: 59, Gina: 53, Hank: 72, Iris: 65, Judy: 72, Kent: 61, Lucy: 60, Mike: 58, Nina: 58, Oran: 53, Paul: 63}
-
-  "D_72" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_72</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 82, Bob: 56, Carol: 62, Dave: 72, Eric: 53, Fred: 62, Gina: 53, Hank: 72, Iris: 67, Judy: 76, Kent: 61, Lucy: 60, Mike: 62, Nina: 58, Oran: 53, Paul: 67}
-
-  "D_73" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_73</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 82, Bob: 56, Carol: 62, Dave: 73, Eric: 53, Fred: 62, Gina: 60, Hank: 72, Iris: 71, Judy: 76, Kent: 61, Lucy: 62, Mike: 62, Nina: 68, Oran: 55, Paul: 67}
-
-  "D_74" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_74</td></tr>
-</table>>]
-/// cause: Requesting(Fred)
-/// last_ancestors: {Alice: 82, Bob: 56, Carol: 62, Dave: 74, Eric: 53, Fred: 62, Gina: 60, Hank: 72, Iris: 71, Judy: 76, Kent: 61, Lucy: 62, Mike: 62, Nina: 68, Oran: 55, Paul: 67}
-
-  "D_75" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_75</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 83, Bob: 56, Carol: 62, Dave: 75, Eric: 53, Fred: 68, Gina: 64, Hank: 72, Iris: 71, Judy: 76, Kent: 61, Lucy: 62, Mike: 62, Nina: 68, Oran: 55, Paul: 67}
-
-  "D_76" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_76</td></tr>
-</table>>]
-/// cause: Requesting(Lucy)
-/// last_ancestors: {Alice: 83, Bob: 56, Carol: 62, Dave: 76, Eric: 53, Fred: 68, Gina: 64, Hank: 72, Iris: 71, Judy: 76, Kent: 61, Lucy: 62, Mike: 62, Nina: 68, Oran: 55, Paul: 67}
-
-  "D_77" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_77</td></tr>
-</table>>]
-/// cause: Requesting(Carol)
-/// last_ancestors: {Alice: 83, Bob: 56, Carol: 62, Dave: 77, Eric: 53, Fred: 68, Gina: 64, Hank: 72, Iris: 71, Judy: 76, Kent: 61, Lucy: 62, Mike: 62, Nina: 68, Oran: 55, Paul: 67}
-
-  "D_78" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_78</td></tr>
-</table>>]
-/// cause: Requesting(Nina)
-/// last_ancestors: {Alice: 83, Bob: 56, Carol: 62, Dave: 78, Eric: 53, Fred: 68, Gina: 64, Hank: 72, Iris: 71, Judy: 76, Kent: 61, Lucy: 62, Mike: 62, Nina: 68, Oran: 55, Paul: 67}
-
-  "D_79" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_79</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 87, Bob: 56, Carol: 76, Dave: 79, Eric: 54, Fred: 68, Gina: 72, Hank: 72, Iris: 75, Judy: 76, Kent: 70, Lucy: 69, Mike: 64, Nina: 68, Oran: 66, Paul: 68}
-
-  "D_80" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_80</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 93, Bob: 57, Carol: 76, Dave: 80, Eric: 57, Fred: 68, Gina: 72, Hank: 73, Iris: 75, Judy: 76, Kent: 70, Lucy: 75, Mike: 64, Nina: 68, Oran: 70, Paul: 68}
-
-  "D_81" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">D_81</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 97, Bob: 57, Carol: 76, Dave: 81, Eric: 58, Fred: 68, Gina: 73, Hank: 73, Iris: 79, Judy: 84, Kent: 70, Lucy: 75, Mike: 67, Nina: 68, Oran: 70, Paul: 71}
-
   "E_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">E_0</td></tr>
 </table>>]
@@ -4224,30 +3877,6 @@ digraph GossipGraph {
 </table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 85, Bob: 52, Carol: 64, Dave: 65, Eric: 54, Fred: 62, Gina: 59, Hank: 68, Iris: 65, Judy: 68, Kent: 57, Lucy: 62, Mike: 60, Nina: 59, Oran: 53, Paul: 60}
-
-  "E_55" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">E_55</td></tr>
-</table>>]
-/// cause: Requesting(Hank)
-/// last_ancestors: {Alice: 85, Bob: 52, Carol: 64, Dave: 65, Eric: 55, Fred: 62, Gina: 59, Hank: 68, Iris: 65, Judy: 68, Kent: 57, Lucy: 62, Mike: 60, Nina: 59, Oran: 53, Paul: 60}
-
-  "E_56" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">E_56</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 85, Bob: 52, Carol: 64, Dave: 65, Eric: 56, Fred: 62, Gina: 59, Hank: 73, Iris: 65, Judy: 72, Kent: 61, Lucy: 62, Mike: 60, Nina: 59, Oran: 53, Paul: 63}
-
-  "E_57" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">E_57</td></tr>
-</table>>]
-/// cause: Requesting(Oran)
-/// last_ancestors: {Alice: 85, Bob: 52, Carol: 64, Dave: 65, Eric: 57, Fred: 62, Gina: 59, Hank: 73, Iris: 65, Judy: 72, Kent: 61, Lucy: 62, Mike: 60, Nina: 59, Oran: 53, Paul: 63}
-
-  "E_58" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">E_58</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 85, Bob: 56, Carol: 64, Dave: 70, Eric: 58, Fred: 62, Gina: 59, Hank: 73, Iris: 67, Judy: 78, Kent: 61, Lucy: 62, Mike: 62, Nina: 59, Oran: 53, Paul: 67}
 
   "F_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">F_0</td></tr>
@@ -4661,24 +4290,6 @@ digraph GossipGraph {
 </table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 83, Bob: 48, Carol: 62, Dave: 65, Eric: 50, Fred: 65, Gina: 64, Hank: 64, Iris: 68, Judy: 66, Kent: 61, Lucy: 62, Mike: 60, Nina: 59, Oran: 52, Paul: 64}
-
-  "F_66" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">F_66</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 83, Bob: 49, Carol: 62, Dave: 66, Eric: 50, Fred: 66, Gina: 64, Hank: 64, Iris: 70, Judy: 66, Kent: 61, Lucy: 62, Mike: 60, Nina: 63, Oran: 55, Paul: 64}
-
-  "F_67" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">F_67</td></tr>
-</table>>]
-/// cause: Requesting(Judy)
-/// last_ancestors: {Alice: 83, Bob: 49, Carol: 62, Dave: 66, Eric: 50, Fred: 67, Gina: 64, Hank: 64, Iris: 70, Judy: 66, Kent: 61, Lucy: 62, Mike: 60, Nina: 63, Oran: 55, Paul: 64}
-
-  "F_68" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">F_68</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 83, Bob: 56, Carol: 62, Dave: 74, Eric: 53, Fred: 68, Gina: 64, Hank: 72, Iris: 71, Judy: 76, Kent: 61, Lucy: 62, Mike: 62, Nina: 68, Oran: 55, Paul: 67}
 
   "G_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">G_0</td></tr>
@@ -5104,42 +4715,6 @@ digraph GossipGraph {
 </table>>]
 /// cause: Requesting(Alice)
 /// last_ancestors: {Alice: 83, Bob: 49, Carol: 62, Dave: 66, Eric: 50, Fred: 65, Gina: 67, Hank: 64, Iris: 69, Judy: 66, Kent: 61, Lucy: 62, Mike: 60, Nina: 65, Oran: 55, Paul: 64}
-
-  "G_68" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">G_68</td></tr>
-</table>>]
-/// cause: Requesting(Oran)
-/// last_ancestors: {Alice: 83, Bob: 49, Carol: 62, Dave: 66, Eric: 50, Fred: 65, Gina: 68, Hank: 64, Iris: 69, Judy: 66, Kent: 61, Lucy: 62, Mike: 60, Nina: 65, Oran: 55, Paul: 64}
-
-  "G_69" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">G_69</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 87, Bob: 52, Carol: 64, Dave: 66, Eric: 54, Fred: 65, Gina: 69, Hank: 68, Iris: 69, Judy: 68, Kent: 61, Lucy: 62, Mike: 60, Nina: 65, Oran: 55, Paul: 64}
-
-  "G_70" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">G_70</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 87, Bob: 55, Carol: 64, Dave: 66, Eric: 54, Fred: 65, Gina: 70, Hank: 69, Iris: 71, Judy: 69, Kent: 66, Lucy: 67, Mike: 64, Nina: 67, Oran: 64, Paul: 68}
-
-  "G_71" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">G_71</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 87, Bob: 55, Carol: 64, Dave: 66, Eric: 54, Fred: 66, Gina: 71, Hank: 70, Iris: 75, Judy: 69, Kent: 66, Lucy: 67, Mike: 64, Nina: 67, Oran: 64, Paul: 68}
-
-  "G_72" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">G_72</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 87, Bob: 55, Carol: 69, Dave: 66, Eric: 54, Fred: 66, Gina: 72, Hank: 70, Iris: 75, Judy: 69, Kent: 66, Lucy: 69, Mike: 64, Nina: 67, Oran: 64, Paul: 68}
-
-  "G_73" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">G_73</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 87, Bob: 56, Carol: 69, Dave: 70, Eric: 54, Fred: 66, Gina: 73, Hank: 71, Iris: 75, Judy: 77, Kent: 66, Lucy: 69, Mike: 64, Nina: 67, Oran: 64, Paul: 68}
 
   "H_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">H_0</td></tr>
@@ -5578,30 +5153,6 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 81, Bob: 48, Carol: 58, Dave: 63, Eric: 51, Fred: 59, Gina: 53, Hank: 69, Iris: 65, Judy: 66, Kent: 61, Lucy: 60, Mike: 58, Nina: 57, Oran: 52, Paul: 63}
 
-  "H_70" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">H_70</td></tr>
-</table>>]
-/// cause: Requesting(Iris)
-/// last_ancestors: {Alice: 81, Bob: 48, Carol: 58, Dave: 63, Eric: 51, Fred: 59, Gina: 53, Hank: 70, Iris: 65, Judy: 66, Kent: 61, Lucy: 60, Mike: 58, Nina: 57, Oran: 52, Paul: 63}
-
-  "H_71" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">H_71</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 81, Bob: 50, Carol: 58, Dave: 63, Eric: 51, Fred: 59, Gina: 53, Hank: 71, Iris: 65, Judy: 72, Kent: 61, Lucy: 60, Mike: 58, Nina: 57, Oran: 53, Paul: 63}
-
-  "H_72" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">H_72</td></tr>
-</table>>]
-/// cause: Requesting(Dave)
-/// last_ancestors: {Alice: 81, Bob: 50, Carol: 58, Dave: 63, Eric: 51, Fred: 59, Gina: 53, Hank: 72, Iris: 65, Judy: 72, Kent: 61, Lucy: 60, Mike: 58, Nina: 57, Oran: 53, Paul: 63}
-
-  "H_73" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">H_73</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 85, Bob: 52, Carol: 64, Dave: 65, Eric: 55, Fred: 62, Gina: 59, Hank: 73, Iris: 65, Judy: 72, Kent: 61, Lucy: 62, Mike: 60, Nina: 59, Oran: 53, Paul: 63}
-
   "I_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">I_0</td></tr>
 </table>>]
@@ -6038,66 +5589,6 @@ digraph GossipGraph {
 </table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 79, Bob: 49, Carol: 58, Dave: 66, Eric: 50, Fred: 59, Gina: 60, Hank: 63, Iris: 69, Judy: 66, Kent: 61, Lucy: 62, Mike: 58, Nina: 63, Oran: 55, Paul: 64}
-
-  "I_70" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">I_70</td></tr>
-</table>>]
-/// cause: Requesting(Fred)
-/// last_ancestors: {Alice: 79, Bob: 49, Carol: 58, Dave: 66, Eric: 50, Fred: 59, Gina: 60, Hank: 63, Iris: 70, Judy: 66, Kent: 61, Lucy: 62, Mike: 58, Nina: 63, Oran: 55, Paul: 64}
-
-  "I_71" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">I_71</td></tr>
-</table>>]
-/// cause: Requesting(Nina)
-/// last_ancestors: {Alice: 79, Bob: 49, Carol: 58, Dave: 66, Eric: 50, Fred: 59, Gina: 60, Hank: 63, Iris: 71, Judy: 66, Kent: 61, Lucy: 62, Mike: 58, Nina: 63, Oran: 55, Paul: 64}
-
-  "I_72" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">I_72</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 79, Bob: 49, Carol: 58, Dave: 66, Eric: 50, Fred: 59, Gina: 60, Hank: 63, Iris: 72, Judy: 66, Kent: 61, Lucy: 62, Mike: 58, Nina: 66, Oran: 55, Paul: 64}
-
-  "I_73" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">I_73</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 83, Bob: 49, Carol: 62, Dave: 66, Eric: 50, Fred: 66, Gina: 64, Hank: 64, Iris: 73, Judy: 66, Kent: 61, Lucy: 62, Mike: 60, Nina: 66, Oran: 55, Paul: 64}
-
-  "I_74" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">I_74</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 83, Bob: 49, Carol: 62, Dave: 66, Eric: 51, Fred: 66, Gina: 64, Hank: 70, Iris: 74, Judy: 66, Kent: 61, Lucy: 62, Mike: 60, Nina: 66, Oran: 55, Paul: 64}
-
-  "I_75" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">I_75</td></tr>
-</table>>]
-/// cause: Requesting(Gina)
-/// last_ancestors: {Alice: 83, Bob: 49, Carol: 62, Dave: 66, Eric: 51, Fred: 66, Gina: 64, Hank: 70, Iris: 75, Judy: 66, Kent: 61, Lucy: 62, Mike: 60, Nina: 66, Oran: 55, Paul: 64}
-
-  "I_76" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">I_76</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 83, Bob: 55, Carol: 63, Dave: 66, Eric: 53, Fred: 66, Gina: 64, Hank: 70, Iris: 76, Judy: 69, Kent: 66, Lucy: 67, Mike: 65, Nina: 67, Oran: 62, Paul: 68}
-
-  "I_77" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">I_77</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 87, Bob: 55, Carol: 64, Dave: 66, Eric: 54, Fred: 66, Gina: 71, Hank: 70, Iris: 77, Judy: 69, Kent: 66, Lucy: 67, Mike: 65, Nina: 67, Oran: 64, Paul: 68}
-
-  "I_78" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">I_78</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 87, Bob: 55, Carol: 64, Dave: 66, Eric: 54, Fred: 66, Gina: 71, Hank: 70, Iris: 78, Judy: 69, Kent: 66, Lucy: 67, Mike: 65, Nina: 67, Oran: 64, Paul: 71}
-
-  "I_79" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">I_79</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 90, Bob: 55, Carol: 64, Dave: 66, Eric: 54, Fred: 66, Gina: 71, Hank: 70, Iris: 79, Judy: 69, Kent: 66, Lucy: 67, Mike: 65, Nina: 67, Oran: 64, Paul: 71}
 
   "J_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">J_0</td></tr>
@@ -6548,84 +6039,6 @@ digraph GossipGraph {
 /// cause: Requesting(Bob)
 /// last_ancestors: {Alice: 76, Bob: 50, Carol: 56, Dave: 61, Eric: 48, Fred: 59, Gina: 48, Hank: 62, Iris: 57, Judy: 71, Kent: 58, Lucy: 60, Mike: 50, Nina: 56, Oran: 53, Paul: 60}
 
-  "J_72" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">J_72</td></tr>
-</table>>]
-/// cause: Requesting(Hank)
-/// last_ancestors: {Alice: 76, Bob: 50, Carol: 56, Dave: 61, Eric: 48, Fred: 59, Gina: 48, Hank: 62, Iris: 57, Judy: 72, Kent: 58, Lucy: 60, Mike: 50, Nina: 56, Oran: 53, Paul: 60}
-
-  "J_73" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">J_73</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 82, Bob: 56, Carol: 62, Dave: 65, Eric: 53, Fred: 62, Gina: 53, Hank: 69, Iris: 67, Judy: 73, Kent: 61, Lucy: 60, Mike: 62, Nina: 57, Oran: 53, Paul: 67}
-
-  "J_74" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">J_74</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 82, Bob: 56, Carol: 62, Dave: 68, Eric: 53, Fred: 62, Gina: 53, Hank: 69, Iris: 67, Judy: 74, Kent: 61, Lucy: 60, Mike: 62, Nina: 58, Oran: 53, Paul: 67}
-
-  "J_75" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">J_75</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 82, Bob: 56, Carol: 62, Dave: 68, Eric: 53, Fred: 62, Gina: 53, Hank: 71, Iris: 67, Judy: 75, Kent: 61, Lucy: 60, Mike: 62, Nina: 58, Oran: 53, Paul: 67}
-
-  "J_76" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">J_76</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 82, Bob: 56, Carol: 62, Dave: 70, Eric: 53, Fred: 62, Gina: 53, Hank: 71, Iris: 67, Judy: 76, Kent: 61, Lucy: 60, Mike: 62, Nina: 58, Oran: 53, Paul: 67}
-
-  "J_77" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">J_77</td></tr>
-</table>>]
-/// cause: Requesting(Gina)
-/// last_ancestors: {Alice: 82, Bob: 56, Carol: 62, Dave: 70, Eric: 53, Fred: 62, Gina: 53, Hank: 71, Iris: 67, Judy: 77, Kent: 61, Lucy: 60, Mike: 62, Nina: 58, Oran: 53, Paul: 67}
-
-  "J_78" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">J_78</td></tr>
-</table>>]
-/// cause: Requesting(Eric)
-/// last_ancestors: {Alice: 82, Bob: 56, Carol: 62, Dave: 70, Eric: 53, Fred: 62, Gina: 53, Hank: 71, Iris: 67, Judy: 78, Kent: 61, Lucy: 60, Mike: 62, Nina: 58, Oran: 53, Paul: 67}
-
-  "J_79" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">J_79</td></tr>
-</table>>]
-/// cause: Requesting(Mike)
-/// last_ancestors: {Alice: 82, Bob: 56, Carol: 62, Dave: 70, Eric: 53, Fred: 62, Gina: 53, Hank: 71, Iris: 67, Judy: 79, Kent: 61, Lucy: 60, Mike: 62, Nina: 58, Oran: 53, Paul: 67}
-
-  "J_80" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">J_80</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 82, Bob: 56, Carol: 63, Dave: 70, Eric: 53, Fred: 62, Gina: 57, Hank: 71, Iris: 67, Judy: 80, Kent: 61, Lucy: 65, Mike: 62, Nina: 59, Oran: 53, Paul: 70}
-
-  "J_81" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">J_81</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 83, Bob: 56, Carol: 63, Dave: 70, Eric: 53, Fred: 66, Gina: 64, Hank: 71, Iris: 76, Judy: 81, Kent: 66, Lucy: 67, Mike: 67, Nina: 67, Oran: 62, Paul: 70}
-
-  "J_82" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">J_82</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 85, Bob: 56, Carol: 64, Dave: 70, Eric: 58, Fred: 66, Gina: 64, Hank: 73, Iris: 76, Judy: 82, Kent: 66, Lucy: 67, Mike: 67, Nina: 67, Oran: 62, Paul: 70}
-
-  "J_83" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">J_83</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 87, Bob: 56, Carol: 69, Dave: 70, Eric: 58, Fred: 66, Gina: 73, Hank: 73, Iris: 76, Judy: 83, Kent: 66, Lucy: 69, Mike: 67, Nina: 67, Oran: 64, Paul: 70}
-
-  "J_84" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">J_84</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 89, Bob: 56, Carol: 69, Dave: 70, Eric: 58, Fred: 66, Gina: 73, Hank: 73, Iris: 76, Judy: 84, Kent: 66, Lucy: 69, Mike: 67, Nina: 67, Oran: 64, Paul: 70}
-
   "K_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">K_0</td></tr>
 </table>>]
@@ -7038,36 +6451,6 @@ digraph GossipGraph {
 </table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 79, Bob: 50, Carol: 59, Dave: 66, Eric: 48, Fred: 63, Gina: 54, Hank: 63, Iris: 62, Judy: 69, Kent: 65, Lucy: 60, Mike: 58, Nina: 61, Oran: 56, Paul: 62}
-
-  "K_66" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">K_66</td></tr>
-</table>>]
-/// cause: Requesting(Oran)
-/// last_ancestors: {Alice: 79, Bob: 50, Carol: 59, Dave: 66, Eric: 48, Fred: 63, Gina: 54, Hank: 63, Iris: 62, Judy: 69, Kent: 66, Lucy: 60, Mike: 58, Nina: 61, Oran: 56, Paul: 62}
-
-  "K_67" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">K_67</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 81, Bob: 50, Carol: 63, Dave: 66, Eric: 51, Fred: 63, Gina: 57, Hank: 69, Iris: 67, Judy: 69, Kent: 67, Lucy: 67, Mike: 58, Nina: 61, Oran: 59, Paul: 68}
-
-  "K_68" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">K_68</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 81, Bob: 50, Carol: 63, Dave: 66, Eric: 51, Fred: 63, Gina: 57, Hank: 69, Iris: 67, Judy: 69, Kent: 68, Lucy: 67, Mike: 58, Nina: 61, Oran: 60, Paul: 68}
-
-  "K_69" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">K_69</td></tr>
-</table>>]
-/// cause: Requesting(Oran)
-/// last_ancestors: {Alice: 81, Bob: 50, Carol: 63, Dave: 66, Eric: 51, Fred: 63, Gina: 57, Hank: 69, Iris: 67, Judy: 69, Kent: 69, Lucy: 67, Mike: 58, Nina: 61, Oran: 60, Paul: 68}
-
-  "K_70" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">K_70</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 84, Bob: 50, Carol: 68, Dave: 66, Eric: 51, Fred: 63, Gina: 59, Hank: 69, Iris: 67, Judy: 69, Kent: 70, Lucy: 69, Mike: 60, Nina: 61, Oran: 60, Paul: 68}
 
   "L_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">L_0</td></tr>
@@ -7524,24 +6907,6 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 88, Bob: 52, Carol: 67, Dave: 66, Eric: 54, Fred: 65, Gina: 67, Hank: 69, Iris: 69, Judy: 69, Kent: 65, Lucy: 72, Mike: 60, Nina: 65, Oran: 58, Paul: 68}
 
-  "L_73" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">L_73</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 88, Bob: 55, Carol: 70, Dave: 66, Eric: 57, Fred: 65, Gina: 68, Hank: 73, Iris: 71, Judy: 72, Kent: 69, Lucy: 73, Mike: 64, Nina: 67, Oran: 70, Paul: 68}
-
-  "L_74" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">L_74</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 93, Bob: 57, Carol: 70, Dave: 66, Eric: 57, Fred: 65, Gina: 68, Hank: 73, Iris: 71, Judy: 72, Kent: 69, Lucy: 74, Mike: 64, Nina: 67, Oran: 70, Paul: 68}
-
-  "L_75" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">L_75</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 93, Bob: 57, Carol: 70, Dave: 76, Eric: 57, Fred: 68, Gina: 68, Hank: 73, Iris: 71, Judy: 76, Kent: 69, Lucy: 75, Mike: 64, Nina: 68, Oran: 70, Paul: 68}
-
   "M_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">M_0</td></tr>
 </table>>]
@@ -7936,36 +7301,6 @@ digraph GossipGraph {
 </table>>]
 /// cause: Requesting(Bob)
 /// last_ancestors: {Alice: 82, Bob: 48, Carol: 62, Dave: 65, Eric: 48, Fred: 62, Gina: 49, Hank: 64, Iris: 62, Judy: 64, Kent: 57, Lucy: 57, Mike: 62, Nina: 57, Oran: 49, Paul: 59}
-
-  "M_63" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">M_63</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 82, Bob: 55, Carol: 62, Dave: 65, Eric: 53, Fred: 62, Gina: 53, Hank: 69, Iris: 67, Judy: 68, Kent: 61, Lucy: 60, Mike: 63, Nina: 57, Oran: 53, Paul: 67}
-
-  "M_64" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">M_64</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 82, Bob: 55, Carol: 63, Dave: 66, Eric: 53, Fred: 63, Gina: 60, Hank: 69, Iris: 71, Judy: 69, Kent: 66, Lucy: 67, Mike: 64, Nina: 67, Oran: 62, Paul: 68}
-
-  "M_65" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">M_65</td></tr>
-</table>>]
-/// cause: Requesting(Iris)
-/// last_ancestors: {Alice: 82, Bob: 55, Carol: 63, Dave: 66, Eric: 53, Fred: 63, Gina: 60, Hank: 69, Iris: 71, Judy: 69, Kent: 66, Lucy: 67, Mike: 65, Nina: 67, Oran: 62, Paul: 68}
-
-  "M_66" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">M_66</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 83, Bob: 55, Carol: 63, Dave: 66, Eric: 53, Fred: 66, Gina: 64, Hank: 70, Iris: 76, Judy: 69, Kent: 66, Lucy: 67, Mike: 66, Nina: 67, Oran: 62, Paul: 68}
-
-  "M_67" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">M_67</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 83, Bob: 56, Carol: 63, Dave: 70, Eric: 53, Fred: 66, Gina: 64, Hank: 71, Iris: 76, Judy: 79, Kent: 66, Lucy: 67, Mike: 67, Nina: 67, Oran: 62, Paul: 68}
 
   "N_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">N_0</td></tr>
@@ -8380,24 +7715,6 @@ digraph GossipGraph {
 /// cause: Requesting(Gina)
 /// last_ancestors: {Alice: 79, Bob: 49, Carol: 58, Dave: 66, Eric: 50, Fred: 59, Gina: 60, Hank: 63, Iris: 69, Judy: 66, Kent: 61, Lucy: 62, Mike: 58, Nina: 65, Oran: 55, Paul: 64}
 
-  "N_66" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">N_66</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 79, Bob: 49, Carol: 58, Dave: 66, Eric: 50, Fred: 59, Gina: 60, Hank: 63, Iris: 71, Judy: 66, Kent: 61, Lucy: 62, Mike: 58, Nina: 66, Oran: 55, Paul: 64}
-
-  "N_67" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">N_67</td></tr>
-</table>>]
-/// cause: Requesting(Oran)
-/// last_ancestors: {Alice: 79, Bob: 49, Carol: 58, Dave: 66, Eric: 50, Fred: 59, Gina: 60, Hank: 63, Iris: 71, Judy: 66, Kent: 61, Lucy: 62, Mike: 58, Nina: 67, Oran: 55, Paul: 64}
-
-  "N_68" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">N_68</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 79, Bob: 50, Carol: 60, Dave: 69, Eric: 50, Fred: 59, Gina: 60, Hank: 63, Iris: 71, Judy: 70, Kent: 61, Lucy: 62, Mike: 58, Nina: 68, Oran: 55, Paul: 64}
-
   "O_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">O_0</td></tr>
 </table>>]
@@ -8768,78 +8085,6 @@ digraph GossipGraph {
 </table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 81, Bob: 50, Carol: 63, Dave: 66, Eric: 51, Fred: 63, Gina: 57, Hank: 69, Iris: 67, Judy: 69, Kent: 65, Lucy: 67, Mike: 58, Nina: 61, Oran: 58, Paul: 68}
-
-  "O_59" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">O_59</td></tr>
-</table>>]
-/// cause: Requesting(Kent)
-/// last_ancestors: {Alice: 81, Bob: 50, Carol: 63, Dave: 66, Eric: 51, Fred: 63, Gina: 57, Hank: 69, Iris: 67, Judy: 69, Kent: 65, Lucy: 67, Mike: 58, Nina: 61, Oran: 59, Paul: 68}
-
-  "O_60" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">O_60</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 81, Bob: 50, Carol: 63, Dave: 66, Eric: 51, Fred: 63, Gina: 57, Hank: 69, Iris: 67, Judy: 69, Kent: 66, Lucy: 67, Mike: 58, Nina: 61, Oran: 60, Paul: 68}
-
-  "O_61" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">O_61</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 81, Bob: 50, Carol: 63, Dave: 66, Eric: 51, Fred: 63, Gina: 60, Hank: 69, Iris: 71, Judy: 69, Kent: 66, Lucy: 67, Mike: 58, Nina: 67, Oran: 61, Paul: 68}
-
-  "O_62" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">O_62</td></tr>
-</table>>]
-/// cause: Requesting(Mike)
-/// last_ancestors: {Alice: 81, Bob: 50, Carol: 63, Dave: 66, Eric: 51, Fred: 63, Gina: 60, Hank: 69, Iris: 71, Judy: 69, Kent: 66, Lucy: 67, Mike: 58, Nina: 67, Oran: 62, Paul: 68}
-
-  "O_63" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">O_63</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 82, Bob: 55, Carol: 63, Dave: 66, Eric: 53, Fred: 63, Gina: 60, Hank: 69, Iris: 71, Judy: 69, Kent: 66, Lucy: 67, Mike: 64, Nina: 67, Oran: 63, Paul: 68}
-
-  "O_64" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">O_64</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 83, Bob: 55, Carol: 63, Dave: 66, Eric: 53, Fred: 65, Gina: 68, Hank: 69, Iris: 71, Judy: 69, Kent: 66, Lucy: 67, Mike: 64, Nina: 67, Oran: 64, Paul: 68}
-
-  "O_65" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">O_65</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 83, Bob: 55, Carol: 63, Dave: 66, Eric: 53, Fred: 65, Gina: 68, Hank: 69, Iris: 71, Judy: 69, Kent: 67, Lucy: 67, Mike: 64, Nina: 67, Oran: 65, Paul: 68}
-
-  "O_66" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">O_66</td></tr>
-</table>>]
-/// cause: Requesting(Carol)
-/// last_ancestors: {Alice: 83, Bob: 55, Carol: 63, Dave: 66, Eric: 53, Fred: 65, Gina: 68, Hank: 69, Iris: 71, Judy: 69, Kent: 67, Lucy: 67, Mike: 64, Nina: 67, Oran: 66, Paul: 68}
-
-  "O_67" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">O_67</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 83, Bob: 55, Carol: 63, Dave: 66, Eric: 53, Fred: 65, Gina: 68, Hank: 69, Iris: 71, Judy: 69, Kent: 69, Lucy: 67, Mike: 64, Nina: 67, Oran: 67, Paul: 68}
-
-  "O_68" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">O_68</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 84, Bob: 55, Carol: 70, Dave: 66, Eric: 53, Fred: 65, Gina: 68, Hank: 69, Iris: 71, Judy: 69, Kent: 69, Lucy: 69, Mike: 64, Nina: 67, Oran: 68, Paul: 68}
-
-  "O_69" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">O_69</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 85, Bob: 55, Carol: 70, Dave: 66, Eric: 57, Fred: 65, Gina: 68, Hank: 73, Iris: 71, Judy: 72, Kent: 69, Lucy: 69, Mike: 64, Nina: 67, Oran: 69, Paul: 68}
-
-  "O_70" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">O_70</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 85, Bob: 55, Carol: 70, Dave: 66, Eric: 57, Fred: 65, Gina: 68, Hank: 73, Iris: 71, Judy: 72, Kent: 69, Lucy: 71, Mike: 64, Nina: 67, Oran: 70, Paul: 68}
 
   "P_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">P_0</td></tr>
@@ -9272,24 +8517,6 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 81, Bob: 48, Carol: 63, Dave: 65, Eric: 51, Fred: 62, Gina: 57, Hank: 69, Iris: 67, Judy: 66, Kent: 61, Lucy: 65, Mike: 58, Nina: 59, Oran: 52, Paul: 68}
 
-  "P_69" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">P_69</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 81, Bob: 53, Carol: 63, Dave: 65, Eric: 51, Fred: 62, Gina: 57, Hank: 69, Iris: 67, Judy: 68, Kent: 61, Lucy: 65, Mike: 58, Nina: 59, Oran: 53, Paul: 69}
-
-  "P_70" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">P_70</td></tr>
-</table>>]
-/// cause: Requesting(Judy)
-/// last_ancestors: {Alice: 81, Bob: 53, Carol: 63, Dave: 65, Eric: 51, Fred: 62, Gina: 57, Hank: 69, Iris: 67, Judy: 68, Kent: 61, Lucy: 65, Mike: 58, Nina: 59, Oran: 53, Paul: 70}
-
-  "P_71" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">P_71</td></tr>
-</table>>]
-/// cause: Requesting(Iris)
-/// last_ancestors: {Alice: 81, Bob: 53, Carol: 63, Dave: 65, Eric: 51, Fred: 62, Gina: 57, Hank: 69, Iris: 67, Judy: 68, Kent: 61, Lucy: 65, Mike: 58, Nina: 59, Oran: 53, Paul: 71}
-
 }
 
 /// ===== meta-elections =====
@@ -9368,410 +8595,6 @@ digraph GossipGraph {
 /// unconsensused_events: {}
 /// meta_events: {
 ///   A_92 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   A_93 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   A_94 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   A_95 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   A_96 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   A_97 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   A_98 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   C_68 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   C_69 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   C_70 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   C_71 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   C_72 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   C_73 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   C_74 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   C_75 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   C_76 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   D_67 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   D_68 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   D_69 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   D_70 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   D_71 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   D_72 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   D_73 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   D_74 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   D_75 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   D_76 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   D_77 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   D_78 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   D_79 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   D_80 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   D_81 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   E_55 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   E_56 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   E_57 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   E_58 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   F_66 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   F_67 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   F_68 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   G_68 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   G_69 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   G_70 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   G_71 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   G_72 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   G_73 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   H_70 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   H_71 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   H_72 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   H_73 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   I_70 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   I_71 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   I_72 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   I_73 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   I_74 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   I_75 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   I_76 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   I_77 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   I_78 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   I_79 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   J_72 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   J_73 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   J_74 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   J_75 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   J_76 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   J_77 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   J_78 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   J_79 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   J_80 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   J_81 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   J_82 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   J_83 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   J_84 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   K_66 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   K_67 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   K_68 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   K_69 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   K_70 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   L_73 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   L_74 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   L_75 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   M_63 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   M_64 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   M_65 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   M_66 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   M_67 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   N_66 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   N_67 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   N_68 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   O_59 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   O_60 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   O_61 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   O_62 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   O_63 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   O_64 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   O_65 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   O_66 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   O_67 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   O_68 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   O_69 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   O_70 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   P_69 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   P_70 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   P_71 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }

@@ -95,6 +95,10 @@ pub struct Parsec<T: NetworkEvent, S: SecretId> {
     pending_accusations: Accusations<T, S::PublicId>,
     // Events to be inserted into the gossip graph when this node becomes voter.
     pending_events: Vec<PendingEvent<T, S::PublicId>>,
+
+    // True to disable processing consensus on this instance to speed up processing for irrelevant parsec instances.
+    #[cfg(any(test, feature = "testing"))]
+    ignore_process_events: bool,
 }
 
 impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
@@ -226,6 +230,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             consensus_mode,
             pending_accusations: vec![],
             pending_events: vec![],
+
+            #[cfg(any(test, feature = "testing"))]
+            ignore_process_events: false,
         }
     }
 
@@ -606,7 +613,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 .add_unconsensused_event(event_index, payload_key);
         });
 
-        self.process_events(event_index.topological_index())?;
+        #[cfg(any(test, feature = "testing"))]
+        let ignore_process_events = self.ignore_process_events;
+        #[cfg(not(any(test, feature = "testing")))]
+        let ignore_process_events = false;
+
+        if !ignore_process_events {
+            self.process_events(event_index.topological_index())?;
+        }
 
         Ok(event_index)
     }
@@ -1356,11 +1370,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .iter()
             .map(|payload_key| {
                 let votes = self
-                    .graph
-                    .iter()
+                    .unconsensused_events(Some(payload_key))
                     .map(|event| event.inner())
                     .filter(|event| voters.contains(event.creator()))
-                    .filter(|event| event.payload_key() == Some(payload_key))
                     .filter_map(|event| {
                         let (vote, key) = event.vote_and_payload_key(&self.observations)?;
                         let creator_id =
@@ -2110,6 +2122,19 @@ enum PendingEvent<T: NetworkEvent, P: PublicId> {
         offender: PeerIndex,
         malice: Malice<T, P>,
     },
+}
+
+#[cfg(any(test, feature = "testing"))]
+impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
+    // Disable processing consensus on this instance (speed up processing).
+    pub(crate) fn set_ignore_process_events(&mut self) {
+        self.ignore_process_events = true;
+    }
+
+    // Return true if processing consensus is disabled.
+    pub(crate) fn ignore_process_events(&self) -> bool {
+        self.ignore_process_events
+    }
 }
 
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]

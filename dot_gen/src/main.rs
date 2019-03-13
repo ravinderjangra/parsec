@@ -418,7 +418,6 @@ fn add_bench_section_size(scenarios: &mut Scenarios) {
                 genesis_size,
                 opaque_to_add,
                 votes_before_gossip: true,
-                intermediate_consistency_checks: false,
                 ..Default::default()
             };
 
@@ -459,8 +458,6 @@ fn add_bench_section_size(scenarios: &mut Scenarios) {
                 prob_opaque: 0.1,
                 // Events will be seen within 2 gossip events
                 max_observation_delay: 20,
-                // For speed only check consistency at the end
-                intermediate_consistency_checks: false,
                 ..Default::default()
             },
             ConsensusMode::Single,
@@ -475,14 +472,32 @@ fn add_bench_section_size(scenarios: &mut Scenarios) {
             ScheduleOptions {
                 genesis_size: *genesis_size,
                 opaque_to_add,
-                // 1 gossip event every 10 steps in one peer in the network
+                // 1 gossip event every 80 steps in one peer in the network
                 prob_gossip: 0.1 / (*genesis_size as f64 * 8.0),
                 // 1 opaque event per 10 steps
                 prob_opaque: 0.1,
                 // Events will be seen within 2 gossip events
                 max_observation_delay: 20 * 8,
-                // For speed only check consistency at the end
-                intermediate_consistency_checks: false,
+                ..Default::default()
+            },
+            ConsensusMode::Single,
+            &format!("{}_interleave", opaque_to_add),
+        );
+    }
+
+    for genesis_size in &[4, 8, 16, 32] {
+        let opaque_to_add = 65536;
+        add_bench_scalability_common(
+            scenarios,
+            ScheduleOptions {
+                genesis_size: *genesis_size,
+                opaque_to_add,
+                // 1 gossip event every 640 steps in one peer in the network
+                prob_gossip: 0.1 / (*genesis_size as f64 * 64.0),
+                // 1 opaque event per 10 steps
+                prob_opaque: 0.1,
+                // Events will be seen within 2 gossip events
+                max_observation_delay: 20 * 64,
                 ..Default::default()
             },
             ConsensusMode::Single,
@@ -502,6 +517,12 @@ fn add_bench_scalability_common(
         options.genesis_size, options.opaque_to_add
     );
     let bench_name = format!("bench_section_size_evt{}", bench_tag);
+
+    let options = ScheduleOptions {
+        intermediate_consistency_checks: false,
+        genesis_restrict_consensus_to: Some(peer_ids!("Alice")),
+        ..options
+    };
 
     let _ = s
         .add(bench_name, move |env| Schedule::new(env, &options))

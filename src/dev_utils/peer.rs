@@ -200,6 +200,14 @@ impl Peer {
         self.status
     }
 
+    pub fn ignore_process_events(&self) -> bool {
+        self.parsec.ignore_process_events()
+    }
+
+    pub fn set_ignore_process_events(&mut self) {
+        self.parsec.set_ignore_process_events();
+    }
+
     pub fn network_view(&self) -> NetworkView {
         self.network_view
     }

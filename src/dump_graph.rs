@@ -69,9 +69,7 @@ pub use self::detail::{DumpGraphMode, DIR, DUMP_MODE};
 #[cfg(feature = "dump-graphs")]
 mod detail {
     use super::DumpGraphContext;
-    use crate::gossip::{
-        Cause, Event, EventHash, EventIndex, Graph, GraphSnapshot, IndexedEventRef,
-    };
+    use crate::gossip::{Cause, Event, EventIndex, Graph, GraphSnapshot, IndexedEventRef};
     use crate::id::{PublicId, SecretId};
     use crate::meta_voting::{MetaElection, MetaElectionSnapshot, MetaEvent, MetaVote, Observer};
     use crate::network_event::NetworkEvent;
@@ -252,24 +250,6 @@ mod detail {
 
         // Create symlink so it's easier to find the latest graphs.
         let _ = force_symlink_dir(&*ROOT_DIR, ROOT_DIR_PREFIX.join("latest"));
-    }
-
-    fn parent_pos<P: PublicId>(
-        index: usize,
-        parent: Option<IndexedEventRef<P>>,
-        positions: &BTreeMap<EventHash, usize>,
-    ) -> Option<usize> {
-        if let Some(parent_hash) = parent.map(|e| e.inner().hash()) {
-            if let Some(parent_pos) = positions.get(parent_hash) {
-                Some(*parent_pos)
-            } else if *parent_hash == EventHash::ZERO {
-                Some(index)
-            } else {
-                None
-            }
-        } else {
-            Some(index)
-        }
     }
 
     fn force_symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Result<()> {
@@ -494,36 +474,27 @@ mod detail {
             self.writeln(format_args!("{}{}}}", Self::COMMENT, indent))
         }
 
-        fn calculate_positions(&self) -> BTreeMap<EventHash, usize> {
-            let mut positions = BTreeMap::new();
-            while positions.len() < self.gossip_graph.len() {
-                for event in self.gossip_graph {
-                    if !positions.contains_key(event.hash()) {
-                        let self_parent_pos = if let Some(position) = parent_pos(
-                            event.index_by_creator(),
-                            self.gossip_graph.self_parent(event),
-                            &positions,
-                        ) {
-                            position
-                        } else {
-                            continue;
-                        };
-                        let other_parent_pos = if let Some(position) = parent_pos(
-                            event.index_by_creator(),
-                            self.gossip_graph.other_parent(event),
-                            &positions,
-                        ) {
-                            position
-                        } else {
-                            continue;
-                        };
-                        let _ = positions.insert(
-                            *event.hash(),
-                            cmp::max(self_parent_pos, other_parent_pos) + 1,
-                        );
-                        break;
-                    }
-                }
+        fn calculate_positions(&self) -> Vec<usize> {
+            let mut positions = Vec::new();
+            positions.resize(self.gossip_graph.len(), 0);
+
+            // gossip_graph in topological order: parent processed before children:
+            for event in self.gossip_graph.iter() {
+                let (self_parent_pos, other_parent_pos) = {
+                    let position = |index: &Option<EventIndex>| {
+                        index
+                            .and_then(|index| positions.get(index.topological_index()))
+                            .cloned()
+                            .unwrap_or(0)
+                    };
+                    (
+                        position(&event.self_parent()),
+                        position(&event.other_parent()),
+                    )
+                };
+
+                positions[event.topological_index()] =
+                    cmp::max(&self_parent_pos, &other_parent_pos) + 1;
             }
             positions
         }
@@ -532,7 +503,7 @@ mod detail {
             &mut self,
             peer_index: PeerIndex,
             peer_id: &DotPeerId,
-            positions: &BTreeMap<EventHash, usize>,
+            positions: &[usize],
         ) -> io::Result<()> {
             self.writeln(format_args!("  style=invis"))?;
             self.writeln(format_args!("  subgraph cluster_{:?} {{", peer_id))?;
@@ -546,7 +517,7 @@ mod detail {
             &mut self,
             peer_index: PeerIndex,
             peer_id: &DotPeerId,
-            positions: &BTreeMap<EventHash, usize>,
+            positions: &[usize],
         ) -> io::Result<()> {
             let mut lines = vec![];
             for event in self
@@ -560,8 +531,8 @@ mod detail {
                 {
                     None => (format!("\"{:?}\"", peer_id), "[style=invis]".to_string()),
                     Some(parent) => {
-                        let event_pos = *positions.get(event.hash()).unwrap_or(&0);
-                        let parent_pos = *positions.get(parent.hash()).unwrap_or(&0);
+                        let event_pos = *positions.get(event.topological_index()).unwrap_or(&0);
+                        let parent_pos = *positions.get(parent.topological_index()).unwrap_or(&0);
                         let minlen = if event_pos > parent_pos {
                             event_pos - parent_pos
                         } else {
