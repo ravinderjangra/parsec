@@ -13,7 +13,7 @@ use crate::gossip::{Event, Graph, GraphSnapshot};
 use crate::id::PublicId;
 use crate::meta_voting::MetaElectionSnapshot;
 use crate::mock::{self, PeerId, Transaction};
-use crate::observation::Observation;
+use crate::observation::{ConsensusMode, Observation};
 use crate::parsec::TestParsec;
 use crate::peer_list::{PeerIndexSet, PeerListSnapshot, PeerState};
 use std::collections::BTreeSet;
@@ -74,7 +74,12 @@ fn from_existing() {
     let our_id = unwrap!(peers.pop());
     let peers = peers.into_iter().collect();
 
-    let parsec = TestParsec::<Transaction, _>::from_existing(our_id.clone(), &peers, &peers);
+    let parsec = TestParsec::<Transaction, _>::from_existing(
+        our_id.clone(),
+        &peers,
+        &peers,
+        ConsensusMode::Supermajority,
+    );
 
     // Existing section + us
     assert_eq!(parsec.peer_list().all_ids().count(), peers.len() + 1);
@@ -92,7 +97,12 @@ fn from_existing_requires_non_empty_genesis_group() {
     let our_id = unwrap!(peers.pop());
     let peers = peers.into_iter().collect();
 
-    let _ = TestParsec::<Transaction, _>::from_existing(our_id, &BTreeSet::new(), &peers);
+    let _ = TestParsec::<Transaction, _>::from_existing(
+        our_id,
+        &BTreeSet::new(),
+        &peers,
+        ConsensusMode::Supermajority,
+    );
 }
 
 // TODO: remove this `cfg` once the `maidsafe_utilities` crate with PR 130 is published.
@@ -105,7 +115,12 @@ fn from_existing_requires_that_genesis_group_does_not_contain_us() {
     let genesis_group = peers.iter().cloned().collect();
     let section = peers.into_iter().skip(1).collect();
 
-    let _ = TestParsec::<Transaction, _>::from_existing(our_id, &genesis_group, &section);
+    let _ = TestParsec::<Transaction, _>::from_existing(
+        our_id,
+        &genesis_group,
+        &section,
+        ConsensusMode::Supermajority,
+    );
 }
 
 // TODO: remove this `cfg` once the `maidsafe_utilities` crate with PR 130 is published.
@@ -117,7 +132,12 @@ fn from_existing_requires_non_empty_section() {
     let our_id = unwrap!(peers.pop());
     let genesis_group = peers.into_iter().collect();
 
-    let _ = TestParsec::<Transaction, _>::from_existing(our_id, &genesis_group, &BTreeSet::new());
+    let _ = TestParsec::<Transaction, _>::from_existing(
+        our_id,
+        &genesis_group,
+        &BTreeSet::new(),
+        ConsensusMode::Supermajority,
+    );
 }
 
 // TODO: remove this `cfg` once the `maidsafe_utilities` crate with PR 130 is published.
@@ -130,7 +150,12 @@ fn from_existing_requires_that_section_does_not_contain_us() {
     let genesis_group = peers.iter().skip(1).cloned().collect();
     let section = peers.into_iter().collect();
 
-    let _ = TestParsec::<Transaction, _>::from_existing(our_id, &genesis_group, &section);
+    let _ = TestParsec::<Transaction, _>::from_existing(
+        our_id,
+        &genesis_group,
+        &section,
+        ConsensusMode::Supermajority,
+    );
 }
 
 #[test]
@@ -139,7 +164,11 @@ fn from_genesis() {
     let our_id = unwrap!(peers.first()).clone();
     let peers = peers.into_iter().collect();
 
-    let parsec = TestParsec::<Transaction, _>::from_genesis(our_id.clone(), &peers);
+    let parsec = TestParsec::<Transaction, _>::from_genesis(
+        our_id.clone(),
+        &peers,
+        ConsensusMode::Supermajority,
+    );
     // the peer_list should contain the entire genesis group
     assert_eq!(parsec.peer_list().all_ids().count(), peers.len());
     // initial event + genesis_observation
@@ -166,7 +195,11 @@ fn from_genesis_requires_the_genesis_group_contains_us() {
     let our_id = unwrap!(peers.pop());
     let peers = peers.into_iter().collect();
 
-    let _ = TestParsec::<Transaction, _>::from_genesis(our_id.clone(), &peers);
+    let _ = TestParsec::<Transaction, _>::from_genesis(
+        our_id.clone(),
+        &peers,
+        ConsensusMode::Supermajority,
+    );
 }
 
 #[test]
@@ -226,7 +259,12 @@ fn add_peer() {
         .any(|(_, peer_id)| *peer_id == fred_id));
 
     // Construct Fred's Parsec instance.
-    let mut fred = TestParsec::from_existing(fred_id.clone(), &genesis_group, &genesis_group);
+    let mut fred = TestParsec::from_existing(
+        fred_id.clone(),
+        &genesis_group,
+        &genesis_group,
+        ConsensusMode::Supermajority,
+    );
 
     // Now pass a valid initial request from Alice to Fred.  The generated response would
     // normally only contain Fred's initial event, and the one recording receipt of Alice's
@@ -277,7 +315,12 @@ fn remove_peer() {
         .map(|(_, id)| id.clone())
         .collect();
     let _ = section.remove(&eric_id);
-    let mut eric = TestParsec::<Transaction, _>::from_existing(eric_id.clone(), &section, &section);
+    let mut eric = TestParsec::<Transaction, _>::from_existing(
+        eric_id.clone(),
+        &section,
+        &section,
+        ConsensusMode::Supermajority,
+    );
 
     // Peer state is (VOTE | SEND) when created from existing. Need to update the states to
     // (VOTE | SEND | RECV).
@@ -367,7 +410,11 @@ fn gossip_after_fork() {
         PeerId::new("Dave")
     ];
 
-    let mut alice = TestParsec::from_genesis(alice_id.clone(), &genesis_group);
+    let mut alice = TestParsec::from_genesis(
+        alice_id.clone(),
+        &genesis_group,
+        ConsensusMode::Supermajority,
+    );
 
     // Alice creates couple of valid events.
     let a_1_index = unwrap!(alice.peer_list().our_events().next());
@@ -388,7 +435,8 @@ fn gossip_after_fork() {
     let a_3_packed = alice.pack_event(&a_3);
     unwrap!(alice.unpack_and_add_event(a_3_packed));
 
-    let mut bob = TestParsec::from_genesis(bob_id.clone(), &genesis_group);
+    let mut bob =
+        TestParsec::from_genesis(bob_id.clone(), &genesis_group, ConsensusMode::Supermajority);
 
     // Alice sends a gossip request to Bob and receives a response back.
     let req = unwrap!(alice.create_gossip(&bob_id));
@@ -1132,7 +1180,12 @@ mod handle_malice {
         alice.add_peer(fred_id.clone(), PeerState::RECV | PeerState::VOTE);
 
         // Construct Fred's Parsec instance.
-        let mut fred = TestParsec::from_existing(fred_id.clone(), &genesis_group, &genesis_group);
+        let mut fred = TestParsec::from_existing(
+            fred_id.clone(),
+            &genesis_group,
+            &genesis_group,
+            ConsensusMode::Supermajority,
+        );
 
         // Check that Fred has no events that Alice has
         assert!(alice

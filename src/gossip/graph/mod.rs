@@ -155,7 +155,7 @@ impl<P: PublicId> Graph<P> {
     }
 }
 
-#[cfg(test)]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 impl<P: PublicId> Graph<P> {
     /// Remove the topologically last event.
     pub fn remove_last(&mut self) -> Option<(EventIndex, Event<P>)> {

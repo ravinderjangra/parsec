@@ -37,6 +37,70 @@ pub struct Request {
     pub resp_delay: usize,
 }
 
+#[derive(Clone, Debug)]
+pub struct Genesis {
+    ids_of_good_peers: BTreeSet<PeerId>,
+    ids_of_malicious_peers: BTreeSet<PeerId>,
+}
+
+impl Genesis {
+    pub fn new(ids_of_good_peers: BTreeSet<PeerId>) -> Self {
+        Self {
+            ids_of_good_peers,
+            ids_of_malicious_peers: BTreeSet::new(),
+        }
+    }
+
+    pub fn new_with_malicious(
+        ids_of_good_peers: BTreeSet<PeerId>,
+        ids_of_malicious_peers: BTreeSet<PeerId>,
+    ) -> Self {
+        assert!(
+            ids_of_good_peers.is_disjoint(&ids_of_malicious_peers),
+            "{:?} cannot be good *and* malicious",
+            ids_of_good_peers
+                .intersection(&ids_of_malicious_peers)
+                .collect_vec()
+        );
+        Self {
+            ids_of_good_peers,
+            ids_of_malicious_peers,
+        }
+    }
+
+    fn from_all_ids(mut peer_ids: BTreeSet<PeerId>, malicious_count: usize) -> Self {
+        assert!(malicious_count <= peer_ids.len());
+        if malicious_count == 0 {
+            return Self {
+                ids_of_good_peers: peer_ids,
+                ids_of_malicious_peers: BTreeSet::new(),
+            };
+        }
+
+        let split_off_at_id = unwrap!(peer_ids.iter().rev().nth(malicious_count - 1)).clone();
+        let ids_of_malicious_peers = peer_ids.split_off(&split_off_at_id);
+        Self {
+            ids_of_good_peers: peer_ids,
+            ids_of_malicious_peers,
+        }
+    }
+
+    pub fn ids_of_good_peers(&self) -> impl Iterator<Item = &PeerId> {
+        self.ids_of_good_peers.iter()
+    }
+
+    pub fn ids_of_malicious_peers(&self) -> impl Iterator<Item = &PeerId> {
+        self.ids_of_malicious_peers.iter()
+    }
+
+    pub fn all_ids(&self) -> BTreeSet<PeerId> {
+        self.ids_of_good_peers()
+            .chain(self.ids_of_malicious_peers())
+            .cloned()
+            .collect()
+    }
+}
+
 /// Represents an event the network is supposed to simulate.
 /// The simulation proceeds in steps. During every global step, every node has some probability
 /// of being scheduled to perform a local step, consisting of receiving messages that reached it
@@ -44,7 +108,7 @@ pub struct Request {
 #[derive(Clone, Debug)]
 pub enum ScheduleEvent {
     /// Event storing the names of the initial nodes
-    Genesis(BTreeSet<PeerId>),
+    Genesis(Genesis),
     /// This event variant represents a scheduled slot to execute a local step for all active peers.
     /// It contains a global step number.
     LocalStep(usize),
@@ -168,6 +232,8 @@ pub enum DelayDistribution {
 pub struct ScheduleOptions {
     /// Size of the genesis group
     pub genesis_size: usize,
+    /// Number of malicious peers included in the genesis group
+    pub malicious_genesis_count: usize,
     /// Probabilitity per step that a random node will fail
     pub prob_failure: f64,
     /// Probability that a vote will get repeated
@@ -227,6 +293,8 @@ impl Default for ScheduleOptions {
         ScheduleOptions {
             // default genesis of 4 peers
             genesis_size: 4,
+            // no malicious genesis peers
+            malicious_genesis_count: 0,
             // no randomised failures
             prob_failure: 0.0,
             // no vote duplication
@@ -294,7 +362,7 @@ impl ObservationEvent {
 }
 
 pub struct ObservationSchedule {
-    pub genesis: BTreeSet<PeerId>,
+    pub genesis: Genesis,
     /// A `Vec` of pairs (step number, event), carrying information about what events happen at
     /// which steps
     pub schedule: Vec<(usize, ObservationEvent)>,
@@ -317,12 +385,12 @@ impl ObservationSchedule {
         let mut opaque_count: usize = 0;
 
         // schedule genesis first
-        let genesis_names = names_iter
+        let genesis_ids = names_iter
             .by_ref()
             .take(options.genesis_size)
             .map(|s| PeerId::new(&s))
             .collect();
-        let mut peers = PeerStatuses::new(&genesis_names);
+        let mut peers = PeerStatuses::new(&genesis_ids);
 
         let mut step: usize = 1;
         while num_observations
@@ -374,7 +442,7 @@ impl ObservationSchedule {
         }
 
         ObservationSchedule {
-            genesis: genesis_names,
+            genesis: Genesis::from_all_ids(genesis_ids, options.malicious_genesis_count),
             schedule,
         }
     }
@@ -493,7 +561,7 @@ impl Schedule {
         // the +1 below is to account for genesis
         let max_observations = obs_schedule.count_observations() + 1;
 
-        let mut peers = PeerStatuses::new(&obs_schedule.genesis);
+        let mut peers = PeerStatuses::new(&obs_schedule.genesis.all_ids());
         let mut step = 0;
 
         // genesis has to be first
@@ -520,8 +588,8 @@ impl Schedule {
             }
         }
 
-        let obs_schedule = StepObservationSchedule::new(obs_schedule.schedule);
-        let schedule_by_step = obs_schedule
+        let step_obs_schedule = StepObservationSchedule::new(obs_schedule.schedule);
+        let schedule_by_step = step_obs_schedule
             .schedule
             .into_iter()
             .group_by(|(step, _)| *step);

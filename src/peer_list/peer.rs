@@ -76,7 +76,7 @@ impl<P: PublicId> Peer<P> {
         self.events.add(index_by_creator, event_index);
     }
 
-    #[cfg(all(test, feature = "mock"))]
+    #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
     pub(super) fn remove_last_event(&mut self) -> Option<EventIndex> {
         self.events.remove_last()
     }
@@ -103,7 +103,7 @@ impl Events {
         self.0.push(Slot::new(event_index))
     }
 
-    #[cfg(all(test, feature = "mock"))]
+    #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
     fn remove_last(&mut self) -> Option<EventIndex> {
         if let Some(slot) = self.0.last_mut() {
             if let Some(index) = slot.rest.pop() {

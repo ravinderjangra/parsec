@@ -271,7 +271,7 @@ impl<S: SecretId> PeerList<S> {
     }
 
     /// Removes last event from its creator.
-    #[cfg(all(test, feature = "mock"))]
+    #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
     pub fn remove_last_event(&mut self, creator: PeerIndex) -> Option<EventIndex> {
         if let Some(peer) = self.get_known_mut(creator) {
             peer.remove_last_event()
