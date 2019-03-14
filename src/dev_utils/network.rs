@@ -566,11 +566,10 @@ impl Network {
                         !keep_consensus.is_empty() && keep_consensus.iter().all(|id| genesis_group.contains(id)),
                         "genesis_restrict_consensus_to must be None or not empty and contain only ids from the genesis group.: {:?} - {:?}", keep_consensus, genesis_group );
 
-                    keep_consensus.iter().for_each(|id| {
-                        let _ = peers
-                            .get_mut(id)
-                            .map(|peer| peer.set_ignore_process_events());
-                    });
+                    peers
+                        .iter_mut()
+                        .filter(|(id, _)| !keep_consensus.contains(id))
+                        .for_each(|(_, peer)| peer.set_ignore_process_events());
                 }
 
                 self.peers = peers;
