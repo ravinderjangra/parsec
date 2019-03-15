@@ -2,6 +2,6 @@
 
 set -e -x
 
-cargo test --verbose --release --features=testing
-cargo test --verbose --release --features=testing,malice-detection
-cargo test --verbose --release --features=dump-graphs dot_parser
+cargo test $@ --release --features=testing
+cargo test $@ --release --features=testing,malice-detection
+cargo test $@ --release --features=dump-graphs dot_parser

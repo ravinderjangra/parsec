@@ -17,13 +17,13 @@ before_script:
   - rustup component add rustfmt clippy
 jobs:
   include:
-    - script: scripts/clippy
+    - script: scripts/clippy --verbose
       env: CACHE_NAME=clippy_linux
       os: linux
-    - script: scripts/tests
+    - script: scripts/tests --verbose
       env: CACHE_NAME=tests_linux
       os: linux
-    - script: scripts/tests
+    - script: scripts/tests --verbose
       env: CACHE_NAME=tests_osx
       os: osx
 before_cache:
