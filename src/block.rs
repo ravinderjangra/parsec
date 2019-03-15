@@ -13,6 +13,7 @@ use crate::observation::Observation;
 use crate::vote::Vote;
 use std::{
     collections::{BTreeMap, BTreeSet},
+    ops::Deref,
     slice, vec,
 };
 
@@ -96,5 +97,12 @@ impl<'a, T: NetworkEvent, P: PublicId> IntoIterator for &'a BlockGroup<T, P> {
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.iter()
+    }
+}
+
+impl<T: NetworkEvent, P: PublicId> Deref for BlockGroup<T, P> {
+    type Target = [Block<T, P>];
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }

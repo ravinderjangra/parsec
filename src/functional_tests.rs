@@ -7,7 +7,7 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use crate::block::Block;
-use crate::dev_utils::parse_test_dot_file;
+use crate::dev_utils::{parse_test_dot_file, Record};
 use crate::error::Error;
 use crate::gossip::{Event, Graph, GraphSnapshot};
 use crate::id::PublicId;
@@ -396,6 +396,31 @@ fn unpolled_and_unconsensused_observations() {
     assert_eq!(*unwrap!(unpolled_observations.next()), add_eric);
     assert_eq!(*unwrap!(unpolled_observations.next()), vote);
     assert!(unpolled_observations.next().is_none());
+}
+
+#[test]
+fn our_unpolled_observations_with_consensus_mode_single() {
+    let mut alice = Record::from(parse_test_dot_file("alice.dot")).play();
+
+    let blocks = unwrap!(alice.poll());
+    match blocks[0].payload() {
+        Observation::Genesis(_) => (),
+        x => panic!("Unexpected block payload: {:?}", x),
+    }
+
+    let blocks = unwrap!(alice.poll());
+    match blocks[0].payload() {
+        Observation::OpaquePayload(_) => (),
+        x => panic!("Unexpected block payload: {:?}", x),
+    }
+    assert_eq!(blocks[0].proofs().len(), 1);
+    assert!(blocks[0]
+        .proofs()
+        .iter()
+        .any(|proof| proof.public_id() == alice.our_pub_id()));
+
+    // Bob's vote is still in, but should not be returned here, as it's not "ours"
+    assert_eq!(alice.our_unpolled_observations().next(), None);
 }
 
 #[test]

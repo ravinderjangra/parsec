@@ -321,6 +321,29 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
         })
         .seed([411278735, 3293288956, 208850454, 2872654992])
         .file("Alice", "alice.dot");
+
+    let _ = scenarios
+        .add(
+            "functional_tests::our_unpolled_observations_with_consensus_mode_single",
+            |env| {
+                let obs = ObservationSchedule {
+                    genesis: Genesis::new(peer_ids!("Alice", "Bob")),
+                    // Make the votes sufficiently far apart from each other so they are placed
+                    // each in its own block group.
+                    schedule: vec![
+                        (0, Opaque(Transaction::new("A"))),
+                        (1000, Opaque(Transaction::new("A"))),
+                    ],
+                };
+
+                Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+            },
+        )
+        // Note: Make sure to only use seeds that make Alice reach consensus on Transaction(A) by
+        // Alice before Transaction(A) by Bob.
+        .seed([834576548, 1145967030, 3794692405, 640370552])
+        .consensus_mode(ConsensusMode::Single)
+        .file("Alice", "alice.dot");
 }
 
 fn add_dev_utils_record_smoke_tests(scenarios: &mut Scenarios) {

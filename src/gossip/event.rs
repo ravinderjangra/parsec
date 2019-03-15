@@ -22,6 +22,8 @@ use crate::id::{PublicId, SecretId};
 #[cfg(any(test, feature = "testing"))]
 use crate::mock::{PeerId, Transaction};
 use crate::network_event::NetworkEvent;
+#[cfg(any(test, feature = "testing"))]
+use crate::observation::ConsensusMode;
 use crate::observation::{Observation, ObservationForStore, ObservationKey, ObservationStore};
 use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
 use crate::serialise;
@@ -502,6 +504,7 @@ impl Event<PeerId> {
         self_parent: Option<(EventIndex, EventHash)>,
         other_parent: Option<(EventIndex, EventHash)>,
         index_by_creator: usize,
+        consensus_mode: ConsensusMode,
         last_ancestors: BTreeMap<PeerId, usize>,
         peer_list: &PeerList<PeerId>,
         observations: &mut ObservationStore<Transaction, PeerId>,
@@ -529,6 +532,7 @@ impl Event<PeerId> {
             recipient,
             self_parent.map(|(i, _)| i),
             other_parent.map(|(i, _)| i),
+            consensus_mode,
             observations,
         );
         let content = Content { creator, cause };

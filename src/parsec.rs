@@ -13,7 +13,7 @@ use crate::dump_graph;
 use crate::error::{Error, Result};
 #[cfg(all(test, feature = "mock"))]
 use crate::gossip::EventHash;
-#[cfg(all(test, feature = "testing"))]
+#[cfg(all(test, any(feature = "testing", feature = "mock")))]
 use crate::gossip::GraphSnapshot;
 use crate::gossip::{
     Event, EventContextRef, EventIndex, Graph, IndexedEventRef, PackedEvent, Request, Response,
@@ -705,6 +705,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     fn output_consensus_info(&self, payload_keys: &[ObservationKey]) {
         dump_graph::to_file(
             self.our_pub_id(),
+            self.consensus_mode,
             &self.graph,
             &self.meta_election,
             &self.peer_list,
@@ -712,7 +713,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             &dump_graph::DumpGraphContext::ConsensusReached,
         );
 
-        for payload_key in payload_keys {
+        for (index, payload_key) in payload_keys.iter().enumerate() {
             let payload = self
                 .observations
                 .get(payload_key)
@@ -720,7 +721,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             info!(
                 "{:?} got consensus on block {} with payload {:?} and payload hash {:?}",
                 self.our_pub_id(),
-                self.meta_election.consensus_history().len(),
+                self.meta_election.consensus_history().len() + index,
                 payload,
                 payload_key.hash()
             )
@@ -2085,6 +2086,7 @@ impl<T: NetworkEvent, S: SecretId> Drop for Parsec<T, S> {
     fn drop(&mut self) {
         dump_graph::to_file(
             self.our_pub_id(),
+            self.consensus_mode,
             &self.graph,
             &self.meta_election,
             &self.peer_list,
@@ -2148,7 +2150,7 @@ impl Parsec<Transaction, PeerId> {
         let mut parsec = Parsec::empty(
             peer_list,
             PeerIndexSet::default(),
-            ConsensusMode::Supermajority,
+            parsed_contents.consensus_mode,
         );
 
         for event in &parsed_contents.graph {
@@ -2391,7 +2393,7 @@ impl<T: NetworkEvent, S: SecretId> DerefMut for TestParsec<T, S> {
 }
 
 /// Get the parsec graph snapshot with inserted events out of order.
-#[cfg(all(test, feature = "testing"))]
+#[cfg(all(test, any(feature = "testing", feature = "mock")))]
 pub(crate) fn get_graph_snapshot<T: NetworkEvent, S: SecretId>(
     parsec: &Parsec<T, S>,
     ignore_last_events: usize,

@@ -186,6 +186,7 @@ impl Cause<VoteKey<PeerId>, EventIndex, PeerIndex> {
         recipient: Option<PeerIndex>,
         self_parent: Option<EventIndex>,
         other_parent: Option<EventIndex>,
+        consensus_mode: ConsensusMode,
         observations: &mut ObservationStore<Transaction, PeerId>,
     ) -> Self {
         let self_parent = self_parent.unwrap_or(EventIndex::PHONY);
@@ -205,8 +206,7 @@ impl Cause<VoteKey<PeerId>, EventIndex, PeerIndex> {
                 other_parent,
             },
             Cause::Observation { vote, .. } => {
-                let (vote_key, observation) =
-                    VoteKey::new(vote, creator, ConsensusMode::Supermajority);
+                let (vote_key, observation) = VoteKey::new(vote, creator, consensus_mode);
                 let _ = observations
                     .entry(*vote_key.payload_key())
                     .or_insert_with(|| ObservationInfo::new(observation));

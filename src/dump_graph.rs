@@ -10,7 +10,7 @@ use crate::gossip::Graph;
 use crate::id::SecretId;
 use crate::meta_voting::MetaElection;
 use crate::network_event::NetworkEvent;
-use crate::observation::ObservationStore;
+use crate::observation::{ConsensusMode, ObservationStore};
 use crate::peer_list::PeerList;
 
 /// Use this to initialise the folder into which the dot files will be dumped.  This allows the
@@ -37,6 +37,7 @@ pub enum DumpGraphContext {
 #[cfg(feature = "dump-graphs")]
 pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
     owner_id: &S::PublicId,
+    consensus_mode: ConsensusMode,
     gossip_graph: &Graph<S::PublicId>,
     meta_election: &MetaElection,
     peer_list: &PeerList<S>,
@@ -45,6 +46,7 @@ pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
 ) {
     detail::to_file(
         owner_id,
+        consensus_mode,
         gossip_graph,
         meta_election,
         peer_list,
@@ -55,6 +57,7 @@ pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
 #[cfg(not(feature = "dump-graphs"))]
 pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
     _: &S::PublicId,
+    _: ConsensusMode,
     _: &Graph<S::PublicId>,
     _: &MetaElection,
     _: &PeerList<S>,
@@ -73,7 +76,7 @@ mod detail {
     use crate::id::{PublicId, SecretId};
     use crate::meta_voting::{MetaElection, MetaElectionSnapshot, MetaEvent, MetaVote, Observer};
     use crate::network_event::NetworkEvent;
-    use crate::observation::{Observation, ObservationKey, ObservationStore};
+    use crate::observation::{ConsensusMode, Observation, ObservationKey, ObservationStore};
     use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
     use crate::serialise;
     use itertools::Itertools;
@@ -185,6 +188,7 @@ mod detail {
 
     pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
         owner_id: &S::PublicId,
+        consensus_mode: ConsensusMode,
         gossip_graph: &Graph<S::PublicId>,
         meta_election: &MetaElection,
         peer_list: &PeerList<S>,
@@ -223,6 +227,7 @@ mod detail {
 
         match DotWriter::new(
             &file_path,
+            consensus_mode,
             gossip_graph,
             meta_election,
             peer_list,
@@ -356,6 +361,7 @@ mod detail {
 
     struct DotWriter<'a, S: SecretId + 'a> {
         file: BufWriter<File>,
+        consensus_mode: ConsensusMode,
         gossip_graph: &'a Graph<S::PublicId>,
         meta_election: &'a MetaElection,
         peer_list: &'a PeerList<S>,
@@ -368,8 +374,10 @@ mod detail {
     impl<'a, S: SecretId + 'a> DotWriter<'a, S> {
         const COMMENT: &'static str = "/// ";
 
+        #[allow(clippy::too_many_arguments)]
         fn new(
             file_path: &Path,
+            consensus_mode: ConsensusMode,
             gossip_graph: &'a Graph<S::PublicId>,
             meta_election: &'a MetaElection,
             peer_list: &'a PeerList<S>,
@@ -379,6 +387,7 @@ mod detail {
         ) -> io::Result<Self> {
             File::create(&file_path).map(|file| DotWriter {
                 file: BufWriter::new(file),
+                consensus_mode,
                 gossip_graph,
                 meta_election,
                 peer_list,
@@ -423,6 +432,7 @@ mod detail {
 
         fn write(&mut self) -> io::Result<()> {
             self.write_peer_list()?;
+            self.write_consensus_mode()?;
 
             self.writeln(format_args!("digraph GossipGraph {{"))?;
             self.writeln(format_args!("  splines=false"))?;
@@ -472,6 +482,17 @@ mod detail {
             self.dedent();
             let indent = self.indentation();
             self.writeln(format_args!("{}{}}}", Self::COMMENT, indent))
+        }
+
+        fn write_consensus_mode(&mut self) -> io::Result<()> {
+            let indent = self.indentation();
+            let consensus_mode = self.consensus_mode;
+            self.writeln(format_args!(
+                "{}{}consensus_mode: {:?}",
+                Self::COMMENT,
+                indent,
+                consensus_mode
+            ))
         }
 
         fn calculate_positions(&self) -> Vec<usize> {

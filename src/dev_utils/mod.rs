@@ -15,7 +15,7 @@ mod peer;
 mod peer_statuses;
 #[cfg(feature = "testing")]
 pub mod proptest;
-#[cfg(feature = "testing")]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 mod record;
 mod schedule;
 
@@ -29,7 +29,7 @@ pub use self::environment::{Environment, RngChoice};
 pub use self::network::{ConsensusError, Network};
 pub use self::peer::{NetworkView, Peer, PeerStatus};
 pub use self::peer_statuses::PeerStatuses;
-#[cfg(feature = "testing")]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 pub use self::record::Record;
 pub use self::schedule::*;
 

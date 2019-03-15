@@ -212,7 +212,7 @@ impl From<ParsedContents> for Record {
             genesis_group,
             actions,
             consensus_history: contents.meta_election.consensus_history,
-            consensus_mode: ConsensusMode::Supermajority,
+            consensus_mode: contents.consensus_mode,
         }
     }
 }
