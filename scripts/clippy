@@ -5,11 +5,12 @@ set -e -x
 cargo fmt -- --check
 cargo clippy $@ --all-targets
 cargo clippy $@ --all-targets --features=dump-graphs
-cargo clippy $@ --all-targets --features=testing
-cargo clippy $@ --all-targets --features=testing,malice-detection
+cargo clippy $@ --all-targets --features=dump-graphs,malice-detection,mock
+cargo clippy $@ --all-targets --features=dump-graphs,malice-detection,testing
+cargo clippy $@ --all-targets --features=dump-graphs,mock
 cargo clippy $@ --all-targets --features=dump-graphs,testing
-cargo clippy $@ --all-targets --features=dump-graphs,testing,malice-detection
+cargo clippy $@ --all-targets --features=malice-detection
+cargo clippy $@ --all-targets --features=malice-detection,testing
 cargo clippy $@ --all-targets --features=mock
-cargo clippy $@ --all-targets --features=mock,dump-graphs
-cargo clippy $@ --all-targets --features=mock,dump-graphs,malice-detection
+cargo clippy $@ --all-targets --features=testing
 cargo clippy $@ --manifest-path=dot_gen/Cargo.toml
