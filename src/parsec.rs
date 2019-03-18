@@ -406,11 +406,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         self.observations.values().filter_map(move |info| {
             if info.created_by_us
                 && info.consensused
-                && self
-                    .consensused_blocks
-                    .iter()
-                    .flatten()
-                    .any(|block| block.payload() == &info.observation)
+                && self.has_our_unpolled_blocks(&info.observation)
             {
                 Some(&info.observation)
             } else {
@@ -427,6 +423,28 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 None
             }
         })
+    }
+
+    fn has_our_unpolled_blocks(&self, payload: &Observation<T, S::PublicId>) -> bool {
+        let mut matching_blocks = self
+            .consensused_blocks
+            .iter()
+            .flatten()
+            .filter(|block| block.payload() == payload);
+
+        // In `Supermajority` mode, check only if the payload matches, as there can be blocks not
+        // signed by us, yet with payloads voted for by us.
+        // In `Single` mode, on the other hand, check also that we signed it, to avoid false
+        // positives when there are blocks with the same payloads but signed by somone else.
+        match self.consensus_mode.of(payload) {
+            ConsensusMode::Supermajority => matching_blocks.next().is_some(),
+            ConsensusMode::Single => matching_blocks.any(|block| {
+                block
+                    .proofs()
+                    .iter()
+                    .any(|proof| proof.public_id() == self.our_pub_id())
+            }),
+        }
     }
 
     /// Must only be used for events which have already been added to our graph.
