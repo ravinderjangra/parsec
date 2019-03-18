@@ -225,17 +225,20 @@ mod detail {
         let peer_ids = sanitise_peer_ids(peer_list);
         let short_peer_ids = short_peer_id_names(&peer_ids);
 
-        match DotWriter::new(
-            &file_path,
-            consensus_mode,
-            gossip_graph,
-            meta_election,
-            peer_list,
-            &DotObservation::from_observations(&observations),
-            &peer_ids,
-            &short_peer_ids,
-        ) {
-            Ok(mut dot_writer) => {
+        match File::create(&file_path) {
+            Ok(file) => {
+                let mut dot_writer = DotWriter {
+                    file: BufWriter::new(file),
+                    consensus_mode,
+                    gossip_graph,
+                    meta_election,
+                    peer_list,
+                    observations: &DotObservation::from_observations(&observations),
+                    peer_ids: &peer_ids,
+                    short_peer_ids: &short_peer_ids,
+                    indent: 0,
+                };
+
                 if let Err(error) = dot_writer.write() {
                     println!("Error writing to {:?}: {:?}", file_path, error);
                 }
@@ -373,30 +376,6 @@ mod detail {
 
     impl<'a, S: SecretId + 'a> DotWriter<'a, S> {
         const COMMENT: &'static str = "/// ";
-
-        #[allow(clippy::too_many_arguments)]
-        fn new(
-            file_path: &Path,
-            consensus_mode: ConsensusMode,
-            gossip_graph: &'a Graph<S::PublicId>,
-            meta_election: &'a MetaElection,
-            peer_list: &'a PeerList<S>,
-            observations: &'a DotObservationStore,
-            peer_ids: &'a PeerIndexMap<DotPeerId>,
-            short_peer_ids: &'a PeerIndexMap<String>,
-        ) -> io::Result<Self> {
-            File::create(&file_path).map(|file| DotWriter {
-                file: BufWriter::new(file),
-                consensus_mode,
-                gossip_graph,
-                meta_election,
-                peer_list,
-                observations,
-                peer_ids,
-                short_peer_ids,
-                indent: 0,
-            })
-        }
 
         fn indentation(&self) -> String {
             " ".repeat(self.indent)

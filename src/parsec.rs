@@ -435,15 +435,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         // In `Supermajority` mode, check only if the payload matches, as there can be blocks not
         // signed by us, yet with payloads voted for by us.
         // In `Single` mode, on the other hand, check also that we signed it, to avoid false
-        // positives when there are blocks with the same payloads but signed by somone else.
+        // positives when there are blocks with the same payloads but signed by someone else.
         match self.consensus_mode.of(payload) {
             ConsensusMode::Supermajority => matching_blocks.next().is_some(),
-            ConsensusMode::Single => matching_blocks.any(|block| {
-                block
-                    .proofs()
-                    .iter()
-                    .any(|proof| proof.public_id() == self.our_pub_id())
-            }),
+            ConsensusMode::Single => {
+                matching_blocks.any(|block| block.is_signed_by(self.our_pub_id()))
+            }
         }
     }
 

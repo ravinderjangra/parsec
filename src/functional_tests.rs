@@ -414,12 +414,10 @@ fn our_unpolled_observations_with_consensus_mode_single() {
         x => panic!("Unexpected block payload: {:?}", x),
     }
     assert_eq!(blocks[0].proofs().len(), 1);
-    assert!(blocks[0]
-        .proofs()
-        .iter()
-        .any(|proof| proof.public_id() == alice.our_pub_id()));
+    assert!(blocks[0].is_signed_by(alice.our_pub_id()));
 
-    // Bob's vote is still in, but should not be returned here, as it's not "ours"
+    // Bob's vote is still in, but should not be returned here, as it's not "ours" (from Alice's
+    // point of view).
     assert_eq!(alice.our_unpolled_observations().next(), None);
 }
 
