@@ -11,10 +11,7 @@
     feature = "testing"
 ))]
 use crate::error::Error;
-#[cfg(any(
-    all(test, feature = "malice-detection", feature = "mock"),
-    feature = "testing"
-))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 use crate::gossip::EventContextRef;
 use crate::gossip::{CauseInput, Event, EventIndex, Graph, IndexedEventRef};
 use crate::hash::Hash;
@@ -23,10 +20,6 @@ use crate::meta_voting::{
     BoolSet, MetaElection, MetaEvent, MetaVote, Observer, Step, UnconsensusedEvents,
 };
 use crate::mock::{PeerId, Transaction};
-#[cfg(any(
-    all(test, feature = "malice-detection", feature = "mock"),
-    feature = "testing"
-))]
 use crate::observation::ConsensusMode;
 use crate::observation::{
     Observation, ObservationHash, ObservationInfo, ObservationKey, ObservationStore,
@@ -78,6 +71,7 @@ fn comment_prefix() -> Parser<u8, ()> {
 struct ParsedFile {
     our_id: PeerId,
     peer_list: ParsedPeerList,
+    consensus_mode: ConsensusMode,
     graph: ParsedGraph,
     meta_election: ParsedMetaElection,
 }
@@ -120,13 +114,21 @@ impl ParserCtx {
 }
 
 fn parse_file(ctx: &Rc<ParserCtx>) -> Parser<u8, ParsedFile> {
-    (parse_our_id() + parse_peer_list(ctx) + parse_graph() + parse_meta_election(ctx) - parse_end())
-        .map(|(((our_id, peer_list), graph), meta_election)| ParsedFile {
+    (parse_our_id()
+        + parse_peer_list(ctx)
+        + parse_consensus_mode()
+        + parse_graph()
+        + parse_meta_election(ctx)
+        - parse_end())
+    .map(
+        |((((our_id, peer_list), consensus_mode), graph), meta_election)| ParsedFile {
             our_id,
             peer_list,
+            consensus_mode,
             graph,
             meta_election,
-        })
+        },
+    )
 }
 
 fn parse_peer_id() -> Parser<u8, PeerId> {
@@ -179,6 +181,15 @@ fn parse_single_state() -> Parser<u8, PeerState> {
 
 fn parse_peers() -> Parser<u8, BTreeSet<PeerId>> {
     (sym(b'{') * list(parse_peer_id(), seq(b", ")) - sym(b'}')).map(|v| v.into_iter().collect())
+}
+
+fn parse_consensus_mode() -> Parser<u8, ConsensusMode> {
+    let parser = seq(b"Single").map(|_| ConsensusMode::Single)
+        | seq(b"Supermajority").map(|_| ConsensusMode::Supermajority);
+    let parser = comment_prefix() * seq(b"consensus_mode: ") * parser - next_line();
+    parser
+        .opt()
+        .map(|mode| mode.unwrap_or(ConsensusMode::Supermajority))
 }
 
 #[derive(Debug)]
@@ -694,6 +705,7 @@ pub(crate) struct ParsedContents {
     pub meta_election: MetaElection,
     pub peer_list: PeerList<PeerId>,
     pub observations: ObservationStore<Transaction, PeerId>,
+    pub consensus_mode: ConsensusMode,
 }
 
 impl ParsedContents {
@@ -708,6 +720,7 @@ impl ParsedContents {
             meta_election,
             peer_list,
             observations: ObservationStore::new(),
+            consensus_mode: ConsensusMode::Supermajority,
         }
     }
 }
@@ -737,16 +750,13 @@ impl ParsedContents {
         indexed_event.event_index()
     }
 
-    #[cfg(any(
-        all(test, feature = "malice-detection", feature = "mock"),
-        feature = "testing"
-    ))]
+    #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
     pub fn event_context(&self) -> EventContextRef<Transaction, PeerId> {
         EventContextRef {
             graph: &self.graph,
             peer_list: &self.peer_list,
             observations: &self.observations,
-            consensus_mode: ConsensusMode::Supermajority,
+            consensus_mode: self.consensus_mode,
         }
     }
 
@@ -833,6 +843,7 @@ fn convert_into_parsed_contents(result: ParsedFile) -> ParsedContents {
     let ParsedFile {
         our_id,
         peer_list,
+        consensus_mode,
         mut graph,
         meta_election,
     } = result;
@@ -847,6 +858,7 @@ fn convert_into_parsed_contents(result: ParsedFile) -> ParsedContents {
         graph.event_details,
         &mut parsed_contents,
         peer_list_builder.peer_list(),
+        consensus_mode,
     );
 
     let peer_list = peer_list_builder.finish(&parsed_contents.graph);
@@ -866,6 +878,7 @@ fn convert_into_parsed_contents(result: ParsedFile) -> ParsedContents {
 
     parsed_contents.peer_list = peer_list;
     parsed_contents.meta_election = meta_election;
+    parsed_contents.consensus_mode = consensus_mode;
     parsed_contents
 }
 
@@ -986,6 +999,7 @@ fn create_events(
     mut details: BTreeMap<String, EventDetails>,
     parsed_contents: &mut ParsedContents,
     peer_list: &PeerList<PeerId>,
+    consensus_mode: ConsensusMode,
 ) -> BTreeMap<String, EventIndex> {
     let mut event_indices = BTreeMap::new();
 
@@ -1022,6 +1036,7 @@ fn create_events(
             self_parent,
             other_parent,
             index_by_creator,
+            consensus_mode,
             next_event_details.last_ancestors.clone(),
             peer_list,
             &mut parsed_contents.observations,

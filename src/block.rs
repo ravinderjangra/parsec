@@ -13,6 +13,7 @@ use crate::observation::Observation;
 use crate::vote::Vote;
 use std::{
     collections::{BTreeMap, BTreeSet},
+    ops::Deref,
     slice, vec,
 };
 
@@ -58,6 +59,11 @@ impl<T: NetworkEvent, P: PublicId> Block<T, P> {
         &self.proofs
     }
 
+    /// Is this block signed by the given peer?
+    pub fn is_signed_by(&self, peer_id: &P) -> bool {
+        self.proofs.iter().any(|proof| proof.public_id() == peer_id)
+    }
+
     /// Converts `vote` to a `Proof` and attempts to add it to the block.  Returns an error if
     /// `vote` is invalid (i.e. signature check fails or the `vote` is for a different network
     /// event), `Ok(true)` if the `Proof` wasn't previously held in this `Block`, or `Ok(false)` if
@@ -96,5 +102,12 @@ impl<'a, T: NetworkEvent, P: PublicId> IntoIterator for &'a BlockGroup<T, P> {
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.iter()
+    }
+}
+
+impl<T: NetworkEvent, P: PublicId> Deref for BlockGroup<T, P> {
+    type Target = [Block<T, P>];
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }

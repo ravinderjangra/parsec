@@ -7,26 +7,22 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use crate::block::Block;
-use crate::dev_utils::parse_test_dot_file;
+use crate::dev_utils::{parse_test_dot_file, Record};
 use crate::error::Error;
 use crate::gossip::{Event, Graph, GraphSnapshot};
-use crate::id::PublicId;
+use crate::id::{Proof, PublicId};
 use crate::meta_voting::MetaElectionSnapshot;
 use crate::mock::{self, PeerId, Transaction};
 use crate::observation::{ConsensusMode, Observation};
 use crate::parsec::TestParsec;
 use crate::peer_list::{PeerIndexSet, PeerListSnapshot, PeerState};
-use std::collections::BTreeSet;
+use std::{collections::BTreeSet, fmt::Debug};
 
-macro_rules! assert_err {
-    ($expected_error:pat, $result:expr) => {
-        match $result {
-            Err($expected_error) => (),
-            unexpected => panic!(
-                "Expected {}, but got {:?}",
-                stringify!($expected_error),
-                unexpected
-            ),
+macro_rules! assert_matches {
+    ($actual:expr, $expected:pat) => {
+        match $actual {
+            $expected => (),
+            ref unexpected => panic!("{:?} does not match {}", unexpected, stringify!($expected)),
         }
     };
 }
@@ -67,6 +63,27 @@ impl Snapshot {
 fn nth_event<P: PublicId>(graph: &Graph<P>, n: usize) -> &Event<P> {
     unwrap!(graph.iter_from(n).next()).inner()
 }
+
+/// Testing related extensions to `Iterator`.
+trait TestIterator: Iterator {
+    /// Returns the only element in the iterator. Panics if the iterator yields less or more than
+    /// one element.
+    fn only(mut self) -> Self::Item
+    where
+        Self: Sized,
+        Self::Item: Debug,
+    {
+        let item = unwrap!(self.next(), "Expected one element - got none.");
+        assert!(
+            self.by_ref().peekable().peek().is_none(),
+            "Expected one element - got more (excess: {:?}).",
+            self.collect::<Vec<_>>()
+        );
+        item
+    }
+}
+
+impl<I: Iterator> TestIterator for I {}
 
 #[test]
 fn from_existing() {
@@ -246,7 +263,7 @@ fn add_peer() {
     let alice_snapshot = Snapshot::new(&alice);
 
     // Try calling `create_gossip()` for a peer which doesn't exist yet.
-    assert_err!(Error::UnknownPeer, alice.create_gossip(&fred_id));
+    assert_matches!(alice.create_gossip(&fred_id), Err(Error::UnknownPeer));
     assert_eq!(alice_snapshot, Snapshot::new(&alice));
 
     // Now add D_18, which should result in Alice adding Fred.
@@ -306,7 +323,10 @@ fn remove_peer() {
     );
 
     // Try calling `create_gossip()` for Eric shall result in error.
-    assert_err!(Error::InvalidPeerState { .. }, alice.create_gossip(&eric_id));
+    assert_matches!(
+        alice.create_gossip(&eric_id),
+        Err(Error::InvalidPeerState { .. })
+    );
 
     // Construct Eric's parsec instance.
     let mut section: BTreeSet<_> = alice
@@ -329,9 +349,9 @@ fn remove_peer() {
     }
 
     // Eric can no longer gossip to anyone.
-    assert_err!(
-        Error::InvalidSelfState { .. },
-        eric.create_gossip(&PeerId::new("Alice"))
+    assert_matches!(
+        eric.create_gossip(&PeerId::new("Alice")),
+        Err(Error::InvalidSelfState { .. })
     );
 }
 
@@ -396,6 +416,25 @@ fn unpolled_and_unconsensused_observations() {
     assert_eq!(*unwrap!(unpolled_observations.next()), add_eric);
     assert_eq!(*unwrap!(unpolled_observations.next()), vote);
     assert!(unpolled_observations.next().is_none());
+}
+
+#[test]
+fn our_unpolled_observations_with_consensus_mode_single() {
+    let mut alice = Record::from(parse_test_dot_file("alice.dot")).play();
+
+    let block = alice.poll().into_iter().flatten().only();
+    assert_matches!(*block.payload(), Observation::Genesis(_));
+
+    let block = alice.poll().into_iter().flatten().only();
+    assert_matches!(*block.payload(), Observation::OpaquePayload(_));
+    assert_eq!(
+        block.proofs().iter().map(Proof::public_id).only(),
+        alice.our_pub_id()
+    );
+
+    // Bob's vote is still in, but should not be returned here, as it's not "ours" (from Alice's
+    // point of view).
+    assert_eq!(alice.our_unpolled_observations().next(), None);
 }
 
 #[test]
@@ -709,7 +748,10 @@ mod handle_malice {
         // Send gossip from Alice to Dave.
         let message = unwrap!(alice.create_gossip(&dave_id));
         // Alice's genesis should be rejected as invalid
-        assert_err!(Error::InvalidEvent, dave.handle_request(&alice_id, message));
+        assert_matches!(
+            dave.handle_request(&alice_id, message),
+            Err(Error::InvalidEvent)
+        );
         assert!(dave.graph().contains(&a_0_hash));
         // Dave's events shouldn't contain Alice's genesis because of the rejection
         assert!(!dave.graph().contains(&a_1_hash));
@@ -1070,9 +1112,9 @@ mod handle_malice {
         let mut alice = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
 
         // Try to add the event.
-        assert_err!(
-            Error::InvalidEvent,
-            alice.unpack_and_add_event(c_25_packed.clone())
+        assert_matches!(
+            alice.unpack_and_add_event(c_25_packed.clone()),
+            Err(Error::InvalidEvent)
         );
 
         // The invalid event should trigger an accusation vote to be raised immediately, and the
@@ -1127,7 +1169,10 @@ mod handle_malice {
         unwrap!(alice.unpack_and_add_event(b_1_packed));
 
         // This should fail, as B_2 has other-parent by the same creator.
-        assert_err!(Error::InvalidEvent, alice.unpack_and_add_event(b_2_packed));
+        assert_matches!(
+            alice.unpack_and_add_event(b_2_packed),
+            Err(Error::InvalidEvent)
+        );
 
         // Alice should raise accusation against Bob
         let (offender, event) = unwrap!(our_votes(&alice)
@@ -1173,7 +1218,7 @@ mod handle_malice {
         let alice_snapshot = Snapshot::new(&alice);
 
         // Try calling `create_gossip()` for a peer which doesn't exist yet.
-        assert_err!(Error::UnknownPeer, alice.create_gossip(&fred_id));
+        assert_matches!(alice.create_gossip(&fred_id), Err(Error::UnknownPeer));
         assert_eq!(alice_snapshot, Snapshot::new(&alice));
 
         // We'll modify Alice's peer list to allow her to create gossip for Fred
@@ -1198,7 +1243,7 @@ mod handle_malice {
         let result = fred.handle_request(&alice_id, request);
 
         // check that Fred detected premature gossip
-        assert_err!(Error::PrematureGossip, result);
+        assert_matches!(result, Err(Error::PrematureGossip));
 
         // Check that Fred has all the events that Alice has
         assert!(alice
