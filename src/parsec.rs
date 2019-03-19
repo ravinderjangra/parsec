@@ -2300,7 +2300,7 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         unwrap!(self.0.our_last_event_index())
     }
 
-    #[cfg(all(test, feature = "malice-detection"))]
+    #[cfg(all(test, feature = "malice-detection", feature = "mock"))]
     pub fn remove_last_event(&mut self) -> Option<(EventIndex, Event<S::PublicId>)> {
         let (event_index, event) = self.graph.remove_last()?;
         assert_eq!(
@@ -2327,22 +2327,22 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         Some((event_index, event))
     }
 
-    #[cfg(all(test, feature = "malice-detection"))]
+    #[cfg(all(test, feature = "malice-detection", feature = "mock"))]
     pub fn pending_accusations(&self) -> &Accusations<T, S::PublicId> {
         &self.0.pending_accusations
     }
 
-    #[cfg(all(test, feature = "malice-detection"))]
+    #[cfg(all(test, feature = "malice-detection", feature = "mock"))]
     pub fn add_peer(&mut self, peer_id: S::PublicId, state: PeerState) {
         let _ = self.0.peer_list.add_peer(peer_id, state);
     }
 
-    #[cfg(all(test, feature = "malice-detection"))]
+    #[cfg(all(test, feature = "malice-detection", feature = "mock"))]
     pub fn restart_consensus(&mut self) -> Result<()> {
         self.0.process_events(0)
     }
 
-    #[cfg(all(test, any(feature = "malice-detection", feature = "mock")))]
+    #[cfg(all(test, feature = "mock"))]
     pub fn event_payload(
         &self,
         event: &Event<S::PublicId>,
@@ -2350,7 +2350,7 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         self.0.event_payload(event)
     }
 
-    #[cfg(all(test, any(feature = "malice-detection", feature = "mock")))]
+    #[cfg(all(test, feature = "mock"))]
     pub fn event_creator_id(&self, event: &Event<S::PublicId>) -> &S::PublicId {
         unwrap!(self.0.event_creator_id(event))
     }
