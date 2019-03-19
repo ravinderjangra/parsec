@@ -561,7 +561,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         forking_peers: &PeerIndexSet,
     ) -> Result<Option<Event<S::PublicId>>> {
         if let Some(unpacked_event) =
-            Event::unpack(packed_event, &forking_peers, &self.event_context())?
+            Event::unpack(packed_event, &forking_peers, self.event_context())?
         {
             if let Some((payload_key, observation_info)) = unpacked_event.observation_for_store {
                 let _ = self
@@ -581,7 +581,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         observation: Observation<T, S::PublicId>,
     ) -> Result<Event<S::PublicId>> {
         let (event, observation_for_store) =
-            Event::new_from_observation(self_parent, observation, &self.event_context())?;
+            Event::new_from_observation(self_parent, observation, self.event_context())?;
 
         if let Some((payload_key, observation_info)) = observation_for_store {
             let _ = self
