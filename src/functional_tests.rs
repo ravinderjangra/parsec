@@ -507,12 +507,13 @@ fn gossip_after_fork() {
 mod handle_malice {
     use super::*;
     use crate::dev_utils::{parse_dot_file_with_test_name, parse_test_dot_file, ParsedContents};
-    use crate::gossip::{find_event_by_short_name, Event, EventHash};
+    use crate::gossip::{find_event_by_short_name, Event, EventContext, EventHash};
     use crate::id::SecretId;
     use crate::mock::Transaction;
     use crate::network_event::NetworkEvent;
     use crate::observation::Malice;
     use crate::peer_list::{PeerIndex, PeerList, PeerState};
+    use crate::Request;
     use std::ops::Deref;
 
     // Returns iterator over all votes cast by the given node.
@@ -1250,5 +1251,42 @@ mod handle_malice {
             .graph()
             .iter()
             .all(|ev| fred.graph().contains(ev.inner().hash())));
+    }
+
+    #[test]
+    fn invalid_self_parent() {
+        let alice_id = PeerId::new("Alice");
+        let bob_id = PeerId::new("Bob");
+        let genesis = btree_set![alice_id.clone(), bob_id.clone()];
+
+        let mut alice = EventContext::new(alice_id.clone());
+        let _ = alice
+            .peer_list
+            .add_peer(bob_id.clone(), PeerState::active());
+
+        let a_0 = Event::new_initial(alice.as_ref());
+        let a_0_index = alice.graph.insert(a_0).event_index();
+
+        let a_1 = unwrap!(Event::new_from_requesting(
+            a_0_index,
+            &bob_id,
+            &PeerIndexSet::new(),
+            alice.as_ref(),
+        ));
+        let a_1_hash = *a_1.hash();
+        let a_1_packed = unwrap!(a_1.pack(alice.as_ref()));
+
+        // Construct a request which contains an event but not its self-parent.
+        let request = Request {
+            packed_events: vec![a_1_packed],
+        };
+
+        // Create another Parsec and handle the above request. It should return error.
+        let mut bob = TestParsec::from_genesis(bob_id, &genesis, ConsensusMode::Supermajority);
+        let result = bob.handle_request(&alice_id, request);
+        assert_matches!(result, Err(Error::UnknownSelfParent));
+
+        // Verify that the invalid event has not been added to Bob:
+        assert!(bob.graph().get_index(&a_1_hash).is_none());
     }
 }
