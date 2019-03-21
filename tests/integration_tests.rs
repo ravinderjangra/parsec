@@ -410,8 +410,6 @@ fn extensive_dynamic_membership() {
 // execute it when the feature is disabled.
 // TODO: remove this after MAID-3270 is completed.
 #[cfg(not(feature = "malice-detection"))]
-// TODO: remove this after MAID-3164 is completed.
-#[ignore]
 #[test]
 fn consensus_with_fork() {
     let mut env = Environment::new(SEED);

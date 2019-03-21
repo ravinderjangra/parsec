@@ -6,27 +6,26 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use crate::gossip::AbstractEvent;
-use crate::observation::ObservationKey;
+use crate::{gossip::AbstractEventRef, observation::ObservationKey};
 use itertools::Itertools;
 use std::usize;
 
 /// Find interesting payloads for the builder_event.
 /// For payload observed from builder_event, order them by creation index.
 pub(crate) fn find_interesting_content_for_event<'a, E>(
-    builder_event: &E,
-    unconsensused_events: impl Iterator<Item = &'a E>,
+    builder_event: E,
+    unconsensused_events: impl Iterator<Item = E>,
+    is_descendant: impl Fn(E, E) -> bool,
     is_already_interesting_content: impl Fn(&ObservationKey) -> bool,
     is_interesting_payload: impl Fn(&ObservationKey) -> bool,
-    has_interesting_ancestor: impl Fn(&ObservationKey) -> bool,
 ) -> Vec<ObservationKey>
 where
-    E: 'a + AbstractEvent + AsRef<E>,
+    E: AbstractEventRef<'a>,
 {
-    let has_builder_creator = |event: &E| event.creator() == builder_event.creator();
+    let has_builder_creator = |event: E| event.creator() == builder_event.creator();
 
     let mut events_to_process = unconsensused_events
-        .filter(|event| builder_event.sees(event))
+        .filter(|event| is_descendant(builder_event, *event))
         .filter_map(|event| {
             event
                 .payload_key()
@@ -63,16 +62,12 @@ where
             if is_interesting_payload(&payload_key) {
                 events.iter().next().map(|event| (event, payload_key))
             } else {
-                events
-                    .iter()
-                    .find(|event| event.sees_fork())
-                    .filter(|_| has_interesting_ancestor(payload_key))
-                    .map(|event| (event, payload_key))
+                None
             }
         })
         .map(|(event, payload_key)| {
             (
-                if has_builder_creator(event) {
+                if has_builder_creator(*event) {
                     event.index_by_creator()
                 } else {
                     usize::MAX
@@ -116,8 +111,7 @@ mod tests {
         peer_index: PeerIndex,
         creator_index: usize,
         payload_key: Option<ObservationKey>,
-        sees_others: bool,
-        sees_forks: bool,
+        has_ancestors: bool,
     }
 
     impl TestEvent {
@@ -132,51 +126,29 @@ mod tests {
                 payload_key: payload_hash.map(|hash| {
                     ObservationKey::new(hash, peer_index, ConsensusMode::Supermajority)
                 }),
-                sees_others: false,
-                sees_forks: false,
+                has_ancestors: false,
             }
         }
 
-        fn with_sees_others(self) -> Self {
+        fn with_ancestors(self) -> Self {
             Self {
-                sees_others: true,
-                ..self
-            }
-        }
-
-        fn with_sees_forks(self) -> Self {
-            Self {
-                sees_forks: true,
+                has_ancestors: true,
                 ..self
             }
         }
     }
 
-    impl AbstractEvent for TestEvent {
-        fn sees<E: AsRef<Self>>(&self, _other: E) -> bool {
-            self.sees_others
-        }
-
-        fn payload_key(&self) -> Option<&ObservationKey> {
+    impl<'a> AbstractEventRef<'a> for &'a TestEvent {
+        fn payload_key(self) -> Option<&'a ObservationKey> {
             self.payload_key.as_ref()
         }
 
-        fn creator(&self) -> PeerIndex {
+        fn creator(self) -> PeerIndex {
             self.peer_index
         }
 
-        fn sees_fork(&self) -> bool {
-            self.sees_forks
-        }
-
-        fn index_by_creator(&self) -> usize {
+        fn index_by_creator(self) -> usize {
             self.creator_index
-        }
-    }
-
-    impl AsRef<Self> for TestEvent {
-        fn as_ref(&self) -> &Self {
-            self
         }
     }
 
@@ -226,7 +198,6 @@ mod tests {
         struct PayloadProperties {
             is_already_interesting_content: bool,
             is_interesting_payload: bool,
-            has_interesting_ancestor: bool,
         }
 
         struct Events {
@@ -237,18 +208,7 @@ mod tests {
         impl Events {
             fn with_builder_event_sees_other(self) -> Self {
                 Self {
-                    builder_event: self.builder_event.with_sees_others(),
-                    ..self
-                }
-            }
-
-            fn with_unconsensused_events_sees_forks(self) -> Self {
-                Self {
-                    unconsensused_events: self
-                        .unconsensused_events
-                        .into_iter()
-                        .map(|e| e.with_sees_forks())
-                        .collect(),
+                    builder_event: self.builder_event.with_ancestors(),
                     ..self
                 }
             }
@@ -284,9 +244,9 @@ mod tests {
             let payloads = find_interesting_content_for_event(
                 &events.builder_event,
                 events.unconsensused_events.iter(),
+                |event_x, _event_y| event_x.has_ancestors,
                 |_payload_key| payload_properties.is_already_interesting_content,
                 |_payload_key| payload_properties.is_interesting_payload,
-                |_payload_key| payload_properties.has_interesting_ancestor,
             );
 
             assert_eq!(
@@ -306,7 +266,6 @@ mod tests {
                 payload_properties: PayloadProperties {
                     is_already_interesting_content: false,
                     is_interesting_payload: true,
-                    has_interesting_ancestor: false,
                 },
                 expected_payloads: vec![Supermajority(1), Supermajority(2)],
             });
@@ -320,7 +279,6 @@ mod tests {
                 payload_properties: PayloadProperties {
                     is_already_interesting_content: true,
                     is_interesting_payload: true,
-                    has_interesting_ancestor: false,
                 },
                 expected_payloads: vec![],
             });
@@ -334,26 +292,8 @@ mod tests {
                 payload_properties: PayloadProperties {
                     is_already_interesting_content: false,
                     is_interesting_payload: false,
-                    has_interesting_ancestor: false,
                 },
                 expected_payloads: vec![],
-            });
-        }
-
-        #[test]
-        /// Handle forks: interesting payload if has_interesting_ancestor and
-        /// an event see a fork.
-        fn all_payloads_interesting_because_of_forks_and_ancestor() {
-            test_find_interesting_content_for_event(TestSimpleData {
-                events: Events::new_basic_setup()
-                    .with_builder_event_sees_other()
-                    .with_unconsensused_events_sees_forks(),
-                payload_properties: PayloadProperties {
-                    is_already_interesting_content: false,
-                    is_interesting_payload: false,
-                    has_interesting_ancestor: true,
-                },
-                expected_payloads: vec![Supermajority(1), Supermajority(2)],
             });
         }
     }

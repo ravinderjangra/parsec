@@ -6,6 +6,7 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
+mod abstract_event;
 mod cause;
 mod content;
 mod event;
@@ -15,13 +16,14 @@ mod graph;
 mod messages;
 mod packed_event;
 
+pub(super) use self::abstract_event::AbstractEventRef;
 #[cfg(any(test, feature = "testing", feature = "dump-graphs"))]
 pub(super) use self::cause::Cause;
 #[cfg(test)]
 pub(super) use self::event::find_event_by_short_name;
 #[cfg(any(test, feature = "testing"))]
 pub(super) use self::event::CauseInput;
-pub(super) use self::event::{AbstractEvent, Event};
+pub(super) use self::event::Event;
 #[cfg(all(test, feature = "mock", feature = "malice-detection"))]
 pub(super) use self::event_context::EventContext;
 pub(super) use self::event_context::EventContextRef;
