@@ -22,7 +22,7 @@ pub(super) use self::cause::Cause;
 pub(super) use self::event::find_event_by_short_name;
 #[cfg(any(test, feature = "testing"))]
 pub(super) use self::event::CauseInput;
-#[cfg(all(test, feature = "mock", feature = "malice-detection"))]
+#[cfg(all(test, feature = "mock"))]
 pub(super) use self::event_context::EventContext;
 #[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
 pub(super) use self::graph::snapshot::GraphSnapshot;

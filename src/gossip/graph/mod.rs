@@ -268,6 +268,10 @@ impl<P: PublicId> Graph<P> {
         let _ = self.indices.remove(event.hash());
         Some((index, event))
     }
+
+    pub fn get_by_hash<'a>(&'a self, hash: &EventHash) -> Option<IndexedEventRef<'a, P>> {
+        self.get_index(hash).and_then(|index| self.get(index))
+    }
 }
 
 impl<P: PublicId> IntoIterator for Graph<P> {

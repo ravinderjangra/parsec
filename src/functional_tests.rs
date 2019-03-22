@@ -10,7 +10,7 @@ use crate::{
     block::Block,
     dev_utils::{parse_test_dot_file, Record},
     error::Error,
-    gossip::{Event, Graph, GraphSnapshot},
+    gossip::{find_event_by_short_name, Event, EventContext, Graph, GraphSnapshot, Request},
     id::{Proof, PublicId},
     meta_voting::MetaElectionSnapshot,
     mock::{self, PeerId, Transaction},
@@ -500,6 +500,120 @@ fn gossip_after_fork() {
 
     // Verify that Bob now has the forked event.
     assert!(bob.graph().contains(&a_2_fork_hash));
+}
+
+#[test]
+fn sees() {
+    //
+    // Construct gossip graph like this and then verify the sees relation between various pairs of
+    // events.
+    //
+    // (A3)---------+                           - request
+    //  |           |
+    //  |           |
+    //  |          (B3)                         - requesting
+    //  |           |
+    //  |           |
+    // (A2)----+   (B2)--------------+          - request
+    //  |      |    |                |
+    //  |      |    |                |
+    //  |      +---------(C2,0)    (C2,1)       - requesting
+    //  |           |      |         |
+    //  |           |      +----+----+
+    //  |           |           |
+    // (A1)        (B1)        (C1)             - genesis
+    //  |           |           |
+    // (A0)        (B0)        (C0)             - initial
+    //
+
+    let alice_id = PeerId::new("Alice");
+    let bob_id = PeerId::new("Bob");
+    let carol_id = PeerId::new("Carol");
+    let genesis = btree_set![alice_id.clone(), bob_id.clone(), carol_id.clone()];
+
+    let mut alice =
+        TestParsec::from_genesis(alice_id.clone(), &genesis, ConsensusMode::Supermajority);
+    let mut bob = TestParsec::from_genesis(bob_id.clone(), &genesis, ConsensusMode::Supermajority);
+
+    // Create Carol's events outside of Parsec, because we need to create a fork.
+    let mut carol_ctx = EventContext::new(carol_id.clone());
+    let _ = carol_ctx
+        .peer_list
+        .add_peer(alice_id.clone(), PeerState::active());
+    let _ = carol_ctx
+        .peer_list
+        .add_peer(bob_id.clone(), PeerState::active());
+
+    let c0 = Event::new_initial(carol_ctx.as_ref());
+    let c0_packed = unwrap!(c0.pack(carol_ctx.as_ref()));
+    let c0_index = carol_ctx.graph.insert(c0).event_index();
+
+    let (c1, obs) = unwrap!(Event::new_from_observation(
+        c0_index,
+        Observation::Genesis(genesis.clone()),
+        carol_ctx.as_ref()
+    ));
+    let (obs_key, obs_info) = unwrap!(obs);
+    let _ = carol_ctx.observations.insert(obs_key, obs_info);
+    let c1_packed = unwrap!(c1.pack(carol_ctx.as_ref()));
+    let c1_index = carol_ctx.graph.insert(c1).event_index();
+
+    let c2_0 = unwrap!(Event::new_from_requesting(
+        c1_index,
+        &alice_id,
+        carol_ctx.as_ref()
+    ));
+    let c2_0_hash = *c2_0.hash();
+    let c2_0_packed = unwrap!(c2_0.pack(carol_ctx.as_ref()));
+    let _ = carol_ctx.graph.insert(c2_0).event_index();
+
+    let c2_1 = unwrap!(Event::new_from_requesting(
+        c1_index,
+        &bob_id,
+        carol_ctx.as_ref()
+    ));
+    let c2_1_hash = *c2_1.hash();
+    let c2_1_packed = unwrap!(c2_1.pack(carol_ctx.as_ref()));
+    let _ = carol_ctx.graph.insert(c2_1).event_index();
+
+    // Send one side of the fork to Alice...
+    let request = Request {
+        packed_events: vec![c0_packed.clone(), c1_packed.clone(), c2_0_packed],
+    };
+    let _ = unwrap!(alice.handle_request(&carol_id, request));
+
+    // ...and the other to Bob.
+    let request = Request {
+        packed_events: vec![c0_packed, c1_packed, c2_1_packed],
+    };
+    let _ = unwrap!(bob.handle_request(&carol_id, request));
+
+    // Send gossip from Bob to Alice, so Alice will have all the events.
+    let request = unwrap!(bob.create_gossip(&alice_id));
+    let _ = unwrap!(alice.handle_request(&bob_id, request));
+
+    // Verify the sees relations
+
+    let a2 = unwrap!(find_event_by_short_name(alice.graph().iter(), "A_2"));
+    let a3 = unwrap!(find_event_by_short_name(alice.graph().iter(), "A_3"));
+    let b2 = unwrap!(find_event_by_short_name(alice.graph().iter(), "B_2"));
+    let c1 = unwrap!(find_event_by_short_name(alice.graph().iter(), "C_1"));
+
+    // These two cannot by fetched by the short name because it's not unique in case of fork.
+    let c2_0 = unwrap!(alice.graph().get_by_hash(&c2_0_hash));
+    let c2_1 = unwrap!(alice.graph().get_by_hash(&c2_1_hash));
+
+    assert!(a2.sees(c1));
+    assert!(a2.sees(c2_0));
+    assert!(!a2.sees(c2_1));
+
+    assert!(b2.sees(c1));
+    assert!(!b2.sees(c2_0));
+    assert!(b2.sees(c2_1));
+
+    assert!(!a3.sees(c1));
+    assert!(!a3.sees(c2_0));
+    assert!(!a3.sees(c2_1));
 }
 
 #[cfg(feature = "malice-detection")]
