@@ -22,6 +22,8 @@ pub(super) use self::event::find_event_by_short_name;
 #[cfg(any(test, feature = "testing"))]
 pub(super) use self::event::CauseInput;
 pub(super) use self::event::{AbstractEvent, Event};
+#[cfg(all(test, feature = "mock", feature = "malice-detection"))]
+pub(super) use self::event_context::EventContext;
 pub(super) use self::event_context::EventContextRef;
 pub use self::event_hash::EventHash;
 #[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]

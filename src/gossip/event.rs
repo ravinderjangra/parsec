@@ -765,47 +765,17 @@ mod tests {
     use crate::gossip::{
         cause::Cause,
         event::Event,
+        event_context::EventContext,
         event_hash::EventHash,
         graph::{EventIndex, Graph},
     };
     use crate::id::SecretId;
     use crate::mock::{PeerId, Transaction};
-    use crate::observation::ConsensusMode;
     use crate::observation::Observation;
-    use crate::peer_list::{PeerList, PeerState};
+    use crate::peer_list::PeerState;
 
-    struct Context {
-        graph: Graph<PeerId>,
-        peer_list: PeerList<PeerId>,
-        observations: ObservationStore<Transaction, PeerId>,
-        consensus_mode: ConsensusMode,
-    }
-
-    impl Context {
-        fn new(our_id: &str) -> Self {
-            let our_id = PeerId::new(our_id);
-            let peer_list = PeerList::new(our_id);
-
-            Self {
-                graph: Graph::new(),
-                peer_list,
-                observations: ObservationStore::new(),
-                consensus_mode: ConsensusMode::Supermajority,
-            }
-        }
-
-        fn as_ref(&self) -> EventContextRef<Transaction, PeerId> {
-            EventContextRef {
-                graph: &self.graph,
-                peer_list: &self.peer_list,
-                observations: &self.observations,
-                consensus_mode: self.consensus_mode,
-            }
-        }
-    }
-
-    fn create_event_with_single_peer(id: &str) -> (Context, Event<PeerId>) {
-        let context = Context::new(id);
+    fn create_event_with_single_peer(id: &str) -> (EventContext, Event<PeerId>) {
+        let context = EventContext::new(PeerId::new(id));
         let event = Event::new_initial(context.as_ref());
 
         (context, event)
@@ -820,9 +790,12 @@ mod tests {
         (graph.insert(initial_event).event_index(), hash)
     }
 
-    fn create_two_events(id0: &str, id1: &str) -> (Context, Event<PeerId>, Context, Event<PeerId>) {
-        let mut context0 = Context::new(id0);
-        let mut context1 = Context::new(id1);
+    fn create_two_events(
+        id0: &str,
+        id1: &str,
+    ) -> (EventContext, Event<PeerId>, EventContext, Event<PeerId>) {
+        let mut context0 = EventContext::new(PeerId::new(id0));
+        let mut context1 = EventContext::new(PeerId::new(id1));
 
         let _ = context0.peer_list.add_peer(
             context1.peer_list.our_pub_id().clone(),
@@ -905,7 +878,7 @@ mod tests {
     #[test]
     #[cfg(feature = "testing")]
     fn event_construction_from_observation_with_phony_self_parent() {
-        let alice = Context::new("Alice");
+        let alice = EventContext::new(PeerId::new("Alice"));
         let self_parent_index = EventIndex::PHONY;
         let net_event = Observation::OpaquePayload(Transaction::new("event_observed_by_alice"));
 
