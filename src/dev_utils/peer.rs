@@ -134,11 +134,9 @@ impl MaliciousComponents {
         let _ = unwrap!(self.test_parsec.create_gossip(&dummy_recipient_id));
 
         // Create the forking event.
-        let forking_peers = Default::default();
         let event = unwrap!(Event::new_from_requesting(
             common_self_parent_index,
             recipient_id,
-            &forking_peers,
             self.test_parsec.event_context()
         ));
         let forked_event = ForkedEvent {

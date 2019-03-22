@@ -6,8 +6,6 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-#[cfg(feature = "malice-detection")]
-use crate::peer_list::PeerIndexSet;
 use crate::{
     block::Block,
     dev_utils::{parse_test_dot_file, Record},
@@ -1157,7 +1155,6 @@ mod handle_malice {
         let b_2 = unwrap!(Event::new_from_request(
             b_1_index,
             b_0_index,
-            &PeerIndexSet::default(),
             bob_contents.event_context()
         ));
         let b_2_hash = *b_2.hash();
@@ -1273,7 +1270,6 @@ mod handle_malice {
         let a_1 = unwrap!(Event::new_from_requesting(
             a_0_index,
             &bob_id,
-            &PeerIndexSet::new(),
             alice.as_ref(),
         ));
         let a_1_hash = *a_1.hash();
@@ -1314,18 +1310,12 @@ mod handle_malice {
 
         let b_0 = Event::new_initial(bob.as_ref());
         let b_0 = unwrap!(b_0.pack(bob.as_ref()));
-        let b_0 = unwrap!(unwrap!(Event::unpack(
-            b_0,
-            &PeerIndexSet::new(),
-            alice.as_ref()
-        )))
-        .event;
+        let b_0 = unwrap!(unwrap!(Event::unpack(b_0, alice.as_ref()))).event;
         let b_0_index = alice.graph.insert(b_0).event_index();
 
         let a_1 = unwrap!(Event::new_from_request(
             a_0_index,
             b_0_index,
-            &PeerIndexSet::new(),
             alice.as_ref()
         ));
         let a_1_hash = *a_1.hash();

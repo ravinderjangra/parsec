@@ -294,9 +294,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             log_or_panic!("{:?} missing our own last event hash.", self.our_pub_id());
             Error::Logic
         })?;
-        let forking_peers = PeerIndexSet::default();
-        let sync_event =
-            Event::new_from_requesting(self_parent, peer_id, &forking_peers, self.event_context())?;
+        let sync_event = Event::new_from_requesting(self_parent, peer_id, self.event_context())?;
         let _ = self.add_event(sync_event)?;
 
         let events = if self.peer_list.last_event(peer_index).is_some() {
@@ -322,9 +320,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         );
 
         let src_index = self.get_peer_index(src)?;
-        let (other_parent, forking_peers) =
-            self.unpack_and_add_events(src_index, req.packed_events)?;
-        self.create_sync_event(true, other_parent, forking_peers)?;
+        let other_parent = self.unpack_and_add_events(src_index, req.packed_events)?;
+        self.create_sync_event(true, other_parent)?;
         self.create_accusation_events()?;
         self.flush_pending_events()?;
 
@@ -346,9 +343,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         );
 
         let src_index = self.get_peer_index(src)?;
-        let (other_parent, forking_peers) =
-            self.unpack_and_add_events(src_index, resp.packed_events)?;
-        self.create_sync_event(false, other_parent, forking_peers)?;
+        let other_parent = self.unpack_and_add_events(src_index, resp.packed_events)?;
+        self.create_sync_event(false, other_parent)?;
         self.create_accusation_events()?;
         self.flush_pending_events()
     }
@@ -516,7 +512,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         &mut self,
         src_index: PeerIndex,
         packed_events: Vec<PackedEvent<T, S::PublicId>>,
-    ) -> Result<(EventIndex, PeerIndexSet)> {
+    ) -> Result<EventIndex> {
         self.confirm_self_state(PeerState::RECV)?;
         self.confirm_peer_state(src_index, PeerState::SEND)?;
 
@@ -524,18 +520,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .last()
             .map(PackedEvent::compute_hash)
             .ok_or_else(|| Error::InvalidMessage)?;
-        let mut forking_peers = PeerIndexSet::default();
         for packed_event in packed_events {
-            if let Some(event) = self.unpack(packed_event, &forking_peers)? {
-                if self
-                    .peer_list
-                    .events_by_index(event.creator(), event.index_by_creator())
-                    .next()
-                    .is_some()
-                {
-                    let _ = forking_peers.insert(event.creator());
-                }
-
+            if let Some(event) = self.unpack(packed_event)? {
                 let event_creator = event.creator();
                 let event_index = self.add_event(event)?;
 
@@ -558,17 +544,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .graph
             .get_index(&hash_of_last_event)
             .ok_or_else(|| Error::InvalidMessage)?;
-        Ok((last_event_index, forking_peers))
+        Ok(last_event_index)
     }
 
     fn unpack(
         &mut self,
         packed_event: PackedEvent<T, S::PublicId>,
-        forking_peers: &PeerIndexSet,
     ) -> Result<Option<Event<S::PublicId>>> {
-        if let Some(unpacked_event) =
-            Event::unpack(packed_event, &forking_peers, self.event_context())?
-        {
+        if let Some(unpacked_event) = Event::unpack(packed_event, self.event_context())? {
             if let Some((payload_key, observation_info)) = unpacked_event.observation_for_store {
                 let _ = self
                     .observations
@@ -1445,45 +1428,24 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
     // Constructs a sync event to prove receipt of a `Request` or `Response` (depending on the value
     // of `is_request`) from `src`, then add it to our graph.
-    fn create_sync_event(
-        &mut self,
-        is_request: bool,
-        other_parent: EventIndex,
-        forking_peers: PeerIndexSet,
-    ) -> Result<()> {
+    fn create_sync_event(&mut self, is_request: bool, other_parent: EventIndex) -> Result<()> {
         if self.peer_list.last_event(PeerIndex::OUR).is_none() {
             self.pending_events.push(PendingEvent::Sync {
                 is_request,
                 other_parent,
-                forking_peers,
             });
             return Ok(());
         };
 
-        self.add_sync_event(is_request, other_parent, &forking_peers)
+        self.add_sync_event(is_request, other_parent)
     }
 
-    fn add_sync_event(
-        &mut self,
-        is_request: bool,
-        other_parent: EventIndex,
-        forking_peers: &PeerIndexSet,
-    ) -> Result<()> {
+    fn add_sync_event(&mut self, is_request: bool, other_parent: EventIndex) -> Result<()> {
         let self_parent = self.our_last_event_index()?;
         let event = if is_request {
-            Event::new_from_request(
-                self_parent,
-                other_parent,
-                forking_peers,
-                self.event_context(),
-            )?
+            Event::new_from_request(self_parent, other_parent, self.event_context())?
         } else {
-            Event::new_from_response(
-                self_parent,
-                other_parent,
-                forking_peers,
-                self.event_context(),
-            )?
+            Event::new_from_response(self_parent, other_parent, self.event_context())?
         };
 
         #[cfg(feature = "malice-detection")]
@@ -1582,8 +1544,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 PendingEvent::Sync {
                     is_request,
                     other_parent,
-                    forking_peers,
-                } => self.add_sync_event(is_request, other_parent, &forking_peers)?,
+                } => self.add_sync_event(is_request, other_parent)?,
                 PendingEvent::Accusation { offender, malice } => {
                     self.add_accusation_event(offender, malice)?
                 }
@@ -2137,7 +2098,6 @@ enum PendingEvent<T: NetworkEvent, P: PublicId> {
     Sync {
         is_request: bool,
         other_parent: EventIndex,
-        forking_peers: PeerIndexSet,
     },
     Accusation {
         offender: PeerIndex,
@@ -2265,7 +2225,7 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         &mut self,
         packed_event: PackedEvent<T, S::PublicId>,
     ) -> Result<EventIndex> {
-        match self.0.unpack(packed_event, &PeerIndexSet::default())? {
+        match self.0.unpack(packed_event)? {
             Some(event) => self.0.add_event(event),
             None => Err(Error::Logic),
         }
