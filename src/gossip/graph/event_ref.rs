@@ -6,11 +6,15 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use super::super::event::Event;
-use super::event_index::EventIndex;
-use crate::id::PublicId;
-use std::cmp::{Ord, Ordering, PartialOrd};
-use std::ops::Deref;
+use super::{
+    super::{abstract_event::AbstractEventRef, event::Event},
+    event_index::EventIndex,
+};
+use crate::{id::PublicId, observation::ObservationKey, peer_list::PeerIndex};
+use std::{
+    cmp::{Ord, Ordering, PartialOrd},
+    ops::Deref,
+};
 
 /// Reference to `Event` together with its index.
 #[derive(Clone, Debug)]
@@ -69,5 +73,19 @@ impl<'a, P: PublicId> PartialOrd for IndexedEventRef<'a, P> {
 impl<'a, P: PublicId> Ord for IndexedEventRef<'a, P> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.index.cmp(&other.index)
+    }
+}
+
+impl<'a, P: PublicId> AbstractEventRef<'a> for IndexedEventRef<'a, P> {
+    fn payload_key(self) -> Option<&'a ObservationKey> {
+        self.event.payload_key()
+    }
+
+    fn creator(self) -> PeerIndex {
+        self.event.creator()
+    }
+
+    fn index_by_creator(self) -> usize {
+        self.event.index_by_creator()
     }
 }

@@ -873,6 +873,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         let peers_that_can_vote = self.voters();
 
+        let is_descendant = |x, y| self.graph.is_descendant(x, y);
+
         let is_already_interesting_content = |payload_key: &ObservationKey| {
             self.meta_election
                 .is_already_interesting_content(builder.event().creator(), payload_key)
@@ -882,39 +884,15 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             self.is_interesting_payload(builder, &peers_that_can_vote, payload_key)
         };
 
-        let has_interesting_ancestor =
-            |payload_key: &ObservationKey| self.has_interesting_ancestor(builder, payload_key);
-
         let payloads = find_interesting_content_for_event(
-            builder.event().as_ref(),
-            self.unconsensused_events(None).map(|event| event.inner()),
+            builder.event(),
+            self.unconsensused_events(None),
+            is_descendant,
             is_already_interesting_content,
             is_interesting_payload,
-            has_interesting_ancestor,
         );
 
         builder.set_interesting_content(payloads);
-    }
-
-    // Returns true if `builder.event()` has an ancestor by a different creator that has `payload`
-    // in interesting content
-    fn has_interesting_ancestor(
-        &self,
-        builder: &MetaEventBuilder<S::PublicId>,
-        payload_key: &ObservationKey,
-    ) -> bool {
-        let start_index = self.meta_election.new_consensus_start_index();
-
-        self.graph
-            .ancestors(builder.event())
-            .take_while(|that_event| that_event.topological_index() >= start_index)
-            .filter(|that_event| that_event.creator() != builder.event().creator())
-            .any(|that_event| {
-                self.meta_election
-                    .meta_event(that_event.event_index())
-                    .map(|meta_event| meta_event.interesting_content.contains(payload_key))
-                    .unwrap_or(false)
-            })
     }
 
     // Returns true if enough of `valid_voters` have voted for the indicated payload from the
@@ -928,7 +906,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let num_peers_that_did_vote = || {
             self.num_creators_of_ancestors_carrying_payload(
                 peers_that_can_vote,
-                &*builder.event(),
+                builder.event(),
                 payload_key,
             )
         };
@@ -964,20 +942,18 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     fn num_creators_of_ancestors_carrying_payload(
         &self,
         peers_that_can_vote: &PeerIndexSet,
-        event: &Event<S::PublicId>,
+        event: IndexedEventRef<S::PublicId>,
         payload_key: &ObservationKey,
     ) -> usize {
-        let unconsensused_events = self
-            .unconsensused_events(Some(payload_key))
-            .map(|that_event| that_event.inner())
-            .collect_vec();
+        let unconsensused_events = self.unconsensused_events(Some(payload_key)).collect_vec();
 
         peers_that_can_vote
             .iter()
             .filter(|peer_index| {
-                unconsensused_events
-                    .iter()
-                    .any(|that_event| that_event.creator() == *peer_index && event.sees(that_event))
+                unconsensused_events.iter().any(|that_event| {
+                    that_event.creator() == *peer_index
+                        && self.graph.is_descendant(event, *that_event)
+                })
             })
             .count()
     }

@@ -157,10 +157,6 @@ impl MetaElection {
         self.continue_consensus_start_index
     }
 
-    pub fn new_consensus_start_index(&self) -> usize {
-        self.new_consensus_start_index
-    }
-
     /// Starts new election.
     pub fn new_election<P: PublicId>(
         &mut self,
