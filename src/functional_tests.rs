@@ -1289,4 +1289,56 @@ mod handle_malice {
         // Verify that the invalid event has not been added to Bob:
         assert!(bob.graph().get_index(&a_1_hash).is_none());
     }
+
+    #[test]
+    fn invalid_other_parent() {
+        let alice_id = PeerId::new("Alice");
+        let bob_id = PeerId::new("Bob");
+        let carol_id = PeerId::new("Carol");
+        let genesis = btree_set![alice_id.clone(), bob_id.clone(), carol_id.clone()];
+
+        let mut alice = EventContext::new(alice_id.clone());
+        let _ = alice
+            .peer_list
+            .add_peer(bob_id.clone(), PeerState::active());
+
+        let bob = EventContext::new(bob_id.clone());
+
+        let a_0 = Event::new_initial(alice.as_ref());
+        let a_0_index = alice.graph.insert(a_0).event_index();
+        let a_0 = unwrap!(alice.graph.get(a_0_index));
+        let a_0_packed = unwrap!(a_0.pack(alice.as_ref()));
+
+        let b_0 = Event::new_initial(bob.as_ref());
+        let b_0 = unwrap!(b_0.pack(bob.as_ref()));
+        let b_0 = unwrap!(unwrap!(Event::unpack(
+            b_0,
+            &PeerIndexSet::new(),
+            alice.as_ref()
+        )))
+        .event;
+        let b_0_index = alice.graph.insert(b_0).event_index();
+
+        let a_1 = unwrap!(Event::new_from_request(
+            a_0_index,
+            b_0_index,
+            &PeerIndexSet::new(),
+            alice.as_ref()
+        ));
+        let a_1_hash = *a_1.hash();
+        let a_1_packed = unwrap!(a_1.pack(alice.as_ref()));
+
+        // Construct a request which contains an event but not its other-parent.
+        let request = Request {
+            packed_events: vec![a_0_packed, a_1_packed],
+        };
+
+        // Create another Parsec and handle the above request. It should return error.
+        let mut carol = TestParsec::from_genesis(carol_id, &genesis, ConsensusMode::Supermajority);
+        let result = carol.handle_request(&alice_id, request);
+        assert_matches!(result, Err(Error::UnknownOtherParent));
+
+        // Verify that the invalid event has not been added to Carol:
+        assert!(carol.graph().get_index(&a_1_hash).is_none());
+    }
 }

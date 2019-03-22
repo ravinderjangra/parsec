@@ -770,7 +770,7 @@ impl ParsedContents {
         observation: Observation<Transaction, PeerId>,
     ) -> Result<Event<PeerId>, Error> {
         let (event, observation_for_store) =
-            Event::new_from_observation(self_parent, observation, &self.event_context())?;
+            Event::new_from_observation(self_parent, observation, self.event_context())?;
 
         if let Some((payload_key, observation_info)) = observation_for_store {
             let _ = self

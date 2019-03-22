@@ -176,7 +176,7 @@ impl<P: PublicId> Event<P> {
     pub fn new_from_observation<T: NetworkEvent, S: SecretId<PublicId = P>>(
         self_parent: EventIndex,
         observation: Observation<T, P>,
-        ctx: &EventContextRef<T, S>,
+        ctx: EventContextRef<T, S>,
     ) -> Result<(Self, ObservationForStore<T, P>), Error> {
         // Compute event hash + signature.
         let vote = Vote::new(ctx.peer_list.our_id(), observation);
@@ -256,7 +256,7 @@ impl<P: PublicId> Event<P> {
     pub(crate) fn unpack<T: NetworkEvent, S: SecretId<PublicId = P>>(
         packed_event: PackedEvent<T, P>,
         forking_peers: &PeerIndexSet,
-        ctx: &EventContextRef<T, S>,
+        ctx: EventContextRef<T, S>,
     ) -> Result<Option<UnpackedEvent<T, P>>, Error> {
         let hash = compute_event_hash_and_verify_signature(
             &packed_event.content,
@@ -818,7 +818,7 @@ mod tests {
         dst: EventContextRef<Transaction, PeerId>,
     ) -> Event<PeerId> {
         let e = unwrap!(event.pack(src));
-        unwrap!(unwrap!(Event::unpack(e, &PeerIndexSet::default(), &dst))).event
+        unwrap!(unwrap!(Event::unpack(e, &PeerIndexSet::default(), dst))).event
     }
 
     #[test]
@@ -843,7 +843,7 @@ mod tests {
         let (event_from_observation, observation_for_store) = unwrap!(Event::new_from_observation(
             initial_event_index,
             net_event.clone(),
-            &alice.as_ref(),
+            alice.as_ref(),
         ));
 
         let (key, observation_info) = unwrap!(observation_for_store);
@@ -882,7 +882,7 @@ mod tests {
         let self_parent_index = EventIndex::PHONY;
         let net_event = Observation::OpaquePayload(Transaction::new("event_observed_by_alice"));
 
-        match Event::new_from_observation(self_parent_index, net_event.clone(), &alice.as_ref()) {
+        match Event::new_from_observation(self_parent_index, net_event.clone(), alice.as_ref()) {
             Err(Error::UnknownSelfParent) => (),
             x => panic!("Unexpected {:?}", x),
         }
@@ -988,7 +988,7 @@ mod tests {
         let (event_from_observation, observation_for_store) = unwrap!(Event::new_from_observation(
             a_0_index,
             net_event,
-            &alice.as_ref()
+            alice.as_ref()
         ));
 
         let (key, observation_info) = unwrap!(observation_for_store);
@@ -998,7 +998,7 @@ mod tests {
         let unpacked_event = unwrap!(unwrap!(Event::unpack(
             packed_event.clone(),
             &PeerIndexSet::default(),
-            &alice.as_ref()
+            alice.as_ref()
         )))
         .event;
 
@@ -1010,7 +1010,7 @@ mod tests {
         assert!(unwrap!(Event::unpack(
             packed_event,
             &PeerIndexSet::default(),
-            &alice.as_ref()
+            alice.as_ref()
         ))
         .is_none());
     }
@@ -1026,7 +1026,7 @@ mod tests {
         let (event_from_observation, observation_for_store) = unwrap!(Event::new_from_observation(
             a_0_index,
             net_event,
-            &alice.as_ref()
+            alice.as_ref()
         ));
 
         let (key, observation_info) = unwrap!(observation_for_store);
@@ -1038,7 +1038,7 @@ mod tests {
         let error = unwrap_err!(Event::unpack(
             packed_event,
             &PeerIndexSet::default(),
-            &alice.as_ref()
+            alice.as_ref()
         ));
         if let Error::SignatureFailure = error {
         } else {
