@@ -121,8 +121,8 @@ pub(crate) enum MaliceInput {
     InvalidAccusation(String),
 }
 
+#[cfg(feature = "malice-detection")]
 impl<T: NetworkEvent, P: PublicId> Malice<T, P> {
-    #[cfg(any(test, feature = "malice-detection", feature = "testing"))]
     pub(crate) fn is_provable(&self) -> bool {
         match *self {
             Malice::Unprovable(_) => false,
@@ -130,7 +130,6 @@ impl<T: NetworkEvent, P: PublicId> Malice<T, P> {
         }
     }
 
-    #[cfg(feature = "malice-detection")]
     // If the malice specifies a single event as its source, return it.
     pub(crate) fn single_hash(&self) -> Option<&EventHash> {
         match self {
@@ -146,6 +145,23 @@ impl<T: NetworkEvent, P: PublicId> Malice<T, P> {
             | Malice::InvalidRequest(_)
             | Malice::InvalidResponse(_)
             | Malice::Unprovable(_) => None,
+        }
+    }
+
+    pub(crate) fn accused_events_in_graph(&self) -> Vec<&EventHash> {
+        match self {
+            Malice::UnexpectedGenesis(hash)
+            | Malice::MissingGenesis(hash)
+            | Malice::IncorrectGenesis(hash)
+            | Malice::Fork(hash)
+            | Malice::InvalidAccusation(hash)
+            | Malice::Accomplice(hash, _) => vec![hash],
+            Malice::DuplicateVote(first, second) => vec![first, second],
+            Malice::OtherParentBySameCreator(_)
+            | Malice::SelfParentByDifferentCreator(_)
+            | Malice::InvalidRequest(_)
+            | Malice::InvalidResponse(_)
+            | Malice::Unprovable(_) => vec![],
         }
     }
 }
