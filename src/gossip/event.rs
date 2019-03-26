@@ -660,7 +660,7 @@ where
     let short_name = short_name.to_uppercase();
     events
         .into_iter()
-        .find(|event| event.short_name().to_string() == short_name)
+        .find(move |event| event.short_name().to_string() == short_name)
 }
 
 #[cfg(any(test, feature = "testing"))]
