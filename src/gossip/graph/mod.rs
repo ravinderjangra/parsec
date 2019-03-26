@@ -195,6 +195,32 @@ impl<P: PublicId> Graph<P> {
         self.awaiting_associated_events.contains(&event.index)
     }
 
+    /// Returns `Some(true)` if the event is a `Request` or `Response` and is valid (follows the
+    /// `Requesting -> Request -> Response` pattern).  Returns `Some(false)` if the event is a
+    /// `Request` or `Response` and is invalid.  Otherwise returns `None`.
+    pub fn is_valid_sync_event(&self, event: &Event<P>) -> Option<bool> {
+        if event.is_request() {
+            self.other_parent(event).map(|requesting_event| {
+                Some(event.creator()) == requesting_event.requesting_recipient()
+                    && self.is_awaiting_associated_event(requesting_event)
+            })
+        } else if event.is_response() {
+            self.other_parent(event)
+                .and_then(|other_parent| self.self_sync_ancestor(other_parent))
+                .and_then(|request_event| {
+                    self.other_parent(request_event)
+                        .map(|requesting_event| (request_event, requesting_event))
+                })
+                .map(|(request_event, requesting_event)| {
+                    request_event.is_request()
+                        && requesting_event.creator() == event.creator()
+                        && self.is_awaiting_associated_event(request_event)
+                })
+        } else {
+            None
+        }
+    }
+
     fn awaiting_and_awaited_indices(
         &self,
         index: EventIndex,

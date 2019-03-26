@@ -1471,6 +1471,15 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             )?
         };
 
+        #[cfg(feature = "malice-detection")]
+        {
+            if !self.graph.is_valid_sync_event(&event).unwrap_or(false) {
+                // The message we're handling is invalid, since it doesn't allow us to create our
+                // sync event so that it follows the `Requesting -> Request -> Response` pattern.
+                return Err(Error::InvalidMessage);
+            }
+        }
+
         let _ = self.add_event(event)?;
         Ok(())
     }
@@ -1613,8 +1622,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         self.detect_other_parent_by_same_creator(event)?;
         self.detect_self_parent_by_different_creator(event)?;
-        self.detect_invalid_request(event)?;
-        self.detect_invalid_response(event)?;
+        self.detect_invalid_sync_event(event)?;
 
         self.detect_unexpected_genesis(event);
         self.detect_missing_genesis(event);
@@ -1689,62 +1697,18 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         Err(Error::InvalidEvent)
     }
 
-    fn detect_invalid_request(&mut self, event: &Event<S::PublicId>) -> Result<()> {
-        if !event.is_request() {
+    fn detect_invalid_sync_event(&mut self, event: &Event<S::PublicId>) -> Result<()> {
+        if self.graph.is_valid_sync_event(event).unwrap_or(true) {
             return Ok(());
         }
 
-        let is_valid = self
-            .graph
-            .other_parent(event)
-            .map(|requesting_event| {
-                Some(event.creator()) == requesting_event.requesting_recipient()
-                    && self.graph.is_awaiting_associated_event(requesting_event)
-            })
-            .unwrap_or(false);
-
-        if is_valid {
-            return Ok(());
-        }
-
-        let packed_event = event.pack(self.event_context())?;
-        self.create_accusation_event(
-            event.creator(),
-            Malice::InvalidRequest(Box::new(packed_event)),
-        )?;
-        Err(Error::InvalidEvent)
-    }
-
-    fn detect_invalid_response(&mut self, event: &Event<S::PublicId>) -> Result<()> {
-        if !event.is_response() {
-            return Ok(());
-        }
-
-        let is_valid = self
-            .graph
-            .other_parent(event)
-            .and_then(|other_parent| self.graph.self_sync_ancestor(other_parent))
-            .and_then(|request_event| {
-                self.graph
-                    .other_parent(request_event)
-                    .map(|requesting_event| (request_event, requesting_event))
-            })
-            .map(|(request_event, requesting_event)| {
-                request_event.is_request()
-                    && requesting_event.creator() == event.creator()
-                    && self.graph.is_awaiting_associated_event(request_event)
-            })
-            .unwrap_or(false);
-
-        if is_valid {
-            return Ok(());
-        }
-
-        let packed_event = event.pack(self.event_context())?;
-        self.create_accusation_event(
-            event.creator(),
-            Malice::InvalidResponse(Box::new(packed_event)),
-        )?;
+        let packed_event = Box::new(event.pack(self.event_context())?);
+        let malice = if event.is_request() {
+            Malice::InvalidRequest(packed_event)
+        } else {
+            Malice::InvalidResponse(packed_event)
+        };
+        self.create_accusation_event(event.creator(), malice)?;
         Err(Error::InvalidEvent)
     }
 
