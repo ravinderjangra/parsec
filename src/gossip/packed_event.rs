@@ -6,13 +6,15 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use super::content::Content;
-use super::event_hash::EventHash;
-use crate::hash::Hash;
-use crate::id::PublicId;
-use crate::network_event::NetworkEvent;
-use crate::serialise;
-use crate::vote::Vote;
+use super::{content::Content, event_hash::EventHash};
+#[cfg(all(feature = "mock", any(feature = "testing", test)))]
+use crate::{
+    gossip::Cause,
+    id::SecretId,
+    mock::{PeerId, Transaction},
+    observation::Observation,
+};
+use crate::{hash::Hash, serialise, NetworkEvent, PublicId, Vote};
 use std::fmt::{self, Debug, Formatter};
 
 /// Packed event contains only content and signature.
@@ -39,5 +41,78 @@ impl<T: NetworkEvent, P: PublicId> Debug for PackedEvent<T, P> {
 impl<T: NetworkEvent, P: PublicId> PackedEvent<T, P> {
     pub(crate) fn compute_hash(&self) -> EventHash {
         EventHash(Hash::from(serialise(&self.content).as_slice()))
+    }
+}
+
+#[cfg(all(feature = "mock", any(feature = "testing", test)))]
+impl PackedEvent<Transaction, PeerId> {
+    /// Construct a new `Requesting` packed event.
+    pub fn new_requesting(creator: PeerId, recipient: PeerId, self_parent: EventHash) -> Self {
+        let content = Content {
+            creator,
+            cause: Cause::Requesting {
+                self_parent,
+                recipient,
+            },
+        };
+        Self::new(content)
+    }
+
+    /// Construct a new `Request` packed event.
+    pub fn new_request(creator: PeerId, self_parent: EventHash, other_parent: EventHash) -> Self {
+        let content = Content {
+            creator,
+            cause: Cause::Request {
+                self_parent,
+                other_parent,
+            },
+        };
+        Self::new(content)
+    }
+
+    /// Construct a new `Response` packed event.
+    pub fn new_response(creator: PeerId, self_parent: EventHash, other_parent: EventHash) -> Self {
+        let content = Content {
+            creator,
+            cause: Cause::Response {
+                self_parent,
+                other_parent,
+            },
+        };
+        Self::new(content)
+    }
+
+    /// Construct a new `Observation` packed event.
+    pub fn new_observation(
+        creator: PeerId,
+        self_parent: EventHash,
+        observation: Observation<Transaction, PeerId>,
+    ) -> Self {
+        let vote = Vote::new(&creator, observation);
+        let content = Content {
+            creator,
+            cause: Cause::Observation { self_parent, vote },
+        };
+        Self::new(content)
+    }
+
+    /// Construct a new `Initial` packed event.
+    pub fn new_initial(creator: PeerId) -> Self {
+        let content = Content {
+            creator,
+            cause: Cause::Initial,
+        };
+        Self::new(content)
+    }
+
+    fn new(content: Content<Vote<Transaction, PeerId>, EventHash, PeerId>) -> Self {
+        let serialised_content = serialise(&content);
+        let signature = content.creator.sign_detached(&serialised_content);
+        PackedEvent { content, signature }
+    }
+
+    /// Getter for the event's creator.
+    pub fn creator(&self) -> &PeerId {
+        &self.content.creator
     }
 }

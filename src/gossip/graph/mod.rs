@@ -16,6 +16,8 @@ pub(crate) use self::event_ref::IndexedEventRef;
 
 use super::{event::Event, event_hash::EventHash};
 use crate::id::PublicId;
+#[cfg(feature = "malice-detection")]
+use fnv::FnvHashSet;
 use std::collections::btree_map::{BTreeMap, Entry};
 use std::collections::BTreeSet;
 
@@ -24,6 +26,10 @@ use std::collections::BTreeSet;
 pub(crate) struct Graph<P: PublicId> {
     events: Vec<Event<P>>,
     indices: BTreeMap<EventHash, EventIndex>,
+    /// Indices of `Requesting` events with no associated descendant `Request`, and `Request`s with
+    /// no associated descendant `Response`.
+    #[cfg(feature = "malice-detection")]
+    awaiting_associated_events: FnvHashSet<EventIndex>,
 }
 
 impl<P: PublicId> Default for Graph<P> {
@@ -31,6 +37,8 @@ impl<P: PublicId> Default for Graph<P> {
         Self {
             events: Vec::new(),
             indices: BTreeMap::new(),
+            #[cfg(feature = "malice-detection")]
+            awaiting_associated_events: FnvHashSet::default(),
         }
     }
 }
@@ -51,9 +59,16 @@ impl<P: PublicId> Graph<P> {
     }
 
     /// Insert new event into the graph.
+    ///
     /// Returns `IndexedEventRef` to the newly inserted event.
     /// If the event was already present in the graph, does not overwrite it, just returns an
     /// `IndexedEventRef` to it.
+    ///
+    /// If the event is a `Requesting` or `Request`, it is also added to
+    /// `awaiting_associated_events`.
+    ///
+    /// If the event is a `Request` or `Response`, the other_parent is removed from
+    /// `awaiting_associated_events`.
     pub fn insert(&mut self, event: Event<P>) -> IndexedEventRef<P> {
         let index = match self.indices.entry(*event.hash()) {
             Entry::Occupied(entry) => *entry.get(),
@@ -64,7 +79,12 @@ impl<P: PublicId> Graph<P> {
                 assert_ne!(index, EventIndex::PHONY);
 
                 self.events.push(event);
-                *entry.insert(index)
+                let _ = entry.insert(index);
+
+                #[cfg(feature = "malice-detection")]
+                self.update_awaiting(index);
+
+                index
             }
         };
 
@@ -132,6 +152,18 @@ impl<P: PublicId> Graph<P> {
         None
     }
 
+    /// Returns `event` if it's a sync event, or else `self_sync_parent()` of it otherwise.
+    pub fn self_sync_ancestor<'a>(
+        &'a self,
+        event: IndexedEventRef<'a, P>,
+    ) -> Option<IndexedEventRef<'a, P>> {
+        if event.is_sync_event() {
+            Some(event)
+        } else {
+            self.self_sync_parent(event)
+        }
+    }
+
     /// Iterator over all ancestors of the given event (including itself) in reverse topological
     /// order.
     pub fn ancestors<'a>(&'a self, event: IndexedEventRef<'a, P>) -> Ancestors<'a, P> {
@@ -155,13 +187,60 @@ impl<P: PublicId> Graph<P> {
     }
 }
 
+#[cfg(feature = "malice-detection")]
+impl<P: PublicId> Graph<P> {
+    /// Returns true if the event specified by `index` should eventually but still doesn't have an
+    /// associated `Request` or `Response` added to the graph.
+    pub fn is_awaiting_associated_event(&self, event: IndexedEventRef<P>) -> bool {
+        self.awaiting_associated_events.contains(&event.index)
+    }
+
+    fn awaiting_and_awaited_indices(
+        &self,
+        index: EventIndex,
+    ) -> (Option<EventIndex>, Option<EventIndex>) {
+        let event = &self.events[index.0];
+        if event.is_requesting() {
+            (Some(index), None)
+        } else if event.is_request() {
+            (
+                Some(index),
+                self.other_parent(event)
+                    .map(|other_parent| other_parent.index),
+            )
+        } else if event.is_response() {
+            (
+                None,
+                self.other_parent(event)
+                    .and_then(|other_parent| self.self_sync_ancestor(other_parent))
+                    .map(|self_sync_ancestor| self_sync_ancestor.index),
+            )
+        } else {
+            (None, None)
+        }
+    }
+
+    fn update_awaiting(&mut self, index: EventIndex) {
+        let (awaiting, awaited) = self.awaiting_and_awaited_indices(index);
+        let _ = awaiting.map(|awaiting| self.awaiting_associated_events.insert(awaiting));
+        let _ = awaited.map(|awaited| self.awaiting_associated_events.remove(&awaited));
+    }
+}
+
 #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 impl<P: PublicId> Graph<P> {
     /// Remove the topologically last event.
     pub fn remove_last(&mut self) -> Option<(EventIndex, Event<P>)> {
+        let index = EventIndex(self.events.len() - 1);
+        #[cfg(feature = "malice-detection")]
+        {
+            let (awaiting, awaited) = self.awaiting_and_awaited_indices(index);
+            let _ = awaiting.map(|awaiting| self.awaiting_associated_events.remove(&awaiting));
+            let _ = awaited.map(|awaited| self.awaiting_associated_events.insert(awaited));
+        }
         let event = self.events.pop()?;
         let _ = self.indices.remove(event.hash());
-        Some((EventIndex(self.events.len()), event))
+        Some((index, event))
     }
 }
 

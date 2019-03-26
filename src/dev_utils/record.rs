@@ -8,7 +8,7 @@
 
 use super::dot_parser::{parse_dot_file, ParsedContents};
 use crate::gossip::IndexedEventRef;
-use crate::gossip::{Cause, Event, Request, Response};
+use crate::gossip::{Cause, Event, PackedEvent, Request, Response};
 use crate::hash::Hash;
 use crate::mock::{PeerId, Transaction};
 use crate::observation::{ConsensusMode, Observation, ObservationKey, ObservationStore};
@@ -26,12 +26,13 @@ pub struct Record {
     our_id: PeerId,
     genesis_group: BTreeSet<PeerId>,
     actions: Vec<Action>,
-
     // Keys of the consensused blocks' payloads in the order they were consensused.
     consensus_history: Vec<ObservationKey>,
-
     // Consensus mode to play
     consensus_mode: ConsensusMode,
+    // True if when parsing the graph we had to add a final `Requesting` sync event and schedule a
+    // Request to be sent to us in order to learn of any remaining events.
+    added_final_requesting_event: bool,
 }
 
 impl Record {
@@ -70,8 +71,7 @@ impl From<ParsedContents> for Record {
             contents
                 .graph
                 .iter()
-                .filter_map(|event| extract_genesis_group(event.inner(), &contents.observations))
-                .next()
+                .find_map(|event| extract_genesis_group(event.inner(), &contents.observations))
                 .cloned(),
             "No event carrying Observation::Genesis found"
         );
@@ -84,40 +84,6 @@ impl From<ParsedContents> for Record {
         let mut actions = Vec::new();
         let mut skip_our_accusations = false;
         let mut known = vec![false; contents.graph.len()];
-
-        let collect_event_to_gossip = |other_parent: IndexedEventRef<_>, known: &mut Vec<bool>| {
-            let mut events_to_gossip = Vec::new();
-            let other_parent_tindex = other_parent.topological_index();
-            for event in contents.graph.ancestors(other_parent) {
-                let event_tindex = event.topological_index();
-                if known[event_tindex] && other_parent_tindex != event_tindex {
-                    continue;
-                } else {
-                    known[event_tindex] = true;
-                }
-
-                events_to_gossip.push(unwrap!(event.pack(contents.event_context())));
-            }
-            events_to_gossip.reverse();
-            events_to_gossip
-        };
-
-        let collect_remaining_event_to_gossip = |known: &mut Vec<bool>| {
-            let mut events_to_gossip = Vec::new();
-            let mut last_event = None;
-            for event in contents.graph.iter() {
-                let event_tindex = event.topological_index();
-                if known[event_tindex] {
-                    continue;
-                } else {
-                    known[event_tindex] = true;
-                }
-
-                events_to_gossip.push(unwrap!(event.pack(contents.event_context())));
-                last_event = Some(event);
-            }
-            (events_to_gossip, last_event)
-        };
 
         for event in &contents.graph {
             if event.topological_index() == 0 {
@@ -168,7 +134,8 @@ impl From<ParsedContents> for Record {
                         .get(other_parent.creator())
                         .map(|peer| peer.id().clone()));
 
-                    let events_to_gossip = collect_event_to_gossip(other_parent, &mut known);
+                    let events_to_gossip =
+                        collect_events_to_gossip(&contents, other_parent, &mut known);
 
                     if event.is_request() {
                         actions.push(Action::Request(src, Request::new(events_to_gossip)))
@@ -197,13 +164,14 @@ impl From<ParsedContents> for Record {
             }
         }
 
-        // Need a request to our peer with the remaining events
-        let (events_to_gossip, other_parent) = collect_remaining_event_to_gossip(&mut known);
-        if let Some(other_parent) = other_parent {
-            let src = unwrap!(contents
-                .peer_list
-                .get(other_parent.creator())
-                .map(|peer| peer.id().clone()));
+        let mut events_to_gossip = collect_remaining_events_to_gossip(&contents, &mut known);
+        let added_final_requesting_event = !events_to_gossip.is_empty();
+        if let Some(packed_event) = events_to_gossip.last() {
+            let src = packed_event.creator().clone();
+            let self_parent = packed_event.compute_hash();
+            let requesting_event =
+                PackedEvent::new_requesting(src.clone(), contents.our_id.clone(), self_parent);
+            events_to_gossip.push(requesting_event);
             actions.push(Action::Request(src, Request::new(events_to_gossip)));
         }
 
@@ -213,6 +181,7 @@ impl From<ParsedContents> for Record {
             actions,
             consensus_history: contents.meta_election.consensus_history,
             consensus_mode: contents.consensus_mode,
+            added_final_requesting_event,
         }
     }
 }
@@ -257,19 +226,62 @@ fn extract_genesis_group<'a>(
         })
 }
 
+fn collect_events_to_gossip(
+    contents: &ParsedContents,
+    other_parent: IndexedEventRef<PeerId>,
+    known: &mut Vec<bool>,
+) -> Vec<PackedEvent<Transaction, PeerId>> {
+    let mut events_to_gossip = Vec::new();
+    let other_parent_tindex = other_parent.topological_index();
+    for event in contents.graph.ancestors(other_parent) {
+        let event_tindex = event.topological_index();
+        if known[event_tindex] && other_parent_tindex != event_tindex {
+            continue;
+        } else {
+            known[event_tindex] = true;
+        }
+
+        events_to_gossip.push(unwrap!(event.pack(contents.event_context())));
+    }
+    events_to_gossip.reverse();
+    events_to_gossip
+}
+
+fn collect_remaining_events_to_gossip(
+    contents: &ParsedContents,
+    known: &mut Vec<bool>,
+) -> Vec<PackedEvent<Transaction, PeerId>> {
+    let mut events_to_gossip = Vec::new();
+    for event in contents.graph.iter() {
+        let event_tindex = event.topological_index();
+        if known[event_tindex] {
+            continue;
+        } else {
+            known[event_tindex] = true;
+        }
+
+        events_to_gossip.push(unwrap!(event.pack(contents.event_context())));
+    }
+    events_to_gossip
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::parsec::get_graph_snapshot;
-    use std::cmp;
+    use std::fs;
+    use std::iter;
+    use std::path::PathBuf;
+    use std::thread;
+    use walkdir::WalkDir;
 
     #[derive(PartialEq, Eq, Debug)]
-    struct TrucatedHashes<'th> {
+    struct TruncatedHashes<'th> {
         actual_len: usize,
         hashes: &'th [Hash],
     }
 
-    impl<'th> TrucatedHashes<'th> {
+    impl<'th> TruncatedHashes<'th> {
         fn new_with_one_missing_element(hashes: &'th [Hash]) -> Self {
             Self {
                 actual_len: hashes.len() + 1,
@@ -277,26 +289,45 @@ mod tests {
             }
         }
 
-        fn new_with_one_trucated_element(hashes: &'th [Hash]) -> Self {
+        fn new_with_one_truncated_element(hashes: &'th [Hash]) -> Self {
             Self {
                 actual_len: hashes.len(),
-                hashes: &hashes[0..cmp::max(hashes.len(), 1) - 1],
+                hashes: &hashes[0..hashes.len().saturating_sub(1)],
+            }
+        }
+    }
+
+    // The path of the dot file used to construct the Record.  Used for printing while panicking.
+    struct PathPrinter(PathBuf);
+
+    impl Drop for PathPrinter {
+        fn drop(&mut self) {
+            if thread::panicking() {
+                let msg = format!("!  Record constructed from '{}'  !", self.0.display());
+                let border = iter::repeat('!').take(msg.len()).collect::<String>();
+                println!("\n{1}\n{}\n{1}\n", msg, border);
             }
         }
     }
 
     /// Run smoke test using given dot file.
-    /// Use ignore_last_events to skip fake request that replay generates to send remaining gossip events.
-    fn smoke(path: &str, ignore_last_events: usize) {
-        let contents = unwrap!(parse_dot_file(path));
+    fn smoke<P: AsRef<Path>>(path: P) {
+        let _p = PathPrinter(path.as_ref().to_owned());
+        let contents = unwrap!(parse_dot_file(path.as_ref()));
         let expected = Parsec::from_parsed_contents(contents);
         let expected_events = {
             let ignore_last_events = 0;
             get_graph_snapshot(&expected, ignore_last_events)
         };
 
-        let contents = unwrap!(parse_dot_file(path));
-        let replay = Record::from(contents);
+        let replay = unwrap!(Record::parse(path));
+        let ignore_last_events = if replay.added_final_requesting_event {
+            // Ignore the `Requesting` event we created when parsing the graph, and the associated
+            // `Request` we'll create when receiving the message.
+            2
+        } else {
+            0
+        };
         let actual = replay.play();
         let actual_events = get_graph_snapshot(&actual, ignore_last_events);
 
@@ -304,10 +335,10 @@ mod tests {
     }
 
     /// Run smoke test using given dot file checking the consensus history.
-    /// missing_one_consensus=true if the dump-graphs was taken when consensus is reached (last block missing).
+    /// `missing_one_consensus=true` if the dump-graphs was taken when consensus is reached (last
+    /// block missing).
     fn smoke_consensus_history(path: &str, missing_one_consensus: bool) {
-        let contents = unwrap!(parse_dot_file(path));
-        let replay = Record::from(contents);
+        let replay = unwrap!(Record::parse(path));
         let expected_history = replay.consensus_history();
 
         let actual = replay.play();
@@ -315,8 +346,8 @@ mod tests {
 
         if missing_one_consensus {
             assert_eq!(
-                TrucatedHashes::new_with_one_missing_element(&expected_history),
-                TrucatedHashes::new_with_one_trucated_element(&actual_history)
+                TruncatedHashes::new_with_one_missing_element(&expected_history),
+                TruncatedHashes::new_with_one_truncated_element(&actual_history)
             );
         } else {
             assert_eq!(expected_history, actual_history);
@@ -325,26 +356,39 @@ mod tests {
 
     #[test]
     fn smoke_parsec() {
-        let ignore_last_events = 0;
-        smoke("input_graphs/benches/minimal.dot", ignore_last_events)
+        let is_dot_file = |path: &PathBuf| {
+            path.extension()
+                .map(|extension| extension.to_string_lossy() == "dot")
+                .unwrap_or(false)
+        };
+        // 50kB seems to strike a reasonable balance between including quite a few dot files, while
+        // not having too big of an impact on the test's running time.
+        let max_file_size = 50_000;
+        let mut checked_at_least_one_file = false;
+        for path in WalkDir::new("input_graphs")
+            .into_iter()
+            .map(|entry| unwrap!(entry).path().to_owned())
+            .filter(is_dot_file)
+            .filter(|path| unwrap!(fs::metadata(path)).len() < max_file_size)
+        {
+            smoke(path);
+            checked_at_least_one_file = true;
+        }
+        assert!(
+            checked_at_least_one_file,
+            "All dot files are over {} bytes, so none were checked.",
+            max_file_size
+        );
     }
 
     #[test]
     fn smoke_other_peer_names() {
-        let ignore_last_events = 1;
-        smoke(
-            "input_graphs/dev_utils_record_tests_smoke_other_peer_names/annie.dot",
-            ignore_last_events,
-        )
+        smoke("input_graphs/dev_utils_record_tests_smoke_other_peer_names/annie.dot")
     }
 
     #[test]
     fn smoke_routing() {
-        let ignore_last_events = 1;
-        smoke(
-            "input_graphs/dev_utils_record_tests_smoke_routing/minimal.dot",
-            ignore_last_events,
-        )
+        smoke("input_graphs/dev_utils_record_tests_smoke_routing/minimal.dot")
     }
 
     #[test]

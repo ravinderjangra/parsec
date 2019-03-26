@@ -47,9 +47,10 @@ pub enum Error {
     DuplicateVote,
     /// The peer sent a message to us before knowing we could handle it.
     PrematureGossip,
-    /// The request or response contains at least one event, but doesn't contain an event created by
-    /// the sender.
+    /// The request or response is invalid.
     InvalidMessage,
+    /// The request or response has already been handled by us.
+    DuplicateMessage,
     /// Logic error.
     Logic,
 }
@@ -93,11 +94,12 @@ impl Display for Error {
                 f,
                 "The peer did not know we could handle a message from it."
             ),
-            Error::InvalidMessage => write!(
+            Error::InvalidMessage => write!(f, "This non-empty message is invalid."),
+            Error::DuplicateMessage => write!(f, "This message has already been handled."),
+            Error::Logic => write!(
                 f,
-                "This non-empty message doesn't contain an event created by the sender."
+                "This is a logic error and represents a flaw in the code."
             ),
-            Error::Logic => write!(f, "This a logic error and represents a flaw in the code."),
         }
     }
 }

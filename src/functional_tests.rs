@@ -15,7 +15,9 @@ use crate::meta_voting::MetaElectionSnapshot;
 use crate::mock::{self, PeerId, Transaction};
 use crate::observation::{ConsensusMode, Observation};
 use crate::parsec::TestParsec;
-use crate::peer_list::{PeerIndexSet, PeerListSnapshot, PeerState};
+#[cfg(feature = "malice-detection")]
+use crate::peer_list::PeerIndexSet;
+use crate::peer_list::{PeerListSnapshot, PeerState};
 use std::{collections::BTreeSet, fmt::Debug};
 
 macro_rules! assert_matches {
@@ -241,8 +243,8 @@ fn add_peer() {
     // Generated with RNG seed: [411278735, 3293288956, 208850454, 2872654992].
     let mut parsed_contents = parse_test_dot_file("alice.dot");
 
-    // The final decision to add Fred is reached in D_18, so pop this event for now.
-    let d_18 = unwrap!(parsed_contents.remove_last_event());
+    // The final decision to add Fred is reached in E_25, so pop this event for now.
+    let e_25 = unwrap!(parsed_contents.remove_last_event());
 
     let mut alice = TestParsec::from_parsed_contents(parsed_contents);
     let genesis_group: BTreeSet<_> = alice
@@ -252,7 +254,6 @@ fn add_peer() {
         .collect();
 
     let alice_id = PeerId::new("Alice");
-    let dave_id = PeerId::new("Dave");
     let fred_id = PeerId::new("Fred");
 
     assert!(!alice
@@ -266,10 +267,8 @@ fn add_peer() {
     assert_matches!(alice.create_gossip(&fred_id), Err(Error::UnknownPeer));
     assert_eq!(alice_snapshot, Snapshot::new(&alice));
 
-    // Now add D_18, which should result in Alice adding Fred.
-    let d_18_hash = *d_18.hash();
-    unwrap!(alice.add_event(d_18));
-    unwrap!(alice.create_sync_event(&dave_id, true, PeerIndexSet::default(), Some(d_18_hash)));
+    // Now add E_25, which should result in Alice adding Fred.
+    let _e_25_index = unwrap!(alice.add_event(e_25));
     assert!(alice
         .peer_list()
         .all_ids()

@@ -98,9 +98,14 @@ pub enum Malice<T: NetworkEvent, P: PublicId> {
     /// Event's creator is different to its self_parent's creator. The accusation contains the
     /// original event so other peers can verify the accusation directly.
     SelfParentByDifferentCreator(Box<PackedEvent<T, P>>),
+    /// The event should be a request with other_parent as a requesting event specifying this peer,
+    /// but isn't.
+    InvalidRequest(Box<PackedEvent<T, P>>),
+    /// The event should be a response to a request made to the peer, but isn't.
+    InvalidResponse(Box<PackedEvent<T, P>>),
     /// Detectable but unprovable malice. Relies on consensus.
     Unprovable(UnprovableMalice),
-    /// A node is not reporting malice when it should
+    /// A node is not reporting malice when it should.
     Accomplice(EventHash, Box<Malice<T, P>>),
     // TODO: add other malice variants
 }
@@ -127,6 +132,8 @@ impl<T: NetworkEvent, P: PublicId> Malice<T, P> {
             Malice::DuplicateVote(_, _)
             | Malice::OtherParentBySameCreator(_)
             | Malice::SelfParentByDifferentCreator(_)
+            | Malice::InvalidRequest(_)
+            | Malice::InvalidResponse(_)
             | Malice::Unprovable(_) => None,
         }
     }

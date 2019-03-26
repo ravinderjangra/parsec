@@ -14,7 +14,7 @@
 //!
 //! ```
 //! scenarios
-//!     .add("parsec::functional_tests::my_test_function", |env| {
+//!     .add("functional_tests::my_test_function", |env| {
 //!         Schedule::new(
 //!             env,
 //!             &ScheduleOptions {

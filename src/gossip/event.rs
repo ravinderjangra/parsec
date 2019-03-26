@@ -361,6 +361,15 @@ impl<P: PublicId> Event<P> {
         }
     }
 
+    #[cfg(feature = "malice-detection")]
+    pub fn requesting_recipient(&self) -> Option<PeerIndex> {
+        if let Cause::Requesting { recipient, .. } = self.content.cause {
+            Some(recipient)
+        } else {
+            None
+        }
+    }
+
     pub fn is_request(&self) -> bool {
         if let Cause::Request { .. } = self.content.cause {
             true
