@@ -12,6 +12,7 @@ mod content;
 mod event;
 mod event_context;
 mod event_hash;
+mod event_utils;
 mod graph;
 mod messages;
 mod packed_event;

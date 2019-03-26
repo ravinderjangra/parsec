@@ -862,7 +862,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         let peers_that_can_vote = self.voters();
 
-        let is_descendant = |x, y| self.graph.is_descendant(x, y);
+        let is_descendant = |x: IndexedEventRef<_>, y| x.is_descendant_of(y);
 
         let is_already_interesting_content = |payload_key: &ObservationKey| {
             self.meta_election
@@ -921,8 +921,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     ) -> usize {
         event
             .last_ancestors()
-            .keys()
-            .filter(|peer_index| peers_that_can_vote.contains(*peer_index))
+            .filter(|(peer_index, _)| peers_that_can_vote.contains(*peer_index))
             .count()
     }
 
@@ -940,8 +939,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .iter()
             .filter(|peer_index| {
                 unconsensused_events.iter().any(|that_event| {
-                    that_event.creator() == *peer_index
-                        && self.graph.is_descendant(event, *that_event)
+                    that_event.creator() == *peer_index && event.is_descendant_of(*that_event)
                 })
             })
             .count()
@@ -1108,9 +1106,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         // Try to get the "most-leader"'s aux value.
         let creator = peer_id_hashes[0].0;
-        if let Some(creator_event_index) = event.last_ancestors().get(creator) {
+        if let Some(creator_event_index) = event.last_ancestor_by(creator) {
             if let Some(aux_value) =
-                self.coin_value(creator, *creator_event_index, peer_index, round)
+                self.coin_value(creator, creator_event_index, peer_index, round)
             {
                 return Ok(Some(aux_value));
             }
@@ -1119,9 +1117,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         // If we've already waited long enough, get the aux value of the highest ranking leader.
         if self.stop_waiting(round, event) {
             for (creator, _) in &peer_id_hashes[1..] {
-                if let Some(creator_event_index) = event.last_ancestors().get(*creator) {
+                if let Some(creator_event_index) = event.last_ancestor_by(*creator) {
                     if let Some(aux_value) =
-                        self.coin_value(*creator, *creator_event_index, peer_index, round)
+                        self.coin_value(*creator, creator_event_index, peer_index, round)
                     {
                         return Ok(Some(aux_value));
                     }
@@ -1231,11 +1229,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .filter(|voter_index| *voter_index != event.creator())
             .filter_map(|creator| {
                 event
-                    .last_ancestors()
-                    .get(creator)
+                    .last_ancestor_by(creator)
                     .and_then(|index_by_creator| {
                         let event_index =
-                            self.non_fork_event_by_creator(creator, *index_by_creator)?;
+                            self.non_fork_event_by_creator(creator, index_by_creator)?;
                         self.meta_election.populated_meta_votes(event_index)
                     })
             })
@@ -1399,9 +1396,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         y: &Event<S::PublicId>,
     ) -> usize {
         x.last_ancestors()
-            .iter()
-            .filter(|(peer_index, &event_index)| {
-                for event_idx in self.peer_list.events_by_index(*peer_index, event_index) {
+            .filter(|(peer_index, event_index)| {
+                for event_idx in self.peer_list.events_by_index(*peer_index, *event_index) {
                     if let Ok(event) = self.get_known_event(event_idx) {
                         if x.sees(event) && event.sees(y) {
                             return true;
@@ -1930,20 +1926,20 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 .graph
                 .get_index(hash)
                 .and_then(|index| self.graph.get(index))
-                .map(|malicious_event| self.graph.is_descendant(event, malicious_event))
+                .map(|malicious_event| event.is_descendant_of(malicious_event))
                 .unwrap_or(false),
 
             Malice::DuplicateVote(hash0, hash1) => {
                 self.graph
                     .get_index(hash0)
                     .and_then(|index| self.graph.get(index))
-                    .map(|malicious_event0| self.graph.is_descendant(event, malicious_event0))
+                    .map(|malicious_event0| event.is_descendant_of(malicious_event0))
                     .unwrap_or(false)
                     && self
                         .graph
                         .get_index(hash1)
                         .and_then(|index| self.graph.get(index))
-                        .map(|malicious_event1| self.graph.is_descendant(event, malicious_event1))
+                        .map(|malicious_event1| event.is_descendant_of(malicious_event1))
                         .unwrap_or(false)
             }
             Malice::Fork(hash) => self
@@ -1951,8 +1947,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 .get_index(hash)
                 .and_then(|index| self.graph.get(index))
                 .map(|malicious_event| {
-                    self.graph.is_descendant(event, malicious_event)
-                        && event.is_forking_peer(malicious_event.creator())
+                    event.is_descendant_of(malicious_event)
+                        && event.sees_fork_by(malicious_event.creator())
                 })
                 .unwrap_or(false),
             Malice::OtherParentBySameCreator(packed_event)
@@ -1962,7 +1958,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 .graph
                 .get_index(&packed_event.compute_hash())
                 .and_then(|index| self.graph.get(index))
-                .map(|malicious_event| self.graph.is_descendant(event, malicious_event))
+                .map(|malicious_event| event.is_descendant_of(malicious_event))
                 .unwrap_or(false),
             Malice::Unprovable(_) => false,
         }

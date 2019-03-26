@@ -636,7 +636,8 @@ mod detail {
 
                     self.write_cause_to_dot_format(&event)?;
 
-                    let last_ancestors = self.convert_peer_index_map(event.last_ancestors());
+                    let last_ancestors = event.last_ancestors().collect();
+                    let last_ancestors = self.convert_peer_index_map(&last_ancestors);
                     writeln!(&mut self.file, "/// last_ancestors: {:?}", last_ancestors)?;
 
                     self.writeln(format_args!(""))?;
