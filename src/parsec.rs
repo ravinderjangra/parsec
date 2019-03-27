@@ -1403,8 +1403,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         x.last_ancestors()
             .iter()
             .filter(|(peer_index, &event_index)| {
-                for event_hash in self.peer_list.events_by_index(*peer_index, event_index) {
-                    if let Ok(event) = self.get_known_event(event_hash) {
+                for event_idx in self.peer_list.events_by_index(*peer_index, event_index) {
+                    if let Ok(event) = self.get_known_event(event_idx) {
                         if x.sees(event) && event.sees(y) {
                             return true;
                         }
@@ -1878,7 +1878,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 .peer_list
                 .our_events()
                 .rev()
-                .filter_map(|hash| self.get_known_event(hash).ok())
+                .filter_map(|event_index| self.get_known_event(event_index).ok())
                 .filter_map(|event| {
                     if let Some(&Observation::Accusation {
                         ref offender,
@@ -1992,9 +1992,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
     }
 
-    fn detect_accomplice(&mut self, event: EventIndex) -> Result<()> {
+    fn detect_accomplice(&mut self, event_index: EventIndex) -> Result<()> {
         let (event_hash, creator) = {
-            let event = self.get_known_event(event)?;
+            let event = self.get_known_event(event_index)?;
             let is_accusation = self
                 .event_payload(&event)
                 .map(|payload| match payload {
@@ -2013,7 +2013,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         };
 
         let starting_index = self.peer_list.accomplice_event_checkpoint_by(creator);
-        for (_, malice) in self.detect_accomplice_for_our_accusations(event, starting_index)? {
+        for (_, malice) in
+            self.detect_accomplice_for_our_accusations(event_index, starting_index)?
+        {
             self.accuse(creator, Malice::Accomplice(event_hash, Box::new(malice)));
         }
 
@@ -2034,10 +2036,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
     fn detect_accomplice_for_our_accusations(
         &self,
-        event: EventIndex,
+        event_index: EventIndex,
         starting_event: Option<EventIndex>,
     ) -> Result<Accusations<T, S::PublicId>> {
-        let creator = self.get_known_event(event)?.creator();
+        let creator = self.get_known_event(event_index)?.creator();
         let our_accusations = self.accusations_by_peer_since(PeerIndex::OUR, starting_event);
         let accusations_by_peer_since_starter_event =
             self.accusations_by_peer_since(creator, starting_event);
@@ -2047,7 +2049,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .iter()
             .chain(our_accusations.iter())
             .filter(|(offender, _)| offender != &creator)
-            .filter(|(_, malice)| self.malicious_event_is_ancestor_of_this_event(&malice, event))
+            .filter(|(_, malice)| {
+                self.malicious_event_is_ancestor_of_this_event(&malice, event_index)
+            })
             .filter(|(offender, malice)| {
                 !accusations_by_peer_since_starter_event
                     .iter()
