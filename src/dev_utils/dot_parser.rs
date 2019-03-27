@@ -784,16 +784,48 @@ pub(crate) fn parse_dot_file<P: AsRef<Path>>(full_path: P) -> io::Result<ParsedC
     Ok(convert_into_parsed_contents(result))
 }
 
-/// For use by functional/unit tests which provide a dot file for the test setup.  This put the test
-/// name as part of the path automatically.
+/// For use by functional/unit tests which provide a dot file for the test setup.  This puts the
+/// test name as part of the path automatically, but depends on not explicitly running the tests
+/// single-threaded, i.e. by passing '--test-threads=1' on the command line or setting the env var
+/// 'RUST_TEST_THREADS=1'.
 #[cfg(test)]
 pub(crate) fn parse_test_dot_file(filename: &str) -> ParsedContents {
-    use std::thread;
+    let test_name = derive_test_name_from_current_thread_name();
+    parse_dot_file_with_test_name(filename, &test_name)
+}
 
-    parse_dot_file_with_test_name(
-        filename,
-        &unwrap!(thread::current().name()).replace("::", "_"),
-    )
+#[cfg(test)]
+fn derive_test_name_from_current_thread_name() -> String {
+    use std::{env, thread};
+
+    let test_name = unwrap!(thread::current().name()).replace("::", "_");
+    if test_name == "main" {
+        let panic = |arg: &str| {
+            panic!(
+                "Current thread name is 'main' since running with '{}=1', so can't be used to \
+                 deduce test name for parsing correct dot file.",
+                arg
+            );
+        };
+
+        const THREADS_ARG: &str = "--test-threads";
+        let mut args_itr = env::args().skip_while(|arg| !arg.starts_with(THREADS_ARG));
+        match (
+            args_itr.next().as_ref().map(|x| &**x),
+            args_itr.next().as_ref().map(|x| &**x),
+        ) {
+            (Some(THREADS_ARG), Some("1")) | (Some("--test-threads=1"), _) => {
+                panic(THREADS_ARG);
+            }
+            _ => (),
+        }
+
+        const THREADS_ENV_VAR: &str = "RUST_TEST_THREADS";
+        if let Ok("1") = env::var(THREADS_ENV_VAR).as_ref().map(|x| &**x) {
+            panic(THREADS_ENV_VAR);
+        }
+    }
+    test_name
 }
 
 /// For use by functional/unit tests which provide a dot file for the test setup.  This reads and
