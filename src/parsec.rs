@@ -2332,6 +2332,13 @@ impl TestParsec<Transaction, PeerId> {
 }
 
 #[cfg(any(test, feature = "testing"))]
+impl<T: NetworkEvent, S: SecretId> From<Parsec<T, S>> for TestParsec<T, S> {
+    fn from(parsec: Parsec<T, S>) -> Self {
+        TestParsec(parsec)
+    }
+}
+
+#[cfg(any(test, feature = "testing"))]
 impl<T: NetworkEvent, S: SecretId> Deref for TestParsec<T, S> {
     type Target = Parsec<T, S>;
 
