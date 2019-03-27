@@ -1072,7 +1072,7 @@ mod detail {
             .map(|len| len + 1)
             .unwrap_or(num_char_if_only_one_element);
 
-        // Have all short names the same lengh or shorter
+        // Have all short names the same length or shorter
         let make_short_name = |name: &str| {
             let copy_len = cmp::min(mismatch_len, name.len());
             name[0..copy_len].to_string()

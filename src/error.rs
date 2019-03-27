@@ -39,7 +39,7 @@ pub enum Error {
     },
     /// The given event is invalid or malformed.
     InvalidEvent,
-    /// The event's self-parent is unknwon to our node.
+    /// The event's self-parent is unknown to our node.
     UnknownSelfParent,
     /// The event's other-parent is unknown to our node.
     UnknownOtherParent,

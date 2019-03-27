@@ -234,7 +234,7 @@ pub struct ScheduleOptions {
     pub genesis_size: usize,
     /// Number of malicious peers included in the genesis group
     pub malicious_genesis_count: usize,
-    /// Probabilitity per step that a random node will fail
+    /// Probability per step that a random node will fail
     pub prob_failure: f64,
     /// Probability that a vote will get repeated
     pub prob_vote_duplication: f64,

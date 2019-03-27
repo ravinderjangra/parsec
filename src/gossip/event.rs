@@ -552,7 +552,7 @@ struct Cache {
     last_ancestors: PeerIndexMap<usize>,
     // Peers with a fork having both sides seen by this event.
     forking_peers: PeerIndexSet,
-    // First leter of the creator name.
+    // First letter of the creator name.
     #[cfg(any(test, feature = "testing"))]
     creator_initial: char,
 }
