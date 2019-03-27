@@ -1127,7 +1127,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let creator = peer_id_hashes[0].0;
         if let Some(creator_event_index) = event.last_ancestors().get(creator) {
             if let Some(aux_value) =
-                self.aux_value(creator, *creator_event_index, peer_index, round)
+                self.coin_value(creator, *creator_event_index, peer_index, round)
             {
                 return Ok(Some(aux_value));
             }
@@ -1138,7 +1138,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             for (creator, _) in &peer_id_hashes[1..] {
                 if let Some(creator_event_index) = event.last_ancestors().get(*creator) {
                     if let Some(aux_value) =
-                        self.aux_value(*creator, *creator_event_index, peer_index, round)
+                        self.coin_value(*creator, *creator_event_index, peer_index, round)
                     {
                         return Ok(Some(aux_value));
                     }
@@ -1149,23 +1149,38 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         Ok(None)
     }
 
-    // Returns the aux value for the given peer, created by `creator`, at the given round and at
-    // the genuine flip step.
-    fn aux_value(
+    // Computes the coin toss value for the given peer from the first event by `creator` that has a
+    // meta_vote at the given round and genuine flip step and that has aux_value as well.
+    fn coin_value(
         &self,
         creator: PeerIndex,
-        creator_event_index: usize,
+        last_index_by_creator: usize,
         peer_index: PeerIndex,
         round: usize,
     ) -> Option<bool> {
-        self.meta_votes_by_creator(creator, creator_event_index)
-            .and_then(|meta_votes| meta_votes.get(peer_index))
-            .and_then(|votes| {
-                votes
-                    .iter()
-                    .find(|meta_vote| meta_vote.round_and_step() >= (round, Step::GenuineFlip))
-            })
-            .and_then(|meta_vote| meta_vote.aux_value)
+        for index_by_creator in 0..=last_index_by_creator {
+            let event_index = self.non_fork_event_by_creator(creator, index_by_creator)?;
+            if event_index.topological_index() < self.meta_election.continue_consensus_start_index()
+            {
+                continue;
+            }
+
+            let meta_votes = self.meta_election.populated_meta_votes(event_index)?;
+            let meta_vote = meta_votes
+                .get(peer_index)
+                .into_iter()
+                .flatten()
+                .find(|meta_vote| meta_vote.round_and_step() >= (round, Step::GenuineFlip));
+
+            if let Some(meta_vote) = meta_vote {
+                if meta_vote.aux_value.is_some() {
+                    let event = self.graph.get(event_index)?;
+                    return Some(event.hash().least_significant_bit());
+                }
+            }
+        }
+
+        None
     }
 
     // Skips back through events created by the peer until passed `responsiveness_threshold`
@@ -1206,24 +1221,20 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             })
     }
 
-    // Returns the meta votes created by `creator`.
-    fn meta_votes_by_creator(
+    fn non_fork_event_by_creator(
         &self,
         creator: PeerIndex,
-        creator_event_index: usize,
-    ) -> Option<&PeerIndexMap<Vec<MetaVote>>> {
-        let (event, fork_event) = {
-            let mut events = self.peer_list.events_by_index(creator, creator_event_index);
-            (events.next(), events.next())
-        };
+        index_by_creator: usize,
+    ) -> Option<EventIndex> {
+        let mut events = self.peer_list.events_by_index(creator, index_by_creator);
+        let event = events.next()?;
 
-        if fork_event.is_none() {
-            // Not a fork
-            if let Some(event) = event {
-                return self.meta_election.populated_meta_votes(event);
-            }
+        if events.next().is_none() {
+            Some(event)
+        } else {
+            // Fork
+            None
         }
-        None
     }
 
     // Returns all the meta votes from the event's voting ancestors except the event's creator.
@@ -1239,8 +1250,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 event
                     .last_ancestors()
                     .get(creator)
-                    .and_then(|creator_event_index| {
-                        self.meta_votes_by_creator(creator, *creator_event_index)
+                    .and_then(|index_by_creator| {
+                        let event_index =
+                            self.non_fork_event_by_creator(creator, *index_by_creator)?;
+                        self.meta_election.populated_meta_votes(event_index)
                     })
             })
             .collect()

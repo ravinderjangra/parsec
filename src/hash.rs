@@ -32,6 +32,11 @@ impl Hash {
         Ordering::Equal
     }
 
+    /// Returns the least significant bit of this hash.
+    pub fn least_significant_bit(&self) -> bool {
+        (self.0[HASH_LEN - 1] & 1) != 0
+    }
+
     #[cfg(any(test, feature = "testing"))]
     pub fn from_bytes(bytes: [u8; HASH_LEN]) -> Self {
         Hash(bytes)
