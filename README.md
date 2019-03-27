@@ -1,7 +1,7 @@
 # PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus
 
 |Crate|Documentation|Linux/macOS|Windows|Issues|
-|:---:|:-----------:|:--------:|:-----:|:----:|
+|:---:|:-----------:|:---------:|:-----:|:----:|
 |[![](http://meritbadge.herokuapp.com/parsec)](https://crates.io/crates/parsec)|[![Documentation](https://docs.rs/parsec/badge.svg)](https://docs.rs/parsec)|[![Build Status](https://travis-ci.com/maidsafe/parsec.svg?branch=master)](https://travis-ci.com/maidsafe/parsec)|[![Build status](https://ci.appveyor.com/api/projects/status/1wmc7pj8fx77lywy/branch/master?svg=true)](https://ci.appveyor.com/project/MaidSafe-QA/parsec/branch/master)|[![Stories in Ready](https://badge.waffle.io/maidsafe/parsec.png?label=ready&title=Ready)](https://waffle.io/maidsafe/parsec)|
 
 | [MaidSafe website](https://maidsafe.net) | [SAFE Dev Forum](https://forum.safedev.org) | [SAFE Network Forum](https://safenetforum.org) |
@@ -12,7 +12,7 @@
 There is a basic example available in the examples folder.  This allows you to simulate a network of peers each running the Parsec protocol to reach consensus on a number of random network events.  There is also the ability to dump each peer's gossip graph in dot format to a file in your system temp dir.  This can be enabled via the feature `dump-graphs`.  So, e.g. to run the example for a network of five peers and ten network events:
 
 ```
-cargo run --example=basic --features=mock,dump-graphs -- --initial-peers=5 --opaque=10
+cargo run --release --example=basic --features=mock,dump-graphs -- --initial-peers=5 --opaque=10
 ```
 
 If you have `dot` from [graphviz](https://graphviz.gitlab.io/download) available in your path, then SVG graphs will also have been generated from each of these dot files.  If not, you can copy the contents of a generated dot file into an online converter (e.g. http://viz-js.com) to view the gossip graph.
