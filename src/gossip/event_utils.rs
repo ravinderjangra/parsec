@@ -19,7 +19,7 @@ pub(super) type ForkMap = BTreeMap<usize, IndexSet>;
 
 // Immutable set of integer indices
 #[derive(Clone)]
-pub(super) struct IndexSet(Vec<usize>);
+pub(crate) struct IndexSet(Vec<usize>);
 
 impl IndexSet {
     pub fn new(index: usize) -> Self {

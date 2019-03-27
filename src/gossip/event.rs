@@ -8,8 +8,6 @@
 
 #[cfg(any(test, feature = "testing"))]
 use super::event_utils::ForkMap;
-#[cfg(test)]
-use super::graph::IndexedEventRef;
 use super::{
     cause::{self, Cause},
     content::Content,
@@ -208,7 +206,7 @@ impl<P: PublicId> Event<P> {
     //   - `Err(Error::SignatureFailure)` if signature validation fails
     //   - `Err(Error::UnknownParent)` if the event indicates it should have an ancestor, but the
     //     ancestor isn't in `events`.
-    pub(crate) fn unpack<T: NetworkEvent, S: SecretId<PublicId = P>>(
+    pub fn unpack<T: NetworkEvent, S: SecretId<PublicId = P>>(
         packed_event: PackedEvent<T, P>,
         ctx: EventContextRef<T, S>,
     ) -> Result<Option<UnpackedEvent<T, P>>, Error> {
@@ -237,7 +235,7 @@ impl<P: PublicId> Event<P> {
     }
 
     // Creates a `PackedEvent` from this `Event`.
-    pub(crate) fn pack<T: NetworkEvent, S: SecretId<PublicId = P>>(
+    pub fn pack<T: NetworkEvent, S: SecretId<PublicId = P>>(
         &self,
         ctx: EventContextRef<T, S>,
     ) -> Result<PackedEvent<T, P>, Error> {
@@ -296,7 +294,7 @@ impl<P: PublicId> Event<P> {
     }
 
     // Fork set that this event is a member of.
-    fn fork_set(&self) -> Option<&IndexSet> {
+    pub fn fork_set(&self) -> Option<&IndexSet> {
         self.cache
             .ancestor_info
             .get(self.creator())
@@ -645,22 +643,6 @@ fn compute_event_hash_and_verify_signature<T: NetworkEvent, P: PublicId>(
     } else {
         Err(Error::SignatureFailure)
     }
-}
-
-/// Finds the first event which has the `short_name` provided.
-#[cfg(test)]
-pub(crate) fn find_event_by_short_name<'a, I, P>(
-    events: I,
-    short_name: &str,
-) -> Option<IndexedEventRef<'a, P>>
-where
-    I: IntoIterator<Item = IndexedEventRef<'a, P>>,
-    P: PublicId,
-{
-    let short_name = short_name.to_uppercase();
-    events
-        .into_iter()
-        .find(move |event| event.short_name().to_string() == short_name)
 }
 
 #[cfg(any(test, feature = "testing"))]

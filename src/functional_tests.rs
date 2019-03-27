@@ -10,7 +10,7 @@ use crate::{
     block::Block,
     dev_utils::{parse_test_dot_file, Record},
     error::Error,
-    gossip::{find_event_by_short_name, Event, EventContext, Graph, GraphSnapshot, Request},
+    gossip::{Event, EventContext, Graph, GraphSnapshot, Request},
     id::{Proof, PublicId},
     meta_voting::MetaElectionSnapshot,
     mock::{self, PeerId, Transaction},
@@ -563,7 +563,6 @@ fn sees() {
         &alice_id,
         carol_ctx.as_ref()
     ));
-    let c2_0_hash = *c2_0.hash();
     let c2_0_packed = unwrap!(c2_0.pack(carol_ctx.as_ref()));
     let _ = carol_ctx.graph.insert(c2_0).event_index();
 
@@ -572,7 +571,6 @@ fn sees() {
         &bob_id,
         carol_ctx.as_ref()
     ));
-    let c2_1_hash = *c2_1.hash();
     let c2_1_packed = unwrap!(c2_1.pack(carol_ctx.as_ref()));
     let _ = carol_ctx.graph.insert(c2_1).event_index();
 
@@ -594,14 +592,12 @@ fn sees() {
 
     // Verify the sees relations
 
-    let a2 = unwrap!(find_event_by_short_name(alice.graph().iter(), "A_2"));
-    let a3 = unwrap!(find_event_by_short_name(alice.graph().iter(), "A_3"));
-    let b2 = unwrap!(find_event_by_short_name(alice.graph().iter(), "B_2"));
-    let c1 = unwrap!(find_event_by_short_name(alice.graph().iter(), "C_1"));
-
-    // These two cannot by fetched by the short name because it's not unique in case of fork.
-    let c2_0 = unwrap!(alice.graph().get_by_hash(&c2_0_hash));
-    let c2_1 = unwrap!(alice.graph().get_by_hash(&c2_1_hash));
+    let a2 = unwrap!(alice.graph().find_by_short_name("A_2"));
+    let a3 = unwrap!(alice.graph().find_by_short_name("A_3"));
+    let b2 = unwrap!(alice.graph().find_by_short_name("B_2"));
+    let c1 = unwrap!(alice.graph().find_by_short_name("C_1"));
+    let c2_0 = unwrap!(alice.graph().find_by_short_name("C_2,0"));
+    let c2_1 = unwrap!(alice.graph().find_by_short_name("C_2,1"));
 
     assert!(a2.sees(c1));
     assert!(a2.sees(c2_0));
@@ -621,7 +617,7 @@ mod handle_malice {
     use super::*;
     use crate::{
         dev_utils::{parse_dot_file_with_test_name, parse_test_dot_file, ParsedContents},
-        gossip::{find_event_by_short_name, Event, EventContext, EventHash},
+        gossip::{Event, EventContext, EventHash},
         id::SecretId,
         mock::Transaction,
         network_event::NetworkEvent,
@@ -916,8 +912,7 @@ mod handle_malice {
         // Check that the first duplicate triggers an accusation by Alice, but that the
         // duplicate is still added to the graph.
         let mut alice = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
-        let carols_valid_vote_hash =
-            *unwrap!(find_event_by_short_name(alice.graph(), "C_5")).hash();
+        let carols_valid_vote_hash = *unwrap!(alice.graph().find_by_short_name("C_5")).hash();
         unwrap!(alice.unpack_and_add_event(first_duplicate_clone_packed));
 
         let carol_index = unwrap!(alice.peer_list().get_index(carol.our_pub_id()));
@@ -941,9 +936,8 @@ mod handle_malice {
         // Generated with RNG seed: [935566334, 935694090, 88607029, 861330491].
         let mut alice_contents = parse_test_dot_file("alice.dot");
 
-        let a_4_index =
-            unwrap!(find_event_by_short_name(&alice_contents.graph, "A_4")).event_index();
-        let d_1_hash = *unwrap!(find_event_by_short_name(&alice_contents.graph, "D_1")).hash();
+        let a_4_index = unwrap!(alice_contents.graph.find_by_short_name("A_4")).event_index();
+        let d_1_hash = *unwrap!(alice_contents.graph.find_by_short_name("D_1")).hash();
 
         // Create an invalid accusation from Alice
         let a_5 = unwrap!(alice_contents.new_event_from_observation(
@@ -986,9 +980,8 @@ mod handle_malice {
         let mut alice_contents =
             parse_dot_file_with_test_name("alice.dot", "functional_tests_handle_malice_accomplice");
 
-        let a_18_index =
-            unwrap!(find_event_by_short_name(&alice_contents.graph, "A_18")).event_index();
-        let d_1_hash = *unwrap!(find_event_by_short_name(&alice_contents.graph, "D_1")).hash();
+        let a_18_index = unwrap!(alice_contents.graph.find_by_short_name("A_18")).event_index();
+        let d_1_hash = *unwrap!(alice_contents.graph.find_by_short_name("D_1")).hash();
 
         // Create an invalid accusation from Alice
         let a_19 = unwrap!(alice_contents.new_event_from_observation(
@@ -1180,8 +1173,8 @@ mod handle_malice {
 
         // Bob and Dave have different notions of which event is the 21st one by Alice - here
         // we save the hashes of these two events that could be considered A_21.
-        let bob_a_21_hash = *unwrap!(find_event_by_short_name(bob.graph(), "A_21")).hash();
-        let dave_a_21_hash = *unwrap!(find_event_by_short_name(dave.graph(), "A_21")).hash();
+        let bob_a_21_hash = *unwrap!(bob.graph().find_by_short_name("A_21")).hash();
+        let dave_a_21_hash = *unwrap!(dave.graph().find_by_short_name("A_21")).hash();
         assert_ne!(bob_a_21_hash, dave_a_21_hash);
 
         // Bob doesn't know Dave's A_21, and Dave doesn't know Bob's.
@@ -1205,10 +1198,7 @@ mod handle_malice {
             })
             .next());
         assert_eq!(offender, alice0.our_pub_id());
-        assert_eq!(
-            hash,
-            unwrap!(find_event_by_short_name(bob.graph(), "A_20")).hash()
-        );
+        assert_eq!(hash, unwrap!(bob.graph().find_by_short_name("A_20")).hash());
     }
 
     #[test]
@@ -1217,7 +1207,7 @@ mod handle_malice {
         let mut carol = TestParsec::from_parsed_contents(parse_test_dot_file("carol.dot"));
 
         // Carol creates an event with one of Bob's as the self-parent.
-        let b_12_index = unwrap!(find_event_by_short_name(carol.graph(), "B_12")).event_index();
+        let b_12_index = unwrap!(carol.graph().find_by_short_name("B_12")).event_index();
         let c_25 = unwrap!(carol.new_event_from_observation(
             b_12_index,
             Observation::OpaquePayload(Transaction::new("ABCD")),
@@ -1235,7 +1225,7 @@ mod handle_malice {
 
         // The invalid event should trigger an accusation vote to be raised immediately, and the
         // invalid event should not be added to the graph.
-        let a_21 = unwrap!(find_event_by_short_name(alice.graph(), "A_21"));
+        let a_21 = unwrap!(alice.graph().find_by_short_name("A_21"));
         let expected_observation = Observation::Accusation {
             offender: carol.our_pub_id().clone(),
             malice: Malice::SelfParentByDifferentCreator(Box::new(c_25_packed)),
@@ -1255,13 +1245,13 @@ mod handle_malice {
         let mut bob_contents = initialise_parsed_contents(bob_id.clone(), &genesis, None);
 
         let (b_0_packed, b_0_index, b_0_hash) = {
-            let e = unwrap!(find_event_by_short_name(&bob_contents.graph, "b_0"));
+            let e = unwrap!(bob_contents.graph.find_by_short_name("b_0"));
             let packed = unwrap!(e.pack(bob_contents.event_context()));
             (packed, e.event_index(), *e.hash())
         };
 
         let (b_1_packed, b_1_index, b_1_hash) = {
-            let e = unwrap!(find_event_by_short_name(&bob_contents.graph, "b_1"));
+            let e = unwrap!(bob_contents.graph.find_by_short_name("b_1"));
             let packed = unwrap!(e.pack(bob_contents.event_context()));
             (packed, e.event_index(), *e.hash())
         };

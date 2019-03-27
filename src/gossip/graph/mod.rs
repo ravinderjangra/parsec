@@ -265,6 +265,30 @@ impl<P: PublicId> Graph<P> {
     }
 }
 
+#[cfg(test)]
+impl<P: PublicId> Graph<P> {
+    /// Finds the first event which has the `short_name` provided.
+    pub fn find_by_short_name<'a>(&'a self, short_name: &str) -> Option<IndexedEventRef<'a, P>> {
+        let short_name = short_name.to_uppercase();
+
+        if let Some(sep) = short_name.find(',') {
+            let just_short_name = &short_name[0..sep];
+            let fork_index: usize = unwrap!(short_name[(sep + 1)..].parse());
+
+            self.iter().find(|event| {
+                event.short_name().to_string() == just_short_name
+                    && event
+                        .fork_set()
+                        .map(|set| set.contains(fork_index))
+                        .unwrap_or(fork_index == 0)
+            })
+        } else {
+            self.iter()
+                .find(move |event| event.short_name().to_string() == short_name)
+        }
+    }
+}
+
 impl<P: PublicId> IntoIterator for Graph<P> {
     type IntoIter = IntoIter<P>;
     type Item = <Self::IntoIter as Iterator>::Item;
@@ -356,7 +380,6 @@ pub(crate) mod snapshot {
 
 #[cfg(test)]
 mod tests {
-    use super::super::find_event_by_short_name;
     use crate::dev_utils::parse_test_dot_file;
 
     #[test]
@@ -365,7 +388,7 @@ mod tests {
         let contents = parse_test_dot_file("carol.dot");
         let graph = contents.graph;
 
-        let event = unwrap!(find_event_by_short_name(&graph, "C_8"));
+        let event = unwrap!(graph.find_by_short_name("C_8"));
 
         let expected = vec![
             "C_8", "C_7", "D_14", "B_26", "B_25", "B_24", "A_18", "B_23", "B_22", "D_13", "B_21",
