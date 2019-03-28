@@ -2,7 +2,7 @@
 
 To clone the repo, `git` must be installed.
 
-To compile the code and run the tests, `rust` and `cargo` are required. The currently-supported version of rust can be found in one of the [continuous integration test files](appveyor.yml#L5).
+To compile the code and run the tests, `rust` and `cargo` are required. The currently-supported version of rust can be found in one of the [continuous integration test files](../appveyor.yml#L5).
 
 To optionally generate graphs from generated dot files, `graphviz` is necessary. If you prefer, you can use an online converter (e.g. http://viz-js.com) to view the gossip graphs rather than installing graphviz.
 

@@ -19,7 +19,7 @@ If you have `dot` from [graphviz](https://graphviz.gitlab.io/download) available
 
 ## Detailed tutorial
 
-If the instructions in the overview are a bit sparse for your taste, please refer to the [tutorial](tutorial.md) for a step-by-step guide.
+If the instructions in the overview are a bit sparse for your taste, please refer to the [tutorial](docs/tutorial.md) for a step-by-step guide.
 
 ## Implementation status:
 
