@@ -8,7 +8,7 @@
 
 use crate::{
     block::Block,
-    dev_utils::{parse_test_dot_file, Record},
+    dev_utils::{parse_test_dot_file, Record, TestIterator},
     error::Error,
     gossip::{Event, Graph, GraphSnapshot},
     id::{Proof, PublicId},
@@ -18,7 +18,7 @@ use crate::{
     parsec::TestParsec,
     peer_list::{PeerListSnapshot, PeerState},
 };
-use std::{collections::BTreeSet, fmt::Debug};
+use std::collections::BTreeSet;
 
 macro_rules! assert_matches {
     ($actual:expr, $expected:pat) => {
@@ -65,27 +65,6 @@ impl Snapshot {
 fn nth_event<P: PublicId>(graph: &Graph<P>, n: usize) -> &Event<P> {
     unwrap!(graph.iter_from(n).next()).inner()
 }
-
-/// Testing related extensions to `Iterator`.
-trait TestIterator: Iterator {
-    /// Returns the only element in the iterator. Panics if the iterator yields less or more than
-    /// one element.
-    fn only(mut self) -> Self::Item
-    where
-        Self: Sized,
-        Self::Item: Debug,
-    {
-        let item = unwrap!(self.next(), "Expected one element - got none.");
-        assert!(
-            self.by_ref().peekable().peek().is_none(),
-            "Expected one element - got more (excess: {:?}).",
-            self.collect::<Vec<_>>()
-        );
-        item
-    }
-}
-
-impl<I: Iterator> TestIterator for I {}
 
 #[test]
 fn from_existing() {

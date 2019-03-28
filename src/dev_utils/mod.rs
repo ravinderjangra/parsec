@@ -10,6 +10,7 @@
 #[cfg(any(test, feature = "testing"))]
 mod dot_parser;
 mod environment;
+mod misc;
 mod network;
 mod peer;
 mod peer_statuses;
@@ -29,6 +30,7 @@ pub(crate) use self::dot_parser::ParsedContents;
 pub use self::record::Record;
 pub use self::{
     environment::{Environment, RngChoice},
+    misc::TestIterator,
     network::{ConsensusError, Network},
     peer::{NetworkView, Peer, PeerStatus},
     peer_statuses::PeerStatuses,
