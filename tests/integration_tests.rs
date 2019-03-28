@@ -59,15 +59,16 @@ extern crate proptest;
 extern crate unwrap;
 
 use maidsafe_utilities::log;
-use parsec::dev_utils::proptest::{arbitrary_delay, ScheduleOptionsStrategy, ScheduleStrategy};
-use parsec::dev_utils::{
-    DelayDistribution, Environment, Genesis, ObservationSchedule, RngChoice, Sampling, Schedule,
-    ScheduleOptions,
+use parsec::{
+    dev_utils::{
+        proptest::{arbitrary_delay, ScheduleOptionsStrategy, ScheduleStrategy},
+        DelayDistribution, Environment, Genesis, ObservationSchedule, RngChoice, Sampling,
+        Schedule, ScheduleOptions,
+    },
+    mock::{PeerId, Transaction, NAMES},
+    ConsensusMode,
 };
-use parsec::mock::{PeerId, Transaction, NAMES};
-use parsec::ConsensusMode;
-use proptest::prelude::ProptestConfig;
-use proptest::test_runner::FileFailurePersistence;
+use proptest::{prelude::ProptestConfig, test_runner::FileFailurePersistence};
 use rand::Rng;
 use std::collections::BTreeMap;
 

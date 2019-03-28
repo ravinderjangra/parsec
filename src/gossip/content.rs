@@ -9,12 +9,14 @@
 use super::{
     cause::Cause, event_context::EventContextRef, event_hash::EventHash, graph::EventIndex,
 };
-use crate::error::Error;
-use crate::id::{PublicId, SecretId};
-use crate::network_event::NetworkEvent;
-use crate::observation::ObservationForStore;
-use crate::peer_list::PeerIndex;
-use crate::vote::{Vote, VoteKey};
+use crate::{
+    error::Error,
+    id::{PublicId, SecretId},
+    network_event::NetworkEvent,
+    observation::ObservationForStore,
+    peer_list::PeerIndex,
+    vote::{Vote, VoteKey},
+};
 use serde::{Deserialize, Serialize};
 
 #[serde(bound(

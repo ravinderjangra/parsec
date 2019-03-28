@@ -101,17 +101,21 @@ extern crate parsec;
 extern crate unwrap;
 
 use clap::{App, Arg};
-use parsec::dev_utils::ObservationEvent::*;
-use parsec::dev_utils::{
-    Environment, Genesis, ObservationSchedule, RngChoice, Schedule, ScheduleOptions,
+use parsec::{
+    dev_utils::{
+        Environment, Genesis, ObservationEvent::*, ObservationSchedule, RngChoice, Schedule,
+        ScheduleOptions,
+    },
+    mock::{PeerId, Transaction},
+    ConsensusMode, DumpGraphMode, Observation, DIR, DUMP_MODE,
 };
-use parsec::mock::{PeerId, Transaction};
-use parsec::{ConsensusMode, DumpGraphMode, Observation, DIR, DUMP_MODE};
-use std::collections::{BTreeMap, BTreeSet};
-use std::fs::{self, File};
-use std::io::{self, Read};
-use std::path::{Path, PathBuf};
-use std::slice;
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fs::{self, File},
+    io::{self, Read},
+    path::{Path, PathBuf},
+    slice,
+};
 
 const DST_ROOT: &str = "input_graphs";
 

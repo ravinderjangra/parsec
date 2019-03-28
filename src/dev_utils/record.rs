@@ -7,16 +7,15 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::dot_parser::{parse_dot_file, ParsedContents};
-use crate::gossip::IndexedEventRef;
-use crate::gossip::{Cause, Event, PackedEvent, Request, Response};
-use crate::hash::Hash;
-use crate::mock::{PeerId, Transaction};
-use crate::observation::{ConsensusMode, Observation, ObservationKey, ObservationStore};
-use crate::parsec::Parsec;
-use crate::peer_list::PeerIndex;
-use std::collections::BTreeSet;
-use std::io;
-use std::path::Path;
+use crate::{
+    gossip::{Cause, Event, IndexedEventRef, PackedEvent, Request, Response},
+    hash::Hash,
+    mock::{PeerId, Transaction},
+    observation::{ConsensusMode, Observation, ObservationKey, ObservationStore},
+    parsec::Parsec,
+    peer_list::PeerIndex,
+};
+use std::{collections::BTreeSet, io, path::Path};
 
 /// Record of a Parsec session which consist of sequence of operations (`vote_for`, `handle_request`
 /// and `handle_response`). Can be produced from a previously dumped DOT file and after replaying,
@@ -269,10 +268,7 @@ fn collect_remaining_events_to_gossip(
 mod tests {
     use super::*;
     use crate::parsec::get_graph_snapshot;
-    use std::fs;
-    use std::iter;
-    use std::path::PathBuf;
-    use std::thread;
+    use std::{fs, iter, path::PathBuf, thread};
     use walkdir::WalkDir;
 
     #[derive(PartialEq, Eq, Debug)]

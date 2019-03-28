@@ -6,9 +6,7 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use crate::gossip::packed_event::PackedEvent;
-use crate::id::PublicId;
-use crate::network_event::NetworkEvent;
+use crate::{gossip::packed_event::PackedEvent, id::PublicId, network_event::NetworkEvent};
 
 /// A gossip request message.
 #[serde(bound = "")]

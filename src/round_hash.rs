@@ -6,10 +6,7 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use crate::hash::Hash;
-use crate::id::PublicId;
-use crate::observation::ObservationHash;
-use crate::serialise;
+use crate::{hash::Hash, id::PublicId, observation::ObservationHash, serialise};
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Debug)]
 pub(crate) struct RoundHash {

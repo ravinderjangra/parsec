@@ -6,9 +6,11 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use std::cmp;
-use std::fmt::{self, Debug, Formatter};
-use std::iter::FromIterator;
+use std::{
+    cmp,
+    fmt::{self, Debug, Formatter},
+    iter::FromIterator,
+};
 
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(crate) struct PeerIndex(pub(super) usize);

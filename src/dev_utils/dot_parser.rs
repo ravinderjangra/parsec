@@ -10,32 +10,36 @@
 use crate::error::Error;
 #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 use crate::gossip::EventContextRef;
-use crate::gossip::{CauseInput, Event, EventIndex, Graph, IndexedEventRef};
-use crate::hash::Hash;
-use crate::hash::HASH_LEN;
-use crate::meta_voting::{
-    BoolSet, MetaElection, MetaEvent, MetaVote, Observer, Step, UnconsensusedEvents,
+use crate::{
+    gossip::{CauseInput, Event, EventIndex, Graph, IndexedEventRef},
+    hash::{Hash, HASH_LEN},
+    meta_voting::{
+        BoolSet, MetaElection, MetaEvent, MetaVote, Observer, Step, UnconsensusedEvents,
+    },
+    mock::{PeerId, Transaction},
+    observation::{
+        ConsensusMode, Observation, ObservationHash, ObservationInfo, ObservationKey,
+        ObservationStore,
+    },
+    peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerState},
+    round_hash::RoundHash,
 };
-use crate::mock::{PeerId, Transaction};
-use crate::observation::ConsensusMode;
-use crate::observation::{
-    Observation, ObservationHash, ObservationInfo, ObservationKey, ObservationStore,
-};
-use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerState};
-use crate::round_hash::RoundHash;
 use fnv::{FnvHashMap, FnvHashSet};
 use itertools::Itertools;
-use pom::char_class::{alphanum, digit, hex_digit, multispace, space};
-use pom::parser::*;
-use pom::Result as PomResult;
-use pom::{DataInput, Parser};
-use std::cell::RefCell;
-use std::collections::{BTreeMap, BTreeSet};
-use std::fs::File;
-use std::io::{self, Read};
-use std::path::Path;
-use std::rc::Rc;
-use std::str::FromStr;
+use pom::{
+    char_class::{alphanum, digit, hex_digit, multispace, space},
+    parser::*,
+    DataInput, Parser, Result as PomResult,
+};
+use std::{
+    cell::RefCell,
+    collections::{BTreeMap, BTreeSet},
+    fs::File,
+    io::{self, Read},
+    path::Path,
+    rc::Rc,
+    str::FromStr,
+};
 
 pub const HEX_DIGITS_PER_BYTE: usize = 2;
 
@@ -1157,12 +1161,14 @@ fn next_topological_event(
 #[cfg(all(test, feature = "dump-graphs"))]
 mod tests {
     use super::*;
-    use crate::dev_utils::{Environment, RngChoice, Schedule, ScheduleOptions};
-    use crate::dump_graph::DIR;
-    use crate::gossip::GraphSnapshot;
-    use crate::maidsafe_utilities::serialisation::deserialise;
-    use crate::meta_voting::MetaElectionSnapshot;
-    use crate::mock::PeerId;
+    use crate::{
+        dev_utils::{Environment, RngChoice, Schedule, ScheduleOptions},
+        dump_graph::DIR,
+        gossip::GraphSnapshot,
+        maidsafe_utilities::serialisation::deserialise,
+        meta_voting::MetaElectionSnapshot,
+        mock::PeerId,
+    };
     use std::fs;
 
     type Snapshot = (GraphSnapshot, MetaElectionSnapshot<PeerId>);

@@ -25,12 +25,14 @@ pub(crate) use self::dot_parser::parse_dot_file_with_test_name;
 pub(crate) use self::dot_parser::parse_test_dot_file;
 #[cfg(all(test, feature = "mock"))]
 pub(crate) use self::dot_parser::ParsedContents;
-pub use self::environment::{Environment, RngChoice};
-pub use self::network::{ConsensusError, Network};
-pub use self::peer::{NetworkView, Peer, PeerStatus};
-pub use self::peer_statuses::PeerStatuses;
 #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 pub use self::record::Record;
-pub use self::schedule::*;
+pub use self::{
+    environment::{Environment, RngChoice},
+    network::{ConsensusError, Network},
+    peer::{NetworkView, Peer, PeerStatus},
+    peer_statuses::PeerStatuses,
+    schedule::*,
+};
 
 type Observation = super::observation::Observation<super::mock::Transaction, super::mock::PeerId>;

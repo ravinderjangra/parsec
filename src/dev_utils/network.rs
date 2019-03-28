@@ -6,20 +6,26 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use super::peer::{NetworkView, Peer, PeerStatus};
-use super::schedule::{Schedule, ScheduleEvent, ScheduleOptions};
-use super::Observation;
-use crate::block::Block;
-use crate::error::Error;
-use crate::gossip::{Request, Response};
-use crate::mock::{PeerId, Transaction};
-use crate::observation::{
-    is_more_than_two_thirds, ConsensusMode, Malice, Observation as ParsecObservation,
+use super::{
+    peer::{NetworkView, Peer, PeerStatus},
+    schedule::{Schedule, ScheduleEvent, ScheduleOptions},
+    Observation,
+};
+use crate::{
+    block::Block,
+    error::Error,
+    gossip::{Request, Response},
+    mock::{PeerId, Transaction},
+    observation::{
+        is_more_than_two_thirds, ConsensusMode, Malice, Observation as ParsecObservation,
+    },
 };
 use itertools::Itertools;
 use rand::Rng;
-use std::collections::{BTreeMap, BTreeSet, VecDeque};
-use std::fmt;
+use std::{
+    collections::{BTreeMap, BTreeSet, VecDeque},
+    fmt,
+};
 
 enum Message {
     Request(Request<Transaction, PeerId>, usize),

@@ -6,38 +6,40 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use crate::block::{Block, BlockGroup};
 #[cfg(all(test, feature = "mock"))]
 use crate::dev_utils::ParsedContents;
-use crate::dump_graph;
-use crate::error::{Error, Result};
 #[cfg(all(test, any(feature = "testing", feature = "mock")))]
 use crate::gossip::GraphSnapshot;
-use crate::gossip::{
-    Event, EventContextRef, EventIndex, Graph, IndexedEventRef, PackedEvent, Request, Response,
+use crate::{
+    block::{Block, BlockGroup},
+    dump_graph,
+    error::{Error, Result},
+    gossip::{
+        Event, EventContextRef, EventIndex, Graph, IndexedEventRef, PackedEvent, Request, Response,
+    },
+    id::{PublicId, SecretId},
+    meta_voting::{MetaElection, MetaEvent, MetaEventBuilder, MetaVote, Observer, Step},
+    network_event::NetworkEvent,
+    observation::{
+        is_more_than_two_thirds, ConsensusMode, Malice, Observation, ObservationHash,
+        ObservationKey, ObservationStore,
+    },
+    parsec_helpers::find_interesting_content_for_event,
+    peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerListChange, PeerState},
 };
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]
-use crate::hash::Hash;
-use crate::id::{PublicId, SecretId};
-use crate::meta_voting::{MetaElection, MetaEvent, MetaEventBuilder, MetaVote, Observer, Step};
-#[cfg(any(feature = "testing", all(test, feature = "mock")))]
-use crate::mock::{PeerId, Transaction};
-use crate::network_event::NetworkEvent;
-use crate::observation::{
-    is_more_than_two_thirds, ConsensusMode, Malice, Observation, ObservationHash, ObservationKey,
-    ObservationStore,
-};
-use crate::parsec_helpers::find_interesting_content_for_event;
-use crate::peer_list::{
-    PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerListChange, PeerState,
+use crate::{
+    hash::Hash,
+    mock::{PeerId, Transaction},
 };
 use fnv::FnvHashSet;
 use itertools::Itertools;
-use std::collections::{BTreeMap, BTreeSet, VecDeque};
-use std::mem;
 #[cfg(any(test, feature = "testing"))]
 use std::ops::{Deref, DerefMut};
-use std::usize;
+use std::{
+    collections::{BTreeMap, BTreeSet, VecDeque},
+    mem, usize,
+};
 
 /// The main object which manages creating and receiving gossip about network events from peers, and
 /// which provides a sequence of consensused [Block](struct.Block.html)s by applying the PARSEC

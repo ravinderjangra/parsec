@@ -7,11 +7,15 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::{Bounded, BoundedBoxedStrategy};
-use crate::dev_utils::environment::{Environment, RngChoice};
-use crate::dev_utils::schedule::{DelayDistribution, Schedule, ScheduleOptions};
-use proptest_crate::prelude::{Just, RngCore};
-use proptest_crate::strategy::{NewTree, Strategy, ValueTree};
-use proptest_crate::test_runner::TestRunner;
+use crate::dev_utils::{
+    environment::{Environment, RngChoice},
+    schedule::{DelayDistribution, Schedule, ScheduleOptions},
+};
+use proptest_crate::{
+    prelude::{Just, RngCore},
+    strategy::{NewTree, Strategy, ValueTree},
+    test_runner::TestRunner,
+};
 
 #[derive(Debug)]
 pub struct ScheduleOptionsStrategy {

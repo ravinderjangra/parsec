@@ -203,16 +203,18 @@ pub mod dev_utils;
 #[cfg(any(test, feature = "mock"))]
 pub mod mock;
 
-pub use crate::block::Block;
 #[cfg(feature = "dump-graphs")]
 pub use crate::dump_graph::{DumpGraphMode, DIR, DUMP_MODE};
-pub use crate::error::{Error, Result};
-pub use crate::gossip::{EventHash, PackedEvent, Request, Response};
-pub use crate::id::{Proof, PublicId, SecretId};
-pub use crate::network_event::NetworkEvent;
-pub use crate::observation::{ConsensusMode, Malice, Observation};
-pub use crate::parsec::Parsec;
-pub use crate::vote::Vote;
+pub use crate::{
+    block::Block,
+    error::{Error, Result},
+    gossip::{EventHash, PackedEvent, Request, Response},
+    id::{Proof, PublicId, SecretId},
+    network_event::NetworkEvent,
+    observation::{ConsensusMode, Malice, Observation},
+    parsec::Parsec,
+    vote::Vote,
+};
 
 use maidsafe_utilities::serialisation;
 use serde::ser::Serialize;

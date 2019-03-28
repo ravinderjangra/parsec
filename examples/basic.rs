@@ -52,18 +52,21 @@
 
 #[macro_use]
 extern crate clap;
-use parsec;
 #[macro_use]
 extern crate unwrap;
 
 use clap::{App, Arg, ArgMatches};
 use maidsafe_utilities::{log, SeededRng};
-use parsec::mock::{PeerId, Transaction};
-use parsec::{Block, ConsensusMode, Parsec, Request};
+use parsec::{
+    mock::{PeerId, Transaction},
+    Block, ConsensusMode, Parsec, Request,
+};
 use rand::Rng;
-use std::collections::BTreeSet;
-use std::fmt::{self, Debug, Formatter};
-use std::{process, usize};
+use std::{
+    collections::BTreeSet,
+    fmt::{self, Debug, Formatter},
+    process, usize,
+};
 
 const MIN_PEER_COUNT: usize = 2;
 const MAX_EVENT_COUNT: usize = 1000;

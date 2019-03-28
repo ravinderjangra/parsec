@@ -10,16 +10,16 @@ mod ancestors;
 mod event_index;
 mod event_ref;
 
-pub(crate) use self::ancestors::Ancestors;
-pub(crate) use self::event_index::EventIndex;
-pub(crate) use self::event_ref::IndexedEventRef;
+pub(crate) use self::{ancestors::Ancestors, event_index::EventIndex, event_ref::IndexedEventRef};
 
 use super::{event::Event, event_hash::EventHash};
 use crate::id::PublicId;
 #[cfg(feature = "malice-detection")]
 use fnv::FnvHashSet;
-use std::collections::btree_map::{BTreeMap, Entry};
-use std::collections::BTreeSet;
+use std::collections::{
+    btree_map::{BTreeMap, Entry},
+    BTreeSet,
+};
 
 /// The gossip graph.
 #[derive(Eq, PartialEq, Debug)]

@@ -7,8 +7,10 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use crate::peer_list::PeerState;
-use std::fmt::{self, Display, Formatter};
-use std::result;
+use std::{
+    fmt::{self, Display, Formatter},
+    result,
+};
 
 /// Parsec error
 #[derive(Debug)]

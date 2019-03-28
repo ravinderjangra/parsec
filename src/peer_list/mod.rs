@@ -16,17 +16,19 @@ pub use self::peer_state::PeerState;
 pub(crate) use self::snapshot::PeerListSnapshot;
 
 use self::peer::Peer;
-use crate::error::Error;
+use crate::{
+    error::Error,
+    gossip::{Event, EventIndex, IndexedEventRef},
+    hash::Hash,
+    id::SecretId,
+};
 #[cfg(any(test, feature = "testing"))]
-use crate::gossip::Graph;
-use crate::gossip::{Event, EventIndex, IndexedEventRef};
-use crate::hash::Hash;
-use crate::id::SecretId;
-#[cfg(any(test, feature = "testing"))]
-use crate::mock::PeerId;
-use std::collections::btree_map::{BTreeMap, Entry};
-use std::fmt::{self, Debug, Formatter};
-use std::iter;
+use crate::{gossip::Graph, mock::PeerId};
+use std::{
+    collections::btree_map::{BTreeMap, Entry},
+    fmt::{self, Debug, Formatter},
+    iter,
+};
 
 pub(crate) struct PeerList<S: SecretId> {
     our_id: S,
@@ -388,8 +390,7 @@ pub(crate) enum PeerListChange {
 #[cfg(test)]
 pub(crate) mod snapshot {
     use super::*;
-    use crate::gossip::EventHash;
-    use crate::id::PublicId;
+    use crate::{gossip::EventHash, id::PublicId};
     use std::collections::BTreeSet;
 
     #[derive(Eq, PartialEq, Debug)]
