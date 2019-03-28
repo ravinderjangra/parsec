@@ -351,7 +351,7 @@ mod tests {
 
     // Note: skip this test when malice-detection is enabled, because there could be a mismatch
     // between parsed and replayed graphs when the dot file contains malice (e.g.: fork). This is
-    // because parsing does not create accusation events but replaing does.
+    // because parsing does not create accusation events but replaying does.
     #[cfg(not(feature = "malice-detection"))]
     #[test]
     fn smoke_parsec() {

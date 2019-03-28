@@ -504,6 +504,7 @@ fn gossip_after_fork() {
 
 #[test]
 fn sees() {
+    // This graph contains fork.
     let record = Record::from(parse_test_dot_file("alice.dot"));
     let alice = TestParsec::from(record.play());
 
@@ -514,14 +515,23 @@ fn sees() {
     let c2_0 = unwrap!(alice.graph().find_by_short_name("C_2,0"));
     let c2_1 = unwrap!(alice.graph().find_by_short_name("C_2,1"));
 
+    // Simple no fork cases:
+    assert!(a3.sees(a3));
+    assert!(a3.sees(a2));
+    assert!(a3.sees(b2));
+
+    // A2 cannot prove the fork because it has only the first side of it in its ancestry.
     assert!(a2.sees(c1));
     assert!(a2.sees(c2_0));
     assert!(!a2.sees(c2_1));
 
+    // Similarly, B2 has only the second side of the fork in its ancestry and so cannot prove it
+    // either.
     assert!(b2.sees(c1));
     assert!(!b2.sees(c2_0));
     assert!(b2.sees(c2_1));
 
+    // A3, on the other hand, has both sides of the fork in its ancestry and so can prove it.
     assert!(!a3.sees(c1));
     assert!(!a3.sees(c2_0));
     assert!(!a3.sees(c2_1));

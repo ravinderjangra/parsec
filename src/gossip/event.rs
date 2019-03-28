@@ -274,8 +274,8 @@ impl<P: PublicId> Event<P> {
     }
 
     // Returns whether this event sees `other`, i.e. whether there's a directed path from `other`
-    // to `self` in the graph, and there doesn't exists any pair of events by `other`'s creator
-    // such that they are ancestors of this event but one is neither ancestor not descendant of the
+    // to `self` in the graph, and there doesn't exist any pair of events by `other`'s creator
+    // such that they are ancestors of this event but one is neither ancestor nor descendant of the
     // other.
     pub fn sees<E: AsRef<Event<P>>>(&self, other: E) -> bool {
         !self.sees_fork_by(other.as_ref().creator()) && self.is_descendant_of(other)
@@ -294,6 +294,12 @@ impl<P: PublicId> Event<P> {
     }
 
     // Fork set that this event is a member of.
+    //
+    // ("fork set" is a set of events from the same creator that have the same `index_by_creator`.
+    // This can be events that have the same self-parent, or the same self-grand-parent, etc...)
+    //
+    // If this event is not member of a fork set (it's not forking) or is the first member of its
+    // fork set (in the insertion order), this function returns `None`.
     pub fn fork_set(&self) -> Option<&IndexSet> {
         self.cache
             .ancestor_info

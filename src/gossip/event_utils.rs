@@ -14,7 +14,18 @@ use crate::{
 use itertools::{EitherOrBoth, Itertools};
 use std::{cmp, collections::BTreeMap, iter};
 
-// Map of forks created by a single peer that are in the ancestry of an event.
+// Map of forks created by single peer in the ancestry of the current event.
+// Key is the index-by-creator of the forked events, value is a list of fork indices of the events
+// that the current event is descendant of.
+//
+// ("fork index" is unique index within the fork set the event belongs to. "fork set" is the set of
+// events having the same creator and index-by-creator).
+//
+// If there is an entry with two or more fork indices that means the current event is aware of the
+// fork, because it has at least two sides of the fork in its ancestry.
+//
+// If there is only one fork index in the entry or the entry is missing completely, there can still
+// be a fork, but we cannot prove it yet using just the ancestors of the current event.
 pub(super) type ForkMap = BTreeMap<usize, IndexSet>;
 
 // Immutable set of integer indices
@@ -75,8 +86,6 @@ pub(super) struct AncestorInfo {
     pub last: usize,
 
     // Info about forks in the ancestry of the current event.
-    // Key is the index-by-creator of the forked events, value is a list of indices of the fork
-    // branches that the current event in on.
     pub forks: ForkMap,
 }
 
@@ -125,7 +134,7 @@ fn merge_ancestor_info_maps(
     // Merge the two maps: if an entry exists in only one of the map, copy it over,
     // if it exists in both, merge them by calling `AncestorInfo::merge`.
     // We can use `merge_join_by` from `itertools` because `PeerIndexMap::iter` yields the entries
-    // in lexicographically ascending order.
+    // in ascending order.
     map0.iter()
         .merge_join_by(map1.iter(), |(peer_index0, _), (peer_index1, _)| {
             peer_index0.cmp(peer_index1)
