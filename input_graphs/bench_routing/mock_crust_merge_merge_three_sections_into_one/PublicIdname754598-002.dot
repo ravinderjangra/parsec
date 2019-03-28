@@ -6,6 +6,7 @@
 ///   PublicIdname5c8502: PeerState(VOTE|SEND|RECV)
 ///   PublicIdname70ccc7: PeerState()
 /// }
+/// consensus_mode: Single
 digraph GossipGraph {
   splines=false
   rankdir=BT

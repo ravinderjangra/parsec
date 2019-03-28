@@ -57,10 +57,6 @@ impl Record {
             .map(|observation| observation.hash().0)
             .collect()
     }
-
-    pub fn set_consensus_mode(&mut self, consensus_mode: ConsensusMode) {
-        self.consensus_mode = consensus_mode;
-    }
 }
 
 impl From<ParsedContents> for Record {

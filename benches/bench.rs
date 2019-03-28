@@ -62,12 +62,12 @@ extern crate unwrap;
 #[cfg(feature = "testing")]
 use criterion::Criterion;
 #[cfg(feature = "testing")]
-use parsec::{dev_utils::Record, ConsensusMode};
+use parsec::dev_utils::Record;
 
 #[cfg(feature = "testing")]
 fn bench(c: &mut Criterion) {
     for name in &["minimal", "static", "dynamic"] {
-        bench_dot_file(c, "benches", name, ConsensusMode::Supermajority);
+        bench_dot_file(c, "benches", name);
     }
 
     for name in &[
@@ -77,18 +77,8 @@ fn bench(c: &mut Criterion) {
         "a_node32_opaque_evt8",
         "a_node48_opaque_evt8",
     ] {
-        bench_dot_file(
-            c,
-            "bench_section_size_evt8",
-            name,
-            ConsensusMode::Supermajority,
-        );
-        bench_dot_file(
-            c,
-            "bench_section_size_evt8_single",
-            name,
-            ConsensusMode::Single,
-        );
+        bench_dot_file(c, "bench_section_size_evt8", name);
+        bench_dot_file(c, "bench_section_size_evt8_single", name);
     }
 
     for name in &[
@@ -98,18 +88,8 @@ fn bench(c: &mut Criterion) {
         "a_node32_opaque_evt16",
         "a_node48_opaque_evt16",
     ] {
-        bench_dot_file(
-            c,
-            "bench_section_size_evt16",
-            name,
-            ConsensusMode::Supermajority,
-        );
-        bench_dot_file(
-            c,
-            "bench_section_size_evt16_single",
-            name,
-            ConsensusMode::Single,
-        );
+        bench_dot_file(c, "bench_section_size_evt16", name);
+        bench_dot_file(c, "bench_section_size_evt16_single", name);
     }
 
     for name in &[
@@ -118,11 +98,11 @@ fn bench(c: &mut Criterion) {
         "a_node16_opaque_evt1024",
         "a_node32_opaque_evt1024",
     ] {
+        bench_dot_file(c, "bench_section_size_evt1024_interleave", name);
         bench_dot_file(
             c,
-            "bench_section_size_evt1024_interleave",
+            "bench_section_size_evt1024_interleave_supermajority",
             name,
-            ConsensusMode::Single,
         );
     }
 
@@ -132,12 +112,7 @@ fn bench(c: &mut Criterion) {
         "a_node16_opaque_evt8192",
         "a_node32_opaque_evt8192",
     ] {
-        bench_dot_file(
-            c,
-            "bench_section_size_evt8192_interleave",
-            name,
-            ConsensusMode::Single,
-        );
+        bench_dot_file(c, "bench_section_size_evt8192_interleave", name);
     }
 
     for name in &[
@@ -146,12 +121,7 @@ fn bench(c: &mut Criterion) {
         "a_node16_opaque_evt65536",
         "a_node32_opaque_evt65536",
     ] {
-        bench_dot_file(
-            c,
-            "bench_section_size_evt65536_interleave",
-            name,
-            ConsensusMode::Single,
-        );
+        bench_dot_file(c, "bench_section_size_evt65536_interleave", name);
     }
 
     for name in &[
@@ -202,28 +172,18 @@ fn bench(c: &mut Criterion) {
             c,
             "bench_routing/mock_crust_merge_merge_three_sections_into_one",
             name,
-            ConsensusMode::Single,
         );
     }
 }
 
 #[cfg(feature = "testing")]
-fn bench_dot_file(
-    c: &mut Criterion,
-    group_name: &'static str,
-    name: &'static str,
-    consensus_mode: ConsensusMode,
-) {
+fn bench_dot_file(c: &mut Criterion, group_name: &'static str, name: &'static str) {
     let test_name = format!("{} - {}", name, group_name);
     let _ = c.bench_function(&test_name, move |b| {
-        let record = {
-            let mut record = unwrap!(Record::parse(format!(
-                "input_graphs/{}/{}.dot",
-                group_name, name
-            )));
-            record.set_consensus_mode(consensus_mode);
-            record
-        };
+        let record = unwrap!(Record::parse(format!(
+            "input_graphs/{}/{}.dot",
+            group_name, name
+        )));
         b.iter_with_setup(
             || record.clone(),
             |record| {
