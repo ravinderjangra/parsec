@@ -22,4 +22,9 @@ impl Debug for EventHash {
 impl EventHash {
     #[cfg(any(test, feature = "testing"))]
     pub(crate) const ZERO: Self = EventHash(Hash::ZERO);
+
+    /// Returns the least significant bit of this hash.
+    pub fn least_significant_bit(&self) -> bool {
+        self.0.least_significant_bit()
+    }
 }
