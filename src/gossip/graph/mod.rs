@@ -101,6 +101,11 @@ impl<P: PublicId> Graph<P> {
             .map(|event| IndexedEventRef { index, event })
     }
 
+    /// Gets `Event` by the given `hash`, if it exists.
+    pub fn get_by_hash<'a>(&'a self, hash: &EventHash) -> Option<IndexedEventRef<'a, P>> {
+        self.get_index(hash).and_then(|index| self.get(index))
+    }
+
     /// Number of events in this graph.
     pub fn len(&self) -> usize {
         self.events.len()
@@ -258,10 +263,6 @@ impl<P: PublicId> Graph<P> {
         let event = self.events.pop()?;
         let _ = self.indices.remove(event.hash());
         Some((index, event))
-    }
-
-    pub fn get_by_hash<'a>(&'a self, hash: &EventHash) -> Option<IndexedEventRef<'a, P>> {
-        self.get_index(hash).and_then(|index| self.get(index))
     }
 }
 

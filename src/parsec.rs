@@ -1924,28 +1924,24 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             | Malice::InvalidAccusation(hash)
             | Malice::Accomplice(hash, _) => self
                 .graph
-                .get_index(hash)
-                .and_then(|index| self.graph.get(index))
+                .get_by_hash(hash)
                 .map(|malicious_event| event.is_descendant_of(malicious_event))
                 .unwrap_or(false),
 
             Malice::DuplicateVote(hash0, hash1) => {
                 self.graph
-                    .get_index(hash0)
-                    .and_then(|index| self.graph.get(index))
+                    .get_by_hash(hash0)
                     .map(|malicious_event0| event.is_descendant_of(malicious_event0))
                     .unwrap_or(false)
                     && self
                         .graph
-                        .get_index(hash1)
-                        .and_then(|index| self.graph.get(index))
+                        .get_by_hash(hash1)
                         .map(|malicious_event1| event.is_descendant_of(malicious_event1))
                         .unwrap_or(false)
             }
             Malice::Fork(hash) => self
                 .graph
-                .get_index(hash)
-                .and_then(|index| self.graph.get(index))
+                .get_by_hash(hash)
                 .map(|malicious_event| {
                     event.is_descendant_of(malicious_event)
                         && event.sees_fork_by(malicious_event.creator())
@@ -1956,8 +1952,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             | Malice::InvalidRequest(packed_event)
             | Malice::InvalidResponse(packed_event) => self
                 .graph
-                .get_index(&packed_event.compute_hash())
-                .and_then(|index| self.graph.get(index))
+                .get_by_hash(&packed_event.compute_hash())
                 .map(|malicious_event| event.is_descendant_of(malicious_event))
                 .unwrap_or(false),
             Malice::Unprovable(_) => false,
