@@ -128,9 +128,7 @@ impl Network {
     }
 
     fn active_non_malicious_peers(&self) -> impl Iterator<Item = &Peer> {
-        self.peers
-            .values()
-            .filter(|peer| peer.status() == PeerStatus::Active && !peer.is_malicious())
+        self.active_peers().filter(|peer| !peer.is_malicious())
     }
 
     /// Returns the IDs of peers which consider themselves to be still running correctly, i.e. those
