@@ -1,7 +1,8 @@
 # Prerequisites
+
 To clone the repo, `git` must be installed.
 
-To compile the code and run the tests, `rust` and `cargo` are required. The currently-supported version of rust can be found in one of the [continuous integration test files](appveyor.yml#L5).
+To compile the code and run the tests, `rust` and `cargo` are required. The currently-supported version of rust can be found in one of the [continuous integration test files](../appveyor.yml#L5).
 
 To optionally generate graphs from generated dot files, `graphviz` is necessary. If you prefer, you can use an online converter (e.g. http://viz-js.com) to view the gossip graphs rather than installing graphviz.
 
@@ -16,7 +17,7 @@ On MacOS, homebrew has a graphviz package:
 brew install graphviz
 ```
 
-On Windows, you can find an installer [here](https://graphviz.gitlab.io/_pages/Download/Download_windows.html)
+On Windows, you can find an installer [here](https://graphviz.gitlab.io/_pages/Download/Download_windows.html).
 
 # Run the tests
 
@@ -30,7 +31,7 @@ From the parsec repository, run the tests. Be sure to use the feature: `dump-gra
 
 ```
 cd parsec
-cargo test --release --features=dump-graphs,mock -- --nocapture
+cargo test --release --features=dump-graphs,testing -- --nocapture
 ```
 
 # View the graphs
@@ -38,27 +39,30 @@ cargo test --release --features=dump-graphs,mock -- --nocapture
 The output must contain lines analogous to these:
 
 ```
-Writing dot files in /tmp/parsec_graphs/53srr3/test_minimal_network
-Writing dot files in /tmp/parsec_graphs/53srr3/test_multiple_votes_before_gossip
-Writing dot files in /tmp/parsec_graphs/53srr3/test_faulty_third_terminate_concurrently
-Writing dot files in /tmp/parsec_graphs/53srr3/test_duplicate_vote_is_reduced_to_single
-Writing dot files in /tmp/parsec_graphs/53srr3/test_faulty_third_never_gossip
-Writing dot files in /tmp/parsec_graphs/53srr3/test_faulty_third_terminate_at_random_points
-Writing dot files in /tmp/parsec_graphs/53srr3/test_multiple_votes_during_gossip
+Writing dot files in /tmp/parsec_graphs/53srr3/minimal_network
+Writing dot files in /tmp/parsec_graphs/53srr3/multiple_votes_before_gossip
+Writing dot files in /tmp/parsec_graphs/53srr3/faulty_third_terminate_concurrently
+Writing dot files in /tmp/parsec_graphs/53srr3/duplicate_vote_is_reduced_to_single
+Writing dot files in /tmp/parsec_graphs/53srr3/faulty_third_never_gossip
+Writing dot files in /tmp/parsec_graphs/53srr3/multiple_votes_during_gossip
 ```
 
 Go to one of the directories listed above:
 ```
-cd /tmp/parsec_graphs/53srr3/test_minimal_network
+cd /tmp/parsec_graphs/53srr3/minimal_network
 ```
 
-This particular example consists of four nodes reaching consensus on the order of one single event. It is quite trivial. This is why the directory contains only four dot files:
+This particular example consists of four nodes reaching consensus on the order of a Genesis event and one further opaque event. It is quite trivial. This is why the directory contains only eight dot files:
 ```
 .
 ├── Alice-001.dot
+├── Alice-002.dot
 ├── Bob-001.dot
+├── Bob-002.dot
 ├── Carol-001.dot
-└── Dave-001.dot
+├── Carol-002.dot
+├── Dave-001.dot
+└── Dave-002.dot
 ```
 
 These are `dot` representations of the gossip graphs. You may read them with a text editor to get a feel for the syntax.
@@ -67,9 +71,13 @@ From these dot representations, images may be generated using graphviz. If you a
 ```
 .
 ├── Alice-001.dot.svg
+├── Alice-002.dot.svg
 ├── Bob-001.dot.svg
+├── Bob-002.dot.svg
 ├── Carol-001.dot.svg
-└── Dave-001.dot.svg
+├── Carol-002.dot.svg
+├── Dave-001.dot.svg
+└── Dave-002.dot.svg
 ```
 
 You can open these SVG files in your favourite web browser to view them.
@@ -83,18 +91,18 @@ dot -Tsvg Alice-001.dot -O
 
 These graphs demonstrate how each node reaches a conclusion, based on each node casting a single vote (highlighted in cyan blue). The gossip events that make that vote valid are highlighted in crimson red. The gossip events that contain special values for estimates, bin values, auxiliary values and decisions are labelled with the information needed to understand the decision process.
 
-Now, `test_minimal_network` is a silly example as reaching consensus on a single event is trivial. You may use the same method to explore the outcome of all other tests. `test_multiple_votes_during_gossip` is the most realistic scenario: it involves reaching consensus on the order 10 of events between 4 nodes, where the votes are cast in a random order, at random intervals by each node.
+Now, `minimal_network` is a silly example as reaching consensus on a single event is trivial. You may use the same method to explore the outcome of all other tests. `multiple_votes_during_gossip` is the most realistic scenario: it involves reaching consensus on the order 10 of events between 4 nodes, where the votes are cast in a random order, at random intervals by each node.
 
 # Play around
 
 For more control over the scenario, please run the example. To see which options you may use, run
 ```
-cargo run --release --example basic --features=dump-graphs,mock -- --help
+cargo run --release --example basic --features=mock,dump-graphs -- --help
 ```
 
 For instance, for an example with 10 peers agreeing on the order of 5 events, run
 ```
-cargo run --release --example basic --features=dump-graphs,mock -- -i10 -o5
+cargo run --release --example basic --features=mock,dump-graphs -- -i10 -o5
 ```
 
 # Share your thoughts/questions

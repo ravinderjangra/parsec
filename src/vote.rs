@@ -6,14 +6,14 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use crate::error::Error;
-use crate::id::{Proof, PublicId, SecretId};
-use crate::network_event::NetworkEvent;
-use crate::observation::{
-    ConsensusMode, Observation, ObservationHash, ObservationKey, ObservationStore,
+use crate::{
+    error::Error,
+    id::{Proof, PublicId, SecretId},
+    network_event::NetworkEvent,
+    observation::{ConsensusMode, Observation, ObservationHash, ObservationKey, ObservationStore},
+    peer_list::PeerIndex,
+    serialise,
 };
-use crate::peer_list::PeerIndex;
-use crate::serialise;
 use serde::de::DeserializeOwned;
 use std::fmt::{self, Debug, Formatter};
 

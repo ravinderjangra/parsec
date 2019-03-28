@@ -91,9 +91,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::hash::Hash;
-    use crate::observation::{ConsensusMode, ObservationHash};
-    use crate::peer_list::PeerIndex;
+    use crate::{
+        hash::Hash,
+        observation::{ConsensusMode, ObservationHash},
+        peer_list::PeerIndex,
+    };
 
     lazy_static! {
         /// Hashes for opaque events to use in tests.

@@ -6,24 +6,21 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use super::Environment;
-use super::Observation;
-use super::{PeerStatus, PeerStatuses};
+use super::{Environment, Observation, PeerStatus, PeerStatuses};
 #[cfg(feature = "dump-graphs")]
 use crate::dump_graph::DIR;
-use crate::mock::{PeerId, Transaction, NAMES};
-use crate::observation::{ConsensusMode, Observation as ParsecObservation};
+use crate::{
+    mock::{PeerId, Transaction, NAMES},
+    observation::{ConsensusMode, Observation as ParsecObservation},
+};
 use itertools::Itertools;
-use rand::seq;
-use rand::Rng;
-use std::collections::{BTreeMap, BTreeSet};
-use std::fmt;
+use rand::{seq, Rng};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fmt, iter, mem,
+};
 #[cfg(feature = "dump-graphs")]
-use std::fs::File;
-#[cfg(feature = "dump-graphs")]
-use std::io::Write;
-use std::iter;
-use std::mem;
+use std::{fs::File, io::Write};
 
 /// This struct holds the data necessary to make a simulated request when a node executes a local
 /// step.
@@ -234,7 +231,7 @@ pub struct ScheduleOptions {
     pub genesis_size: usize,
     /// Number of malicious peers included in the genesis group
     pub malicious_genesis_count: usize,
-    /// Probabilitity per step that a random node will fail
+    /// Probability per step that a random node will fail
     pub prob_failure: f64,
     /// Probability that a vote will get repeated
     pub prob_vote_duplication: f64,

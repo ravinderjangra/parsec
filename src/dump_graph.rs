@@ -6,12 +6,14 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use crate::gossip::Graph;
-use crate::id::SecretId;
-use crate::meta_voting::MetaElection;
-use crate::network_event::NetworkEvent;
-use crate::observation::{ConsensusMode, ObservationStore};
-use crate::peer_list::PeerList;
+use crate::{
+    gossip::Graph,
+    id::SecretId,
+    meta_voting::MetaElection,
+    network_event::NetworkEvent,
+    observation::{ConsensusMode, ObservationStore},
+    peer_list::PeerList,
+};
 
 /// Use this to initialise the folder into which the dot files will be dumped.  This allows the
 /// folder's path to be displayed at the start of a run, rather than at the arbitrary point when
@@ -72,25 +74,29 @@ pub use self::detail::{DumpGraphMode, DIR, DUMP_MODE};
 #[cfg(feature = "dump-graphs")]
 mod detail {
     use super::DumpGraphContext;
-    use crate::gossip::{Cause, Event, EventIndex, Graph, GraphSnapshot, IndexedEventRef};
-    use crate::id::{PublicId, SecretId};
-    use crate::meta_voting::{MetaElection, MetaElectionSnapshot, MetaEvent, MetaVote, Observer};
-    use crate::network_event::NetworkEvent;
-    use crate::observation::{ConsensusMode, Observation, ObservationKey, ObservationStore};
-    use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
-    use crate::serialise;
+    use crate::{
+        gossip::{Cause, Event, EventIndex, Graph, GraphSnapshot, IndexedEventRef},
+        id::{PublicId, SecretId},
+        meta_voting::{MetaElection, MetaElectionSnapshot, MetaEvent, MetaVote, Observer},
+        network_event::NetworkEvent,
+        observation::{ConsensusMode, Observation, ObservationKey, ObservationStore},
+        peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList},
+        serialise,
+    };
     use itertools::Itertools;
     use rand::{self, Rng};
-    use std::cell::RefCell;
-    use std::cmp;
-    use std::collections::{BTreeMap, BTreeSet};
-    use std::env;
-    use std::fmt::{self, Debug, Formatter};
-    use std::fs::{self, File};
-    use std::io::{self, BufWriter, Write};
-    use std::path::{Path, PathBuf};
-    use std::process::Command;
-    use std::thread;
+    use std::{
+        cell::RefCell,
+        cmp,
+        collections::{BTreeMap, BTreeSet},
+        env,
+        fmt::{self, Debug, Formatter},
+        fs::{self, File},
+        io::{self, BufWriter, Write},
+        path::{Path, PathBuf},
+        process::Command,
+        thread,
+    };
 
     lazy_static! {
         static ref ROOT_DIR_PREFIX: PathBuf = { env::temp_dir().join("parsec_graphs") };
@@ -1072,7 +1078,7 @@ mod detail {
             .map(|len| len + 1)
             .unwrap_or(num_char_if_only_one_element);
 
-        // Have all short names the same lengh or shorter
+        // Have all short names the same length or shorter
         let make_short_name = |name: &str| {
             let copy_len = cmp::min(mismatch_len, name.len());
             name[0..copy_len].to_string()

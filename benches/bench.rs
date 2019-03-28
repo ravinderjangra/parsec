@@ -62,9 +62,7 @@ extern crate unwrap;
 #[cfg(feature = "testing")]
 use criterion::Criterion;
 #[cfg(feature = "testing")]
-use parsec::dev_utils::Record;
-#[cfg(feature = "testing")]
-use parsec::ConsensusMode;
+use parsec::{dev_utils::Record, ConsensusMode};
 
 #[cfg(feature = "testing")]
 fn bench(c: &mut Criterion) {

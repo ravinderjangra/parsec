@@ -16,17 +16,19 @@ pub use self::peer_state::PeerState;
 pub(crate) use self::snapshot::PeerListSnapshot;
 
 use self::peer::Peer;
-use crate::error::Error;
+use crate::{
+    error::Error,
+    gossip::{Event, EventIndex, IndexedEventRef},
+    hash::Hash,
+    id::SecretId,
+};
 #[cfg(any(test, feature = "testing"))]
-use crate::gossip::Graph;
-use crate::gossip::{Event, EventIndex, IndexedEventRef};
-use crate::hash::Hash;
-use crate::id::SecretId;
-#[cfg(any(test, feature = "testing"))]
-use crate::mock::PeerId;
-use std::collections::btree_map::{BTreeMap, Entry};
-use std::fmt::{self, Debug, Formatter};
-use std::iter;
+use crate::{gossip::Graph, mock::PeerId};
+use std::{
+    collections::btree_map::{BTreeMap, Entry},
+    fmt::{self, Debug, Formatter},
+    iter,
+};
 
 pub(crate) struct PeerList<S: SecretId> {
     our_id: S,
@@ -221,7 +223,7 @@ impl<S: SecretId> PeerList<S> {
             if peer
                 .last_gossiped_event
                 .map(|current| current < event_index)
-                .unwrap_or(false)
+                .unwrap_or(true)
             {
                 peer.last_gossiped_event = Some(event_index)
             }
@@ -366,10 +368,12 @@ impl Builder {
     pub fn finish(mut self, graph: &Graph<PeerId>) -> PeerList<PeerId> {
         // Set peer events and apply the membership list changes.
         for (index, peer) in self.peer_list.iter_mut() {
-            peer.events = graph
+            let events = graph
                 .iter()
                 .filter(|event| event.creator() == index)
-                .collect();
+                .collect::<Vec<_>>();
+            peer.last_gossiped_event = events.last().map(|event| event.event_index());
+            peer.events = events.into_iter().collect();
         }
 
         self.peer_list
@@ -386,8 +390,7 @@ pub(crate) enum PeerListChange {
 #[cfg(test)]
 pub(crate) mod snapshot {
     use super::*;
-    use crate::gossip::EventHash;
-    use crate::id::PublicId;
+    use crate::{gossip::EventHash, id::PublicId};
     use std::collections::BTreeSet;
 
     #[derive(Eq, PartialEq, Debug)]

@@ -6,16 +6,19 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use super::meta_event::{MetaEvent, MetaEventBuilder};
-use super::meta_vote::MetaVote;
-use crate::gossip::{EventIndex, Graph};
-use crate::id::PublicId;
-use crate::observation::{ObservationHash, ObservationKey};
-use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerListChange};
-use crate::round_hash::RoundHash;
+use super::{
+    meta_event::{MetaEvent, MetaEventBuilder},
+    meta_vote::MetaVote,
+};
+use crate::{
+    gossip::{EventIndex, Graph},
+    id::PublicId,
+    observation::{ObservationHash, ObservationKey},
+    peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerListChange},
+    round_hash::RoundHash,
+};
 use fnv::{FnvHashMap, FnvHashSet};
-use std::collections::BTreeSet;
-use std::{cmp, usize};
+use std::{cmp, collections::BTreeSet, usize};
 
 lazy_static! {
     static ref EMPTY_BTREESET_EVENT_INDEX: BTreeSet<EventIndex> = BTreeSet::new();
@@ -342,11 +345,12 @@ impl MetaElection {
 
 #[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
 pub(crate) mod snapshot {
-    use super::super::meta_event::snapshot::MetaEventSnapshot;
-    use super::*;
-    use crate::gossip::{EventHash, Graph};
-    use crate::id::SecretId;
-    use crate::peer_list::PeerList;
+    use super::{super::meta_event::snapshot::MetaEventSnapshot, *};
+    use crate::{
+        gossip::{EventHash, Graph},
+        id::SecretId,
+        peer_list::PeerList,
+    };
     use std::collections::BTreeMap;
 
     #[serde(bound = "")]

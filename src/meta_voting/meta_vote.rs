@@ -6,10 +6,11 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use super::bool_set::BoolSet;
-use super::meta_vote_counts::MetaVoteCounts;
-use std::collections::BTreeMap;
-use std::fmt::{self, Debug, Formatter};
+use super::{bool_set::BoolSet, meta_vote_counts::MetaVoteCounts};
+use std::{
+    collections::BTreeMap,
+    fmt::{self, Debug, Formatter},
+};
 
 // This holds the state of a (binary) meta vote about which we're trying to achieve consensus.
 #[derive(Clone, Default, PartialEq, Eq, Serialize, Deserialize)]

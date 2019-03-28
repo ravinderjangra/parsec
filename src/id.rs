@@ -6,10 +6,8 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use serde::de::DeserializeOwned;
-use serde::Serialize;
-use std::fmt::Debug;
-use std::hash::Hash;
+use serde::{de::DeserializeOwned, Serialize};
+use std::{fmt::Debug, hash::Hash};
 
 /// The public identity of a node.  It provides functionality to allow it to be used as an
 /// asymmetric signing public key.

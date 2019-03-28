@@ -6,11 +6,13 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use crate::error::Error;
-use crate::id::{Proof, PublicId};
-use crate::network_event::NetworkEvent;
-use crate::observation::Observation;
-use crate::vote::Vote;
+use crate::{
+    error::Error,
+    id::{Proof, PublicId},
+    network_event::NetworkEvent,
+    observation::Observation,
+    vote::Vote,
+};
 use std::{
     collections::{BTreeMap, BTreeSet},
     ops::Deref,

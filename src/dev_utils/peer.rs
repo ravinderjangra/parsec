@@ -7,21 +7,25 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::Observation;
-use crate::block::{Block, BlockGroup};
-use crate::error::Result;
-use crate::gossip::{Cause, Event, EventIndex, Request, Response};
-use crate::mock::{PeerId, Transaction};
-use crate::observation::{
-    is_more_than_two_thirds, ConsensusMode, Malice, Observation as ParsecObservation,
+use crate::{
+    block::{Block, BlockGroup},
+    error::Result,
+    gossip::{Cause, Event, EventIndex, Request, Response},
+    mock::{PeerId, Transaction},
+    observation::{
+        is_more_than_two_thirds, ConsensusMode, Malice, Observation as ParsecObservation,
+    },
+    parsec::{Parsec, TestParsec},
+    peer_list::PeerIndex,
 };
-use crate::parsec::{Parsec, TestParsec};
-use crate::peer_list::PeerIndex;
 use itertools::Itertools;
 use rand::Rng;
-use std::collections::{BTreeMap, BTreeSet};
-use std::fmt::{self, Debug, Formatter};
-use std::iter;
-use std::ops::{Deref, DerefMut};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fmt::{self, Debug, Formatter},
+    iter,
+    ops::{Deref, DerefMut},
+};
 
 /// This represents the peer's own view of its current status.
 ///

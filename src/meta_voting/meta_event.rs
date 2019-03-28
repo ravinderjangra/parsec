@@ -7,10 +7,12 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::meta_vote::MetaVote;
-use crate::gossip::IndexedEventRef;
-use crate::id::PublicId;
-use crate::observation::ObservationKey;
-use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet};
+use crate::{
+    gossip::IndexedEventRef,
+    id::PublicId,
+    observation::ObservationKey,
+    peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet},
+};
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub(crate) struct MetaEvent {
@@ -138,9 +140,7 @@ impl<'a, P: PublicId + 'a> MetaEventBuilder<'a, P> {
 #[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
 pub(crate) mod snapshot {
     use super::*;
-    use crate::id::SecretId;
-    use crate::observation::snapshot::ObservationKeySnapshot;
-    use crate::peer_list::PeerList;
+    use crate::{id::SecretId, observation::snapshot::ObservationKeySnapshot, peer_list::PeerList};
     use std::collections::{BTreeMap, BTreeSet};
 
     #[serde(bound = "")]

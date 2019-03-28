@@ -16,20 +16,24 @@ mod graph;
 mod messages;
 mod packed_event;
 
-pub(super) use self::abstract_event::AbstractEventRef;
 #[cfg(any(test, feature = "testing", feature = "dump-graphs"))]
 pub(super) use self::cause::Cause;
 #[cfg(test)]
 pub(super) use self::event::find_event_by_short_name;
 #[cfg(any(test, feature = "testing"))]
 pub(super) use self::event::CauseInput;
-pub(super) use self::event::Event;
 #[cfg(all(test, feature = "mock", feature = "malice-detection"))]
 pub(super) use self::event_context::EventContext;
-pub(super) use self::event_context::EventContextRef;
-pub use self::event_hash::EventHash;
 #[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
 pub(super) use self::graph::snapshot::GraphSnapshot;
-pub(super) use self::graph::{EventIndex, Graph, IndexedEventRef};
-pub use self::messages::{Request, Response};
-pub use self::packed_event::PackedEvent;
+pub(super) use self::{
+    abstract_event::AbstractEventRef,
+    event::Event,
+    event_context::EventContextRef,
+    graph::{EventIndex, Graph, IndexedEventRef},
+};
+pub use self::{
+    event_hash::EventHash,
+    messages::{Request, Response},
+    packed_event::PackedEvent,
+};

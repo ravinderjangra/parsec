@@ -9,10 +9,12 @@
 #[cfg(test)]
 pub(crate) use self::tests::EventContext;
 use super::graph::Graph;
-use crate::id::SecretId;
-use crate::network_event::NetworkEvent;
-use crate::observation::{ConsensusMode, ObservationStore};
-use crate::peer_list::PeerList;
+use crate::{
+    id::SecretId,
+    network_event::NetworkEvent,
+    observation::{ConsensusMode, ObservationStore},
+    peer_list::PeerList,
+};
 
 pub(crate) struct EventContextRef<'a, T: NetworkEvent, S: SecretId> {
     pub(crate) graph: &'a Graph<S::PublicId>,

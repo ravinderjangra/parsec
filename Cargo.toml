@@ -43,7 +43,7 @@ malice-detection = []
 members = ["dot_gen"]
 
 [lib]
-# https://japaric.github.io/criterion.rs/book/faq.html#cargo-bench-gives-unrecognized-option-errors-for-valid-command-line-options
+# https://bheisler.github.io/criterion.rs/book/faq.html#cargo-bench-gives-unrecognized-option-errors-for-valid-command-line-options
 bench = false
 
 [[example]]

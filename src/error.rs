@@ -7,8 +7,10 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use crate::peer_list::PeerState;
-use std::fmt::{self, Display, Formatter};
-use std::result;
+use std::{
+    fmt::{self, Display, Formatter},
+    result,
+};
 
 /// Parsec error
 #[derive(Debug)]
@@ -39,7 +41,7 @@ pub enum Error {
     },
     /// The given event is invalid or malformed.
     InvalidEvent,
-    /// The event's self-parent is unknwon to our node.
+    /// The event's self-parent is unknown to our node.
     UnknownSelfParent,
     /// The event's other-parent is unknown to our node.
     UnknownOtherParent,

@@ -16,22 +16,27 @@ use super::{
     graph::{EventIndex, Graph},
     packed_event::PackedEvent,
 };
-use crate::error::Error;
-use crate::hash::Hash;
-use crate::id::{PublicId, SecretId};
+use crate::{
+    error::Error,
+    hash::Hash,
+    id::{PublicId, SecretId},
+    network_event::NetworkEvent,
+    observation::{Observation, ObservationForStore, ObservationKey, ObservationStore},
+    peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList},
+    serialise,
+    vote::{Vote, VoteKey},
+};
 #[cfg(any(test, feature = "testing"))]
-use crate::mock::{PeerId, Transaction};
-use crate::network_event::NetworkEvent;
-#[cfg(any(test, feature = "testing"))]
-use crate::observation::ConsensusMode;
-use crate::observation::{Observation, ObservationForStore, ObservationKey, ObservationStore};
-use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList};
-use crate::serialise;
-use crate::vote::{Vote, VoteKey};
-use std::cmp;
+use crate::{
+    mock::{PeerId, Transaction},
+    observation::ConsensusMode,
+};
 #[cfg(any(test, feature = "testing"))]
 use std::collections::BTreeMap;
-use std::fmt::{self, Debug, Display, Formatter};
+use std::{
+    cmp,
+    fmt::{self, Debug, Display, Formatter},
+};
 
 pub(crate) struct Event<P: PublicId> {
     content: Content<VoteKey<P>, EventIndex, PeerIndex>,
@@ -552,7 +557,7 @@ struct Cache {
     last_ancestors: PeerIndexMap<usize>,
     // Peers with a fork having both sides seen by this event.
     forking_peers: PeerIndexSet,
-    // First leter of the creator name.
+    // First letter of the creator name.
     #[cfg(any(test, feature = "testing"))]
     creator_initial: char,
 }
@@ -718,18 +723,20 @@ impl Debug for ShortName {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::error::Error;
-    use crate::gossip::{
-        cause::Cause,
-        event::Event,
-        event_context::EventContext,
-        event_hash::EventHash,
-        graph::{EventIndex, Graph},
+    use crate::{
+        error::Error,
+        gossip::{
+            cause::Cause,
+            event::Event,
+            event_context::EventContext,
+            event_hash::EventHash,
+            graph::{EventIndex, Graph},
+        },
+        id::SecretId,
+        mock::{PeerId, Transaction},
+        observation::Observation,
+        peer_list::PeerState,
     };
-    use crate::id::SecretId;
-    use crate::mock::{PeerId, Transaction};
-    use crate::observation::Observation;
-    use crate::peer_list::PeerState;
 
     fn create_event_with_single_peer(id: &str) -> (EventContext, Event<PeerId>) {
         let context = EventContext::new(PeerId::new(id));

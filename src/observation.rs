@@ -6,17 +6,21 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use crate::gossip::{EventHash, PackedEvent};
-use crate::hash::Hash;
-use crate::id::{PublicId, SecretId};
-use crate::network_event::NetworkEvent;
-use crate::peer_list::{PeerIndex, PeerList};
-use crate::serialise;
+use crate::{
+    gossip::{EventHash, PackedEvent},
+    hash::Hash,
+    id::{PublicId, SecretId},
+    network_event::NetworkEvent,
+    peer_list::{PeerIndex, PeerList},
+    serialise,
+};
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
-use std::cmp::Ordering;
-use std::collections::{BTreeMap, BTreeSet};
-use std::error::Error;
-use std::fmt::{self, Debug, Formatter};
+use std::{
+    cmp::Ordering,
+    collections::{BTreeMap, BTreeSet},
+    error::Error,
+    fmt::{self, Debug, Formatter},
+};
 
 /// An enum of the various network events for which a peer can vote.
 #[serde(bound = "")]
@@ -325,8 +329,7 @@ pub fn is_more_than_two_thirds(small: usize, large: usize) -> bool {
 #[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
 pub(crate) mod snapshot {
     use super::*;
-    use crate::id::SecretId;
-    use crate::peer_list::PeerList;
+    use crate::{id::SecretId, peer_list::PeerList};
 
     #[serde(bound = "")]
     #[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]

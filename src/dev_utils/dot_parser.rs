@@ -10,32 +10,36 @@
 use crate::error::Error;
 #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 use crate::gossip::EventContextRef;
-use crate::gossip::{CauseInput, Event, EventIndex, Graph, IndexedEventRef};
-use crate::hash::Hash;
-use crate::hash::HASH_LEN;
-use crate::meta_voting::{
-    BoolSet, MetaElection, MetaEvent, MetaVote, Observer, Step, UnconsensusedEvents,
+use crate::{
+    gossip::{CauseInput, Event, EventIndex, Graph, IndexedEventRef},
+    hash::{Hash, HASH_LEN},
+    meta_voting::{
+        BoolSet, MetaElection, MetaEvent, MetaVote, Observer, Step, UnconsensusedEvents,
+    },
+    mock::{PeerId, Transaction},
+    observation::{
+        ConsensusMode, Observation, ObservationHash, ObservationInfo, ObservationKey,
+        ObservationStore,
+    },
+    peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerState},
+    round_hash::RoundHash,
 };
-use crate::mock::{PeerId, Transaction};
-use crate::observation::ConsensusMode;
-use crate::observation::{
-    Observation, ObservationHash, ObservationInfo, ObservationKey, ObservationStore,
-};
-use crate::peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerState};
-use crate::round_hash::RoundHash;
 use fnv::{FnvHashMap, FnvHashSet};
 use itertools::Itertools;
-use pom::char_class::{alphanum, digit, hex_digit, multispace, space};
-use pom::parser::*;
-use pom::Result as PomResult;
-use pom::{DataInput, Parser};
-use std::cell::RefCell;
-use std::collections::{BTreeMap, BTreeSet};
-use std::fs::File;
-use std::io::{self, Read};
-use std::path::Path;
-use std::rc::Rc;
-use std::str::FromStr;
+use pom::{
+    char_class::{alphanum, digit, hex_digit, multispace, space},
+    parser::*,
+    DataInput, Parser, Result as PomResult,
+};
+use std::{
+    cell::RefCell,
+    collections::{BTreeMap, BTreeSet},
+    fs::File,
+    io::{self, Read},
+    path::Path,
+    rc::Rc,
+    str::FromStr,
+};
 
 pub const HEX_DIGITS_PER_BYTE: usize = 2;
 
@@ -784,16 +788,48 @@ pub(crate) fn parse_dot_file<P: AsRef<Path>>(full_path: P) -> io::Result<ParsedC
     Ok(convert_into_parsed_contents(result))
 }
 
-/// For use by functional/unit tests which provide a dot file for the test setup.  This put the test
-/// name as part of the path automatically.
+/// For use by functional/unit tests which provide a dot file for the test setup.  This puts the
+/// test name as part of the path automatically, but depends on not explicitly running the tests
+/// single-threaded, i.e. by passing '--test-threads=1' on the command line or setting the env var
+/// 'RUST_TEST_THREADS=1'.
 #[cfg(test)]
 pub(crate) fn parse_test_dot_file(filename: &str) -> ParsedContents {
-    use std::thread;
+    let test_name = derive_test_name_from_current_thread_name();
+    parse_dot_file_with_test_name(filename, &test_name)
+}
 
-    parse_dot_file_with_test_name(
-        filename,
-        &unwrap!(thread::current().name()).replace("::", "_"),
-    )
+#[cfg(test)]
+fn derive_test_name_from_current_thread_name() -> String {
+    use std::{env, thread};
+
+    let test_name = unwrap!(thread::current().name()).replace("::", "_");
+    if test_name == "main" {
+        let panic = |arg: &str| {
+            panic!(
+                "Current thread name is 'main' since running with '{}=1', so can't be used to \
+                 deduce test name for parsing correct dot file.",
+                arg
+            );
+        };
+
+        const THREADS_ARG: &str = "--test-threads";
+        let mut args_itr = env::args().skip_while(|arg| !arg.starts_with(THREADS_ARG));
+        match (
+            args_itr.next().as_ref().map(|x| &**x),
+            args_itr.next().as_ref().map(|x| &**x),
+        ) {
+            (Some(THREADS_ARG), Some("1")) | (Some("--test-threads=1"), _) => {
+                panic(THREADS_ARG);
+            }
+            _ => (),
+        }
+
+        const THREADS_ENV_VAR: &str = "RUST_TEST_THREADS";
+        if let Ok("1") = env::var(THREADS_ENV_VAR).as_ref().map(|x| &**x) {
+            panic(THREADS_ENV_VAR);
+        }
+    }
+    test_name
 }
 
 /// For use by functional/unit tests which provide a dot file for the test setup.  This reads and
@@ -1125,12 +1161,14 @@ fn next_topological_event(
 #[cfg(all(test, feature = "dump-graphs"))]
 mod tests {
     use super::*;
-    use crate::dev_utils::{Environment, RngChoice, Schedule, ScheduleOptions};
-    use crate::dump_graph::DIR;
-    use crate::gossip::GraphSnapshot;
-    use crate::maidsafe_utilities::serialisation::deserialise;
-    use crate::meta_voting::MetaElectionSnapshot;
-    use crate::mock::PeerId;
+    use crate::{
+        dev_utils::{Environment, RngChoice, Schedule, ScheduleOptions},
+        dump_graph::DIR,
+        gossip::GraphSnapshot,
+        maidsafe_utilities::serialisation::deserialise,
+        meta_voting::MetaElectionSnapshot,
+        mock::PeerId,
+    };
     use std::fs;
 
     type Snapshot = (GraphSnapshot, MetaElectionSnapshot<PeerId>);

@@ -6,8 +6,7 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use crate::dev_utils::network::Network;
-use crate::observation::ConsensusMode;
+use crate::{dev_utils::network::Network, observation::ConsensusMode};
 use maidsafe_utilities::SeededRng;
 use rand::{Rng, SeedableRng, XorShiftRng};
 use std::fmt;

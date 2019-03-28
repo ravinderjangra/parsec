@@ -7,10 +7,12 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::peer_state::PeerState;
-use crate::gossip::{EventIndex, IndexedEventRef};
-use crate::hash::Hash;
-use crate::id::PublicId;
-use crate::serialise;
+use crate::{
+    gossip::{EventIndex, IndexedEventRef},
+    hash::Hash,
+    id::PublicId,
+    serialise,
+};
 use itertools::Itertools;
 use std::{
     fmt::{self, Debug, Formatter},

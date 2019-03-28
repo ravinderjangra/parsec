@@ -6,8 +6,10 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use std::fmt::{self, Debug, Formatter};
-use std::ops::{BitOr, BitOrAssign};
+use std::{
+    fmt::{self, Debug, Formatter},
+    ops::{BitOr, BitOrAssign},
+};
 
 /// Peer state is a bitflag with these flags:
 ///

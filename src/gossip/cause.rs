@@ -13,19 +13,19 @@ use super::{
     event_hash::EventHash,
     graph::{EventIndex, Graph},
 };
-use crate::error::Error;
-use crate::id::{PublicId, SecretId};
+use crate::{
+    error::Error,
+    id::{PublicId, SecretId},
+    network_event::NetworkEvent,
+    observation::{ObservationForStore, ObservationInfo},
+    peer_list::{PeerIndex, PeerList},
+    vote::{Vote, VoteKey},
+};
 #[cfg(any(test, feature = "testing"))]
-use crate::mock::{PeerId, Transaction};
-use crate::network_event::NetworkEvent;
-#[cfg(any(test, feature = "testing"))]
-use crate::observation::ConsensusMode;
-use crate::observation::ObservationForStore;
-use crate::observation::ObservationInfo;
-#[cfg(any(test, feature = "testing"))]
-use crate::observation::ObservationStore;
-use crate::peer_list::{PeerIndex, PeerList};
-use crate::vote::{Vote, VoteKey};
+use crate::{
+    mock::{PeerId, Transaction},
+    observation::{ConsensusMode, ObservationStore},
+};
 use serde::{Deserialize, Serialize};
 
 #[serde(bound(

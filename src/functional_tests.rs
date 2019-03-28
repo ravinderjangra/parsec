@@ -6,18 +6,20 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use crate::block::Block;
-use crate::dev_utils::{parse_test_dot_file, Record};
-use crate::error::Error;
-use crate::gossip::{Event, Graph, GraphSnapshot};
-use crate::id::{Proof, PublicId};
-use crate::meta_voting::MetaElectionSnapshot;
-use crate::mock::{self, PeerId, Transaction};
-use crate::observation::{ConsensusMode, Observation};
-use crate::parsec::TestParsec;
 #[cfg(feature = "malice-detection")]
 use crate::peer_list::PeerIndexSet;
-use crate::peer_list::{PeerListSnapshot, PeerState};
+use crate::{
+    block::Block,
+    dev_utils::{parse_test_dot_file, Record},
+    error::Error,
+    gossip::{Event, Graph, GraphSnapshot},
+    id::{Proof, PublicId},
+    meta_voting::MetaElectionSnapshot,
+    mock::{self, PeerId, Transaction},
+    observation::{ConsensusMode, Observation},
+    parsec::TestParsec,
+    peer_list::{PeerListSnapshot, PeerState},
+};
 use std::{collections::BTreeSet, fmt::Debug};
 
 macro_rules! assert_matches {
@@ -505,14 +507,16 @@ fn gossip_after_fork() {
 #[cfg(feature = "malice-detection")]
 mod handle_malice {
     use super::*;
-    use crate::dev_utils::{parse_dot_file_with_test_name, parse_test_dot_file, ParsedContents};
-    use crate::gossip::{find_event_by_short_name, Event, EventContext, EventHash};
-    use crate::id::SecretId;
-    use crate::mock::Transaction;
-    use crate::network_event::NetworkEvent;
-    use crate::observation::Malice;
-    use crate::peer_list::{PeerIndex, PeerList, PeerState};
-    use crate::Request;
+    use crate::{
+        dev_utils::{parse_dot_file_with_test_name, parse_test_dot_file, ParsedContents},
+        gossip::{find_event_by_short_name, Event, EventContext, EventHash},
+        id::SecretId,
+        mock::Transaction,
+        network_event::NetworkEvent,
+        observation::Malice,
+        peer_list::{PeerIndex, PeerList, PeerState},
+        Request,
+    };
     use std::ops::Deref;
 
     // Returns iterator over all votes cast by the given node.

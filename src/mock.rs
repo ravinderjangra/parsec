@@ -6,14 +6,17 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use crate::id::{PublicId, SecretId};
-use crate::network_event::NetworkEvent;
+use crate::{
+    id::{PublicId, SecretId},
+    network_event::NetworkEvent,
+};
 use rand::{Rand, Rng};
-use safe_crypto::Signature as SafeSignature;
-use safe_crypto::{gen_sign_keypair, PublicSignKey, SecretSignKey};
-use std::cmp::Ordering;
-use std::fmt::{self, Debug, Display, Formatter};
-use std::hash::{Hash, Hasher};
+use safe_crypto::{gen_sign_keypair, PublicSignKey, SecretSignKey, Signature as SafeSignature};
+use std::{
+    cmp::Ordering,
+    fmt::{self, Debug, Display, Formatter},
+    hash::{Hash, Hasher},
+};
 
 pub const NAMES: &[&str] = &[
     "Alice", "Bob", "Carol", "Dave", "Eric", "Fred", "Gina", "Hank", "Iris", "Judy", "Kent",

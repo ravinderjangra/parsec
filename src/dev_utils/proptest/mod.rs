@@ -9,5 +9,7 @@
 mod bounded;
 mod schedule;
 
-pub use self::bounded::{Bounded, BoundedBoxedStrategy};
-pub use self::schedule::*;
+pub use self::{
+    bounded::{Bounded, BoundedBoxedStrategy},
+    schedule::*,
+};

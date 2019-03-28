@@ -6,12 +6,16 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use proptest_crate::prelude::Just;
-use proptest_crate::strategy::{BoxedStrategy, NewTree, Strategy, ValueTree};
-use proptest_crate::test_runner::TestRunner;
-use std::convert::From;
-use std::fmt::Debug;
-use std::ops::{Range, RangeInclusive};
+use proptest_crate::{
+    prelude::Just,
+    strategy::{BoxedStrategy, NewTree, Strategy, ValueTree},
+    test_runner::TestRunner,
+};
+use std::{
+    convert::From,
+    fmt::Debug,
+    ops::{Range, RangeInclusive},
+};
 
 pub trait Bounded {
     type Bound;
