@@ -398,17 +398,42 @@ mod detail {
         fn index_to_short_name(&self, index: EventIndex) -> Option<String> {
             self.gossip_graph
                 .get(index)
-                .map(|event| self.event_to_short_name(&event))
+                .map(|event| self.event_to_short_name(event))
         }
 
-        fn event_to_short_name(&self, event: &Event<S::PublicId>) -> String {
+        fn event_to_short_name(&self, event: IndexedEventRef<S::PublicId>) -> String {
             let peer_short_name: &str = self
                 .short_peer_ids
                 .get(event.creator())
                 .map(|id| id.as_str())
                 .unwrap_or("???");
 
-            format!("{}_{}", peer_short_name, event.index_by_creator())
+            if let Some(fork_index) = self.fork_index(event) {
+                format!(
+                    "{}_{},{}",
+                    peer_short_name,
+                    event.index_by_creator(),
+                    fork_index
+                )
+            } else {
+                format!("{}_{}", peer_short_name, event.index_by_creator())
+            }
+        }
+
+        fn fork_index(&self, event: IndexedEventRef<S::PublicId>) -> Option<usize> {
+            if self
+                .peer_list
+                .events_by_index(event.creator(), event.index_by_creator())
+                .take(2)
+                .count()
+                <= 1
+            {
+                return None;
+            }
+
+            self.peer_list
+                .events_by_index(event.creator(), event.index_by_creator())
+                .position(|event_index| event_index == event.event_index())
         }
 
         fn writeln(&mut self, args: fmt::Arguments) -> io::Result<()> {
@@ -557,7 +582,7 @@ mod detail {
                 lines.push(format!(
                     "    {} -> \"{}\" {}",
                     before_arrow,
-                    self.event_to_short_name(&event),
+                    self.event_to_short_name(event),
                     suffix
                 ));
             }
@@ -580,8 +605,8 @@ mod detail {
                 {
                     lines.push(format!(
                         "  \"{}\" -> \"{}\" [constraint=false]",
-                        self.event_to_short_name(&other_parent),
-                        self.event_to_short_name(&event)
+                        self.event_to_short_name(other_parent),
+                        self.event_to_short_name(event)
                     ));
                 }
             }
@@ -623,20 +648,21 @@ mod detail {
                 if let Some(event) = self.gossip_graph.get(event_index) {
                     let attr = EventAttributes::new(
                         event.inner(),
-                        self.event_to_short_name(event.inner()),
+                        self.event_to_short_name(event),
                         meta_events.get(&event_index),
                         self.observations,
                         &self.short_peer_ids,
                     );
                     self.writeln(format_args!(
                         "  \"{}\" {}",
-                        self.event_to_short_name(&event),
+                        self.event_to_short_name(event),
                         attr.to_string()
                     ))?;
 
                     self.write_cause_to_dot_format(&event)?;
 
-                    let last_ancestors = self.convert_peer_index_map(event.last_ancestors());
+                    let last_ancestors = event.last_ancestors().collect();
+                    let last_ancestors = self.convert_peer_index_map(&last_ancestors);
                     writeln!(&mut self.file, "/// last_ancestors: {:?}", last_ancestors)?;
 
                     self.writeln(format_args!(""))?;
@@ -797,7 +823,7 @@ mod detail {
                     let creator_id = self.peer_ids.get(event.creator())?;
 
                     let creator_and_index = (creator_id, event.index_by_creator());
-                    let short_name_and_mev = (self.event_to_short_name(&event), mev);
+                    let short_name_and_mev = (self.event_to_short_name(event), mev);
                     Some((creator_and_index, short_name_and_mev))
                 })
                 .collect::<BTreeMap<_, _>>();
@@ -893,7 +919,7 @@ mod detail {
             observations: &DotObservationStore,
             short_peer_ids: &PeerIndexMap<String>,
         ) -> Self {
-            let mut attr = EventAttributes {
+            let mut attr = Self {
                 fillcolor: "fillcolor=white",
                 is_rectangle: false,
                 label: event_short_name,

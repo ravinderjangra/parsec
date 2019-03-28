@@ -268,8 +268,7 @@ fn collect_remaining_events_to_gossip(
 mod tests {
     use super::*;
     use crate::parsec::get_graph_snapshot;
-    use std::{fs, iter, path::PathBuf, thread};
-    use walkdir::WalkDir;
+    use std::{iter, path::PathBuf, thread};
 
     #[derive(PartialEq, Eq, Debug)]
     struct TruncatedHashes<'th> {
@@ -350,13 +349,21 @@ mod tests {
         }
     }
 
+    // Note: skip this test when malice-detection is enabled, because there could be a mismatch
+    // between parsed and replayed graphs when the dot file contains malice (e.g.: fork). This is
+    // because parsing does not create accusation events but replaying does.
+    #[cfg(not(feature = "malice-detection"))]
     #[test]
     fn smoke_parsec() {
+        use std::fs;
+        use walkdir::WalkDir;
+
         let is_dot_file = |path: &PathBuf| {
             path.extension()
                 .map(|extension| extension.to_string_lossy() == "dot")
                 .unwrap_or(false)
         };
+
         // 50kB seems to strike a reasonable balance between including quite a few dot files, while
         // not having too big of an impact on the test's running time.
         let max_file_size = 50_000;

@@ -44,7 +44,14 @@ use std::{
 pub const HEX_DIGITS_PER_BYTE: usize = 2;
 
 type ObservationMap = Vec<(ObservationKey, Observation<Transaction, PeerId>)>;
-type PeerParsedEvent = BTreeMap<i32, (String, ParsedEvent)>;
+
+type PeerParsedEvents = BTreeMap<PeerEventKey, (String, ParsedEvent)>;
+
+#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Debug)]
+struct PeerEventKey {
+    index_by_creator: u32,
+    fork_index: u32,
+}
 
 fn newline() -> Parser<u8, ()> {
     (seq(b"\n") | seq(b"\r\n")).discard()
@@ -301,7 +308,7 @@ fn parse_edge() -> Parser<u8, ParsedEdge> {
 }
 
 fn parse_event_id() -> Parser<u8, String> {
-    is_a(|c| alphanum(c) || c == b'_')
+    is_a(|c| alphanum(c) || c == b'_' || c == b',')
         .repeat(1..)
         .convert(String::from_utf8)
 }
@@ -1090,37 +1097,49 @@ fn get_event_by_id<'a>(
 fn in_peer_order(
     graph: BTreeMap<String, ParsedEvent>,
     peer_list: &PeerList<PeerId>,
-) -> BTreeMap<(Option<PeerIndex>, String), PeerParsedEvent> {
-    type Key = (Option<PeerIndex>, (String, i32));
+) -> BTreeMap<(Option<PeerIndex>, String), PeerParsedEvents> {
+    type Key = (Option<PeerIndex>, (String, PeerEventKey));
+
     let graph: BTreeMap<Key, (String, ParsedEvent)> = graph
         .into_iter()
         .map(|(name, evt)| {
-            let parsed_values = name
-                .rsplit('_')
-                .next()
-                .map(|index| (index.len(), index.parse::<i32>()));
+            let sep0 = unwrap!(name.find('_'));
+            let sep1 = name.find(',');
 
-            let (index_len, index) = unwrap!(parsed_values, "{}", name);
-            let index = unwrap!(index, "{}", name);
+            let prefix = name[0..sep0].to_string();
+            let index_by_creator: u32;
+            let fork_index: u32;
 
-            let prefix = name[0..(name.len() - index_len)].to_string();
-            ((prefix, index), (name.clone(), evt))
+            if let Some(sep1) = sep1 {
+                index_by_creator = unwrap!(name[(sep0 + 1)..sep1].parse());
+                fork_index = unwrap!(name[(sep1 + 1)..].parse());
+            } else {
+                index_by_creator = unwrap!(name[(sep0 + 1)..].parse());
+                fork_index = 0;
+            };
+
+            let event_key = PeerEventKey {
+                index_by_creator,
+                fork_index,
+            };
+
+            ((prefix, event_key), (name.clone(), evt))
         })
         .map(|(name, evt)| ((peer_list.get_index(&evt.1.creator), name), evt))
         .collect();
 
     let mut new_graph = BTreeMap::new();
-    for ((peer_index, (prefix, index)), event) in graph.into_iter() {
+    for ((peer_index, (prefix, event_key)), event) in graph.into_iter() {
         let _ = new_graph
             .entry((peer_index, prefix))
             .or_insert_with(BTreeMap::new)
-            .insert(index, event);
+            .insert(event_key, event);
     }
     new_graph
 }
 
 fn next_topological_event(
-    graph: &mut BTreeMap<(Option<PeerIndex>, String), PeerParsedEvent>,
+    graph: &mut BTreeMap<(Option<PeerIndex>, String), PeerParsedEvents>,
     indices: &BTreeMap<String, EventIndex>,
 ) -> (String, ParsedEvent) {
     let next_event = graph

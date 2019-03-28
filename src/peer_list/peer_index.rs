@@ -363,3 +363,33 @@ impl IntoIterator for PeerIndexSet {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::dev_utils::TestIterator;
+
+    #[test]
+    fn peer_index_map_iter_is_sorted() {
+        let p0 = PeerIndex(0);
+        let p1 = PeerIndex(1);
+        let p2 = PeerIndex(2);
+
+        let orderings = [
+            [p0, p1, p2],
+            [p0, p2, p1],
+            [p1, p0, p2],
+            [p1, p2, p0],
+            [p2, p0, p1],
+            [p2, p1, p0],
+        ];
+
+        for ordering in &orderings {
+            let mut map = PeerIndexMap::new();
+            for peer_id in ordering {
+                let _ = map.insert(*peer_id, ());
+            }
+            assert!(map.iter().is_sorted())
+        }
+    }
+}

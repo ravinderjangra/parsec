@@ -6,10 +6,14 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
+#[macro_use]
+mod macros;
+
 /// This is used to read a dumped dot file and rebuild the event graph and associated info.
 #[cfg(any(test, feature = "testing"))]
 mod dot_parser;
 mod environment;
+mod misc;
 mod network;
 mod peer;
 mod peer_statuses;
@@ -29,6 +33,7 @@ pub(crate) use self::dot_parser::ParsedContents;
 pub use self::record::Record;
 pub use self::{
     environment::{Environment, RngChoice},
+    misc::TestIterator,
     network::{ConsensusError, Network},
     peer::{NetworkView, Peer, PeerStatus},
     peer_statuses::PeerStatuses,

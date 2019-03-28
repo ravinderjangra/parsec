@@ -6,13 +6,14 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-#[cfg(test)]
-use super::graph::IndexedEventRef;
+#[cfg(any(test, feature = "testing"))]
+use super::event_utils::ForkMap;
 use super::{
     cause::{self, Cause},
     content::Content,
     event_context::EventContextRef,
     event_hash::EventHash,
+    event_utils::{compute_ancestor_info, AncestorInfo, IndexSet},
     graph::{EventIndex, Graph},
     packed_event::PackedEvent,
 };
@@ -22,7 +23,7 @@ use crate::{
     id::{PublicId, SecretId},
     network_event::NetworkEvent,
     observation::{Observation, ObservationForStore, ObservationKey, ObservationStore},
-    peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList},
+    peer_list::{PeerIndex, PeerIndexMap, PeerList},
     serialise,
     vote::{Vote, VoteKey},
 };
@@ -31,12 +32,10 @@ use crate::{
     mock::{PeerId, Transaction},
     observation::ConsensusMode,
 };
+use itertools::Itertools;
 #[cfg(any(test, feature = "testing"))]
 use std::collections::BTreeMap;
-use std::{
-    cmp,
-    fmt::{self, Debug, Display, Formatter},
-};
+use std::fmt::{self, Debug, Display, Formatter};
 
 pub(crate) struct Event<P: PublicId> {
     content: Content<VoteKey<P>, EventIndex, PeerIndex>,
@@ -50,7 +49,6 @@ impl<P: PublicId> Event<P> {
     pub fn new_from_requesting<T: NetworkEvent, S: SecretId<PublicId = P>>(
         self_parent: EventIndex,
         recipient: &P,
-        forking_peers: &PeerIndexSet,
         ctx: EventContextRef<T, S>,
     ) -> Result<Self, Error> {
         let content: Content<Vote<T, _>, _, _> = Content {
@@ -75,7 +73,6 @@ impl<P: PublicId> Event<P> {
             content,
             ctx.graph,
             ctx.peer_list,
-            forking_peers,
         ))
     }
 
@@ -83,7 +80,6 @@ impl<P: PublicId> Event<P> {
     pub fn new_from_request<T: NetworkEvent, S: SecretId<PublicId = P>>(
         self_parent: EventIndex,
         other_parent: EventIndex,
-        forking_peers: &PeerIndexSet,
         ctx: EventContextRef<T, S>,
     ) -> Result<Self, Error> {
         let content: Content<Vote<T, _>, _, _> = Content {
@@ -109,7 +105,6 @@ impl<P: PublicId> Event<P> {
             content,
             ctx.graph,
             ctx.peer_list,
-            forking_peers,
         ))
     }
 
@@ -117,7 +112,6 @@ impl<P: PublicId> Event<P> {
     pub fn new_from_response<T: NetworkEvent, S: SecretId<PublicId = P>>(
         self_parent: EventIndex,
         other_parent: EventIndex,
-        forking_peers: &PeerIndexSet,
         ctx: EventContextRef<T, S>,
     ) -> Result<Self, Error> {
         let content: Content<Vote<T, _>, _, _> = Content {
@@ -143,7 +137,6 @@ impl<P: PublicId> Event<P> {
             content,
             ctx.graph,
             ctx.peer_list,
-            forking_peers,
         ))
     }
 
@@ -168,14 +161,7 @@ impl<P: PublicId> Event<P> {
         let (content, observation_for_store) = Content::unpack(content, ctx)?;
 
         Ok((
-            Self::new(
-                hash,
-                signature,
-                content,
-                graph,
-                peer_list,
-                &PeerIndexSet::default(),
-            ),
+            Self::new(hash, signature, content, graph, peer_list),
             observation_for_store,
         ))
     }
@@ -195,14 +181,7 @@ impl<P: PublicId> Event<P> {
             cause: Cause::Initial,
         };
 
-        Self::new(
-            hash,
-            signature,
-            content,
-            ctx.graph,
-            ctx.peer_list,
-            &PeerIndexSet::default(),
-        )
+        Self::new(hash, signature, content, ctx.graph, ctx.peer_list)
     }
 
     fn new<S: SecretId<PublicId = P>>(
@@ -211,9 +190,8 @@ impl<P: PublicId> Event<P> {
         content: Content<VoteKey<P>, EventIndex, PeerIndex>,
         graph: &Graph<P>,
         peer_list: &PeerList<S>,
-        forking_peers: &PeerIndexSet,
     ) -> Self {
-        let cache = Cache::new(hash, &content, graph, peer_list, forking_peers);
+        let cache = Cache::new(hash, &content, graph, peer_list);
         Self {
             content,
             signature,
@@ -228,9 +206,8 @@ impl<P: PublicId> Event<P> {
     //   - `Err(Error::SignatureFailure)` if signature validation fails
     //   - `Err(Error::UnknownParent)` if the event indicates it should have an ancestor, but the
     //     ancestor isn't in `events`.
-    pub(crate) fn unpack<T: NetworkEvent, S: SecretId<PublicId = P>>(
+    pub fn unpack<T: NetworkEvent, S: SecretId<PublicId = P>>(
         packed_event: PackedEvent<T, P>,
-        forking_peers: &PeerIndexSet,
         ctx: EventContextRef<T, S>,
     ) -> Result<Option<UnpackedEvent<T, P>>, Error> {
         let hash = compute_event_hash_and_verify_signature(
@@ -245,7 +222,7 @@ impl<P: PublicId> Event<P> {
         let graph = ctx.graph;
         let peer_list = ctx.peer_list;
         let (content, observation_for_store) = Content::unpack(packed_event.content, ctx)?;
-        let cache = Cache::new(hash, &content, graph, peer_list, forking_peers);
+        let cache = Cache::new(hash, &content, graph, peer_list);
 
         Ok(Some(UnpackedEvent {
             event: Self {
@@ -258,7 +235,7 @@ impl<P: PublicId> Event<P> {
     }
 
     // Creates a `PackedEvent` from this `Event`.
-    pub(crate) fn pack<T: NetworkEvent, S: SecretId<PublicId = P>>(
+    pub fn pack<T: NetworkEvent, S: SecretId<PublicId = P>>(
         &self,
         ctx: EventContextRef<T, S>,
     ) -> Result<PackedEvent<T, P>, Error> {
@@ -268,40 +245,66 @@ impl<P: PublicId> Event<P> {
         })
     }
 
-    // Returns whether this event can see `other`, i.e. whether there's a directed path from `other`
-    // to `self` in the graph, and no two events created by `other`'s creator are ancestors to
-    // `self` (fork).
-    pub fn sees<E: AsRef<Event<P>>>(&self, other: E) -> bool {
-        self.is_descendant_of(other).unwrap_or(false)
-    }
+    // Returns whether this event is descendant of `other`.
+    pub fn is_descendant_of<E: AsRef<Event<P>>>(&self, other: E) -> bool {
+        let other = other.as_ref();
 
-    // Returns whether this event is descendant of `other`. If there are forks between this event
-    // and `other` the answer cannot be determined from the events themselves and graph traversal
-    // is required. `None` is returned in that case. Otherwise returns `Some` with the correct
-    // answer.
-    pub fn is_descendant_of<E: AsRef<Event<P>>>(&self, other: E) -> Option<bool> {
-        match self.last_ancestor_by(other.as_ref().creator()) {
-            LastAncestor::Some(last_index) => Some(last_index >= other.as_ref().index_by_creator()),
-            LastAncestor::None => Some(false),
-            LastAncestor::Fork => None,
-        }
-    }
-
-    // Returns the index-by-creator of the last ancestor of this event created by the given peer.
-    pub fn last_ancestor_by(&self, peer_index: PeerIndex) -> LastAncestor {
-        if self.is_forking_peer(peer_index) {
-            LastAncestor::Fork
+        let self_info = if let Some(info) = self.cache.ancestor_info.get(other.creator()) {
+            info
         } else {
-            self.cache
-                .last_ancestors
-                .get(peer_index)
-                .map(|last_index| LastAncestor::Some(*last_index))
-                .unwrap_or(LastAncestor::None)
+            return false;
+        };
+
+        if self_info.last < other.index_by_creator() {
+            return false;
+        }
+
+        if let Some(self_forks) = self_info.forks.get(&other.index_by_creator()) {
+            if let Some(other_forks) = other.fork_set() {
+                !self_forks.is_disjoint(other_forks)
+            } else {
+                self_forks.contains(0)
+            }
+        } else {
+            other
+                .fork_set()
+                .map(|other_forks| other_forks.contains(0))
+                .unwrap_or(true)
         }
     }
 
-    pub(crate) fn is_forking_peer(&self, peer_index: PeerIndex) -> bool {
-        self.cache.forking_peers.contains(peer_index)
+    // Returns whether this event sees `other`, i.e. whether there's a directed path from `other`
+    // to `self` in the graph, and there doesn't exist any pair of events by `other`'s creator
+    // such that they are ancestors of this event but one is neither ancestor nor descendant of the
+    // other.
+    pub fn sees<E: AsRef<Event<P>>>(&self, other: E) -> bool {
+        !self.sees_fork_by(other.as_ref().creator()) && self.is_descendant_of(other)
+    }
+
+    // Is this event aware of a fork by the given peer?
+    // Note this method returns true only if the fork is provable by every node that has reached
+    // this event. That means this event must have ancestors from at least two sides of the same
+    // fork.
+    pub fn sees_fork_by(&self, creator: PeerIndex) -> bool {
+        self.cache
+            .ancestor_info
+            .get(creator)
+            .map(|info| info.forks.values().any(|fork_set| fork_set.len() > 1))
+            .unwrap_or(false)
+    }
+
+    // Fork set that this event is a member of.
+    //
+    // ("fork set" is a set of events from the same creator that have the same `index_by_creator`.
+    // This can be events that have the same self-parent, or the same self-grand-parent, etc...)
+    //
+    // If this event is not member of a fork set (it's not forking) or is the first member of its
+    // fork set (in the insertion order), this function returns `None`.
+    pub fn fork_set(&self) -> Option<&IndexSet> {
+        self.cache
+            .ancestor_info
+            .get(self.creator())
+            .and_then(|info| info.forks.get(&self.index_by_creator()))
     }
 
     pub fn payload_key(&self) -> Option<&ObservationKey> {
@@ -347,8 +350,19 @@ impl<P: PublicId> Event<P> {
         self.cache.index_by_creator
     }
 
-    pub fn last_ancestors(&self) -> &PeerIndexMap<usize> {
-        &self.cache.last_ancestors
+    pub fn last_ancestors<'a>(&'a self) -> impl Iterator<Item = (PeerIndex, usize)> + 'a {
+        self.cache
+            .ancestor_info
+            .iter()
+            .map(|(peer_index, info)| (peer_index, info.last))
+    }
+
+    pub fn last_ancestor_by(&self, creator: PeerIndex) -> Option<usize> {
+        self.cache.ancestor_info.get(creator).map(|info| info.last)
+    }
+
+    pub(super) fn ancestor_info(&self) -> &PeerIndexMap<AncestorInfo> {
+        &self.cache.ancestor_info
     }
 
     pub fn is_sync_event(&self) -> bool {
@@ -399,10 +413,6 @@ impl<P: PublicId> Event<P> {
         }
     }
 
-    pub fn sees_fork(&self) -> bool {
-        !self.cache.forking_peers.is_empty()
-    }
-
     /// Returns the first char of the creator's ID, followed by an underscore and the event's index.
     #[cfg(any(test, feature = "testing"))]
     pub fn short_name(&self) -> ShortName {
@@ -444,9 +454,21 @@ impl<P: PublicId> Debug for Event<P> {
         write!(
             formatter,
             ", last_ancestors: {:?}",
-            self.cache.last_ancestors
+            self.cache
+                .ancestor_info
+                .iter()
+                .map(|(peer_id, info)| EntryDebug(peer_id, info.last))
+                .format(", ")
         )?;
         write!(formatter, " }}")
+    }
+}
+
+struct EntryDebug<K: Debug, V: Debug>(K, V);
+
+impl<K: Debug, V: Debug> Debug for EntryDebug<K, V> {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "{:?}: {:?}", self.0, self.1)
     }
 }
 
@@ -499,18 +521,23 @@ impl Event<PeerId> {
         );
         let content = Content { creator, cause };
 
-        let last_ancestors = last_ancestors
+        let ancestor_info = last_ancestors
             .into_iter()
             .map(|(peer_id, index_by_creator)| {
-                (unwrap!(peer_list.get_index(&peer_id)), index_by_creator)
+                let peer_index = unwrap!(peer_list.get_index(&peer_id));
+                let ancestor_info = AncestorInfo {
+                    last: index_by_creator,
+                    forks: ForkMap::new(),
+                };
+
+                (peer_index, ancestor_info)
             })
             .collect();
 
         let cache = Cache {
             hash,
             index_by_creator,
-            last_ancestors,
-            forking_peers: PeerIndexSet::default(),
+            ancestor_info,
             creator_initial: get_creator_initial(peer_list, creator),
         };
 
@@ -526,15 +553,6 @@ impl Event<PeerId> {
 pub(crate) struct UnpackedEvent<T: NetworkEvent, P: PublicId> {
     pub event: Event<P>,
     pub observation_for_store: ObservationForStore<T, P>,
-}
-
-pub(crate) enum LastAncestor {
-    // There are no forks and the ancestor exists.
-    Some(usize),
-    // Ancestor doesn't exist.
-    None,
-    // Fork detected. Ancestor cannot be determined from the events only. Graph traversal required.
-    Fork,
 }
 
 #[cfg(any(test, feature = "testing"))]
@@ -553,10 +571,8 @@ struct Cache {
     hash: EventHash,
     // Index of this event relative to other events by the same creator.
     index_by_creator: usize,
-    // Index of each peer's latest event that is an ancestor of this event.
-    last_ancestors: PeerIndexMap<usize>,
-    // Peers with a fork having both sides seen by this event.
-    forking_peers: PeerIndexSet,
+    // Info about events that are ancestors of this event keyed by their creators.
+    ancestor_info: PeerIndexMap<AncestorInfo>,
     // First letter of the creator name.
     #[cfg(any(test, feature = "testing"))]
     creator_initial: char,
@@ -568,85 +584,45 @@ impl Cache {
         content: &Content<VoteKey<S::PublicId>, EventIndex, PeerIndex>,
         graph: &Graph<S::PublicId>,
         peer_list: &PeerList<S>,
-        forking_peers: &PeerIndexSet,
     ) -> Self {
-        let self_parent = content.self_parent().and_then(|index| graph.get(*index));
-        let other_parent = content.other_parent().and_then(|index| graph.get(*index));
+        let self_parent = get_event(graph, content.self_parent());
+        let other_parent = get_event(graph, content.other_parent());
 
-        let (index_by_creator, last_ancestors) = index_by_creator_and_last_ancestors(
+        let index_by_creator = compute_index_by_creator(self_parent);
+        let ancestor_info = compute_ancestor_info(
             content.creator,
-            self_parent.map(|e| e.inner()),
-            other_parent.map(|e| e.inner()),
+            index_by_creator,
+            self_parent,
+            other_parent,
             peer_list,
-        );
-        let forking_peers = join_forking_peers(
-            self_parent.map(|e| e.inner()),
-            other_parent.map(|e| e.inner()),
-            forking_peers,
         );
 
         Self {
             hash,
             index_by_creator,
-            last_ancestors,
-            forking_peers,
+            ancestor_info,
             #[cfg(any(test, feature = "testing"))]
             creator_initial: get_creator_initial(peer_list, content.creator),
         }
     }
 }
 
-fn index_by_creator_and_last_ancestors<S: SecretId>(
-    creator: PeerIndex,
-    self_parent: Option<&Event<S::PublicId>>,
-    other_parent: Option<&Event<S::PublicId>>,
-    peer_list: &PeerList<S>,
-) -> (usize, PeerIndexMap<usize>) {
-    let (index_by_creator, mut last_ancestors) = if let Some(self_parent) = self_parent {
-        (
-            self_parent.index_by_creator() + 1,
-            self_parent.last_ancestors().clone(),
-        )
-    } else {
-        // Initial event
-        (0, PeerIndexMap::default())
-    };
-
-    if let Some(other_parent) = other_parent {
-        for (peer_index, _) in peer_list.iter() {
-            if let Some(other_index) = other_parent.last_ancestors().get(peer_index) {
-                let existing_index = last_ancestors.entry(peer_index).or_insert(*other_index);
-                *existing_index = cmp::max(*existing_index, *other_index);
-            }
-        }
-    }
-
-    let _ = last_ancestors.insert(creator, index_by_creator);
-
-    (index_by_creator, last_ancestors)
+fn get_event<'a, P: PublicId>(
+    graph: &'a Graph<P>,
+    event_index: Option<&EventIndex>,
+) -> Option<&'a Event<P>> {
+    event_index
+        .and_then(|index| graph.get(*index))
+        .map(|event| event.inner())
 }
 
-// An event's forking_peers list is a union inherited from its self_parent and other_parent.
-// The event shall only put forking peer into the list when have direct path to both sides of
-// the fork.
-fn join_forking_peers<P: PublicId>(
-    self_parent: Option<&Event<P>>,
-    other_parent: Option<&Event<P>>,
-    prev_forking_peers: &PeerIndexSet,
-) -> PeerIndexSet {
-    let mut forking_peers = PeerIndexSet::default();
-    forking_peers.extend(
-        self_parent
-            .into_iter()
-            .flat_map(|parent| parent.cache.forking_peers.iter()),
-    );
-    forking_peers.extend(
-        other_parent
-            .into_iter()
-            .flat_map(|parent| parent.cache.forking_peers.iter()),
-    );
-    forking_peers.extend(prev_forking_peers.iter());
-    forking_peers
+fn compute_index_by_creator<P: PublicId>(self_parent: Option<&Event<P>>) -> usize {
+    if let Some(self_parent) = self_parent {
+        self_parent.index_by_creator() + 1
+    } else {
+        // Initial event
+        0
+    }
 }
 
 fn compute_event_hash_and_signature<T: NetworkEvent, S: SecretId>(
@@ -673,22 +649,6 @@ fn compute_event_hash_and_verify_signature<T: NetworkEvent, P: PublicId>(
     } else {
         Err(Error::SignatureFailure)
     }
-}
-
-/// Finds the first event which has the `short_name` provided.
-#[cfg(test)]
-pub(crate) fn find_event_by_short_name<'a, I, P>(
-    events: I,
-    short_name: &str,
-) -> Option<IndexedEventRef<'a, P>>
-where
-    I: IntoIterator<Item = IndexedEventRef<'a, P>>,
-    P: PublicId,
-{
-    let short_name = short_name.to_uppercase();
-    events
-        .into_iter()
-        .find(|event| event.short_name().to_string() == short_name)
 }
 
 #[cfg(any(test, feature = "testing"))]
@@ -782,7 +742,7 @@ mod tests {
         dst: EventContextRef<Transaction, PeerId>,
     ) -> Event<PeerId> {
         let e = unwrap!(event.pack(src));
-        unwrap!(unwrap!(Event::unpack(e, &PeerIndexSet::default(), dst))).event
+        unwrap!(unwrap!(Event::unpack(e, dst))).event
     }
 
     #[test]
@@ -863,7 +823,6 @@ mod tests {
         let event_from_request = unwrap!(Event::new_from_request(
             a_0_index,
             b_0_index,
-            &PeerIndexSet::default(),
             alice.as_ref()
         ));
 
@@ -887,12 +846,7 @@ mod tests {
         let b_0 = convert_event(&b_0, bob.as_ref(), alice.as_ref());
         let b_0_index = alice.graph.insert(b_0).event_index();
 
-        match Event::new_from_request(
-            EventIndex::PHONY,
-            b_0_index,
-            &PeerIndexSet::default(),
-            alice.as_ref(),
-        ) {
+        match Event::new_from_request(EventIndex::PHONY, b_0_index, alice.as_ref()) {
             Err(Error::UnknownSelfParent) => (),
             x => panic!("Unexpected {:?}", x),
         }
@@ -904,12 +858,7 @@ mod tests {
         let (mut alice, a_0, _, _) = create_two_events("Alice", "Bob");
         let a_0_index = alice.graph.insert(a_0).event_index();
 
-        match Event::new_from_request(
-            a_0_index,
-            EventIndex::PHONY,
-            &PeerIndexSet::default(),
-            alice.as_ref(),
-        ) {
+        match Event::new_from_request(a_0_index, EventIndex::PHONY, alice.as_ref()) {
             Err(Error::UnknownOtherParent) => (),
             x => panic!("Unexpected {:?}", x),
         }
@@ -925,7 +874,6 @@ mod tests {
         let event_from_response = unwrap!(Event::new_from_response(
             a_0_index,
             b_0_index,
-            &PeerIndexSet::default(),
             alice.as_ref()
         ));
         let packed_event_from_response = unwrap!(event_from_response.pack(alice.as_ref()));
@@ -959,24 +907,15 @@ mod tests {
         let _ = alice.observations.insert(key, observation_info);
 
         let packed_event = unwrap!(event_from_observation.pack(alice.as_ref()));
-        let unpacked_event = unwrap!(unwrap!(Event::unpack(
-            packed_event.clone(),
-            &PeerIndexSet::default(),
-            alice.as_ref()
-        )))
-        .event;
+        let unpacked_event =
+            unwrap!(unwrap!(Event::unpack(packed_event.clone(), alice.as_ref()))).event;
 
         assert_eq!(event_from_observation, unpacked_event);
         assert!(!alice.graph.contains(unpacked_event.hash()));
 
         let _ = alice.graph.insert(unpacked_event);
 
-        assert!(unwrap!(Event::unpack(
-            packed_event,
-            &PeerIndexSet::default(),
-            alice.as_ref()
-        ))
-        .is_none());
+        assert!(unwrap!(Event::unpack(packed_event, alice.as_ref())).is_none());
     }
 
     #[test]
@@ -999,11 +938,7 @@ mod tests {
         let mut packed_event = unwrap!(event_from_observation.pack(alice.as_ref()));
         packed_event.signature = alice.peer_list.our_id().sign_detached(&[123]);
 
-        let error = unwrap_err!(Event::unpack(
-            packed_event,
-            &PeerIndexSet::default(),
-            alice.as_ref()
-        ));
+        let error = unwrap_err!(Event::unpack(packed_event, alice.as_ref()));
         if let Error::SignatureFailure = error {
         } else {
             panic!("Expected SignatureFailure, but got {:?}", error);

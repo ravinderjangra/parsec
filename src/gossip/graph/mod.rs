@@ -101,6 +101,11 @@ impl<P: PublicId> Graph<P> {
             .map(|event| IndexedEventRef { index, event })
     }
 
+    /// Gets `Event` by the given `hash`, if it exists.
+    pub fn get_by_hash<'a>(&'a self, hash: &EventHash) -> Option<IndexedEventRef<'a, P>> {
+        self.get_index(hash).and_then(|index| self.get(index))
+    }
+
     /// Number of events in this graph.
     pub fn len(&self) -> usize {
         self.events.len()
@@ -175,15 +180,6 @@ impl<P: PublicId> Graph<P> {
             queue,
             visited: vec![false; event.topological_index() + 1],
         }
-    }
-
-    /// Returns whether `x` is descendant of `y`.
-    pub fn is_descendant(&self, x: IndexedEventRef<P>, y: IndexedEventRef<P>) -> bool {
-        x.is_descendant_of(y).unwrap_or_else(|| {
-            self.ancestors(x)
-                .take_while(|e| e.topological_index() >= y.topological_index())
-                .any(|e| e.topological_index() == y.topological_index())
-        })
     }
 }
 
@@ -267,6 +263,30 @@ impl<P: PublicId> Graph<P> {
         let event = self.events.pop()?;
         let _ = self.indices.remove(event.hash());
         Some((index, event))
+    }
+}
+
+#[cfg(test)]
+impl<P: PublicId> Graph<P> {
+    /// Finds the first event which has the `short_name` provided.
+    pub fn find_by_short_name<'a>(&'a self, short_name: &str) -> Option<IndexedEventRef<'a, P>> {
+        let short_name = short_name.to_uppercase();
+
+        if let Some(sep) = short_name.find(',') {
+            let just_short_name = &short_name[0..sep];
+            let fork_index: usize = unwrap!(short_name[(sep + 1)..].parse());
+
+            self.iter().find(|event| {
+                event.short_name().to_string() == just_short_name
+                    && event
+                        .fork_set()
+                        .map(|set| set.contains(fork_index))
+                        .unwrap_or(fork_index == 0)
+            })
+        } else {
+            self.iter()
+                .find(move |event| event.short_name().to_string() == short_name)
+        }
     }
 }
 
@@ -361,7 +381,6 @@ pub(crate) mod snapshot {
 
 #[cfg(test)]
 mod tests {
-    use super::super::find_event_by_short_name;
     use crate::dev_utils::parse_test_dot_file;
 
     #[test]
@@ -370,7 +389,7 @@ mod tests {
         let contents = parse_test_dot_file("carol.dot");
         let graph = contents.graph;
 
-        let event = unwrap!(find_event_by_short_name(&graph, "C_8"));
+        let event = unwrap!(graph.find_by_short_name("C_8"));
 
         let expected = vec![
             "C_8", "C_7", "D_14", "B_26", "B_25", "B_24", "A_18", "B_23", "B_22", "D_13", "B_21",
