@@ -261,7 +261,7 @@ impl<P: PublicId> Event<P> {
 
         if let Some(self_forks) = self_info.forks.get(&other.index_by_creator()) {
             if let Some(other_forks) = other.fork_set() {
-                self_forks.intersects(other_forks)
+                !self_forks.is_disjoint(other_forks)
             } else {
                 self_forks.contains(0)
             }

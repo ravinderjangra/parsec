@@ -11,6 +11,7 @@ use crate::{
     id::SecretId,
     peer_list::{PeerIndex, PeerIndexMap, PeerList},
 };
+use fnv::FnvHashSet;
 use itertools::{EitherOrBoth, Itertools};
 use std::{cmp, collections::BTreeMap, iter};
 
@@ -30,33 +31,21 @@ pub(super) type ForkMap = BTreeMap<usize, IndexSet>;
 
 // Immutable set of integer indices
 #[derive(Clone)]
-pub(crate) struct IndexSet(Vec<usize>);
+pub(crate) struct IndexSet(FnvHashSet<usize>);
 
 impl IndexSet {
     pub fn new(index: usize) -> Self {
-        IndexSet(vec![index])
+        IndexSet(iter::once(index).collect())
     }
 
     pub fn union(&self, other: &Self) -> Self {
-        IndexSet(
-            self.0
-                .iter()
-                .merge(other.0.iter())
-                .dedup()
-                .cloned()
-                .collect(),
-        )
+        IndexSet(self.0.union(&other.0).cloned().collect())
     }
 
     pub fn insert(&self, index: usize) -> Self {
-        IndexSet(
-            self.0
-                .iter()
-                .cloned()
-                .merge(iter::once(index))
-                .dedup()
-                .collect(),
-        )
+        let mut set = self.0.clone();
+        let _ = set.insert(index);
+        IndexSet(set)
     }
 
     pub fn len(&self) -> usize {
@@ -64,17 +53,11 @@ impl IndexSet {
     }
 
     pub fn contains(&self, index: usize) -> bool {
-        self.0.binary_search(&index).is_ok()
+        self.0.contains(&index)
     }
 
-    pub fn intersects(&self, other: &Self) -> bool {
-        self.0
-            .iter()
-            .merge_join_by(other.0.iter(), |x, y| x.cmp(y))
-            .any(|either| match either {
-                EitherOrBoth::Both(..) => true,
-                _ => false,
-            })
+    pub fn is_disjoint(&self, other: &Self) -> bool {
+        self.0.is_disjoint(&other.0)
     }
 }
 
