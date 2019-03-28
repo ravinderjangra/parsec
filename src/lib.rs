@@ -172,6 +172,11 @@ extern crate serde_derive;
 #[macro_use]
 extern crate unwrap;
 
+#[doc(hidden)]
+#[cfg(any(test, feature = "testing"))]
+#[macro_use]
+pub mod dev_utils;
+
 mod block;
 mod dump_graph;
 mod error;
@@ -189,10 +194,6 @@ mod vote;
 
 #[cfg(all(test, feature = "mock"))]
 mod functional_tests;
-
-#[doc(hidden)]
-#[cfg(any(test, feature = "testing"))]
-pub mod dev_utils;
 
 #[doc(hidden)]
 /// **NOT FOR PRODUCTION USE**: Mock types which trivially implement the required Parsec traits.

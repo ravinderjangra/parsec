@@ -29,16 +29,6 @@ macro_rules! assert_matches {
     };
 }
 
-macro_rules! btree_set {
-    ($($item:expr),*) => {{
-        let mut set = BTreeSet::new();
-        $(
-            let _ = set.insert($item);
-        )*
-        set
-    }}
-}
-
 #[derive(Debug, PartialEq, Eq)]
 struct Snapshot {
     peer_list: PeerListSnapshot<PeerId>,

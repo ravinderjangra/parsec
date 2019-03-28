@@ -30,7 +30,7 @@ use std::{cmp, collections::BTreeMap, iter};
 pub(super) type ForkMap = BTreeMap<usize, IndexSet>;
 
 // Immutable set of integer indices
-#[derive(Clone)]
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub(crate) struct IndexSet(FnvHashSet<usize>);
 
 impl IndexSet {
@@ -133,29 +133,29 @@ fn merge_ancestor_info_maps(
         .collect()
 }
 
-fn merge_ancestor_infos(info0: &AncestorInfo, info1: &AncestorInfo) -> AncestorInfo {
+fn merge_ancestor_infos(lhs_info: &AncestorInfo, rhs_info: &AncestorInfo) -> AncestorInfo {
     AncestorInfo {
-        last: cmp::max(info0.last, info1.last),
-        forks: merge_fork_maps(info0, info1),
+        last: cmp::max(lhs_info.last, rhs_info.last),
+        forks: merge_fork_maps(lhs_info, rhs_info),
     }
 }
 
-fn merge_fork_maps(info0: &AncestorInfo, info1: &AncestorInfo) -> ForkMap {
-    info0
+fn merge_fork_maps(lhs_info: &AncestorInfo, rhs_info: &AncestorInfo) -> ForkMap {
+    lhs_info
         .forks
         .iter()
-        .merge_join_by(info1.forks.iter(), |(key0, _), (key1, _)| key0.cmp(key1))
+        .merge_join_by(rhs_info.forks.iter(), |(key0, _), (key1, _)| key0.cmp(key1))
         .map(|either| match either {
-            EitherOrBoth::Left((&index_by_creator, fork_set)) => (
+            EitherOrBoth::Left((&index_by_creator, lhs_fork_set)) => (
                 index_by_creator,
-                merge_with_implicit_fork_set(fork_set, index_by_creator, info1.last),
+                merge_with_implicit_fork_set(lhs_fork_set, index_by_creator, rhs_info.last),
             ),
-            EitherOrBoth::Right((&index_by_creator, fork_set)) => (
+            EitherOrBoth::Right((&index_by_creator, rhs_fork_set)) => (
                 index_by_creator,
-                merge_with_implicit_fork_set(fork_set, index_by_creator, info0.last),
+                merge_with_implicit_fork_set(rhs_fork_set, index_by_creator, lhs_info.last),
             ),
-            EitherOrBoth::Both((&index_by_creator, fork_set0), (_, fork_set1)) => {
-                (index_by_creator, fork_set0.union(fork_set1))
+            EitherOrBoth::Both((&index_by_creator, lhs_fork_set), (_, rhs_fork_set)) => {
+                (index_by_creator, lhs_fork_set.union(rhs_fork_set))
             }
         })
         .collect()
@@ -174,5 +174,122 @@ fn merge_with_implicit_fork_set(
         // The second event is not an ancestor of any event of the fork - just clone the first fork
         // set.
         forks.clone()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn merge_fork_maps_of_events_that_are_not_descendants_of_any_fork() {
+        // Merge C's fork maps of A1 and B1:
+        //
+        //       B1----+
+        //       |     |
+        // A1----------+
+        // |     |     |
+        // A0    B0    C0
+
+        let a_info = AncestorInfo {
+            last: 0,
+            forks: btree_map![],
+        };
+
+        let b_info = AncestorInfo {
+            last: 0,
+            forks: btree_map![],
+        };
+
+        assert_eq!(merge_fork_maps(&a_info, &b_info), btree_map![])
+    }
+
+    #[test]
+    fn merge_fork_maps_of_events_that_are_descendants_of_different_fork_sides() {
+        //
+        //       B1---------+
+        //       |          |
+        // A1---------+     |
+        // |     |    |     |
+        // |     |   C1,0  C1,1
+        // |     |    |     |
+        // |     |    +--+--+
+        // |     |       |
+        // A0    B0      C0
+
+        let a_info = AncestorInfo {
+            last: 1,
+            forks: btree_map![],
+        };
+
+        let b_info = AncestorInfo {
+            last: 1,
+            forks: btree_map![1 => IndexSet::new(1)],
+        };
+
+        assert_eq!(
+            merge_fork_maps(&a_info, &b_info),
+            btree_map![1 => IndexSet::new(0).insert(1)]
+        )
+    }
+
+    #[test]
+    fn merge_fork_maps_of_events_that_are_descendants_of_same_fork_side() {
+        //
+        //       B1---------+
+        //       |          |
+        // A1---------------+
+        // |     |          |
+        // |     |   C1,0  C1,1
+        // |     |    |     |
+        // |     |    +--+--+
+        // |     |       |
+        // A0    B0      C0
+
+        let a_info = AncestorInfo {
+            last: 1,
+            forks: btree_map![1 => IndexSet::new(1)],
+        };
+
+        let b_info = AncestorInfo {
+            last: 1,
+            forks: btree_map![1 => IndexSet::new(1)],
+        };
+
+        assert_eq!(
+            merge_fork_maps(&a_info, &b_info),
+            btree_map![1 => IndexSet::new(1)]
+        )
+    }
+
+    #[test]
+    fn merge_fork_maps_of_one_event_that_is_descendant_of_fork_and_another_that_isnt() {
+        //
+        //       B1---------+
+        //       |          |
+        //       |   C2,0  C2,1
+        //       |    |     |
+        //       |    +--+--+
+        //       |       |
+        // A1------------+
+        // |     |       |
+        // |     |       C1
+        // |     |       |
+        // A0    B0      C0
+
+        let a_info = AncestorInfo {
+            last: 1,
+            forks: btree_map![],
+        };
+
+        let b_info = AncestorInfo {
+            last: 2,
+            forks: btree_map![2 => IndexSet::new(1)],
+        };
+
+        assert_eq!(
+            merge_fork_maps(&a_info, &b_info),
+            btree_map![2 => IndexSet::new(1)]
+        )
     }
 }
