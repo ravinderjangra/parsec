@@ -17,6 +17,7 @@
 ///   Oran: PeerState(VOTE|SEND|RECV)
 ///   Paul: PeerState(VOTE|SEND|RECV)
 /// }
+/// consensus_mode: Single
 digraph GossipGraph {
   splines=false
   rankdir=BT

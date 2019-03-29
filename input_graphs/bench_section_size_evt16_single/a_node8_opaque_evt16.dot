@@ -9,6 +9,7 @@
 ///   Gina: PeerState(VOTE|SEND|RECV)
 ///   Hank: PeerState(VOTE|SEND|RECV)
 /// }
+/// consensus_mode: Single
 digraph GossipGraph {
   splines=false
   rankdir=BT

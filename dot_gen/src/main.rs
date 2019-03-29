@@ -476,39 +476,47 @@ fn add_bench_section_size(scenarios: &mut Scenarios) {
 
     for genesis_size in &[4, 8, 16, 32] {
         let opaque_to_add = 1024;
+        let options = ScheduleOptions {
+            genesis_size: *genesis_size,
+            opaque_to_add,
+            // 1 gossip event every 10 steps in one peer in the network
+            prob_gossip: 0.1 / *genesis_size as f64,
+            // 1 opaque event per 10 steps
+            prob_opaque: 0.1,
+            // Events will be seen within 2 gossip events
+            max_observation_delay: 20,
+            ..Default::default()
+        };
         add_bench_scalability_common(
             scenarios,
-            ScheduleOptions {
-                genesis_size: *genesis_size,
-                opaque_to_add,
-                // 1 gossip event every 10 steps in one peer in the network
-                prob_gossip: 0.1 / *genesis_size as f64,
-                // 1 opaque event per 10 steps
-                prob_opaque: 0.1,
-                // Events will be seen within 2 gossip events
-                max_observation_delay: 20,
-                ..Default::default()
-            },
+            options.clone(),
             ConsensusMode::Single,
             &format!("{}_interleave", opaque_to_add),
+        );
+        add_bench_scalability_common(
+            scenarios,
+            options,
+            ConsensusMode::Supermajority,
+            &format!("{}_interleave_supermajority", opaque_to_add),
         );
     }
 
     for genesis_size in &[4, 8, 16, 32] {
         let opaque_to_add = 8192;
+        let options = ScheduleOptions {
+            genesis_size: *genesis_size,
+            opaque_to_add,
+            // 1 gossip event every 80 steps in one peer in the network
+            prob_gossip: 0.1 / (*genesis_size as f64 * 8.0),
+            // 1 opaque event per 10 steps
+            prob_opaque: 0.1,
+            // Events will be seen within 2 gossip events
+            max_observation_delay: 20 * 8,
+            ..Default::default()
+        };
         add_bench_scalability_common(
             scenarios,
-            ScheduleOptions {
-                genesis_size: *genesis_size,
-                opaque_to_add,
-                // 1 gossip event every 80 steps in one peer in the network
-                prob_gossip: 0.1 / (*genesis_size as f64 * 8.0),
-                // 1 opaque event per 10 steps
-                prob_opaque: 0.1,
-                // Events will be seen within 2 gossip events
-                max_observation_delay: 20 * 8,
-                ..Default::default()
-            },
+            options,
             ConsensusMode::Single,
             &format!("{}_interleave", opaque_to_add),
         );
@@ -516,19 +524,20 @@ fn add_bench_section_size(scenarios: &mut Scenarios) {
 
     for genesis_size in &[4, 8, 16, 32] {
         let opaque_to_add = 65536;
+        let options = ScheduleOptions {
+            genesis_size: *genesis_size,
+            opaque_to_add,
+            // 1 gossip event every 640 steps in one peer in the network
+            prob_gossip: 0.1 / (*genesis_size as f64 * 64.0),
+            // 1 opaque event per 10 steps
+            prob_opaque: 0.1,
+            // Events will be seen within 2 gossip events
+            max_observation_delay: 20 * 64,
+            ..Default::default()
+        };
         add_bench_scalability_common(
             scenarios,
-            ScheduleOptions {
-                genesis_size: *genesis_size,
-                opaque_to_add,
-                // 1 gossip event every 640 steps in one peer in the network
-                prob_gossip: 0.1 / (*genesis_size as f64 * 64.0),
-                // 1 opaque event per 10 steps
-                prob_opaque: 0.1,
-                // Events will be seen within 2 gossip events
-                max_observation_delay: 20 * 64,
-                ..Default::default()
-            },
+            options,
             ConsensusMode::Single,
             &format!("{}_interleave", opaque_to_add),
         );

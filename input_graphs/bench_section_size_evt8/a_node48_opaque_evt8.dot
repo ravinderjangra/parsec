@@ -49,6 +49,7 @@
 ///   Yakov: PeerState(VOTE|SEND|RECV)
 ///   Zaida: PeerState(VOTE|SEND|RECV)
 /// }
+/// consensus_mode: Supermajority
 digraph GossipGraph {
   splines=false
   rankdir=BT
