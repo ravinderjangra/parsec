@@ -171,7 +171,7 @@ impl MetaElection {
 
         self.update_voters(peer_list_changes);
         self.update_unconsensused_events(&decided_keys);
-        self.update_new_consensus_start_index();
+        self.update_new_consensus_start_index(graph.len());
         self.update_continue_consensus_start_index(peer_list_changed);
         self.update_meta_events(&decided_keys, peer_list_changed);
         self.update_interesting_content(graph);
@@ -279,14 +279,14 @@ impl MetaElection {
         }
     }
 
-    fn update_new_consensus_start_index(&mut self) {
+    fn update_new_consensus_start_index(&mut self, graph_len: usize) {
         self.new_consensus_start_index = self
             .unconsensused_events
             .ordered_indices
             .iter()
             .next()
             .map(|event_index| event_index.topological_index())
-            .unwrap_or(usize::MAX);
+            .unwrap_or(graph_len);
     }
 
     fn update_continue_consensus_start_index(&mut self, peer_list_changed: bool) {

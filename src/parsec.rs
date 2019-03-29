@@ -1146,19 +1146,25 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 continue;
             }
 
-            let meta_votes = self.meta_election.populated_meta_votes(event_index)?;
-            let meta_vote = meta_votes
-                .get(peer_index)
+            let meta_vote = self
+                .meta_election
+                .populated_meta_votes(event_index)
+                .and_then(|meta_votes| meta_votes.get(peer_index))
                 .into_iter()
                 .flatten()
                 .find(|meta_vote| meta_vote.round_and_step() >= (round, Step::GenuineFlip));
+            let meta_vote = if let Some(meta_vote) = meta_vote {
+                meta_vote
+            } else {
+                continue;
+            };
 
-            if let Some(meta_vote) = meta_vote {
-                if meta_vote.aux_value.is_some() {
-                    let event = self.graph.get(event_index)?;
-                    return Some(event.hash().least_significant_bit());
-                }
+            if meta_vote.aux_value.is_none() {
+                continue;
             }
+
+            let event = self.graph.get(event_index)?;
+            return Some(event.hash().least_significant_bit());
         }
 
         None
