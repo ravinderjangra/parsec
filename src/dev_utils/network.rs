@@ -243,6 +243,10 @@ impl Network {
         present_peers: &[PeerId],
         step: usize,
     ) {
+        if present_peers.len() == 1 && present_peers.contains(sender) {
+            return;
+        }
+
         let recipient = loop {
             let recipient = unwrap!(rng.choose(present_peers));
             if recipient != sender {
@@ -648,9 +652,17 @@ impl Network {
     }
 
     fn allow_addition_of_peer(&self) -> bool {
+        // For sections of size 3 or more, we only allow new node to join if the currently joined
+        // ones would still form a supermajority event after all the joining one including the new
+        // node become joined. This is to prevent the situation where too many nodes join so the
+        // votes to add more nodes no longer have supermajority.
+        //
+        // Section of size 1 or 2 need special handling, otherwise they would never be allowed to
+        // grow.
         let joined_count = self.num_with_network_view(NetworkView::Joined);
-        // Increment by 1 to include the potential new joiner in the joining count.
-        let joining_count = self.num_with_network_view(NetworkView::Joining) + 1;
-        is_more_than_two_thirds(joined_count, joined_count + joining_count)
+        let joining_count = self.num_with_network_view(NetworkView::Joining);
+
+        (joined_count < 3 && joining_count == 0)
+            || is_more_than_two_thirds(joined_count, joined_count + joining_count + 1)
     }
 }
