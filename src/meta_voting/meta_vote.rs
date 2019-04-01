@@ -86,7 +86,28 @@ impl MetaVote {
         Self::next(&[initial], others, &BTreeMap::new(), total_peers, is_voter)
     }
 
-    pub fn next(
+    /// Create temporary next meta-votes. They must be finalized by calling `next_final` before
+    /// passing them to `MetaEvent`.
+    pub fn next_temp(
+        parent: &[MetaVote],
+        others: &[&[MetaVote]],
+        total_peers: usize,
+        is_voter: bool,
+    ) -> Vec<Self> {
+        Self::next(parent, others, &BTreeMap::new(), total_peers, is_voter)
+    }
+
+    /// Finalize temporary meta-votes.
+    pub fn next_final(
+        temp: &[MetaVote],
+        coin_tosses: &BTreeMap<usize, bool>,
+        total_peers: usize,
+        is_voter: bool,
+    ) -> Vec<Self> {
+        Self::next(temp, &[], coin_tosses, total_peers, is_voter)
+    }
+
+    fn next(
         parent: &[MetaVote],
         others: &[&[MetaVote]],
         coin_tosses: &BTreeMap<usize, bool>,

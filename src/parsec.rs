@@ -1017,13 +1017,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 .into_iter()
                 .map(|(peer_index, parent_votes)| {
                     let other_votes = Self::peer_meta_votes(&ancestors_meta_votes, peer_index);
-                    let temp_votes = MetaVote::next(
-                        parent_votes,
-                        &other_votes,
-                        &BTreeMap::new(),
-                        voters.len(),
-                        is_voter,
-                    );
+                    let temp_votes =
+                        MetaVote::next_temp(parent_votes, &other_votes, voters.len(), is_voter);
 
                     (peer_index, temp_votes)
                 })
@@ -1037,7 +1032,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             for (peer_index, temp_votes) in &context.temp_votes {
                 let coin_tosses = self.toss_coins(&voters, peer_index, temp_votes, &context)?;
                 let final_meta_votes =
-                    MetaVote::next(temp_votes, &[], &coin_tosses, voters.len(), is_voter);
+                    MetaVote::next_final(temp_votes, &coin_tosses, voters.len(), is_voter);
 
                 builder.add_meta_votes(peer_index, final_meta_votes);
             }
