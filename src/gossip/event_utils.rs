@@ -6,14 +6,18 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use super::Event;
 use crate::{
     id::SecretId,
     peer_list::{PeerIndex, PeerIndexMap, PeerList},
 };
 use fnv::FnvHashSet;
 use itertools::{EitherOrBoth, Itertools};
-use std::{cmp, collections::BTreeMap, iter};
+use std::{
+    cmp,
+    collections::{BTreeMap, BTreeSet},
+    fmt::{self, Debug, Formatter},
+    iter,
+};
 
 // Map of forks created by single peer in the ancestry of the current event.
 // Key is the index-by-creator of the forked events, value is a list of fork indices of the events
@@ -30,7 +34,7 @@ use std::{cmp, collections::BTreeMap, iter};
 pub(super) type ForkMap = BTreeMap<usize, IndexSet>;
 
 // Immutable set of integer indices
-#[derive(Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, Eq, PartialEq)]
 pub(crate) struct IndexSet(FnvHashSet<usize>);
 
 impl IndexSet {
@@ -61,13 +65,19 @@ impl IndexSet {
     }
 }
 
+impl Debug for IndexSet {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        let values = self.0.iter().collect::<BTreeSet<_>>();
+        write!(formatter, "{}", values.iter().format(", "))
+    }
+}
+
 // Information about ancestor events.
-#[derive(Clone)]
-pub(super) struct AncestorInfo {
+#[derive(Clone, Debug, Default)]
+pub(crate) struct AncestorInfo {
     // index-by-creator of the last event by the current peer that is ancestor of the current
     // event.
     pub last: usize,
-
     // Info about forks in the ancestry of the current event.
     pub forks: ForkMap,
 }
@@ -84,16 +94,16 @@ impl AncestorInfo {
 pub(super) fn compute_ancestor_info<S: SecretId>(
     creator: PeerIndex,
     index_by_creator: usize,
-    self_parent: Option<&Event<S::PublicId>>,
-    other_parent: Option<&Event<S::PublicId>>,
+    self_parent_info: Option<&PeerIndexMap<AncestorInfo>>,
+    other_parent_info: Option<&PeerIndexMap<AncestorInfo>>,
     peer_list: &PeerList<S>,
 ) -> PeerIndexMap<AncestorInfo> {
-    let mut result = match (self_parent, other_parent) {
-        (Some(self_parent), Some(other_parent)) => {
-            merge_ancestor_info_maps(self_parent.ancestor_info(), other_parent.ancestor_info())
+    let mut result = match (self_parent_info, other_parent_info) {
+        (Some(self_parent_info), Some(other_parent_info)) => {
+            merge_ancestor_info_maps(self_parent_info, other_parent_info)
         }
-        (Some(self_parent), None) => self_parent.ancestor_info().clone(),
-        (None, Some(other_parent)) => other_parent.ancestor_info().clone(),
+        (Some(self_parent_info), None) => self_parent_info.clone(),
+        (None, Some(other_parent_info)) => other_parent_info.clone(),
         (None, None) => PeerIndexMap::new(),
     };
 

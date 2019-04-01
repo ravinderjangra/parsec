@@ -6,8 +6,6 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-#[cfg(any(test, feature = "testing"))]
-use super::event_utils::ForkMap;
 use super::{
     cause::{self, Cause},
     content::Content,
@@ -35,8 +33,6 @@ use crate::{
     observation::ConsensusMode,
 };
 use itertools::Itertools;
-#[cfg(any(test, feature = "testing"))]
-use std::collections::BTreeMap;
 use std::fmt::{self, Debug, Display, Formatter};
 
 pub(crate) struct Event<P: PublicId> {
@@ -371,7 +367,8 @@ impl<P: PublicId> Event<P> {
         }
     }
 
-    pub(super) fn ancestor_info(&self) -> &PeerIndexMap<AncestorInfo> {
+    #[cfg(any(test, feature = "testing"))]
+    pub fn ancestor_info(&self) -> &PeerIndexMap<AncestorInfo> {
         &self.cache.ancestor_info
     }
 
@@ -451,7 +448,14 @@ impl<P: PublicId> Debug for Event<P> {
         write!(formatter, "Event{{")?;
 
         #[cfg(any(test, feature = "testing"))]
-        write!(formatter, " {}", self.short_name())?;
+        write!(
+            formatter,
+            " {}{}",
+            self.short_name(),
+            self.fork_set()
+                .map(|set| format!(",{:?}", set))
+                .unwrap_or_default()
+        )?;
 
         write!(formatter, " {:?}", self.hash())?;
         write!(formatter, ", {:?}", self.content.cause)?;
@@ -495,12 +499,11 @@ impl Event<PeerId> {
     pub(crate) fn new_from_dot_input(
         creator: &PeerId,
         cause: CauseInput,
-        self_parent: Option<(EventIndex, EventHash)>,
-        other_parent: Option<(EventIndex, EventHash)>,
+        self_parent: Option<(EventIndex, EventHash, PeerIndexMap<AncestorInfo>)>,
+        other_parent: Option<(EventIndex, EventHash, PeerIndexMap<AncestorInfo>)>,
         index_by_creator: usize,
         consensus_mode: ConsensusMode,
-        last_ancestors: BTreeMap<PeerId, usize>,
-        peer_list: &PeerList<PeerId>,
+        peer_list: &mut PeerList<PeerId>,
         observations: &mut ObservationStore<Transaction, PeerId>,
     ) -> Self {
         let recipient = match cause {
@@ -510,8 +513,8 @@ impl Event<PeerId> {
         let cause = Cause::new_from_dot_input(
             cause,
             creator,
-            self_parent.map(|(_, h)| h),
-            other_parent.map(|(_, h)| h),
+            self_parent.as_ref().map(|(_, hash, _)| *hash),
+            other_parent.as_ref().map(|(_, hash, _)| *hash),
         );
         let content = Content {
             creator: creator.clone(),
@@ -524,25 +527,29 @@ impl Event<PeerId> {
             content.cause,
             creator,
             recipient,
-            self_parent.map(|(i, _)| i),
-            other_parent.map(|(i, _)| i),
+            self_parent.as_ref().map(|(event_index, _, _)| *event_index),
+            other_parent
+                .as_ref()
+                .map(|(event_index, _, _)| *event_index),
             consensus_mode,
             observations,
         );
         let content = Content { creator, cause };
 
-        let ancestor_info = last_ancestors
-            .into_iter()
-            .map(|(peer_id, index_by_creator)| {
-                let peer_index = unwrap!(peer_list.get_index(&peer_id));
-                let ancestor_info = AncestorInfo {
-                    last: index_by_creator,
-                    forks: ForkMap::new(),
-                };
+        let self_parent_info = self_parent
+            .as_ref()
+            .map(|(_, _, ref ancestor_info)| ancestor_info);
+        let other_parent_info = other_parent
+            .as_ref()
+            .map(|(_, _, ref ancestor_info)| ancestor_info);
 
-                (peer_index, ancestor_info)
-            })
-            .collect();
+        let ancestor_info = compute_ancestor_info(
+            content.creator,
+            index_by_creator,
+            self_parent_info,
+            other_parent_info,
+            peer_list,
+        );
 
         let cache = Cache {
             hash,
@@ -603,8 +610,8 @@ impl Cache {
         let ancestor_info = compute_ancestor_info(
             content.creator,
             index_by_creator,
-            self_parent,
-            other_parent,
+            self_parent.map(|event| &event.cache.ancestor_info),
+            other_parent.map(|event| &event.cache.ancestor_info),
             peer_list,
         );
 

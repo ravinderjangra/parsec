@@ -473,9 +473,8 @@ fn gossip_after_fork() {
 
 #[test]
 fn sees() {
-    // This graph contains fork.
-    let record = Record::from(parse_test_dot_file("alice.dot"));
-    let alice = TestParsec::from(record.play());
+    // This graph contains a fork.
+    let alice = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
 
     let a2 = unwrap!(alice.graph().find_by_short_name("A_2"));
     let a3 = unwrap!(alice.graph().find_by_short_name("A_3"));

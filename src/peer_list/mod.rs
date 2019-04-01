@@ -16,14 +16,16 @@ pub use self::peer_state::PeerState;
 pub(crate) use self::snapshot::PeerListSnapshot;
 
 use self::peer::Peer;
+#[cfg(all(test, feature = "mock"))]
+use crate::gossip::Graph;
+#[cfg(any(test, feature = "testing"))]
+use crate::mock::PeerId;
 use crate::{
     error::Error,
     gossip::{EventIndex, IndexedEventRef},
     hash::Hash,
     id::SecretId,
 };
-#[cfg(any(test, feature = "testing"))]
-use crate::{gossip::Graph, mock::PeerId};
 use std::{
     collections::btree_map::{BTreeMap, Entry},
     fmt::{self, Debug, Formatter},
@@ -303,11 +305,11 @@ impl<S: SecretId> Debug for PeerList<S> {
 
 #[cfg(any(test, feature = "testing"))]
 impl PeerList<PeerId> {
-    // Creates a builder to build PeerList using the input parameters directly.
+    // Creates a PeerList using the input parameters directly.
     pub(super) fn build_from_dot_input(
         our_id: PeerId,
         mut peer_data: BTreeMap<PeerId, PeerState>,
-    ) -> Builder {
+    ) -> Self {
         let our_state = unwrap!(peer_data.remove(&our_id));
         let our_peer = Peer::new(our_id.public_id().clone(), our_state);
 
@@ -323,49 +325,12 @@ impl PeerList<PeerId> {
             .map(|(index, peer)| (peer.id().clone(), PeerIndex(index + 1)))
             .collect();
 
-        Builder {
-            peer_list: PeerList {
-                our_id,
-                our_peer,
-                peers,
-                indices,
-            },
+        PeerList {
+            our_id,
+            our_peer,
+            peers,
+            indices,
         }
-    }
-
-    fn iter_mut(&mut self) -> impl Iterator<Item = (PeerIndex, &mut Peer<PeerId>)> {
-        iter::once((PeerIndex::OUR, &mut self.our_peer)).chain(
-            self.peers
-                .iter_mut()
-                .enumerate()
-                .map(|(index, peer)| (PeerIndex(index + 1), peer)),
-        )
-    }
-}
-
-#[cfg(any(test, feature = "testing"))]
-pub(crate) struct Builder {
-    peer_list: PeerList<PeerId>,
-}
-
-#[cfg(any(test, feature = "testing"))]
-impl Builder {
-    pub fn peer_list(&self) -> &PeerList<PeerId> {
-        &self.peer_list
-    }
-
-    pub fn finish(mut self, graph: &Graph<PeerId>) -> PeerList<PeerId> {
-        // Set peer events and apply the membership list changes.
-        for (index, peer) in self.peer_list.iter_mut() {
-            let events = graph
-                .iter()
-                .filter(|event| event.creator() == index)
-                .collect::<Vec<_>>();
-            peer.last_gossiped_event = events.last().map(|event| event.event_index());
-            peer.events = events.into_iter().collect();
-        }
-
-        self.peer_list
     }
 }
 
