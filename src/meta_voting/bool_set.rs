@@ -7,7 +7,7 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 /// A simple enum to hold a set of bools.
-#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum BoolSet {
     Empty,
     Single(bool),
@@ -21,12 +21,12 @@ impl Default for BoolSet {
 }
 
 impl BoolSet {
-    pub fn is_empty(&self) -> bool {
-        *self == BoolSet::Empty
+    pub fn is_empty(self) -> bool {
+        self == BoolSet::Empty
     }
 
     pub fn insert(&mut self, val: bool) -> bool {
-        match self.clone() {
+        match *self {
             BoolSet::Empty => *self = BoolSet::Single(val),
             BoolSet::Single(s) if s != val => *self = BoolSet::Both,
             _ => return false,
@@ -34,8 +34,8 @@ impl BoolSet {
         true
     }
 
-    pub fn contains(&self, val: bool) -> bool {
-        match *self {
+    pub fn contains(self, val: bool) -> bool {
+        match self {
             BoolSet::Empty => false,
             BoolSet::Single(ref s) => *s == val,
             BoolSet::Both => true,
@@ -46,8 +46,8 @@ impl BoolSet {
         *self = BoolSet::Empty
     }
 
-    pub fn len(&self) -> usize {
-        match *self {
+    pub fn len(self) -> usize {
+        match self {
             BoolSet::Empty => 0,
             BoolSet::Single(_) => 1,
             BoolSet::Both => 2,
@@ -59,8 +59,8 @@ impl BoolSet {
     }
 
     #[cfg(feature = "dump-graphs")]
-    pub(crate) fn as_short_string(&self) -> &'static str {
-        match *self {
+    pub(crate) fn as_short_string(self) -> &'static str {
+        match self {
             BoolSet::Empty => "-",
             BoolSet::Single(true) => "t",
             BoolSet::Single(false) => "f",
