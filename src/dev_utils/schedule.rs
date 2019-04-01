@@ -465,6 +465,16 @@ impl ObservationSchedule {
             })
             .count()
     }
+
+    fn count_expected_accusations(&self) -> usize {
+        if cfg!(feature = "malice-detection") {
+            // One accusation per malicious peer as currently the malicious peers commit only one
+            // malice each.
+            self.genesis.ids_of_malicious_peers.len()
+        } else {
+            0
+        }
+    }
 }
 
 pub struct StepObservationSchedule {
@@ -556,7 +566,8 @@ impl Schedule {
         let mut pending = PendingObservations::new(options);
 
         // the +1 below is to account for genesis
-        let max_observations = obs_schedule.count_observations() + 1;
+        let max_observations =
+            obs_schedule.count_observations() + obs_schedule.count_expected_accusations() + 1;
 
         let mut peers = PeerStatuses::new(&obs_schedule.genesis.all_ids());
         let mut step = 0;
