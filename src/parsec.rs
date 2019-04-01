@@ -1005,21 +1005,36 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         if let Some(parent_meta_votes) = parent_meta_votes {
             // Parent has meta votes: Derive this event's meta votes from them.
-            for (peer_index, parent_event_votes) in parent_meta_votes {
-                let new_meta_votes = {
-                    let other_votes = Self::peer_meta_votes(&ancestors_meta_votes, peer_index);
-                    let coin_tosses =
-                        self.toss_coins(&voters, peer_index, &parent_event_votes, builder.event())?;
-                    MetaVote::next(
-                        &parent_event_votes,
-                        &other_votes,
-                        &coin_tosses,
-                        voters.len(),
-                        is_voter,
-                    )
-                };
 
-                builder.add_meta_votes(peer_index, new_meta_votes);
+            // Calculating the meta-votes is a three step process:
+            // 1. First calculate temporary meta-votes without using coin tosses.
+            // 2. Then calculate the coin toss results using the temporary meta-votes.
+            // 3. Finally calculate the final meta-votes using the temporary meta-votes and the
+            //    coin toss results.
+            // The reason to do it this way is that sometimes we need the meta-votes for the current
+            // event when tossing the coins.
+            let temp_votes = parent_meta_votes
+                .into_iter()
+                .map(|(peer_index, parent_votes)| {
+                    let other_votes = Self::peer_meta_votes(&ancestors_meta_votes, peer_index);
+                    let temp_votes =
+                        MetaVote::next_temp(parent_votes, &other_votes, voters.len(), is_voter);
+
+                    (peer_index, temp_votes)
+                })
+                .collect();
+
+            let context = MetaVoteContext {
+                event: builder.event(),
+                temp_votes,
+            };
+
+            for (peer_index, temp_votes) in &context.temp_votes {
+                let coin_tosses = self.toss_coins(&voters, peer_index, temp_votes, &context)?;
+                let final_meta_votes =
+                    MetaVote::next_final(temp_votes, &coin_tosses, voters.len(), is_voter);
+
+                builder.add_meta_votes(peer_index, final_meta_votes);
             }
         } else {
             // Start meta votes for this observer event.
@@ -1048,14 +1063,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         &self,
         voters: &PeerIndexSet,
         peer_index: PeerIndex,
-        parent_votes: &[MetaVote],
-        event: IndexedEventRef<S::PublicId>,
+        temp_votes: &[MetaVote],
+        context: &MetaVoteContext<S::PublicId>,
     ) -> Result<BTreeMap<usize, bool>> {
         let mut coin_tosses = BTreeMap::new();
-        for parent_vote in parent_votes {
-            let _ = self
-                .toss_coin(voters, peer_index, parent_vote, event)?
-                .map(|coin| coin_tosses.insert(parent_vote.round, coin));
+        for temp_vote in temp_votes {
+            if let Some(coin) = self.toss_coin(voters, peer_index, temp_vote, context)? {
+                let _ = coin_tosses.insert(temp_vote.round, coin);
+            }
         }
         Ok(coin_tosses)
     }
@@ -1064,14 +1079,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         &self,
         voters: &PeerIndexSet,
         peer_index: PeerIndex,
-        parent_vote: &MetaVote,
-        event: IndexedEventRef<S::PublicId>,
+        temp_vote: &MetaVote,
+        context: &MetaVoteContext<S::PublicId>,
     ) -> Result<Option<bool>> {
         // Get the round hash.
-        let round = if parent_vote.estimates.is_empty() {
+        let round = if temp_vote.estimates.is_empty() {
             // We're waiting for the coin toss result already.
-            if parent_vote.round == 0 {
-                if voters.contains(event.creator()) {
+            if temp_vote.round == 0 {
+                if voters.contains(context.event.creator()) {
                     // This should never happen as estimates get cleared only in increase step when the
                     // step is Step::GenuineFlip and the round gets incremented.
                     log_or_panic!(
@@ -1083,9 +1098,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     return Ok(None);
                 }
             }
-            parent_vote.round - 1
-        } else if parent_vote.step == Step::GenuineFlip {
-            parent_vote.round
+            temp_vote.round - 1
+        } else if temp_vote.step == Step::GenuineFlip {
+            temp_vote.round
         } else {
             return Ok(None);
         };
@@ -1104,24 +1119,24 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .collect();
         peer_id_hashes.sort_by(|lhs, rhs| round_hash.xor_cmp(&lhs.1, &rhs.1));
 
-        // Try to get the "most-leader"'s aux value.
+        // Try to get the "most-leader"'s coin value.
         let creator = peer_id_hashes[0].0;
-        if let Some(creator_event_index) = event.last_ancestor_by(creator) {
-            if let Some(aux_value) =
-                self.coin_value(creator, creator_event_index, peer_index, round)
+        if let Some(creator_event_index) = context.event.last_ancestor_by(creator) {
+            if let Some(coin) =
+                self.coin_value(creator, creator_event_index, peer_index, round, context)
             {
-                return Ok(Some(aux_value));
+                return Ok(Some(coin));
             }
         }
 
-        // If we've already waited long enough, get the aux value of the highest ranking leader.
-        if self.stop_waiting(round, event) {
+        // If we've already waited long enough, get the coin value of the highest ranking leader.
+        if self.stop_waiting(round, context) {
             for (creator, _) in &peer_id_hashes[1..] {
-                if let Some(creator_event_index) = event.last_ancestor_by(*creator) {
-                    if let Some(aux_value) =
-                        self.coin_value(*creator, creator_event_index, peer_index, round)
+                if let Some(creator_event_index) = context.event.last_ancestor_by(*creator) {
+                    if let Some(coin) =
+                        self.coin_value(*creator, creator_event_index, peer_index, round, context)
                     {
-                        return Ok(Some(aux_value));
+                        return Ok(Some(coin));
                     }
                 }
             }
@@ -1138,6 +1153,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         last_index_by_creator: usize,
         peer_index: PeerIndex,
         round: usize,
+        context: &MetaVoteContext<S::PublicId>,
     ) -> Option<bool> {
         for index_by_creator in 0..=last_index_by_creator {
             let event_index = self.non_fork_event_by_creator(creator, index_by_creator)?;
@@ -1147,9 +1163,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             }
 
             let meta_vote = self
-                .meta_election
-                .populated_meta_votes(event_index)
-                .and_then(|meta_votes| meta_votes.get(peer_index))
+                .populated_meta_votes(event_index, peer_index, context)
                 .into_iter()
                 .flatten()
                 .find(|meta_vote| meta_vote.round_and_step() >= (round, Step::GenuineFlip));
@@ -1173,8 +1187,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     // Skips back through events created by the peer until passed `responsiveness_threshold`
     // response events and sees if the peer had its `aux_value` set at this round.  If so, returns
     // `true`.
-    fn stop_waiting(&self, round: usize, event: IndexedEventRef<S::PublicId>) -> bool {
-        let mut event_index = Some(event.event_index());
+    fn stop_waiting(&self, round: usize, context: &MetaVoteContext<S::PublicId>) -> bool {
+        let mut event_index = Some(context.event.event_index());
         let mut response_count = 0;
         let responsiveness_threshold = self.responsiveness_threshold();
 
@@ -1198,14 +1212,27 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 return false;
             }
         };
-        self.meta_election
-            .populated_meta_votes(event_index)
-            .and_then(|meta_votes| meta_votes.get(event.creator()))
-            .map_or(false, |event_votes| {
-                event_votes
+        self.populated_meta_votes(event_index, context.event.creator(), context)
+            .map_or(false, |meta_votes| {
+                meta_votes
                     .iter()
                     .any(|meta_vote| meta_vote.round == round && meta_vote.aux_value.is_some())
             })
+    }
+
+    fn populated_meta_votes<'a>(
+        &'a self,
+        event_index: EventIndex,
+        peer_index: PeerIndex,
+        context: &'a MetaVoteContext<S::PublicId>,
+    ) -> Option<&'a Vec<MetaVote>> {
+        if event_index == context.event.event_index() {
+            context.temp_votes.get(peer_index)
+        } else {
+            self.meta_election
+                .populated_meta_votes(event_index)
+                .and_then(|meta_votes| meta_votes.get(peer_index))
+        }
     }
 
     fn non_fork_event_by_creator(
@@ -2100,6 +2127,11 @@ enum PendingEvent<T: NetworkEvent, P: PublicId> {
         offender: PeerIndex,
         malice: Malice<T, P>,
     },
+}
+
+struct MetaVoteContext<'a, P: PublicId> {
+    event: IndexedEventRef<'a, P>,
+    temp_votes: PeerIndexMap<Vec<MetaVote>>,
 }
 
 #[cfg(any(test, feature = "testing"))]
