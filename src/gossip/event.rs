@@ -361,6 +361,14 @@ impl<P: PublicId> Event<P> {
         self.cache.ancestor_info.get(creator).map(|info| info.last)
     }
 
+    pub fn non_fork_last_ancestor_by(&self, creator: PeerIndex) -> Option<usize> {
+        if self.sees_fork_by(creator) {
+            None
+        } else {
+            self.last_ancestor_by(creator)
+        }
+    }
+
     pub(super) fn ancestor_info(&self) -> &PeerIndexMap<AncestorInfo> {
         &self.cache.ancestor_info
     }

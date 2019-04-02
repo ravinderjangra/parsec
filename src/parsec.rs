@@ -1121,9 +1121,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         // Try to get the "most-leader"'s coin value.
         let creator = peer_id_hashes[0].0;
-        if let Some(creator_event_index) = context.event.last_ancestor_by(creator) {
+        if let Some(index_by_creator) = context.event.non_fork_last_ancestor_by(creator) {
             if let Some(coin) =
-                self.coin_value(creator, creator_event_index, peer_index, round, context)
+                self.coin_value(creator, index_by_creator, peer_index, round, context)
             {
                 return Ok(Some(coin));
             }
@@ -1132,9 +1132,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         // If we've already waited long enough, get the coin value of the highest ranking leader.
         if self.stop_waiting(round, context) {
             for (creator, _) in &peer_id_hashes[1..] {
-                if let Some(creator_event_index) = context.event.last_ancestor_by(*creator) {
+                if let Some(index_by_creator) = context.event.non_fork_last_ancestor_by(*creator) {
                     if let Some(coin) =
-                        self.coin_value(*creator, creator_event_index, peer_index, round, context)
+                        self.coin_value(*creator, index_by_creator, peer_index, round, context)
                     {
                         return Ok(Some(coin));
                     }
@@ -1156,7 +1156,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         context: &MetaVoteContext<S::PublicId>,
     ) -> Option<bool> {
         for index_by_creator in 0..=last_index_by_creator {
-            let event_index = self.non_fork_event_by_creator(creator, index_by_creator)?;
+            let event_index = self
+                .peer_list
+                .events_by_index(creator, index_by_creator)
+                .next()?;
             if event_index.topological_index() < self.meta_election.continue_consensus_start_index()
             {
                 continue;
@@ -1235,22 +1238,6 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
     }
 
-    fn non_fork_event_by_creator(
-        &self,
-        creator: PeerIndex,
-        index_by_creator: usize,
-    ) -> Option<EventIndex> {
-        let mut events = self.peer_list.events_by_index(creator, index_by_creator);
-        let event = events.next()?;
-
-        if events.next().is_none() {
-            Some(event)
-        } else {
-            // Fork
-            None
-        }
-    }
-
     // Returns all the meta votes from the event's voting ancestors except the event's creator.
     fn other_voting_ancestors_meta_votes(
         &self,
@@ -1262,10 +1249,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .filter(|voter_index| *voter_index != event.creator())
             .filter_map(|creator| {
                 event
-                    .last_ancestor_by(creator)
+                    .non_fork_last_ancestor_by(creator)
                     .and_then(|index_by_creator| {
-                        let event_index =
-                            self.non_fork_event_by_creator(creator, index_by_creator)?;
+                        let event_index = self
+                            .peer_list
+                            .events_by_index(creator, index_by_creator)
+                            .next()?;
                         self.meta_election.populated_meta_votes(event_index)
                     })
             })
