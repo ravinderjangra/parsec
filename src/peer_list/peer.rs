@@ -26,6 +26,9 @@ pub(crate) struct Peer<P: PublicId> {
     pub(super) state: PeerState,
     pub(super) events: Events,
     pub(super) last_gossiped_event: Option<EventIndex>,
+    // If this peer has been removed, contains the event at which the removal consensus has
+    // been reached.
+    pub(super) removal_event: Option<EventIndex>,
     // As a performance optimisation we keep track of which events we've cleared for Accomplice
     // accusations.
     #[cfg(feature = "malice-detection")]
@@ -42,6 +45,7 @@ impl<P: PublicId> Peer<P> {
             state,
             events: Events::new(),
             last_gossiped_event: None,
+            removal_event: None,
             #[cfg(feature = "malice-detection")]
             accomplice_event_checkpoint: None,
         }
@@ -72,6 +76,10 @@ impl<P: PublicId> Peer<P> {
 
     pub fn events_by_index<'a>(&'a self, index: usize) -> impl Iterator<Item = EventIndex> + 'a {
         self.events.by_index(index)
+    }
+
+    pub fn removal_event(&self) -> Option<EventIndex> {
+        self.removal_event
     }
 
     pub(super) fn add_event(&mut self, index_by_creator: usize, event_index: EventIndex) {

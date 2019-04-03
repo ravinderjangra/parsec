@@ -18,7 +18,7 @@ pub(crate) use self::snapshot::PeerListSnapshot;
 use self::peer::Peer;
 use crate::{
     error::Error,
-    gossip::{Event, EventIndex, IndexedEventRef},
+    gossip::{EventIndex, IndexedEventRef},
     hash::Hash,
     id::SecretId,
 };
@@ -187,9 +187,12 @@ impl<S: SecretId> PeerList<S> {
         }
     }
 
-    pub fn remove_peer(&mut self, index: PeerIndex) {
-        if let Some(peer) = self.get_known_mut(index) {
+    /// Remove peer at `peer_index` after reaching consensus on the removal at the event
+    /// at `deciding_event_index`.
+    pub fn remove_peer(&mut self, peer_index: PeerIndex, deciding_event_index: EventIndex) {
+        if let Some(peer) = self.get_known_mut(peer_index) {
             peer.state = PeerState::inactive();
+            peer.removal_event = Some(deciding_event_index);
         }
     }
 
@@ -249,18 +252,6 @@ impl<S: SecretId> PeerList<S> {
             {
                 peer.accomplice_event_checkpoint = Some(event_index)
             }
-        }
-    }
-
-    pub fn confirm_can_add_event(&self, event: &Event<S::PublicId>) -> Result<(), Error> {
-        let peer = self.get(event.creator()).ok_or(Error::UnknownPeer)?;
-        if event.creator() == PeerIndex::OUR || peer.state.can_send() {
-            Ok(())
-        } else {
-            Err(Error::InvalidPeerState {
-                required: PeerState::SEND,
-                actual: peer.state,
-            })
         }
     }
 
