@@ -62,8 +62,10 @@ impl<P: PublicId> Peer<P> {
         }
     }
 
-    pub(super) fn set_state(&mut self, state: PeerState) {
-        self.presence = Presence::Present(state);
+    pub(super) fn change_state(&mut self, new_state: PeerState) {
+        if let Presence::Present(ref mut old_state) = self.presence {
+            *old_state |= new_state;
+        }
     }
 
     pub(super) fn set_removed(&mut self, deciding_event_index: EventIndex) {

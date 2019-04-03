@@ -197,7 +197,7 @@ impl<S: SecretId> PeerList<S> {
 
     pub fn change_peer_state(&mut self, index: PeerIndex, state: PeerState) {
         if let Some(peer) = self.get_known_mut(index) {
-            peer.set_state(peer.state() | state);
+            peer.change_state(state);
         }
     }
 

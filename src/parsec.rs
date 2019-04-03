@@ -485,9 +485,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .peer_list
             .get(event.creator())
             .ok_or(Error::UnknownPeer)?;
+
         if event.creator() == PeerIndex::OUR || peer.state().can_send() {
             return Ok(());
-        } else if let Some(removal_event) = peer
+        }
+
+        if let Some(removal_event) = peer
             .removal_event()
             .and_then(|event_index| self.graph.get(event_index))
         {
