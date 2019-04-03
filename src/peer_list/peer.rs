@@ -107,6 +107,7 @@ impl<P: PublicId> Peer<P> {
 #[derive(Debug)]
 enum Presence {
     Present(PeerState),
+    // Contains the index of the event at which we reached the consensus on the removal.
     Removed(EventIndex),
 }
 

@@ -495,8 +495,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .and_then(|event_index| self.graph.get(event_index))
         {
             // If the creator of the event has been removed but they are not yet aware of the
-            // removal (they haven't reached the consensus on removing themselves), accept
-            // the event.
+            // removal (that is, we don't know for sure that reached consensus on removing
+            // themselves), accept the event.
             if !event.is_descendant_of(removal_event) {
                 return Ok(());
             }
