@@ -38,7 +38,7 @@ use itertools::Itertools;
 use std::ops::{Deref, DerefMut};
 use std::{
     collections::{BTreeMap, BTreeSet, VecDeque},
-    mem, usize,
+    iter, mem, usize,
 };
 
 /// The main object which manages creating and receiving gossip about network events from peers, and
@@ -670,12 +670,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             return Ok(PostProcessAction::Continue);
         }
 
-        if !get_known_event(self.our_pub_id(), &self.graph, event_index)?.is_sync_event() {
-            // Only add meta events for sync events
-            return Ok(PostProcessAction::Continue);
+        // Only add meta events for sync events
+        if get_known_event(self.our_pub_id(), &self.graph, event_index)?.is_sync_event() {
+            self.create_meta_event(event_index)?;
         }
-
-        self.create_meta_event(event_index)?;
 
         let payload_keys = self.compute_consensus(event_index);
         if payload_keys.is_empty() {
@@ -1293,6 +1291,19 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     fn compute_consensus(&self, event_index: EventIndex) -> Vec<ObservationKey> {
+        let event = if let Ok(event) = self.get_known_event(event_index) {
+            event
+        } else {
+            return vec![];
+        };
+
+        // If the creator of the current event is the only known voter and the event carries
+        // a payload, decide it immediately.
+        if iter::once(event.creator()).eq(self.voters()) {
+            return event.payload_key().into_iter().cloned().collect();
+        }
+
+        // Otherwise proceed normally with evaluating the meta-election.
         let last_meta_votes = match self.meta_election.populated_meta_votes(event_index) {
             Some(meta_votes) => meta_votes,
             None => return Vec::new(),

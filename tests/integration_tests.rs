@@ -424,6 +424,30 @@ fn consensus_with_fork() {
     unwrap!(env.network.execute_schedule(&mut env.rng, schedule));
 }
 
+#[test]
+fn grow_network_from_two_nodes() {
+    let mut env = Environment::new(SEED);
+    let options = ScheduleOptions {
+        genesis_size: 2,
+        peers_to_add: 2,
+        ..Default::default()
+    };
+    let schedule = Schedule::new(&mut env, &options);
+    unwrap!(env.network.execute_schedule(&mut env.rng, schedule));
+}
+
+#[test]
+fn grow_network_from_one_node() {
+    let mut env = Environment::new(SEED);
+    let options = ScheduleOptions {
+        genesis_size: 1,
+        peers_to_add: 3,
+        ..Default::default()
+    };
+    let schedule = Schedule::new(&mut env, &options);
+    unwrap!(env.network.execute_schedule(&mut env.rng, schedule));
+}
+
 proptest! {
     #![proptest_config(ProptestConfig {
         failure_persistence: Some(Box::new(FileFailurePersistence::WithSource("regressions"))),
