@@ -283,7 +283,7 @@ impl<S: SecretId> PeerList<S> {
             .flat_map(|peer| peer.events())
     }
 
-    /// Hashes of our events in insertion order.
+    /// Indices of our events in insertion order.
     pub fn our_events<'a>(&'a self) -> impl DoubleEndedIterator<Item = EventIndex> + 'a {
         self.peer_events(PeerIndex::OUR)
     }

@@ -869,7 +869,7 @@ fn derive_test_name_from_current_thread_name() -> String {
 /// For use by functional/unit tests which provide a dot file for the test setup.  This reads and
 /// parses the dot file as per `parse_dot_file()` above, with test name being part of the path.
 #[cfg(test)]
-pub(crate) fn parse_dot_file_with_test_name(filename: &str, test_name: &str) -> ParsedContents {
+fn parse_dot_file_with_test_name(filename: &str, test_name: &str) -> ParsedContents {
     use std::path::PathBuf;
 
     let mut dot_path = PathBuf::from("input_graphs");

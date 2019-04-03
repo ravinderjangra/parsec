@@ -23,8 +23,6 @@ pub mod proptest;
 mod record;
 mod schedule;
 
-#[cfg(all(test, feature = "mock", feature = "malice-detection"))]
-pub(crate) use self::dot_parser::parse_dot_file_with_test_name;
 #[cfg(test)]
 pub(crate) use self::dot_parser::parse_test_dot_file;
 #[cfg(all(test, feature = "mock"))]

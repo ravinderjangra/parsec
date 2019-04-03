@@ -8,6 +8,8 @@
 
 #[cfg(all(test, feature = "mock"))]
 use crate::dev_utils::ParsedContents;
+#[cfg(all(test, feature = "malice-detection", feature = "mock"))]
+use crate::gossip::EventHash;
 #[cfg(all(test, any(feature = "testing", feature = "mock")))]
 use crate::gossip::GraphSnapshot;
 #[cfg(feature = "malice-detection")]
@@ -100,8 +102,8 @@ pub struct Parsec<T: NetworkEvent, S: SecretId> {
     pending_accusations: Accusations<T, S::PublicId>,
     // Events to be inserted into the gossip graph when this node becomes voter.
     pending_events: Vec<PendingEvent<T, S::PublicId>>,
-
-    // True to disable processing consensus on this instance to speed up processing for irrelevant parsec instances.
+    // True to disable processing consensus on this instance to speed up processing for irrelevant
+    // parsec instances.
     #[cfg(any(test, feature = "testing"))]
     ignore_process_events: bool,
 }
@@ -1728,20 +1730,18 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
     // Detect if the event carries an `Observation::Genesis` that doesn't match what we'd expect.
     fn detect_incorrect_genesis(&mut self, event: &Event<S::PublicId>) -> Result<()> {
-        let (offender, malice) =
-            if let Some(Observation::Genesis(ref group)) = self.event_payload(event) {
-                if group.iter().collect::<BTreeSet<_>>() != self.genesis_group() {
-                    (event.creator(), Malice::IncorrectGenesis(*event.hash()))
-                } else {
-                    return Ok(());
-                }
-            } else {
+        if let Some(Observation::Genesis(ref group)) = self.event_payload(event) {
+            if self.genesis_group() == group.iter().collect() {
                 return Ok(());
-            };
+            }
+        } else {
+            return Ok(());
+        }
 
         // Return an error to prevent accepting potentially large number of invalid / spam events
         // into our graph.
-        self.accuse(offender, malice);
+        let packed_event = Box::new(event.pack(self.event_context())?);
+        self.accuse(event.creator(), Malice::IncorrectGenesis(packed_event));
         Err(Error::InvalidEvent)
     }
 
@@ -2304,31 +2304,64 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         &self.0.peer_list
     }
 
+    pub fn our_last_event_index(&self) -> EventIndex {
+        unwrap!(self.0.our_last_event_index())
+    }
+
+    pub fn event_context(&self) -> EventContextRef<T, S> {
+        self.0.event_context()
+    }
+
+    pub fn events_to_gossip_to_peer(
+        &self,
+        peer_index: PeerIndex,
+    ) -> Result<Vec<&Event<S::PublicId>>> {
+        self.0.events_to_gossip_to_peer(peer_index)
+    }
+
+    pub fn get_peer_index(&self, peer_id: &S::PublicId) -> Result<PeerIndex> {
+        self.0.get_peer_index(peer_id)
+    }
+
+    pub fn confirm_allowed_to_gossip_to(&self, peer_index: PeerIndex) -> Result<()> {
+        self.0.confirm_allowed_to_gossip_to(peer_index)
+    }
+
     #[cfg(all(test, feature = "mock"))]
+    pub fn event_payload(
+        &self,
+        event: &Event<S::PublicId>,
+    ) -> Option<&Observation<T, S::PublicId>> {
+        self.0.event_payload(event)
+    }
+}
+
+#[cfg(all(test, feature = "mock"))]
+impl TestParsec<Transaction, PeerId> {
+    pub fn from_parsed_contents(parsed_contents: ParsedContents) -> Self {
+        TestParsec(Parsec::from_parsed_contents(parsed_contents))
+    }
+
     pub fn meta_election(&self) -> &MetaElection {
         &self.meta_election
     }
 
-    #[cfg(all(test, feature = "mock"))]
-    pub fn consensused_blocks(&self) -> impl Iterator<Item = &Block<T, S::PublicId>> {
+    pub fn consensused_blocks(&self) -> impl Iterator<Item = &Block<Transaction, PeerId>> {
         self.0.consensused_blocks.iter().flatten()
     }
 
-    #[cfg(all(test, feature = "mock"))]
-    pub fn change_peer_state(&mut self, peer_id: &S::PublicId, state: PeerState) {
+    pub fn change_peer_state(&mut self, peer_id: &PeerId, state: PeerState) {
         let peer_index = unwrap!(self.0.peer_list.get_index(peer_id));
         self.0.peer_list.change_peer_state(peer_index, state)
     }
 
-    #[cfg(all(test, feature = "mock"))]
-    pub fn pack_event(&self, event: &Event<S::PublicId>) -> PackedEvent<T, S::PublicId> {
+    pub fn pack_event(&self, event: &Event<PeerId>) -> PackedEvent<Transaction, PeerId> {
         unwrap!(event.pack(self.0.event_context()))
     }
 
-    #[cfg(all(test, feature = "mock"))]
     pub fn unpack_and_add_event(
         &mut self,
-        packed_event: PackedEvent<T, S::PublicId>,
+        packed_event: PackedEvent<Transaction, PeerId>,
     ) -> Result<EventIndex> {
         match self.0.unpack(packed_event)? {
             Some(event) => self.0.add_event(event),
@@ -2340,17 +2373,26 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
     // instance is not detectable and might lead to incorrect test results. To add event from other
     // instance, first `pack_event` it using that other instance, then add it using
     // `unpack_and_add_event`.
-    #[cfg(all(test, feature = "mock"))]
-    pub fn add_event(&mut self, event: Event<S::PublicId>) -> Result<EventIndex> {
+    pub fn add_event(&mut self, event: Event<PeerId>) -> Result<EventIndex> {
         self.0.add_event(event)
     }
 
-    pub fn our_last_event_index(&self) -> EventIndex {
-        unwrap!(self.0.our_last_event_index())
+    pub fn event_creator_id(&self, event: &Event<PeerId>) -> &PeerId {
+        unwrap!(self.0.event_creator_id(event))
     }
 
-    #[cfg(all(test, feature = "malice-detection", feature = "mock"))]
-    pub fn remove_last_event(&mut self) -> Option<(EventIndex, Event<S::PublicId>)> {
+    pub fn new_event_from_observation(
+        &mut self,
+        self_parent: EventIndex,
+        observation: Observation<Transaction, PeerId>,
+    ) -> Result<Event<PeerId>> {
+        self.0.new_event_from_observation(self_parent, observation)
+    }
+}
+
+#[cfg(all(test, feature = "malice-detection", feature = "mock"))]
+impl TestParsec<Transaction, PeerId> {
+    pub fn remove_last_event(&mut self) -> Option<(EventIndex, Event<PeerId>)> {
         let (event_index, event) = self.graph.remove_last()?;
         assert_eq!(
             event_index,
@@ -2376,67 +2418,59 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         Some((event_index, event))
     }
 
-    #[cfg(all(test, feature = "malice-detection", feature = "mock"))]
-    pub fn pending_accusations(&self) -> &Accusations<T, S::PublicId> {
+    // This is equivalent to handling a request normally, but falsely accusing the sender's last
+    // event as being a fork.  Returns the hash of the invalid accusation.
+    pub fn handle_request_make_false_accusation(
+        &mut self,
+        src: &PeerId,
+        req: Request<Transaction, PeerId>,
+    ) -> EventHash {
+        let src_index = unwrap!(self.0.get_peer_index(src));
+        let last_hash = unwrap!(req.packed_events.last()).compute_hash();
+        let other_parent = unwrap!(self.0.unpack_and_add_events(src_index, req.packed_events));
+        unwrap!(self.0.create_accusation_events(other_parent));
+
+        let invalid_observation = Observation::<Transaction, _>::Accusation {
+            offender: src.clone(),
+            malice: Malice::Fork(last_hash),
+        };
+        unwrap!(self.0.vote_for(invalid_observation.clone()));
+        let invalid_accusation_hash = {
+            let invalid_accusation = unwrap!(self.0.graph.get(self.our_last_event_index()));
+            assert_eq!(
+                self.0.event_payload(&invalid_accusation),
+                Some(&invalid_observation)
+            );
+            *invalid_accusation.hash()
+        };
+
+        unwrap!(self.0.create_sync_event(true, other_parent));
+        invalid_accusation_hash
+    }
+
+    // This is equivalent to handling a request normally, but avoiding creating any accusations.
+    // It can be used by an accomplice peer which wants to avoid accusing a malicious peer.
+    pub fn handle_request_as_accomplice(
+        &mut self,
+        src: &PeerId,
+        req: Request<Transaction, PeerId>,
+    ) {
+        let src_index = unwrap!(self.0.get_peer_index(src));
+        let other_parent = unwrap!(self.0.unpack_and_add_events(src_index, req.packed_events));
+        self.0.pending_accusations.clear();
+        unwrap!(self.0.create_sync_event(true, other_parent));
+    }
+
+    pub fn pending_accusations(&self) -> &Accusations<Transaction, PeerId> {
         &self.0.pending_accusations
     }
 
-    #[cfg(all(test, feature = "malice-detection", feature = "mock"))]
-    pub fn add_peer(&mut self, peer_id: S::PublicId, state: PeerState) {
+    pub fn add_peer(&mut self, peer_id: PeerId, state: PeerState) {
         let _ = self.0.peer_list.add_peer(peer_id, state);
     }
 
-    #[cfg(all(test, feature = "malice-detection", feature = "mock"))]
     pub fn restart_consensus(&mut self) -> Result<()> {
         self.0.process_events(0)
-    }
-
-    #[cfg(all(test, feature = "mock"))]
-    pub fn event_payload(
-        &self,
-        event: &Event<S::PublicId>,
-    ) -> Option<&Observation<T, S::PublicId>> {
-        self.0.event_payload(event)
-    }
-
-    #[cfg(all(test, feature = "mock"))]
-    pub fn event_creator_id(&self, event: &Event<S::PublicId>) -> &S::PublicId {
-        unwrap!(self.0.event_creator_id(event))
-    }
-
-    #[cfg(all(test, feature = "mock"))]
-    pub fn new_event_from_observation(
-        &mut self,
-        self_parent: EventIndex,
-        observation: Observation<T, S::PublicId>,
-    ) -> Result<Event<S::PublicId>> {
-        self.0.new_event_from_observation(self_parent, observation)
-    }
-
-    pub fn event_context(&self) -> EventContextRef<T, S> {
-        self.0.event_context()
-    }
-
-    pub fn events_to_gossip_to_peer(
-        &self,
-        peer_index: PeerIndex,
-    ) -> Result<Vec<&Event<S::PublicId>>> {
-        self.0.events_to_gossip_to_peer(peer_index)
-    }
-
-    pub fn get_peer_index(&self, peer_id: &S::PublicId) -> Result<PeerIndex> {
-        self.0.get_peer_index(peer_id)
-    }
-
-    pub fn confirm_allowed_to_gossip_to(&self, peer_index: PeerIndex) -> Result<()> {
-        self.0.confirm_allowed_to_gossip_to(peer_index)
-    }
-}
-
-#[cfg(all(test, feature = "mock"))]
-impl TestParsec<Transaction, PeerId> {
-    pub(crate) fn from_parsed_contents(parsed_contents: ParsedContents) -> Self {
-        TestParsec(Parsec::from_parsed_contents(parsed_contents))
     }
 }
 

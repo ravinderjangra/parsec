@@ -90,7 +90,7 @@ pub enum Malice<T: NetworkEvent, P: PublicId> {
     /// Event should be carrying a vote for `Observation::Genesis`, but doesn't
     MissingGenesis(EventHash),
     /// Event carries a vote for `Observation::Genesis` which doesn't correspond to what we know.
-    IncorrectGenesis(EventHash),
+    IncorrectGenesis(Box<PackedEvent<T, P>>),
     /// More than one events having this event as its self_parent.
     Fork(EventHash),
     /// A node incorrectly accused other node of malice. Contains hash of the invalid Accusation
@@ -111,7 +111,6 @@ pub enum Malice<T: NetworkEvent, P: PublicId> {
     Unprovable(UnprovableMalice),
     /// A node is not reporting malice when it should.
     Accomplice(EventHash, Box<Malice<T, P>>),
-    // TODO: add other malice variants
 }
 
 #[cfg(any(test, feature = "testing"))]
@@ -135,11 +134,11 @@ impl<T: NetworkEvent, P: PublicId> Malice<T, P> {
         match self {
             Malice::UnexpectedGenesis(hash)
             | Malice::MissingGenesis(hash)
-            | Malice::IncorrectGenesis(hash)
             | Malice::Fork(hash)
             | Malice::InvalidAccusation(hash)
             | Malice::Accomplice(hash, _) => Some(hash),
             Malice::DuplicateVote(_, _)
+            | Malice::IncorrectGenesis(_)
             | Malice::OtherParentBySameCreator(_)
             | Malice::SelfParentByDifferentCreator(_)
             | Malice::InvalidRequest(_)
@@ -152,12 +151,12 @@ impl<T: NetworkEvent, P: PublicId> Malice<T, P> {
         match self {
             Malice::UnexpectedGenesis(hash)
             | Malice::MissingGenesis(hash)
-            | Malice::IncorrectGenesis(hash)
             | Malice::Fork(hash)
             | Malice::InvalidAccusation(hash)
             | Malice::Accomplice(hash, _) => vec![hash],
             Malice::DuplicateVote(first, second) => vec![first, second],
-            Malice::OtherParentBySameCreator(_)
+            Malice::IncorrectGenesis(_)
+            | Malice::OtherParentBySameCreator(_)
             | Malice::SelfParentByDifferentCreator(_)
             | Malice::InvalidRequest(_)
             | Malice::InvalidResponse(_)

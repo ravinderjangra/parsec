@@ -115,4 +115,14 @@ impl PackedEvent<Transaction, PeerId> {
     pub fn creator(&self) -> &PeerId {
         &self.content.creator
     }
+
+    /// Getter for the event's self-parent.
+    pub fn self_parent(&self) -> Option<&EventHash> {
+        self.content.self_parent()
+    }
+
+    /// Getter for the event's self-parent.
+    pub fn other_parent(&self) -> Option<&EventHash> {
+        self.content.other_parent()
+    }
 }
