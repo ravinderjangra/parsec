@@ -407,10 +407,6 @@ fn extensive_dynamic_membership() {
     unwrap!(env.network.execute_schedule(&mut env.rng, schedule));
 }
 
-// This test encounters performance problems when malice-detection is enabled, hence we only
-// execute it when the feature is disabled.
-// TODO: remove this after MAID-3270 is completed.
-#[cfg(not(feature = "malice-detection"))]
 #[test]
 fn consensus_with_fork() {
     let mut env = Environment::new(SEED);

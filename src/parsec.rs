@@ -480,6 +480,34 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
     }
 
+    fn confirm_can_add_event(&self, event: &Event<S::PublicId>) -> Result<()> {
+        let peer = self
+            .peer_list
+            .get(event.creator())
+            .ok_or(Error::UnknownPeer)?;
+
+        if event.creator() == PeerIndex::OUR || peer.state().can_send() {
+            return Ok(());
+        }
+
+        if let Some(removal_event) = peer
+            .removal_event()
+            .and_then(|event_index| self.graph.get(event_index))
+        {
+            // If the creator of the event has been removed but they are not yet aware of the
+            // removal (that is, we don't know for sure that reached consensus on removing
+            // themselves), accept the event.
+            if !event.is_descendant_of(removal_event) {
+                return Ok(());
+            }
+        }
+
+        Err(Error::InvalidPeerState {
+            required: PeerState::SEND,
+            actual: peer.state(),
+        })
+    }
+
     fn get_peer_index(&self, peer_id: &S::PublicId) -> Result<PeerIndex> {
         self.peer_list.get_index(peer_id).ok_or(Error::UnknownPeer)
     }
@@ -589,7 +617,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             self.detect_malice(&event)?;
         }
 
-        self.peer_list.confirm_can_add_event(&event)?;
+        self.confirm_can_add_event(&event)?;
 
         if our && event.is_initial() {
             log_or_panic!(
@@ -691,7 +719,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         let peer_list_changes = payload_keys
             .iter()
-            .filter_map(|payload_key| self.handle_consensus(payload_key))
+            .filter_map(|payload_key| self.handle_consensus(event_index, payload_key))
             .collect();
 
         self.meta_election
@@ -745,14 +773,20 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     /// Handles consensus reached by us.
-    fn handle_consensus(&mut self, payload_key: &ObservationKey) -> Option<PeerListChange> {
+    fn handle_consensus(
+        &mut self,
+        event_index: EventIndex,
+        payload_key: &ObservationKey,
+    ) -> Option<PeerListChange> {
         match self
             .observations
             .get(payload_key)
             .map(|info| info.observation.clone())
         {
             Some(Observation::Add { ref peer_id, .. }) => self.handle_add_peer(peer_id).into(),
-            Some(Observation::Remove { ref peer_id, .. }) => self.handle_remove_peer(peer_id),
+            Some(Observation::Remove { ref peer_id, .. }) => {
+                self.handle_remove_peer(event_index, peer_id)
+            }
             Some(Observation::Accusation {
                 ref offender,
                 ref malice,
@@ -764,7 +798,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     malice
                 );
 
-                self.handle_remove_peer(offender)
+                self.handle_remove_peer(event_index, offender)
             }
             Some(Observation::Genesis(_)) | Some(Observation::OpaquePayload(_)) => None,
             None => {
@@ -819,9 +853,13 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         PeerListChange::Add(peer_index)
     }
 
-    fn handle_remove_peer(&mut self, peer_id: &S::PublicId) -> Option<PeerListChange> {
+    fn handle_remove_peer(
+        &mut self,
+        event_index: EventIndex,
+        peer_id: &S::PublicId,
+    ) -> Option<PeerListChange> {
         self.peer_list.get_index(peer_id).map(|peer_index| {
-            self.peer_list.remove_peer(peer_index);
+            self.peer_list.remove_peer(peer_index, event_index);
             PeerListChange::Remove(peer_index)
         })
     }

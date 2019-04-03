@@ -18,7 +18,7 @@ pub(crate) use self::snapshot::PeerListSnapshot;
 use self::peer::Peer;
 use crate::{
     error::Error,
-    gossip::{Event, EventIndex, IndexedEventRef},
+    gossip::{EventIndex, IndexedEventRef},
     hash::Hash,
     id::SecretId,
 };
@@ -115,18 +115,18 @@ impl<S: SecretId> PeerList<S> {
 
     /// Returns an iterator of peers that can vote.
     pub fn voters(&self) -> impl Iterator<Item = (PeerIndex, &Peer<S::PublicId>)> {
-        self.iter().filter(|(_, peer)| peer.state.can_vote())
+        self.iter().filter(|(_, peer)| peer.state().can_vote())
     }
 
     /// Returns an iterator of peers that we can send gossip to.
     pub fn gossip_recipients<'a>(
         &'a self,
     ) -> impl Iterator<Item = (PeerIndex, &Peer<S::PublicId>)> + 'a {
-        let iter = if self.our_peer.state.can_send() {
+        let iter = if self.our_peer.state().can_send() {
             let iter = self
                 .iter()
                 .skip(1)
-                .filter(|(_, peer)| peer.state.can_vote() && peer.state.can_recv());
+                .filter(|(_, peer)| peer.state().can_vote() && peer.state().can_recv());
             Some(iter)
         } else {
             None
@@ -147,12 +147,12 @@ impl<S: SecretId> PeerList<S> {
 
     pub fn peer_state(&self, index: PeerIndex) -> PeerState {
         self.get(index)
-            .map(|peer| peer.state)
+            .map(|peer| peer.state())
             .unwrap_or_else(PeerState::inactive)
     }
 
     pub fn our_state(&self) -> PeerState {
-        self.our_peer.state
+        self.our_peer.state()
     }
 
     /// Adds a peer in the given state into the map.
@@ -187,15 +187,17 @@ impl<S: SecretId> PeerList<S> {
         }
     }
 
-    pub fn remove_peer(&mut self, index: PeerIndex) {
-        if let Some(peer) = self.get_known_mut(index) {
-            peer.state = PeerState::inactive();
+    /// Remove peer at `peer_index` after reaching consensus on the removal at the event
+    /// at `deciding_event_index`.
+    pub fn remove_peer(&mut self, peer_index: PeerIndex, deciding_event_index: EventIndex) {
+        if let Some(peer) = self.get_known_mut(peer_index) {
+            peer.set_removed(deciding_event_index)
         }
     }
 
     pub fn change_peer_state(&mut self, index: PeerIndex, state: PeerState) {
         if let Some(peer) = self.get_known_mut(index) {
-            peer.state |= state;
+            peer.change_state(state);
         }
     }
 
@@ -249,18 +251,6 @@ impl<S: SecretId> PeerList<S> {
             {
                 peer.accomplice_event_checkpoint = Some(event_index)
             }
-        }
-    }
-
-    pub fn confirm_can_add_event(&self, event: &Event<S::PublicId>) -> Result<(), Error> {
-        let peer = self.get(event.creator()).ok_or(Error::UnknownPeer)?;
-        if event.creator() == PeerIndex::OUR || peer.state.can_send() {
-            Ok(())
-        } else {
-            Err(Error::InvalidPeerState {
-                required: PeerState::SEND,
-                actual: peer.state,
-            })
         }
     }
 
@@ -413,7 +403,7 @@ pub(crate) mod snapshot {
                             })
                             .collect();
 
-                        (peer.id().clone(), (peer.state, events))
+                        (peer.id().clone(), (peer.state(), events))
                     })
                     .collect(),
             )

@@ -23,7 +23,7 @@ use std::{
 pub(crate) struct Peer<P: PublicId> {
     id: P,
     id_hash: Hash,
-    pub(super) state: PeerState,
+    presence: Presence,
     pub(super) events: Events,
     pub(super) last_gossiped_event: Option<EventIndex>,
     // As a performance optimisation we keep track of which events we've cleared for Accomplice
@@ -39,7 +39,7 @@ impl<P: PublicId> Peer<P> {
         Self {
             id,
             id_hash,
-            state,
+            presence: Presence::Present(state),
             events: Events::new(),
             last_gossiped_event: None,
             #[cfg(feature = "malice-detection")]
@@ -56,7 +56,20 @@ impl<P: PublicId> Peer<P> {
     }
 
     pub fn state(&self) -> PeerState {
-        self.state
+        match self.presence {
+            Presence::Present(state) => state,
+            Presence::Removed(_) => PeerState::inactive(),
+        }
+    }
+
+    pub(super) fn change_state(&mut self, new_state: PeerState) {
+        if let Presence::Present(ref mut old_state) = self.presence {
+            *old_state |= new_state;
+        }
+    }
+
+    pub(super) fn set_removed(&mut self, deciding_event_index: EventIndex) {
+        self.presence = Presence::Removed(deciding_event_index)
     }
 
     pub fn events<'a>(&'a self) -> impl DoubleEndedIterator<Item = EventIndex> + 'a {
@@ -74,6 +87,13 @@ impl<P: PublicId> Peer<P> {
         self.events.by_index(index)
     }
 
+    pub fn removal_event(&self) -> Option<EventIndex> {
+        match self.presence {
+            Presence::Present(_) => None,
+            Presence::Removed(event_index) => Some(event_index),
+        }
+    }
+
     pub(super) fn add_event(&mut self, index_by_creator: usize, event_index: EventIndex) {
         self.events.add(index_by_creator, event_index);
     }
@@ -82,6 +102,13 @@ impl<P: PublicId> Peer<P> {
     pub(super) fn remove_last_event(&mut self) -> Option<EventIndex> {
         self.events.remove_last()
     }
+}
+
+#[derive(Debug)]
+enum Presence {
+    Present(PeerState),
+    // Contains the index of the event at which we reached the consensus on the removal.
+    Removed(EventIndex),
 }
 
 #[derive(Debug)]
