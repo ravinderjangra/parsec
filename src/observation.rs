@@ -114,6 +114,13 @@ pub enum Malice<T: NetworkEvent, P: PublicId> {
     // TODO: add other malice variants
 }
 
+#[cfg(any(test, feature = "testing"))]
+#[derive(Debug)]
+pub(crate) enum MaliceInput {
+    Fork(String),
+    InvalidAccusation(String),
+}
+
 impl<T: NetworkEvent, P: PublicId> Malice<T, P> {
     #[cfg(any(test, feature = "malice-detection", feature = "testing"))]
     pub(crate) fn is_provable(&self) -> bool {

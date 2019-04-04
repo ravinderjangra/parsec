@@ -18,8 +18,8 @@ use crate::{
     },
     mock::{PeerId, Transaction},
     observation::{
-        ConsensusMode, Observation, ObservationHash, ObservationInfo, ObservationKey,
-        ObservationStore,
+        ConsensusMode, Malice, MaliceInput, Observation, ObservationHash, ObservationInfo,
+        ObservationKey, ObservationStore,
     },
     peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerState},
     round_hash::RoundHash,
@@ -356,8 +356,10 @@ fn parse_cause() -> Parser<u8, CauseInput> {
     let response = seq(b"Response").map(|_| CauseInput::Response);
     let observation =
         (seq(b"Observation(") * parse_observation() - sym(b')')).map(CauseInput::Observation);
+    let malice = (seq(b"Observation(") * parse_accusation() - sym(b')'))
+        .map(|(offender, malice_input)| CauseInput::Malice(offender, malice_input));
 
-    prefix * (initial | requesting | request | response | observation) - newline()
+    prefix * (initial | requesting | request | response | observation | malice) - newline()
 }
 
 fn parse_last_ancestors() -> Parser<u8, BTreeMap<PeerId, usize>> {
@@ -532,6 +534,31 @@ fn parse_unconsensused_events() -> Parser<u8, BTreeSet<String>> {
 
 fn parse_observation() -> Parser<u8, Observation<Transaction, PeerId>> {
     parse_genesis() | parse_add() | parse_remove() | parse_opaque()
+}
+
+fn parse_accusation() -> Parser<u8, (PeerId, MaliceInput)> {
+    seq(b"Accusation") * parse_offender_and_malice()
+}
+
+fn parse_offender_and_malice() -> Parser<u8, (PeerId, MaliceInput)> {
+    let peer_id = parse_peer_id();
+    let malice = parse_malice();
+
+    spaces() * sym(b'{') * spaces() * peer_id - spaces() - sym(b',') - spaces() + malice
+        - spaces()
+        - sym(b'}')
+}
+
+fn parse_malice() -> Parser<u8, MaliceInput> {
+    parse_fork() | parse_invalid()
+}
+
+fn parse_fork() -> Parser<u8, MaliceInput> {
+    (seq(b"Fork(") * parse_event_id() - seq(b")")).map(MaliceInput::Fork)
+}
+
+fn parse_invalid() -> Parser<u8, MaliceInput> {
+    (seq(b"InvalidAccusation(") * parse_event_id() - seq(b")")).map(MaliceInput::InvalidAccusation)
 }
 
 fn parse_genesis() -> Parser<u8, Observation<Transaction, PeerId>> {
@@ -1067,9 +1094,25 @@ fn create_events(
             )
         };
 
+        let next_event_cause = if let CauseInput::Malice(offender, malice_input) =
+            next_event_details.cause
+        {
+            let malice = match malice_input {
+                MaliceInput::Fork(ref id) => Malice::Fork(
+                    *unwrap!(get_event_by_id(&parsed_contents.graph, &event_indices, id)).hash(),
+                ),
+                MaliceInput::InvalidAccusation(ref id) => Malice::InvalidAccusation(
+                    *unwrap!(get_event_by_id(&parsed_contents.graph, &event_indices, id)).hash(),
+                ),
+            };
+            CauseInput::Observation(Observation::Accusation { offender, malice })
+        } else {
+            next_event_details.cause
+        };
+
         let next_event = Event::new_from_dot_input(
             &next_parsed_event.creator,
-            next_event_details.cause,
+            next_event_cause,
             self_parent,
             other_parent,
             index_by_creator,
