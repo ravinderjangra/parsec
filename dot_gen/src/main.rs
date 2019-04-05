@@ -260,7 +260,7 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
         .file("Carol", "carol.dot");
 
     let _ = scenarios
-        .add("functional_tests::handle_malice::handle_fork", |env| {
+        .add("functional_tests::handle_malice::basic_fork", |env| {
             let obs = ObservationSchedule {
                 genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave")),
                 schedule: vec![(0, Opaque(Transaction::new("IJKL")))],
