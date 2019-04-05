@@ -17,6 +17,8 @@ use super::{
     graph::{EventIndex, Graph},
     packed_event::PackedEvent,
 };
+#[cfg(any(test, feature = "testing"))]
+use crate::observation::MaliceInput;
 use crate::{
     error::Error,
     hash::Hash,
@@ -571,6 +573,7 @@ pub(crate) enum CauseInput {
     Request,
     Response,
     Observation(Observation<Transaction, PeerId>),
+    Malice(PeerId, MaliceInput),
 }
 
 // Properties of `Event` that can be computed from its `Content`.

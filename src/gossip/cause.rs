@@ -174,6 +174,9 @@ impl Cause<Vote<Transaction, PeerId>, EventHash, PeerId> {
                 self_parent,
                 vote: Vote::new(creator_id, observation),
             },
+            CauseInput::Malice(_, _) => {
+                panic!("CauseInput Malice shall be replaced already");
+            }
         }
     }
 }

@@ -79,7 +79,7 @@ mod detail {
         id::{PublicId, SecretId},
         meta_voting::{MetaElection, MetaElectionSnapshot, MetaEvent, MetaVote, Observer},
         network_event::NetworkEvent,
-        observation::{ConsensusMode, Observation, ObservationKey, ObservationStore},
+        observation::{ConsensusMode, Malice, Observation, ObservationKey, ObservationStore},
         peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList},
         serialise,
     };
@@ -239,7 +239,12 @@ mod detail {
                     gossip_graph,
                     meta_election,
                     peer_list,
-                    observations: &DotObservation::from_observations(&observations),
+                    observations: &DotObservation::from_observations(
+                        &observations,
+                        gossip_graph,
+                        &peer_list,
+                        &short_peer_ids,
+                    ),
                     peer_ids: &peer_ids,
                     short_peer_ids: &short_peer_ids,
                     indent: 0,
@@ -402,38 +407,7 @@ mod detail {
         }
 
         fn event_to_short_name(&self, event: IndexedEventRef<S::PublicId>) -> String {
-            let peer_short_name: &str = self
-                .short_peer_ids
-                .get(event.creator())
-                .map(|id| id.as_str())
-                .unwrap_or("???");
-
-            if let Some(fork_index) = self.fork_index(event) {
-                format!(
-                    "{}_{},{}",
-                    peer_short_name,
-                    event.index_by_creator(),
-                    fork_index
-                )
-            } else {
-                format!("{}_{}", peer_short_name, event.index_by_creator())
-            }
-        }
-
-        fn fork_index(&self, event: IndexedEventRef<S::PublicId>) -> Option<usize> {
-            if self
-                .peer_list
-                .events_by_index(event.creator(), event.index_by_creator())
-                .take(2)
-                .count()
-                <= 1
-            {
-                return None;
-            }
-
-            self.peer_list
-                .events_by_index(event.creator(), event.index_by_creator())
-                .position(|event_index| event_index == event.event_index())
+            sanitise_event_short_name(event, &self.peer_list, &self.short_peer_ids)
         }
 
         fn writeln(&mut self, args: fmt::Arguments) -> io::Result<()> {
@@ -1018,21 +992,33 @@ mod detail {
     }
 
     impl DotObservation {
-        fn from_observations<T: NetworkEvent, P: PublicId>(
-            observations: &ObservationStore<T, P>,
+        fn from_observations<T: NetworkEvent, S: SecretId>(
+            observations: &ObservationStore<T, S::PublicId>,
+            graph: &Graph<S::PublicId>,
+            peer_list: &PeerList<S>,
+            short_peer_ids: &PeerIndexMap<String>,
         ) -> DotObservationStore {
             observations
                 .iter()
                 .map(|(key, info)| {
-                    let observation = DotObservation::new(&key, &info.observation);
+                    let observation = DotObservation::new(
+                        &key,
+                        &info.observation,
+                        graph,
+                        peer_list,
+                        short_peer_ids,
+                    );
                     (*key, observation)
                 })
                 .collect()
         }
 
-        fn new<T: NetworkEvent, P: PublicId>(
+        fn new<T: NetworkEvent, S: SecretId>(
             key: &ObservationKey,
-            observation: &Observation<T, P>,
+            observation: &Observation<T, S::PublicId>,
+            graph: &Graph<S::PublicId>,
+            peer_list: &PeerList<S>,
+            short_peer_ids: &PeerIndexMap<String>,
         ) -> Self {
             let value = match observation {
                 Observation::Genesis(group) => format!(
@@ -1044,9 +1030,9 @@ mod detail {
                     format!("Remove({:?})", sanitise_peer_id(peer_id))
                 }
                 Observation::Accusation { offender, malice } => format!(
-                    "Accusation {{ {:?}, {:?} }}",
+                    "Accusation {{ {:?}, {} }}",
                     sanitise_peer_id(offender),
-                    malice
+                    write_malice_to_string(malice, graph, peer_list, short_peer_ids),
                 ),
                 Observation::OpaquePayload(payload) => {
                     let max_length = 16;
@@ -1067,6 +1053,73 @@ mod detail {
             };
 
             DotObservation { value }
+        }
+    }
+
+    fn write_malice_to_string<T: NetworkEvent, S: SecretId>(
+        malice: &Malice<T, S::PublicId>,
+        graph: &Graph<S::PublicId>,
+        peer_list: &PeerList<S>,
+        short_peer_ids: &PeerIndexMap<String>,
+    ) -> String {
+        let get_short_name_by_hash = |event_hash| {
+            sanitise_event_short_name(
+                unwrap!(graph.get_by_hash(event_hash)),
+                peer_list,
+                short_peer_ids,
+            )
+        };
+        match malice {
+            Malice::Fork(event_hash) => format!("Fork({})", get_short_name_by_hash(event_hash)),
+            Malice::InvalidAccusation(event_hash) => {
+                format!("InvalidAccusation({})", get_short_name_by_hash(event_hash))
+            }
+            Malice::Accomplice(event_hash, boxed_malice) => format!(
+                "Accomplice({}, {})",
+                get_short_name_by_hash(event_hash),
+                write_malice_to_string(boxed_malice, graph, peer_list, short_peer_ids),
+            ),
+            _ => panic!("unsupported yet"),
+        }
+    }
+
+    fn fork_index<S: SecretId>(
+        event: IndexedEventRef<S::PublicId>,
+        peer_list: &PeerList<S>,
+    ) -> Option<usize> {
+        if peer_list
+            .events_by_index(event.creator(), event.index_by_creator())
+            .take(2)
+            .count()
+            <= 1
+        {
+            return None;
+        }
+
+        peer_list
+            .events_by_index(event.creator(), event.index_by_creator())
+            .position(|event_index| event_index == event.event_index())
+    }
+
+    fn sanitise_event_short_name<S: SecretId>(
+        event: IndexedEventRef<S::PublicId>,
+        peer_list: &PeerList<S>,
+        short_peer_ids: &PeerIndexMap<String>,
+    ) -> String {
+        let peer_short_name: &str = short_peer_ids
+            .get(event.creator())
+            .map(|id| id.as_str())
+            .unwrap_or("???");
+
+        if let Some(fork_index) = fork_index(event, peer_list) {
+            format!(
+                "{}_{},{}",
+                peer_short_name,
+                event.index_by_creator(),
+                fork_index
+            )
+        } else {
+            format!("{}_{}", peer_short_name, event.index_by_creator())
         }
     }
 
