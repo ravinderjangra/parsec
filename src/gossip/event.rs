@@ -276,14 +276,14 @@ impl<P: PublicId> Event<P> {
     // such that they are ancestors of this event but one is neither ancestor nor descendant of the
     // other.
     pub fn sees<E: AsRef<Event<P>>>(&self, other: E) -> bool {
-        !self.sees_fork_by(other.as_ref().creator()) && self.is_descendant_of(other)
+        !self.descends_from_fork(other.as_ref().creator()) && self.is_descendant_of(other)
     }
 
     // Is this event aware of a fork by the given peer?
     // Note this method returns true only if the fork is provable by every node that has reached
     // this event. That means this event must have ancestors from at least two sides of the same
     // fork.
-    pub fn sees_fork_by(&self, creator: PeerIndex) -> bool {
+    pub fn descends_from_fork(&self, creator: PeerIndex) -> bool {
         self.cache
             .ancestor_info
             .get(creator)
@@ -360,7 +360,7 @@ impl<P: PublicId> Event<P> {
     }
 
     pub fn non_fork_last_ancestor_by(&self, creator: PeerIndex) -> Option<usize> {
-        if self.sees_fork_by(creator) {
+        if self.descends_from_fork(creator) {
             None
         } else {
             self.last_ancestor_by(creator)
