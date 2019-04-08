@@ -90,7 +90,7 @@ pub enum Malice<T: NetworkEvent, P: PublicId> {
     /// Event should be carrying a vote for `Observation::Genesis`, but doesn't
     MissingGenesis(EventHash),
     /// Event carries a vote for `Observation::Genesis` which doesn't correspond to what we know.
-    IncorrectGenesis(EventHash),
+    IncorrectGenesis(Box<PackedEvent<T, P>>),
     /// More than one events having this event as its self_parent.
     Fork(EventHash),
     /// A node incorrectly accused other node of malice. Contains hash of the invalid Accusation
@@ -111,7 +111,6 @@ pub enum Malice<T: NetworkEvent, P: PublicId> {
     Unprovable(UnprovableMalice),
     /// A node is not reporting malice when it should.
     Accomplice(EventHash, Box<Malice<T, P>>),
-    // TODO: add other malice variants
 }
 
 #[cfg(any(test, feature = "testing"))]
@@ -121,8 +120,8 @@ pub(crate) enum MaliceInput {
     InvalidAccusation(String),
 }
 
+#[cfg(feature = "malice-detection")]
 impl<T: NetworkEvent, P: PublicId> Malice<T, P> {
-    #[cfg(any(test, feature = "malice-detection", feature = "testing"))]
     pub(crate) fn is_provable(&self) -> bool {
         match *self {
             Malice::Unprovable(_) => false,
@@ -130,22 +129,38 @@ impl<T: NetworkEvent, P: PublicId> Malice<T, P> {
         }
     }
 
-    #[cfg(feature = "malice-detection")]
     // If the malice specifies a single event as its source, return it.
     pub(crate) fn single_hash(&self) -> Option<&EventHash> {
         match self {
             Malice::UnexpectedGenesis(hash)
             | Malice::MissingGenesis(hash)
-            | Malice::IncorrectGenesis(hash)
             | Malice::Fork(hash)
             | Malice::InvalidAccusation(hash)
             | Malice::Accomplice(hash, _) => Some(hash),
             Malice::DuplicateVote(_, _)
+            | Malice::IncorrectGenesis(_)
             | Malice::OtherParentBySameCreator(_)
             | Malice::SelfParentByDifferentCreator(_)
             | Malice::InvalidRequest(_)
             | Malice::InvalidResponse(_)
             | Malice::Unprovable(_) => None,
+        }
+    }
+
+    pub(crate) fn accused_events_in_graph(&self) -> Vec<&EventHash> {
+        match self {
+            Malice::UnexpectedGenesis(hash)
+            | Malice::MissingGenesis(hash)
+            | Malice::Fork(hash)
+            | Malice::InvalidAccusation(hash)
+            | Malice::Accomplice(hash, _) => vec![hash],
+            Malice::DuplicateVote(first, second) => vec![first, second],
+            Malice::IncorrectGenesis(_)
+            | Malice::OtherParentBySameCreator(_)
+            | Malice::SelfParentByDifferentCreator(_)
+            | Malice::InvalidRequest(_)
+            | Malice::InvalidResponse(_)
+            | Malice::Unprovable(_) => vec![],
         }
     }
 }

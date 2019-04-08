@@ -260,34 +260,6 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
         .file("Carol", "carol.dot");
 
     let _ = scenarios
-        .add(
-            "functional_tests::handle_malice::invalid_accusation",
-            |env| {
-                let obs = ObservationSchedule {
-                    genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave")),
-                    schedule: vec![],
-                };
-                Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
-            },
-        )
-        .seed([935566334, 935694090, 88607029, 861330491])
-        .file("Alice", "alice.dot")
-        .file("Carol", "carol.dot");
-
-    let _ = scenarios
-        .add("functional_tests::handle_malice::accomplice", |env| {
-            let obs = ObservationSchedule {
-                genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave")),
-                schedule: vec![(0, Opaque(Transaction::new("EFGH")))],
-            };
-            Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
-        })
-        .seed([3932887254, 691979681, 2029125979, 3359276664])
-        .file("Alice", "alice.dot")
-        .file("Bob", "bob.dot")
-        .file("Carol", "carol.dot");
-
-    let _ = scenarios
         .add("functional_tests::handle_malice::handle_fork", |env| {
             let obs = ObservationSchedule {
                 genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave")),
@@ -299,21 +271,6 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
         .file("Alice", "alice.dot")
         .file("Bob", "bob.dot")
         .file("Dave", "dave.dot");
-
-    let _ = scenarios
-        .add(
-            "functional_tests::handle_malice::self_parent_by_different_creator",
-            |env| {
-                let obs = ObservationSchedule {
-                    genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol")),
-                    schedule: vec![],
-                };
-                Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
-            },
-        )
-        .seed([856368386, 135728199, 764559083, 3829746197])
-        .file("Alice", "alice.dot")
-        .file("Carol", "carol.dot");
 
     let _ = scenarios
         .add("functional_tests::handle_malice::premature_gossip", |env| {

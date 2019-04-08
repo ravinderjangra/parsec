@@ -455,7 +455,7 @@ impl Network {
             .unpolled_accusations()
             .find(|(offender, malice)| match malice {
                 Malice::Fork(..) => !self.peer(offender).has_misbehaved(),
-                _ => malice.is_provable(),
+                _ => true,
             });
 
         if let Some((offender, malice)) = accusation {

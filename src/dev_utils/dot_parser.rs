@@ -869,7 +869,7 @@ fn derive_test_name_from_current_thread_name() -> String {
 /// For use by functional/unit tests which provide a dot file for the test setup.  This reads and
 /// parses the dot file as per `parse_dot_file()` above, with test name being part of the path.
 #[cfg(test)]
-pub(crate) fn parse_dot_file_with_test_name(filename: &str, test_name: &str) -> ParsedContents {
+fn parse_dot_file_with_test_name(filename: &str, test_name: &str) -> ParsedContents {
     use std::path::PathBuf;
 
     let mut dot_path = PathBuf::from("input_graphs");
@@ -915,17 +915,15 @@ fn convert_into_parsed_contents(result: ParsedFile) -> ParsedContents {
     let mut parsed_contents = ParsedContents::new(our_id.clone());
 
     let peer_data = peer_list.0.into_iter().collect();
-    let peer_list_builder = PeerList::build_from_dot_input(our_id, peer_data);
+    let mut peer_list = PeerList::build_from_dot_input(our_id, peer_data);
 
-    let mut event_hashes = create_events(
+    let mut event_indices = create_events(
         &mut graph.graph,
         graph.event_details,
         &mut parsed_contents,
-        peer_list_builder.peer_list(),
+        &mut peer_list,
         consensus_mode,
     );
-
-    let peer_list = peer_list_builder.finish(&parsed_contents.graph);
 
     parsed_contents.observations.extend(
         meta_election
@@ -935,7 +933,7 @@ fn convert_into_parsed_contents(result: ParsedFile) -> ParsedContents {
     );
     let meta_election = convert_to_meta_election(
         meta_election,
-        &mut event_hashes,
+        &mut event_indices,
         &peer_list,
         &parsed_contents.graph,
     );
@@ -1062,7 +1060,7 @@ fn create_events(
     graph: &mut BTreeMap<String, ParsedEvent>,
     mut details: BTreeMap<String, EventDetails>,
     parsed_contents: &mut ParsedContents,
-    peer_list: &PeerList<PeerId>,
+    peer_list: &mut PeerList<PeerId>,
     consensus_mode: ConsensusMode,
 ) -> BTreeMap<String, EventIndex> {
     let mut event_indices = BTreeMap::new();
@@ -1088,8 +1086,8 @@ fn create_events(
                 .unwrap_or(0usize);
 
             (
-                self_parent.map(|e| (e.event_index(), *e.hash())),
-                other_parent.map(|e| (e.event_index(), *e.hash())),
+                self_parent.map(|e| (e.event_index(), *e.hash(), e.ancestor_info().clone())),
+                other_parent.map(|e| (e.event_index(), *e.hash(), e.ancestor_info().clone())),
                 index_by_creator,
             )
         };
@@ -1117,13 +1115,15 @@ fn create_events(
             other_parent,
             index_by_creator,
             consensus_mode,
-            next_event_details.last_ancestors.clone(),
             peer_list,
             &mut parsed_contents.observations,
         );
 
-        let index = parsed_contents.graph.insert(next_event).event_index();
-        let _ = event_indices.insert(ev_id, index);
+        let indexed_event_ref = parsed_contents.graph.insert(next_event);
+        peer_list.add_event(indexed_event_ref);
+        let event_index = indexed_event_ref.event_index();
+        peer_list.record_gossiped_event_by(indexed_event_ref.creator(), event_index);
+        let _ = event_indices.insert(ev_id, event_index);
     }
 
     event_indices
