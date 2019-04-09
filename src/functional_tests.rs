@@ -825,8 +825,8 @@ mod handle_malice {
             let (mut alice, mut bob, mut carol, dave) =
                 unwrap!(initialise_genesis_parsecs(4).into_iter().collect_tuple());
 
-            // Put Carol's events into Alice's graph, and have Alice make a false accusation of forking
-            // by Carol's last event.
+            // Put Carol's events into Alice's graph, and have Alice make a false accusation of
+            // forking by Carol's last event.
             let mut message = unwrap!(carol.create_gossip(alice.our_pub_id()));
             let invalid_accusation_hash =
                 alice.handle_request_make_false_accusation(carol.our_pub_id(), message);
@@ -836,8 +836,8 @@ mod handle_malice {
             message = unwrap!(alice.create_gossip(bob.our_pub_id()));
             bob.handle_request_as_accomplice(alice.our_pub_id(), message);
 
-            // Bob's `Request` event he just created will be the one linked to any detected accomplice
-            // accusation.
+            // Bob's `Request` event he just created will be the one linked to any detected
+            // accomplice accusation.
             let accomplice_event_hash =
                 *unwrap!(bob.graph().get(bob.our_last_event_index())).hash();
 
@@ -949,7 +949,7 @@ mod handle_malice {
     }
 
     #[test]
-    fn handle_fork() {
+    fn basic_fork() {
         // Generated with RNG seed: [1573595827, 2035773878, 1331264098, 154770609].
         //
         // In this scenario, Alice creates two descendants of A_20 and sends one of them to Bob,
@@ -982,17 +982,234 @@ mod handle_malice {
         assert!(dave.graph().contains(&bob_a_21_hash));
 
         // Verify that Dave detected malice and accused Alice of it.
-        let (offender, hash) = unwrap!(our_votes(&dave)
-            .filter_map(|payload| match payload {
-                Observation::Accusation {
-                    ref offender,
-                    malice: Malice::Fork(hash),
-                } => Some((offender, hash)),
-                _ => None,
-            })
-            .next());
-        assert_eq!(offender, alice0.our_pub_id());
-        assert_eq!(hash, unwrap!(bob.graph().find_by_short_name("A_20")).hash());
+        let expected_malice = Malice::Fork(*unwrap!(bob.graph().find_by_short_name("A_20")).hash());
+        assert_peer_has_accused(&dave, vec![(alice0.our_pub_id(), &expected_malice)]);
+    }
+
+    #[test]
+    //             A_3,0     A_3,1
+    //               |         |
+    //    A_2,0    A_2,1 ------+
+    //      |        |
+    //     A_1 ------+
+    //      |
+    //     A_0
+    //
+    // Fork accusations should be made against A_1 and A_2,1.
+    fn second_fork_on_branch_of_first_fork_four_peers() {
+        let (alice, mut bob, mut carol, mut dave) =
+            unwrap!(initialise_genesis_parsecs(4).into_iter().collect_tuple());
+
+        let alice_id = alice.our_pub_id().clone();
+        let bob_id = bob.our_pub_id().clone();
+        let carol_id = carol.our_pub_id().clone();
+        let dave_id = dave.our_pub_id().clone();
+
+        // [A_0, A_1, A_2,0] will be sent to Bob.
+        let a_0 = unwrap!(nth_event(alice.graph(), 0).pack(alice.event_context()));
+        let a_1 = unwrap!(nth_event(alice.graph(), 1).pack(alice.event_context()));
+        let a_2_0 =
+            PackedEvent::new_requesting(alice_id.clone(), bob_id.clone(), a_1.compute_hash());
+        let mut request = Request {
+            packed_events: vec![a_0.clone(), a_1.clone(), a_2_0.clone()],
+        };
+        unwrap!(bob.handle_request(&alice_id, request.clone()));
+
+        // [A_0, A_1, A_2,1, A_3,0] will be sent to Carol.
+        let a_2_1 = PackedEvent::new_observation(
+            alice_id.clone(),
+            a_1.compute_hash(),
+            Observation::OpaquePayload(Transaction::new("For fork's sake")),
+        );
+        let a_3_0 =
+            PackedEvent::new_requesting(alice_id.clone(), carol_id.clone(), a_2_1.compute_hash());
+        request.packed_events = vec![a_0.clone(), a_1.clone(), a_2_1.clone(), a_3_0.clone()];
+        unwrap!(carol.handle_request(&alice_id, request.clone()));
+
+        // [A_0, A_1, A_2,1, A_3,1] will be sent to Dave.
+        let a_3_1 =
+            PackedEvent::new_requesting(alice_id.clone(), dave_id.clone(), a_2_1.compute_hash());
+        request.packed_events = vec![a_0.clone(), a_1.clone(), a_2_1.clone(), a_3_1.clone()];
+        unwrap!(dave.handle_request(&alice_id, request));
+
+        // Send a request from Dave to Carol.  Carol should accuse A_2_1.  Don't send the response.
+        request = unwrap!(dave.create_gossip(&carol_id));
+        unwrap!(carol.handle_request(&dave_id, request));
+        assert!(carol.graph().contains(&a_3_1.compute_hash()));
+        let expected_malice_a_2_1 = Malice::Fork(a_2_1.compute_hash());
+        assert_peer_has_accused(&carol, vec![(&alice_id, &expected_malice_a_2_1)]);
+
+        // Send a request from Dave to Bob.  Bob should accuse A_1.  Don't send the response.
+        request = unwrap!(dave.create_gossip(&bob_id));
+        unwrap!(bob.handle_request(&dave_id, request));
+        assert!(bob.graph().contains(&a_2_1.compute_hash()));
+        let expected_malice_a_1 = Malice::Fork(a_1.compute_hash());
+        assert_peer_has_accused(&bob, vec![(&alice_id, &expected_malice_a_1)]);
+
+        // Send a request from Carol to Bob and send the response.  Bob should accuse A_2_1 and
+        // Carol should accuse A_1.
+        request = unwrap!(carol.create_gossip(&bob_id));
+        let response = unwrap!(bob.handle_request(&carol_id, request));
+        assert!(bob.graph().contains(&a_3_0.compute_hash()));
+        assert!(bob.graph().contains(&a_3_1.compute_hash()));
+        let both_accusations = vec![
+            (&alice_id, &expected_malice_a_1),
+            (&alice_id, &expected_malice_a_2_1),
+        ];
+        assert_peer_has_accused(&bob, both_accusations.clone());
+        unwrap!(carol.handle_response(&bob_id, response));
+        assert!(carol.graph().contains(&a_2_0.compute_hash()));
+        assert_peer_has_accused(&carol, both_accusations.clone());
+
+        // Send a request from Bob to Dave.  Dave should make both accusations.
+        request = unwrap!(bob.create_gossip(&dave_id));
+        unwrap!(dave.handle_request(&bob_id, request));
+        assert!(dave.graph().contains(&a_3_0.compute_hash()));
+        assert!(dave.graph().contains(&a_2_0.compute_hash()));
+        assert_peer_has_accused(&dave, both_accusations.clone());
+    }
+
+    #[test]
+    //    A_3,0    A_3,1     A_3,2
+    //      |        |         |
+    //    A_2,0    A_2,1 ------+
+    //      |        |
+    //     A_1 ------+
+    //      |
+    //     A_0
+    //
+    // Fork accusations should be made against A_1 and A_2,1.
+    //
+    // This is also a regression test which validated the issue raised at
+    // https://github.com/maidsafe/parsec/pull/295#discussion_r273378041
+    fn second_fork_on_branch_of_first_fork_three_peers() {
+        let (alice, mut bob, mut carol) =
+            unwrap!(initialise_genesis_parsecs(3).into_iter().collect_tuple());
+
+        let alice_id = alice.our_pub_id().clone();
+        let bob_id = bob.our_pub_id().clone();
+        let carol_id = carol.our_pub_id().clone();
+
+        // [A_0, A_1, A_2,0, A_3,0] will be sent to Bob first.
+        let a_0 = unwrap!(nth_event(alice.graph(), 0).pack(alice.event_context()));
+        let a_1 = unwrap!(nth_event(alice.graph(), 1).pack(alice.event_context()));
+        let a_2_0 = PackedEvent::new_observation(
+            alice_id.clone(),
+            a_1.compute_hash(),
+            Observation::OpaquePayload(Transaction::new("LHS")),
+        );
+        let a_2_1 = PackedEvent::new_observation(
+            alice_id.clone(),
+            a_1.compute_hash(),
+            Observation::OpaquePayload(Transaction::new("RHS")),
+        );
+        let a_3_0 =
+            PackedEvent::new_requesting(alice_id.clone(), bob_id.clone(), a_2_0.compute_hash());
+        let a_3_1 =
+            PackedEvent::new_requesting(alice_id.clone(), bob_id.clone(), a_2_1.compute_hash());
+        let mut request = Request {
+            packed_events: vec![a_0.clone(), a_1.clone(), a_2_0.clone(), a_3_0.clone()],
+        };
+        unwrap!(bob.handle_request(&alice_id, request.clone()));
+
+        // [A_0, A_1, A_2,1, A_3,1] will be sent to Bob second.  Bob should accuse A_1.
+        request.packed_events = vec![a_0.clone(), a_1.clone(), a_2_1.clone(), a_3_1.clone()];
+        unwrap!(bob.handle_request(&alice_id, request.clone()));
+
+        assert!(bob.graph().contains(&a_2_0.compute_hash()));
+        assert!(bob.graph().contains(&a_2_1.compute_hash()));
+        let expected_malice_a_1 = Malice::Fork(a_1.compute_hash());
+        assert_peer_has_accused(&bob, vec![(&alice_id, &expected_malice_a_1)]);
+
+        // [A_0, A_1, A_2,1, A_3,2] will be sent to Carol.
+        let a_3_2 =
+            PackedEvent::new_requesting(alice_id.clone(), carol_id.clone(), a_2_1.compute_hash());
+        request.packed_events = vec![a_0.clone(), a_1.clone(), a_2_1.clone(), a_3_2.clone()];
+        unwrap!(carol.handle_request(&alice_id, request));
+
+        // Send a request from Bob to Carol.  Carol should accuse A_1 and A_2_1.
+        request = unwrap!(bob.create_gossip(&carol_id));
+        let response = unwrap!(carol.handle_request(&bob_id, request));
+        assert!(carol.graph().contains(&a_2_0.compute_hash()));
+        assert!(carol.graph().contains(&a_2_1.compute_hash()));
+        assert!(carol.graph().contains(&a_3_0.compute_hash()));
+        assert!(carol.graph().contains(&a_3_1.compute_hash()));
+        assert!(carol.graph().contains(&a_3_2.compute_hash()));
+        let expected_malice_a_2_1 = Malice::Fork(a_2_1.compute_hash());
+        let both_accusations = vec![
+            (&alice_id, &expected_malice_a_1),
+            (&alice_id, &expected_malice_a_2_1),
+        ];
+        assert_peer_has_accused(&carol, both_accusations.clone());
+
+        // Send the response from Carol to Bob.  Bob should now accuse A_2_1 also.
+        unwrap!(bob.handle_response(&carol_id, response));
+        assert!(bob.graph().contains(&a_3_0.compute_hash()));
+        assert!(bob.graph().contains(&a_3_1.compute_hash()));
+        assert!(bob.graph().contains(&a_3_2.compute_hash()));
+        assert_peer_has_accused(&bob, both_accusations.clone());
+    }
+
+    #[test]
+    //    A_2,0    A_2,1    A_2,2
+    //      |        |        |
+    //      +------ A_1 ------+
+    //               |
+    //              A_0
+    //
+    // Fork accusations should be made against A_1 only.
+    fn triple_fork() {
+        let (alice, mut bob, mut carol, mut dave) =
+            unwrap!(initialise_genesis_parsecs(4).into_iter().collect_tuple());
+
+        let alice_id = alice.our_pub_id().clone();
+        let bob_id = bob.our_pub_id().clone();
+        let carol_id = carol.our_pub_id().clone();
+        let dave_id = dave.our_pub_id().clone();
+
+        // [A_0, A_1, A_2,0] will be sent to Bob.
+        let a_0 = unwrap!(nth_event(alice.graph(), 0).pack(alice.event_context()));
+        let a_1 = unwrap!(nth_event(alice.graph(), 1).pack(alice.event_context()));
+        let a_2_0 =
+            PackedEvent::new_requesting(alice_id.clone(), bob_id.clone(), a_1.compute_hash());
+        let mut request = Request {
+            packed_events: vec![a_0.clone(), a_1.clone(), a_2_0.clone()],
+        };
+        unwrap!(bob.handle_request(&alice_id, request.clone()));
+
+        // [A_0, A_1, A_2,1] will be sent to Carol.
+        let a_2_1 =
+            PackedEvent::new_requesting(alice_id.clone(), carol_id.clone(), a_1.compute_hash());
+        request.packed_events = vec![a_0.clone(), a_1.clone(), a_2_1.clone()];
+        unwrap!(carol.handle_request(&alice_id, request.clone()));
+
+        // [A_0, A_1, A_2,2] will be sent to Dave.
+        let a_2_2 =
+            PackedEvent::new_requesting(alice_id.clone(), dave_id.clone(), a_1.compute_hash());
+        request.packed_events = vec![a_0.clone(), a_1.clone(), a_2_2.clone()];
+        unwrap!(dave.handle_request(&alice_id, request));
+
+        // Send a request from Bob to Carol and send the response.  Bob and Carol should accuse A_1.
+        request = unwrap!(bob.create_gossip(&carol_id));
+        let mut response = unwrap!(carol.handle_request(&bob_id, request));
+        assert!(carol.graph().contains(&a_2_0.compute_hash()));
+        let expected_malice = Malice::Fork(a_1.compute_hash());
+        let expected_accusation = vec![(&alice_id, &expected_malice)];
+        assert_peer_has_accused(&carol, expected_accusation.clone());
+        unwrap!(bob.handle_response(&carol_id, response));
+        assert!(bob.graph().contains(&a_2_1.compute_hash()));
+        assert_peer_has_accused(&bob, expected_accusation.clone());
+
+        // Send a request from Dave to Carol and send the response.  Dave should accuse A_1.  Carol
+        // should not make any further accusations.
+        request = unwrap!(dave.create_gossip(&carol_id));
+        response = unwrap!(carol.handle_request(&dave_id, request));
+        assert!(carol.graph().contains(&a_2_2.compute_hash()));
+        assert_peer_has_accused(&carol, expected_accusation.clone());
+        unwrap!(dave.handle_response(&carol_id, response));
+        assert!(dave.graph().contains(&a_2_0.compute_hash()));
+        assert!(dave.graph().contains(&a_2_1.compute_hash()));
+        assert_peer_has_accused(&dave, expected_accusation.clone());
     }
 
     #[derive(PartialEq)]

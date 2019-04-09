@@ -2054,7 +2054,18 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .all(|accused_event| event.is_descendant_of(accused_event))
     }
 
-    fn accused_event_is_fork_but_not_seen_by(
+    fn events_with_self_parent(
+        &self,
+        parent: IndexedEventRef<S::PublicId>,
+    ) -> impl Iterator<Item = IndexedEventRef<S::PublicId>> {
+        let parent_index = parent.event_index();
+        self.peer_list
+            .events_by_index(parent.creator(), parent.index_by_creator() + 1)
+            .filter_map(move |descendant_index| self.get_known_event(descendant_index).ok())
+            .filter(move |descendant| descendant.self_parent() == Some(parent_index))
+    }
+
+    fn accused_event_is_fork_but_this_event_is_not_a_fork_descendant(
         &self,
         malice: &Malice<T, S::PublicId>,
         event_index: EventIndex,
@@ -2067,7 +2078,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                         .get(event_index)
                         .map(|event| (accused_event, event))
                 })
-                .map(|(accused_event, event)| !event.sees_fork_by(accused_event.creator()))
+                .map(|(accused_event, event)| {
+                    // `event` must be a descendant of more than one fork branch to be in a position
+                    // to know about the fork.
+                    self.events_with_self_parent(accused_event)
+                        .filter(|forked_event| event.is_descendant_of(forked_event))
+                        .count()
+                        < 2
+                })
                 .unwrap_or(true)
         } else {
             false
@@ -2126,7 +2144,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .chain(our_accusations)
             .filter(|(offender, _)| offender != &creator)
             .filter(|(_, malice)| self.accused_events_are_ancestors_of(&malice, event_index))
-            .filter(|(_, malice)| !self.accused_event_is_fork_but_not_seen_by(&malice, event_index))
+            .filter(|(_, malice)| {
+                !self.accused_event_is_fork_but_this_event_is_not_a_fork_descendant(
+                    &malice,
+                    event_index,
+                )
+            })
             .filter(|accusation| !accusations_by_peer_since_starter_event.contains(accusation))
             .filter(|(_, malice)| {
                 !self.pending_accusations.iter().any(|(off, mal)| match mal {
