@@ -921,6 +921,8 @@ mod handle_malice {
     // Alice has falsely accused Carol of creating a fork.  Bob knows this, but as an accomplice,
     // hasn't accused Alice of `InvalidAccusation`.  Dave will detect Alice's malicious behaviour
     // when she gossips to him, and will later detect Bob as an accomplice when he gossips to him.
+    // In addition to that, Dave shall not accuse accomplice against Bob more than once during the
+    // later on gossips.
     fn accomplice_separate() {
         let mut env = AccompliceEnvironment::new();
         let alice_id = env.alice_id().clone();
@@ -936,8 +938,13 @@ mod handle_malice {
         message = unwrap!(env.bob.create_gossip(&dave_id));
         unwrap!(env.dave.handle_request(&bob_id, message));
 
+        // Send gossip from Bob to Dave again.
+        message = unwrap!(env.bob.create_gossip(&dave_id));
+        unwrap!(env.dave.handle_request(&bob_id, message));
+
         // Dave's events should contain Alice's accusation, and he should have made an accusation
-        // against Alice's invalid event and against Bob as an accomplice.
+        // against Alice's invalid event and against Bob as an accomplice. The accomplice accusation
+        // against Bob shall only happen once.
         env.assert_dave_accused_alice_and_bob();
     }
 
