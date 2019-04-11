@@ -392,10 +392,10 @@ fn unpolled_and_unconsensused_observations() {
 fn our_unpolled_observations_with_consensus_mode_single() {
     let mut alice = Record::from(parse_test_dot_file("alice.dot")).play();
 
-    let block = alice.poll().into_iter().flatten().only();
+    let block = unwrap!(alice.poll());
     assert_matches!(*block.payload(), Observation::Genesis(_));
 
-    let block = alice.poll().into_iter().flatten().only();
+    let block = unwrap!(alice.poll());
     assert_matches!(*block.payload(), Observation::OpaquePayload(_));
     assert_eq!(
         block.proofs().iter().map(Proof::public_id).only(),

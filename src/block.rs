@@ -14,9 +14,8 @@ use crate::{
     vote::Vote,
 };
 use std::{
-    collections::{BTreeMap, BTreeSet},
-    ops::Deref,
-    slice, vec,
+    collections::{vec_deque, BTreeMap, BTreeSet, VecDeque},
+    ops::{Deref, DerefMut},
 };
 
 /// A struct representing a collection of votes by peers for an `Observation`.
@@ -81,7 +80,7 @@ impl<T: NetworkEvent, P: PublicId> Block<T, P> {
 
 /// Group of blocks that were all created within the same meta-election.
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
-pub struct BlockGroup<T: NetworkEvent, P: PublicId>(pub Vec<Block<T, P>>);
+pub(crate) struct BlockGroup<T: NetworkEvent, P: PublicId>(pub VecDeque<Block<T, P>>);
 
 impl<T: NetworkEvent, P: PublicId> BlockGroup<T, P> {
     pub fn is_empty(&self) -> bool {
@@ -91,7 +90,7 @@ impl<T: NetworkEvent, P: PublicId> BlockGroup<T, P> {
 
 impl<T: NetworkEvent, P: PublicId> IntoIterator for BlockGroup<T, P> {
     type Item = Block<T, P>;
-    type IntoIter = vec::IntoIter<Block<T, P>>;
+    type IntoIter = vec_deque::IntoIter<Block<T, P>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()
@@ -100,7 +99,7 @@ impl<T: NetworkEvent, P: PublicId> IntoIterator for BlockGroup<T, P> {
 
 impl<'a, T: NetworkEvent, P: PublicId> IntoIterator for &'a BlockGroup<T, P> {
     type Item = &'a Block<T, P>;
-    type IntoIter = slice::Iter<'a, Block<T, P>>;
+    type IntoIter = vec_deque::Iter<'a, Block<T, P>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.iter()
@@ -108,8 +107,14 @@ impl<'a, T: NetworkEvent, P: PublicId> IntoIterator for &'a BlockGroup<T, P> {
 }
 
 impl<T: NetworkEvent, P: PublicId> Deref for BlockGroup<T, P> {
-    type Target = [Block<T, P>];
+    type Target = VecDeque<Block<T, P>>;
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl<T: NetworkEvent, P: PublicId> DerefMut for BlockGroup<T, P> {
+    fn deref_mut(&mut self) -> &mut VecDeque<Block<T, P>> {
+        &mut self.0
     }
 }
