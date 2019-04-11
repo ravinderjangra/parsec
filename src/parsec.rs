@@ -366,7 +366,24 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     /// Once the owning peer has been removed from the section (i.e. a block with payload
     /// `Observation::Remove(our_id)` has been made stable), then no further blocks will be
     /// enqueued. So, once `poll()` returns such a block, it will continue to return `None` forever.
-    pub fn poll(&mut self) -> Option<BlockGroup<T, S::PublicId>> {
+    pub fn poll(&mut self) -> Option<Block<T, S::PublicId>> {
+        let mut block_group = self.batch_poll()?;
+        let block = block_group.pop_front()?;
+        if !block_group.is_empty() {
+            self.consensused_blocks.push_front(block_group);
+        }
+        Some(block)
+    }
+
+    /// Returns the next group of stable blocks, if any. The method might need to be called more
+    /// than once for the caller to get all the blocks that have been consensused. A `None` value
+    /// means that all the blocks consensused so far have already been returned.
+    ///
+    /// Once the owning peer has been removed from the section (i.e. a block with payload
+    /// `Observation::Remove(our_id)` has been made stable), then no further blocks will be
+    /// enqueued. So, once `poll()` or `batch_poll()` returns such a block, it will continue to
+    /// return `None` forever.
+    pub(crate) fn batch_poll(&mut self) -> Option<BlockGroup<T, S::PublicId>> {
         self.consensused_blocks.pop_front()
     }
 
@@ -1441,7 +1458,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
     fn create_blocks(&self, payload_keys: &[ObservationKey]) -> Result<BlockGroup<T, S::PublicId>> {
         let voters = self.voters();
-        let blocks: Result<Vec<_>> = payload_keys
+        let blocks: Result<VecDeque<_>> = payload_keys
             .iter()
             .map(|payload_key| {
                 let votes = self

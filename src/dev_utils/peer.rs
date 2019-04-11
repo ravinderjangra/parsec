@@ -355,9 +355,10 @@ impl Peer {
         }
     }
 
-    /// Repeatedly calls `parsec.poll()` until `None` and returns the index of the first new block.
+    /// Repeatedly calls `parsec.batch_poll()` until `None` and returns the index of the first new
+    /// block.
     pub fn poll_all(&mut self) {
-        while let Some(block_group) = self.parsec.poll() {
+        while let Some(block_group) = self.parsec.batch_poll() {
             for block in &block_group {
                 self.make_active_if_added(block);
                 match block.payload() {
@@ -379,7 +380,7 @@ impl Peer {
         self.parsec.our_pub_id()
     }
 
-    pub fn grouped_blocks(&self) -> &[BlockGroup<Transaction, PeerId>] {
+    pub(crate) fn grouped_blocks(&self) -> &[BlockGroup<Transaction, PeerId>] {
         &self.grouped_blocks
     }
 
