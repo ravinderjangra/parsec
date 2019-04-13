@@ -409,7 +409,7 @@ fn parse_usize(matches: &ArgMatches, arg: &str) -> usize {
 fn parse_seed(seed_str: &str) -> Result<Seed, ()> {
     let parts = seed_str
         .split(',')
-        .map(|s| s.to_string())
+        .map(ToString::to_string)
         .collect::<Vec<String>>();
     if parts.len() != 4 {
         return Err(());

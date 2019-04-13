@@ -116,7 +116,7 @@ mod detail {
         static ref FILTER_PEERS: Option<Vec<String>> = {
             // PARSEC_DUMP_GRAPH_PEERS=Alice,Bob to only dump graph for them.
             env::var("PARSEC_DUMP_GRAPH_PEERS").ok().map(|x| {
-                x.split(',').map(|x | x.to_string()).collect::<Vec<String>>()
+                x.split(',').map(ToString::to_string).collect_vec()
             })
         };
 
@@ -1108,7 +1108,7 @@ mod detail {
     ) -> String {
         let peer_short_name: &str = short_peer_ids
             .get(event.creator())
-            .map(|id| id.as_str())
+            .map(String::as_str)
             .unwrap_or("???");
 
         if let Some(fork_index) = fork_index(event, peer_list) {

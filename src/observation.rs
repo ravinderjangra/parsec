@@ -11,7 +11,7 @@ use crate::{
     hash::Hash,
     id::{PublicId, SecretId},
     network_event::NetworkEvent,
-    peer_list::{PeerIndex, PeerList},
+    peer_list::{Peer, PeerIndex, PeerList},
     serialise,
 };
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
@@ -314,11 +314,11 @@ impl ObservationKey {
             let lhs_peer_id = self
                 .peer_index()
                 .and_then(|index| peer_list.get(index))
-                .map(|peer| peer.id());
+                .map(Peer::id);
             let rhs_peer_id = other
                 .peer_index()
                 .and_then(|index| peer_list.get(index))
-                .map(|peer| peer.id());
+                .map(Peer::id);
             lhs_peer_id.cmp(&rhs_peer_id)
         })
     }

@@ -10,12 +10,14 @@ mod peer;
 mod peer_index;
 mod peer_state;
 
-pub(crate) use self::peer_index::{PeerIndex, PeerIndexMap, PeerIndexSet};
 pub use self::peer_state::PeerState;
 #[cfg(all(test, feature = "mock"))]
 pub(crate) use self::snapshot::PeerListSnapshot;
+pub(crate) use self::{
+    peer::Peer,
+    peer_index::{PeerIndex, PeerIndexMap, PeerIndexSet},
+};
 
-use self::peer::Peer;
 #[cfg(all(test, feature = "mock"))]
 use crate::gossip::Graph;
 #[cfg(any(test, feature = "testing"))]
@@ -149,7 +151,7 @@ impl<S: SecretId> PeerList<S> {
 
     pub fn peer_state(&self, index: PeerIndex) -> PeerState {
         self.get(index)
-            .map(|peer| peer.state())
+            .map(Peer::state)
             .unwrap_or_else(PeerState::inactive)
     }
 
@@ -278,9 +280,7 @@ impl<S: SecretId> PeerList<S> {
         &'a self,
         peer_index: PeerIndex,
     ) -> impl DoubleEndedIterator<Item = EventIndex> + 'a {
-        self.get(peer_index)
-            .into_iter()
-            .flat_map(|peer| peer.events())
+        self.get(peer_index).into_iter().flat_map(Peer::events)
     }
 
     /// Indices of our events in insertion order.
