@@ -1879,8 +1879,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     // observation by the same creator.
     fn detect_duplicate_vote(&mut self, event: &Event<S::PublicId>) {
         let other_hash = {
-            let payload = if let Some(payload) = self.event_payload(event) {
-                payload
+            let payload_key = if let Some(key) = event.payload_key() {
+                key
             } else {
                 return;
             };
@@ -1891,8 +1891,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 .rev()
                 .filter_map(|index| self.get_known_event(index).ok())
                 .filter(|event| {
-                    self.event_payload(event)
-                        .map_or(false, |event_payload| event_payload == payload)
+                    event
+                        .payload_key()
+                        .map_or(false, |event_payload_key| event_payload_key == payload_key)
                 })
                 .map(|event| *event.hash())
                 .take(2);
