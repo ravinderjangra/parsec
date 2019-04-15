@@ -35,22 +35,19 @@ impl<T> PeerIndexMap<T> {
     }
 
     pub fn get(&self, key: PeerIndex) -> Option<&T> {
-        self.0.get(key.0).and_then(|value| value.as_ref())
+        self.0.get(key.0).and_then(Option::as_ref)
     }
 
     pub fn get_mut(&mut self, key: PeerIndex) -> Option<&mut T> {
-        self.0.get_mut(key.0).and_then(|value| value.as_mut())
+        self.0.get_mut(key.0).and_then(Option::as_mut)
     }
 
     pub fn contains_key(&self, key: PeerIndex) -> bool {
-        self.0
-            .get(key.0)
-            .map(|value| value.is_some())
-            .unwrap_or(false)
+        self.0.get(key.0).map(Option::is_some).unwrap_or(false)
     }
 
     pub fn is_empty(&self) -> bool {
-        self.0.iter().all(|value| value.is_none())
+        self.0.iter().all(Option::is_none)
     }
 
     pub fn iter(&self) -> MapIter<T> {
@@ -389,7 +386,7 @@ mod tests {
             for peer_id in ordering {
                 let _ = map.insert(*peer_id, ());
             }
-            assert!(map.iter().is_sorted())
+            assert!(map.iter().itr_is_sorted())
         }
     }
 }

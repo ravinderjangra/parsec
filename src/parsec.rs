@@ -29,7 +29,7 @@ use crate::{
         ObservationStore,
     },
     parsec_helpers::find_interesting_content_for_event,
-    peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerListChange, PeerState},
+    peer_list::{Peer, PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerListChange, PeerState},
 };
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]
 use crate::{
@@ -1332,7 +1332,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         meta_votes_maps
             .iter()
             .filter_map(|meta_votes| meta_votes.get(peer_index))
-            .map(|meta_votes| meta_votes.as_slice())
+            .map(Vec::as_slice)
             .collect()
     }
 
@@ -1467,8 +1467,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     .filter(|event| voters.contains(event.creator()))
                     .filter_map(|event| {
                         let (vote, key) = event.vote_and_payload_key(&self.observations)?;
-                        let creator_id =
-                            self.peer_list.get(event.creator()).map(|peer| peer.id())?;
+                        let creator_id = self.peer_list.get(event.creator()).map(Peer::id)?;
                         Some((key, vote, creator_id))
                     })
                     .map(|(_, vote, creator_id)| (creator_id.clone(), vote.clone()))
@@ -1643,7 +1642,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     fn event_creator_id<'a>(&'a self, event: &Event<S::PublicId>) -> Result<&'a S::PublicId> {
         self.peer_list
             .get(event.creator())
-            .map(|peer| peer.id())
+            .map(Peer::id)
             .ok_or_else(|| {
                 log_or_panic!(
                     "{:?} doesn't know the creator of {:?}",
@@ -2031,7 +2030,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         oldest_event: Option<EventIndex>,
     ) -> impl Iterator<Item = (PeerIndex, &Malice<T, S::PublicId>)> {
         self.graph
-            .iter_from(oldest_event.map(|e| e.topological_index()).unwrap_or(0))
+            .iter_from(oldest_event.map(EventIndex::topological_index).unwrap_or(0))
             .filter(move |event| event.creator() == peer_index)
             .filter_map(move |event| match self.event_payload(event.inner()) {
                 Some(Observation::Accusation { offender, malice }) => Some((offender, malice)),

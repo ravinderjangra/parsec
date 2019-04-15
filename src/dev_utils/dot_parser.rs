@@ -817,7 +817,7 @@ impl ParsedContents {
 
 /// Read a dumped dot file and return with parsed event graph and associated info.
 pub(crate) fn parse_dot_file<P: AsRef<Path>>(full_path: P) -> io::Result<ParsedContents> {
-    let name: Option<String> = full_path.as_ref().to_str().map(|s| s.to_string());
+    let name: Option<String> = full_path.as_ref().to_str().map(ToString::to_string);
     let result = unwrap!(read(File::open(full_path)?), "Failed to read {:?}", name);
     Ok(convert_into_parsed_contents(result))
 }

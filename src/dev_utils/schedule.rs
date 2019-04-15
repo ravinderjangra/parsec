@@ -208,7 +208,7 @@ impl PendingObservations {
 
     /// Returns true if no more peers have pending observations
     pub fn queues_empty<'a, I: Iterator<Item = &'a PeerId>>(&self, mut peers: I) -> bool {
-        peers.all(|id| self.queues.get(id).map_or(true, |queue| queue.is_empty()))
+        peers.all(|id| self.queues.get(id).map_or(true, BTreeMap::is_empty))
     }
 
     /// Number of `OpaquePayload` observations scheduled to be made by the given peer.
@@ -370,7 +370,7 @@ impl ObservationSchedule {
         let mut schedule = vec![];
         let mut names_iter = NAMES
             .iter()
-            .map(|name| name.to_string())
+            .map(ToString::to_string)
             // Generate numbered names skipping the ones in NAMES.
             .chain((10..).map(|num| num.to_string()));
 

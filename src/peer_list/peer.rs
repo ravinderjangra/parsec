@@ -146,7 +146,7 @@ impl Events {
     }
 
     fn iter<'a>(&'a self) -> impl DoubleEndedIterator<Item = EventIndex> + 'a {
-        self.0.iter().flat_map(|slot| slot.iter())
+        self.0.iter().flat_map(Slot::iter)
     }
 
     #[cfg(all(test, feature = "mock"))]
@@ -164,7 +164,7 @@ impl Events {
         self.0
             .get(index_by_creator)
             .into_iter()
-            .flat_map(|slot| slot.iter())
+            .flat_map(Slot::iter)
     }
 }
 

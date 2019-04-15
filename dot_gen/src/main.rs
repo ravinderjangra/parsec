@@ -612,7 +612,7 @@ impl Scenario {
     }
 
     fn collect_files(&self, files: &BTreeMap<String, String>, mode: Mode) {
-        let src_dir = DIR.with(|dir| dir.clone());
+        let src_dir = DIR.with(Clone::clone);
         let dst_dir = self.dst_dir();
 
         if let Err(error) = fs::create_dir_all(&dst_dir) {
@@ -797,7 +797,7 @@ fn default_file_map() -> BTreeMap<String, String> {
 
 fn find_file_for_peer(dir: &Path, peer_name: &str) -> io::Result<PathBuf> {
     if let Some(name) = fs::read_dir(dir)?
-        .filter_map(|entry| entry.ok())
+        .filter_map(Result::ok)
         .filter_map(|entry| entry.file_name().into_string().ok())
         .filter(|name| name.starts_with(peer_name) && name.ends_with(".dot"))
         .max()
