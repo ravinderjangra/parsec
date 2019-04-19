@@ -22,15 +22,6 @@ use std::collections::BTreeSet;
 
 type TestPeer = TestParsec<Transaction, PeerId>;
 
-macro_rules! assert_matches {
-    ($actual:expr, $expected:pat) => {
-        match $actual {
-            $expected => (),
-            ref unexpected => panic!("{:?} does not match {}", unexpected, stringify!($expected)),
-        }
-    };
-}
-
 #[derive(Debug, PartialEq, Eq)]
 struct Snapshot {
     peer_list: PeerListSnapshot<PeerId>,
@@ -235,7 +226,7 @@ fn add_peer() {
     let alice_snapshot = Snapshot::new(&alice);
 
     // Try calling `create_gossip()` for a peer which doesn't exist yet.
-    assert_matches!(alice.create_gossip(&fred_id), Err(Error::UnknownPeer));
+    assert_eq!(alice.create_gossip(&fred_id), Err(Error::UnknownPeer));
     assert_eq!(alice_snapshot, Snapshot::new(&alice));
 
     // Now add E_25, which should result in Alice adding Fred.
@@ -293,9 +284,12 @@ fn remove_peer() {
     );
 
     // Try calling `create_gossip()` for Eric shall result in error.
-    assert_matches!(
+    assert_eq!(
         alice.create_gossip(&eric_id),
-        Err(Error::InvalidPeerState { .. })
+        Err(Error::InvalidPeerState {
+            required: PeerState::VOTE | PeerState::RECV,
+            actual: PeerState::inactive()
+        })
     );
 
     // Construct Eric's parsec instance.
@@ -319,9 +313,12 @@ fn remove_peer() {
     }
 
     // Eric can no longer gossip to anyone.
-    assert_matches!(
+    assert_eq!(
         eric.create_gossip(&PeerId::new("Alice")),
-        Err(Error::InvalidSelfState { .. })
+        Err(Error::InvalidSelfState {
+            required: PeerState::SEND,
+            actual: PeerState::RECV
+        })
     );
 }
 
@@ -393,10 +390,13 @@ fn our_unpolled_observations_with_consensus_mode_single() {
     let mut alice = Record::from(parse_test_dot_file("alice.dot")).play();
 
     let block = unwrap!(alice.poll());
-    assert_matches!(*block.payload(), Observation::Genesis(_));
+    if let Observation::Genesis(_) = block.payload() {
+    } else {
+        panic!();
+    }
 
     let block = unwrap!(alice.poll());
-    assert_matches!(*block.payload(), Observation::OpaquePayload(_));
+    assert!(block.payload().is_opaque());
     assert_eq!(
         block.proofs().iter().map(Proof::public_id).only(),
         alice.our_pub_id()
@@ -745,7 +745,7 @@ mod handle_malice {
         let alice_requesting_hash = *nth_event(alice.graph(), 2).hash();
 
         // Send request.  Alice's genesis should be rejected as invalid.
-        assert_matches!(
+        assert_eq!(
             carol.handle_request(alice.our_pub_id(), request),
             Err(Error::InvalidEvent)
         );
@@ -1578,7 +1578,7 @@ mod handle_malice {
                 b_2_packed.clone(),
             ],
         };
-        assert_matches!(
+        assert_eq!(
             alice.handle_request(bob.our_pub_id(), message),
             Err(Error::InvalidEvent)
         );
@@ -1644,7 +1644,7 @@ mod handle_malice {
         let alice_snapshot = Snapshot::new(&alice);
 
         // Try calling `create_gossip()` for a peer which doesn't exist yet.
-        assert_matches!(alice.create_gossip(&fred_id), Err(Error::UnknownPeer));
+        assert_eq!(alice.create_gossip(&fred_id), Err(Error::UnknownPeer));
         assert_eq!(alice_snapshot, Snapshot::new(&alice));
 
         // We'll modify Alice's peer list to allow her to create gossip for Fred
@@ -1669,7 +1669,7 @@ mod handle_malice {
         let result = fred.handle_request(&alice_id, request);
 
         // check that Fred detected premature gossip
-        assert_matches!(result, Err(Error::PrematureGossip));
+        assert_eq!(result, Err(Error::PrematureGossip));
 
         // Check that Fred has all the events that Alice has
         assert!(alice
@@ -1696,7 +1696,7 @@ mod handle_malice {
         // Assert we did actually remove the self-parent from the message.
         assert!(!hashes.contains(&unwrap!(request.packed_events[1].self_parent())));
 
-        assert_matches!(
+        assert_eq!(
             bob.handle_request(alice.our_pub_id(), request),
             Err(Error::UnknownSelfParent)
         );
@@ -1729,7 +1729,7 @@ mod handle_malice {
             .packed_events
             .retain(|packed_event| packed_event.compute_hash() != other_parent_hash);
 
-        assert_matches!(
+        assert_eq!(
             carol.handle_request(alice.our_pub_id(), request),
             Err(Error::UnknownOtherParent)
         );
