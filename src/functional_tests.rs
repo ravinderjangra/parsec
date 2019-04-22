@@ -518,9 +518,20 @@ mod handle_malice {
         network_event::NetworkEvent,
         observation::Malice,
         peer_list::{PeerIndex, PeerList, PeerState},
-        PackedEvent, Request,
+        PackedEvent, Request, Response,
     };
     use itertools::Itertools;
+
+    fn take_packed_events<T: NetworkEvent, S: SecretId>(
+        peer: &TestParsec<T, S>,
+        n: usize,
+    ) -> Vec<PackedEvent<T, S::PublicId>> {
+        peer.graph()
+            .iter()
+            .map(|event| unwrap!(event.inner().pack(peer.event_context())))
+            .take(n)
+            .collect()
+    }
 
     // Returns iterator over all votes cast by the given node.
     fn our_votes<T: NetworkEvent, S: SecretId>(
@@ -759,6 +770,322 @@ mod handle_malice {
         let _ = unwrap!(carol.handle_request(bob.our_pub_id(), request));
         assert_peer_has_accused(&carol, vec![(alice.our_pub_id(), &expected_malice)]);
         assert!(carol.pending_accusations().is_empty());
+    }
+
+    fn assert_handling_invalid_response(
+        sender: &mut TestPeer,
+        receiver: &mut TestPeer,
+        invalid_resp_msg: Response<Transaction, PeerId>,
+        expected_malice: &Malice<Transaction, PeerId>,
+        invalid_hash: &EventHash,
+    ) {
+        assert_eq!(
+            receiver.handle_response(sender.our_pub_id(), invalid_resp_msg),
+            Err(Error::InvalidEvent)
+        );
+
+        assert!(!receiver.graph().contains(invalid_hash));
+
+        // Handling a valid request shall flush the pending accusations.
+        let request = unwrap!(sender.create_gossip(receiver.our_pub_id()));
+        assert!(receiver
+            .handle_request(sender.our_pub_id(), request)
+            .is_ok());
+        assert_peer_has_accused(&receiver, vec![(sender.our_pub_id(), expected_malice)]);
+    }
+
+    fn packed_req_event(
+        peer: &TestPeer,
+        self_parent: EventHash,
+        other_parent: EventHash,
+    ) -> PackedEvent<Transaction, PeerId> {
+        PackedEvent::new_request(peer.our_pub_id().clone(), self_parent, other_parent)
+    }
+
+    #[test]
+    fn invalid_request_wrong_recipient() {
+        let (mut alice, mut bob, carol, mut dave) =
+            unwrap!(initialise_genesis_parsecs(4).into_iter().collect_tuple());
+
+        // Create request from Alice to Carol, but sent to Bob.
+        let request_msg = unwrap!(alice.create_gossip(carol.our_pub_id()));
+        let alice_requesting_hash = *nth_event(alice.graph(), 2).hash();
+
+        // Bob shall not create response for that request, but can put Alice's requesting event into
+        // its graph.
+        assert_eq!(
+            bob.handle_request(alice.our_pub_id(), request_msg),
+            Err(Error::InvalidMessage)
+        );
+        assert!(bob.graph().contains(&alice_requesting_hash));
+
+        // Have Bob create an invalid `Request` event.  (Bob should not use Alice's
+        // `Requesting(Carol)` event as an other-parent for his `Request` event.)
+        let b_1_hash = *nth_event(bob.graph(), 1).hash();
+        let invalid_req = packed_req_event(&bob, b_1_hash, alice_requesting_hash);
+        let invalid_req_hash = invalid_req.compute_hash();
+        let mut packed_events = take_packed_events(&bob, bob.graph().len());
+        packed_events.push(invalid_req.clone());
+        let invalid_response_msg = Response { packed_events };
+
+        let expected_malice = Malice::InvalidRequest(Box::new(invalid_req));
+
+        assert_handling_invalid_response(
+            &mut bob,
+            &mut alice,
+            invalid_response_msg.clone(),
+            &expected_malice,
+            &invalid_req_hash,
+        );
+
+        assert_handling_invalid_response(
+            &mut bob,
+            &mut dave,
+            invalid_response_msg,
+            &expected_malice,
+            &invalid_req_hash,
+        );
+    }
+
+    #[test]
+    fn invalid_request_wrong_type_of_other_parent() {
+        let (mut alice, mut bob, mut carol) =
+            unwrap!(initialise_genesis_parsecs(3).into_iter().collect_tuple());
+
+        // Send request from Alice to Bob.
+        let request_msg = unwrap!(alice.create_gossip(bob.our_pub_id()));
+        let a_1 = nth_event(alice.graph(), 1);
+        assert!(
+            !a_1.is_requesting()
+            "A_1 should not be a 'Requesting(Bob)' event to ensure a 'Request' using this as its \
+             other-parent is invalid.",
+        );
+
+        assert!(bob.handle_request(alice.our_pub_id(), request_msg).is_ok());
+
+        // Have Bob create an invalid Request event.  (Bob should not use Alice's second last
+        // event (`A_1`) as an other-parent for his Request event, as it is not a
+        // `Requesting(Bob)` event.)
+        let b_1_hash = *nth_event(bob.graph(), 1).hash();
+        let invalid_req = packed_req_event(&bob, b_1_hash, *a_1.hash());
+        let invalid_req_hash = invalid_req.compute_hash();
+
+        let expected_malice = Malice::InvalidRequest(Box::new(invalid_req.clone()));
+
+        let mut packed_events = take_packed_events(&bob, 2);
+        packed_events.push(invalid_req.clone());
+        let invalid_response_msg = Response { packed_events };
+
+        assert_handling_invalid_response(
+            &mut bob,
+            &mut alice,
+            invalid_response_msg,
+            &expected_malice,
+            &invalid_req_hash,
+        );
+
+        packed_events = take_packed_events(&bob, 5);
+        packed_events.push(invalid_req);
+        // Knowledge of Alice and Bob, and the invalid_req.
+        let invalid_response_msg = Response { packed_events };
+
+        assert_handling_invalid_response(
+            &mut bob,
+            &mut carol,
+            invalid_response_msg,
+            &expected_malice,
+            &invalid_req_hash,
+        );
+    }
+
+    #[test]
+    fn duplicate_requests() {
+        let (mut alice, mut bob, mut carol) =
+            unwrap!(initialise_genesis_parsecs(3).into_iter().collect_tuple());
+
+        // Send request from Alice to Bob.
+        let request_msg = unwrap!(alice.create_gossip(bob.our_pub_id()));
+        let mut response_msg = unwrap!(bob.handle_request(alice.our_pub_id(), request_msg));
+
+        // Have Bob create an invalid Request event.  (Bob has already assigned a Request
+        // to the `Requesting(Bob)`, hence can not use it again.)
+        let b_last = nth_event(bob.graph(), bob.graph().len() - 1);
+        let alice_requesting = unwrap!(bob.graph().get(unwrap!(b_last.other_parent())));
+        let invalid_req = packed_req_event(&bob, *b_last.hash(), *alice_requesting.hash());
+        let invalid_req_hash = invalid_req.compute_hash();
+        let expected_malice = Malice::InvalidRequest(Box::new(invalid_req.clone()));
+
+        response_msg.packed_events.push(invalid_req.clone());
+        assert_handling_invalid_response(
+            &mut bob,
+            &mut alice,
+            response_msg,
+            &expected_malice,
+            &invalid_req_hash,
+        );
+
+        let mut packed_events = take_packed_events(&bob, bob.graph().len());
+        packed_events.push(invalid_req);
+        let invalid_response_msg = Response { packed_events };
+        assert_handling_invalid_response(
+            &mut bob,
+            &mut carol,
+            invalid_response_msg,
+            &expected_malice,
+            &invalid_req_hash,
+        );
+    }
+
+    fn packed_resp_event(
+        peer: &TestPeer,
+        self_parent: EventHash,
+        other_parent: EventHash,
+    ) -> PackedEvent<Transaction, PeerId> {
+        PackedEvent::new_response(peer.our_pub_id().clone(), self_parent, other_parent)
+    }
+
+    #[test]
+    fn invalid_response_wrong_recipient() {
+        let (mut alice, mut bob, mut carol, mut dave) =
+            unwrap!(initialise_genesis_parsecs(4).into_iter().collect_tuple());
+
+        // Send request from Alice to Bob.
+        let request_msg = unwrap!(alice.create_gossip(bob.our_pub_id()));
+        assert!(bob.handle_request(alice.our_pub_id(), request_msg).is_ok());
+
+        // If the response be sent to Carol, a response event shall not be created.
+        let packed_events = take_packed_events(&bob, bob.graph().len());
+        assert_eq!(
+            carol.handle_response(bob.our_pub_id(), Response { packed_events }),
+            Err(Error::InvalidMessage)
+        );
+        assert!(!carol.graph().iter().any(|event| event.is_response()));
+
+        // Have Carol create an invalid Response event.  (Carol should not use Bob's Request event
+        // as an other-parent for her Response event since the other-parent of Bob's Request wasn't
+        // created by her.)
+        let c_1_hash = *nth_event(carol.graph(), 1).hash();
+        let bob_request = unwrap!(nth_event(bob.graph(), 5).pack(bob.event_context()));
+        let bob_request_hash = bob_request.compute_hash();
+        let invalid_resp = packed_resp_event(&carol, c_1_hash, bob_request_hash);
+        let invalid_resp_hash = invalid_resp.compute_hash();
+        let expected_malice = Malice::InvalidResponse(Box::new(invalid_resp.clone()));
+
+        let mut packed_events = take_packed_events(&carol, 2);
+        packed_events.push(bob_request);
+        packed_events.push(invalid_resp.clone());
+        let invalid_response_msg = Response { packed_events };
+        assert_handling_invalid_response(
+            &mut carol,
+            &mut bob,
+            invalid_response_msg,
+            &expected_malice,
+            &invalid_resp_hash,
+        );
+
+        packed_events = take_packed_events(&bob, 8);
+        packed_events.push(invalid_resp);
+        // Knowledge of Alice, Bob and Carol, and the invalid_resp.
+        let invalid_response_msg = Response { packed_events };
+        assert_handling_invalid_response(
+            &mut carol,
+            &mut dave,
+            invalid_response_msg,
+            &expected_malice,
+            &invalid_resp_hash,
+        );
+    }
+
+    #[test]
+    fn invalid_response_wrong_type_of_other_parent() {
+        let (mut alice, mut bob, mut carol) =
+            unwrap!(initialise_genesis_parsecs(3).into_iter().collect_tuple());
+
+        // Send request from Alice to Bob.
+        let request_msg = unwrap!(alice.create_gossip(bob.our_pub_id()));
+        assert!(bob.handle_request(alice.our_pub_id(), request_msg).is_ok());
+
+        // Have Alice create an invalid Response event.  (Alice should not use Bob's second last
+        // event as an other-parent for her Response event, as it is not a Request event.)
+        let b_1 = nth_event(bob.graph(), 1);
+        assert!(
+            !b_1.is_request()
+            "B_1 should not be a Request event to ensure a 'Response' using this as its \
+             other-parent is invalid.",
+        );
+        let a_last_hash = *nth_event(alice.graph(), alice.graph().len() - 1).hash();
+        let invalid_resp = packed_resp_event(&alice, a_last_hash, *b_1.hash());
+        let invalid_resp_hash = invalid_resp.compute_hash();
+        let expected_malice = Malice::InvalidResponse(Box::new(invalid_resp.clone()));
+
+        let invalid_response_msg = Response {
+            packed_events: vec![invalid_resp.clone()],
+        };
+        assert_handling_invalid_response(
+            &mut alice,
+            &mut bob,
+            invalid_response_msg,
+            &expected_malice,
+            &invalid_resp_hash,
+        );
+
+        let mut packed_events = take_packed_events(&bob, 6);
+        packed_events.push(invalid_resp);
+        // Knowledge of Alice and Bob, and the invalid_resp.
+        let invalid_response_msg = Response { packed_events };
+        assert_handling_invalid_response(
+            &mut alice,
+            &mut carol,
+            invalid_response_msg,
+            &expected_malice,
+            &invalid_resp_hash,
+        );
+    }
+
+    #[test]
+    fn duplicate_responses() {
+        let (mut alice, mut bob, mut carol) =
+            unwrap!(initialise_genesis_parsecs(3).into_iter().collect_tuple());
+
+        // Send request from Alice to Bob.
+        let request_msg = unwrap!(alice.create_gossip(bob.our_pub_id()));
+        let response_msg = unwrap!(bob.handle_request(alice.our_pub_id(), request_msg));
+
+        assert!(alice
+            .handle_response(bob.our_pub_id(), response_msg)
+            .is_ok());
+
+        // Have Alice create an invalid Response event.  (Alice has already assigned a Response
+        // to the Request, hence can not use it again.)
+        let valid_resp =
+            unwrap!(nth_event(alice.graph(), alice.graph().len() - 1).pack(alice.event_context()));
+        let a_last_event_hash = valid_resp.compute_hash();
+        let bob_request_hash = *unwrap!(valid_resp.other_parent());
+        let invalid_resp = packed_resp_event(&alice, a_last_event_hash, bob_request_hash);
+        let invalid_resp_hash = invalid_resp.compute_hash();
+        let expected_malice = Malice::InvalidResponse(Box::new(invalid_resp.clone()));
+
+        let invalid_response_msg = Response {
+            packed_events: vec![valid_resp, invalid_resp.clone()],
+        };
+        assert_handling_invalid_response(
+            &mut alice,
+            &mut bob,
+            invalid_response_msg,
+            &expected_malice,
+            &invalid_resp_hash,
+        );
+
+        let mut packed_events = take_packed_events(&alice, alice.graph().len());
+        packed_events.push(invalid_resp);
+        let invalid_response_msg = Response { packed_events };
+        assert_handling_invalid_response(
+            &mut alice,
+            &mut carol,
+            invalid_response_msg,
+            &expected_malice,
+            &invalid_resp_hash,
+        );
     }
 
     #[test]

@@ -10,7 +10,7 @@ use crate::{gossip::packed_event::PackedEvent, id::PublicId, network_event::Netw
 
 /// A gossip request message.
 #[serde(bound = "")]
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub struct Request<T: NetworkEvent, P: PublicId> {
     pub(crate) packed_events: Vec<PackedEvent<T, P>>,
 }
@@ -23,7 +23,7 @@ impl<T: NetworkEvent, P: PublicId> Request<T, P> {
 
 /// A gossip response message.
 #[serde(bound = "")]
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub struct Response<T: NetworkEvent, P: PublicId> {
     pub(crate) packed_events: Vec<PackedEvent<T, P>>,
 }
