@@ -8,6 +8,7 @@
 
 use super::meta_vote::MetaVote;
 use crate::observation::is_more_than_two_thirds;
+use std::iter;
 use std::num::NonZeroUsize;
 
 // This is used to collect the meta votes of other events relating to a single (binary) meta vote at
@@ -27,24 +28,10 @@ pub(crate) struct MetaVoteCounts {
 impl MetaVoteCounts {
     // Construct a `MetaVoteCounts` by collecting details from all meta votes which are for the
     // given `parent`'s `round` and `step`.  These results will include info from our own `parent`
-    // meta vote, if `is_voter` is true.
-    pub fn new(
-        parent: &MetaVote,
-        others: &[&[MetaVote]],
-        total_peers: NonZeroUsize,
-        is_voter: bool,
-    ) -> Self {
-        let mut counts = Self {
-            estimates_true: 0,
-            estimates_false: 0,
-            bin_values_true: 0,
-            bin_values_false: 0,
-            aux_values_true: 0,
-            aux_values_false: 0,
-            decision: None,
-            total_peers,
-        };
-
+    // meta vote.
+    pub fn new(parent: &MetaVote, others: &[&[MetaVote]], total_peers: NonZeroUsize) -> Self {
+        let mut counts = MetaVoteCounts::default();
+        counts.total_peers = total_peers;
         for vote in others
             .iter()
             .filter_map(|other| {
@@ -53,7 +40,7 @@ impl MetaVoteCounts {
                     .filter(|vote| vote.round_and_step() == parent.round_and_step())
                     .last()
             })
-            .chain(if is_voter { Some(parent) } else { None })
+            .chain(iter::once(parent))
         {
             if vote.estimates.contains(true) {
                 counts.estimates_true += 1;
