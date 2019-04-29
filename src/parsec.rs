@@ -1106,7 +1106,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     let other_votes = Self::peer_meta_votes(&ancestors_meta_votes, peer_index);
                     let initial_estimate = builder.has_observee(peer_index);
 
-                    MetaVote::new(initial_estimate, &other_votes, voters_len)
+                    MetaVote::new_for_observer(initial_estimate, &other_votes, voters_len)
                 };
 
                 builder.add_meta_votes(peer_index, new_meta_votes);
@@ -1227,7 +1227,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .filter_map(|(peer_index, event_votes)| {
                 event_votes
                     .last()
-                    .and_then(|v| v.decision)
+                    .and_then(MetaVote::decision)
                     .map(|v| (peer_index, v))
             });
 

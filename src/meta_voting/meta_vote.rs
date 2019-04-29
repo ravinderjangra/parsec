@@ -6,7 +6,15 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use super::{bool_set::BoolSet, meta_vote_counts::MetaVoteCounts};
+#[cfg(any(test, feature = "testing"))]
+use super::{
+    bool_set::BoolSet,
+    meta_vote_values::{AuxValue, BinValues, Estimates, UndecidedMetaVoteValues},
+};
+use super::{
+    meta_vote_counts::MetaVoteCounts,
+    meta_vote_values::{MetaVoteValues, Step},
+};
 use std::{
     collections::BTreeMap,
     fmt::{self, Debug, Formatter},
@@ -18,69 +26,51 @@ use std::{
 pub(crate) struct MetaVote {
     pub round: usize,
     pub step: Step,
-    pub estimates: BoolSet,
-    pub bin_values: BoolSet,
-    pub aux_value: Option<bool>,
-    pub decision: Option<bool>,
-}
-
-fn write_bool(f: &mut Formatter, a_bool: bool) -> fmt::Result {
-    if a_bool {
-        write!(f, "t")
-    } else {
-        write!(f, "f")
-    }
-}
-
-fn write_multiple_bool_values(f: &mut Formatter, field: &str, input: BoolSet) -> fmt::Result {
-    write!(f, "{}:{{", field)?;
-    match input {
-        BoolSet::Empty => (),
-        BoolSet::Single(ref s) => {
-            write_bool(f, *s)?;
-        }
-        BoolSet::Both => {
-            write_bool(f, true)?;
-            write!(f, ", ")?;
-            write_bool(f, false)?;
-        }
-    }
-    write!(f, "}} ")
-}
-
-fn write_optional_single_bool_value(
-    f: &mut Formatter,
-    field: &str,
-    value: Option<bool>,
-) -> fmt::Result {
-    write!(f, "{}:{{", field)?;
-    if let Some(vote) = value {
-        write_bool(f, vote)?;
-    }
-    write!(f, "}} ")
+    pub values: MetaVoteValues,
 }
 
 impl Debug for MetaVote {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(f, "{{ {}/{:?}, ", self.round, self.step)?;
-
-        write_multiple_bool_values(f, "est", self.estimates)?;
-        write_multiple_bool_values(f, "bin", self.bin_values)?;
-        write_optional_single_bool_value(f, "aux", self.aux_value)?;
-        write_optional_single_bool_value(f, "dec", self.decision)?;
-
+        write!(f, "{:?}", self.values)?;
         write!(f, "}}")
     }
 }
 
 impl MetaVote {
+    #[cfg(any(test, feature = "testing"))]
     pub fn new(
+        round: usize,
+        step: Step,
+        estimates: BoolSet,
+        bin_values: BoolSet,
+        aux_value: Option<bool>,
+        decision: Option<bool>,
+    ) -> Self {
+        let values = match decision {
+            Some(values) => MetaVoteValues::Decided(values),
+            None => MetaVoteValues::Undecided(UndecidedMetaVoteValues::new(
+                Estimates::new(estimates),
+                BinValues::new(bin_values),
+                AuxValue::new(aux_value),
+            )),
+        };
+        MetaVote {
+            round,
+            step,
+            values,
+        }
+    }
+
+    pub fn new_for_observer(
         initial_estimate: bool,
         others: &[&[MetaVote]],
         total_peers: NonZeroUsize,
     ) -> Vec<Self> {
-        let mut initial = Self::default();
-        initial.estimates = BoolSet::from_bool(initial_estimate);
+        let initial = Self {
+            values: MetaVoteValues::from_initial_estimate(initial_estimate),
+            ..Default::default()
+        };
         Self::next_votes(&[initial], others, &BTreeMap::new(), total_peers)
     }
 
@@ -103,6 +93,13 @@ impl MetaVote {
         Self::next_votes(temp, &[], coin_tosses, total_peers)
     }
 
+    pub fn decision(&self) -> Option<bool> {
+        match self.values {
+            MetaVoteValues::Decided(value) => Some(value),
+            MetaVoteValues::Undecided(_) => None,
+        }
+    }
+
     fn next_votes(
         prev: &[MetaVote],
         others: &[&[MetaVote]],
@@ -112,8 +109,9 @@ impl MetaVote {
         let mut next = Vec::new();
         for vote in prev {
             let counts = MetaVoteCounts::new(vote, others, total_peers);
-            let updated = vote.update(counts, &coin_tosses);
-            let decided = updated.decision.is_some();
+            let mut updated = *vote;
+            updated.update(counts, &coin_tosses);
+            let decided = vote.is_decided();
             next.push(updated);
             if decided {
                 break;
@@ -133,19 +131,17 @@ impl MetaVote {
         (self.round, self.step)
     }
 
-    fn update(&self, mut counts: MetaVoteCounts, coin_tosses: &BTreeMap<usize, bool>) -> MetaVote {
-        if self.decision.is_some() {
-            return *self;
+    fn is_decided(&self) -> bool {
+        if let MetaVoteValues::Decided(_) = self.values {
+            true
+        } else {
+            false
         }
-        let coin_toss = coin_tosses.get(&self.round);
-        let mut updated = *self;
-        updated.calculate_new_estimates(&mut counts, coin_toss);
-        let bin_values_was_empty = updated.bin_values.is_empty();
-        updated.calculate_new_bin_values(&mut counts);
-        updated.calculate_new_auxiliary_value(&mut counts, bin_values_was_empty);
-        counts.check_exceeding();
-        updated.calculate_new_decision(&counts);
-        updated
+    }
+
+    fn update(&mut self, counts: MetaVoteCounts, coin_tosses: &BTreeMap<usize, bool>) {
+        let coin_toss = coin_tosses.get(&self.round).cloned();
+        self.values.update(counts, coin_toss, self.step);
     }
 
     fn next_vote(
@@ -156,170 +152,36 @@ impl MetaVote {
     ) -> Option<MetaVote> {
         let parent = parent?;
 
-        if parent.decision.is_some() {
+        if parent.is_decided() {
             return None;
         }
         let counts = MetaVoteCounts::new(parent, others, total_peers);
         if counts.is_supermajority(counts.aux_values_set()) {
             let coin_toss = coin_tosses.get(&parent.round);
-            let next = parent.increase_step(&counts, coin_toss.cloned());
+            let mut next = parent.increase_step(&counts, coin_toss.cloned());
             let new_counts = MetaVoteCounts::new(&next, others, total_peers);
-            let updated = next.update(new_counts, &coin_tosses);
-            Some(updated)
+            next.update(new_counts, &coin_tosses);
+            Some(next)
         } else {
             None
         }
     }
 
-    fn calculate_new_estimates(&mut self, counts: &mut MetaVoteCounts, coin_toss: Option<&bool>) {
-        if self.estimates.is_empty() {
-            if let Some(toss) = coin_toss {
-                if *toss {
-                    counts.estimates_true += 1;
-                } else {
-                    counts.estimates_false += 1;
-                }
-                self.estimates = BoolSet::from_bool(*toss);
-            }
-        } else {
-            if counts.is_at_least_one_third(counts.estimates_true) && self.estimates.insert(true) {
-                counts.estimates_true += 1;
-            }
-            if counts.is_at_least_one_third(counts.estimates_false) && self.estimates.insert(false)
-            {
-                counts.estimates_false += 1;
-            }
-        }
-    }
-
-    fn calculate_new_bin_values(&mut self, counts: &mut MetaVoteCounts) {
-        if counts.is_supermajority(counts.estimates_true) && self.bin_values.insert(true) {
-            counts.bin_values_true += 1;
-        }
-        if counts.is_supermajority(counts.estimates_false) && self.bin_values.insert(false) {
-            counts.bin_values_false += 1;
-        }
-    }
-
-    fn calculate_new_auxiliary_value(
-        &mut self,
-        counts: &mut MetaVoteCounts,
-        bin_values_was_empty: bool,
-    ) {
-        if self.aux_value.is_some() {
-            return;
-        }
-        if bin_values_was_empty {
-            if self.bin_values.len() == 1 {
-                if self.bin_values.contains(true) {
-                    self.aux_value = Some(true);
-                    counts.aux_values_true += 1;
-                } else {
-                    self.aux_value = Some(false);
-                    counts.aux_values_false += 1;
-                }
-            } else if self.bin_values.len() == 2 {
-                self.aux_value = Some(true);
-                counts.aux_values_true += 1;
-            }
-        }
-    }
-
-    fn calculate_new_decision(&mut self, counts: &MetaVoteCounts) {
-        let opt_decision = match self.step {
-            Step::ForcedTrue => {
-                if self.bin_values.contains(true) && counts.is_supermajority(counts.aux_values_true)
-                {
-                    Some(true)
-                } else {
-                    counts.decision
-                }
-            }
-            Step::ForcedFalse => {
-                if self.bin_values.contains(false)
-                    && counts.is_supermajority(counts.aux_values_false)
-                {
-                    Some(false)
-                } else {
-                    counts.decision
-                }
-            }
-            Step::GenuineFlip => counts.decision,
-        };
-        if let Some(decision) = opt_decision {
-            self.estimates = BoolSet::from_bool(decision);
-            self.bin_values = BoolSet::from_bool(decision);
-            self.aux_value = Some(decision);
-            self.decision = Some(decision);
-        }
-    }
-
     fn increase_step(&self, counts: &MetaVoteCounts, coin_toss: Option<bool>) -> Self {
-        let mut next = Self {
-            bin_values: BoolSet::Empty,
-            aux_value: None,
-            ..*self
-        };
-
-        // Set the estimates as per the concrete coin toss rules.
+        let mut next = *self;
+        next.values.increase_step(counts, coin_toss, self.step);
         match next.step {
             Step::ForcedTrue => {
-                if counts.is_supermajority(counts.aux_values_false) {
-                    next.estimates = BoolSet::from_bool(false);
-                } else if !counts.is_supermajority(counts.aux_values_true) {
-                    next.estimates = BoolSet::from_bool(true);
-                }
                 next.step = Step::ForcedFalse;
             }
             Step::ForcedFalse => {
-                if counts.is_supermajority(counts.aux_values_true) {
-                    next.estimates = BoolSet::from_bool(true);
-                } else if !counts.is_supermajority(counts.aux_values_false) {
-                    next.estimates = BoolSet::from_bool(false);
-                }
                 next.step = Step::GenuineFlip;
             }
             Step::GenuineFlip => {
-                if counts.is_supermajority(counts.aux_values_true) {
-                    next.estimates = BoolSet::from_bool(true);
-                } else if counts.is_supermajority(counts.aux_values_false) {
-                    next.estimates = BoolSet::from_bool(false);
-                } else if let Some(coin_toss_result) = coin_toss {
-                    next.estimates = BoolSet::from_bool(coin_toss_result);
-                } else {
-                    // Clear the estimates to indicate we're waiting for further events to be
-                    // gossiped to try and get the coin toss result.
-                    next.estimates.clear();
-                }
                 next.step = Step::ForcedTrue;
                 next.round += 1;
             }
         }
-
         next
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Serialize, Deserialize)]
-pub(crate) enum Step {
-    ForcedTrue,
-    ForcedFalse,
-    GenuineFlip,
-}
-
-impl Default for Step {
-    fn default() -> Step {
-        Step::ForcedTrue
-    }
-}
-
-impl Debug for Step {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        let step = match self {
-            Step::ForcedTrue => 0,
-            Step::ForcedFalse => 1,
-            Step::GenuineFlip => 2,
-        };
-        write!(f, "{}", step)
     }
 }
