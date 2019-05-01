@@ -54,7 +54,8 @@ pub enum Observation<T: NetworkEvent, P: PublicId> {
 }
 
 impl<T: NetworkEvent, P: PublicId> Observation<T, P> {
-    pub(crate) fn is_opaque(&self) -> bool {
+    /// Is this observation's payload opaque to PARSEC?
+    pub fn is_opaque(&self) -> bool {
         if let Observation::OpaquePayload(_) = *self {
             true
         } else {
