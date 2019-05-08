@@ -403,11 +403,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .unwrap_or(false)
     }
 
-    /// Check if there are any observations that have been voted for but not yet consensused - i.e.
-    /// if there is a gossip event containing a vote for a payload that is not yet a part of a
-    /// stable block.
-    pub fn has_unconsensused_observations(&self) -> bool {
+    /// Check if there are any observations that have been voted for but not yet polled - that is,
+    /// either they haven't been consensused yet or a block containing that observation hasn't yet
+    /// been retrieved by calling `poll`.
+    pub fn has_unpolled_observations(&self) -> bool {
         self.observations.values().any(|info| !info.consensused)
+            || !self.consensused_blocks.is_empty()
     }
 
     /// Returns observations voted for by the owning peer which haven't been returned as a stable
