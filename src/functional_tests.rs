@@ -323,7 +323,7 @@ fn remove_peer() {
 }
 
 #[test]
-fn unpolled_and_unconsensused_observations() {
+fn unpolled_observations() {
     // Generated with RNG seed: [3016139397, 1416620722, 2110786801, 3768414447], but using
     // Alice-002.dot to get the dot file where we get consensus on `Add(Eric)`.
     let mut alice_contents = parse_test_dot_file("alice.dot");
@@ -331,9 +331,9 @@ fn unpolled_and_unconsensused_observations() {
 
     let mut alice = TestParsec::from_parsed_contents(alice_contents);
 
-    // `Add(Eric)` should still be unconsensused since A_17 would be the first gossip event to
+    // `Add(Eric)` should still be unpolled since A_17 would be the first gossip event to
     // reach consensus on `Add(Eric)`, but it was removed from the graph.
-    assert!(alice.has_unconsensused_observations());
+    assert!(alice.has_unpolled_observations());
 
     // Since we haven't called `poll()` yet, our vote for `Add(Eric)` should be returned by
     // `our_unpolled_observations()`.
@@ -344,10 +344,9 @@ fn unpolled_and_unconsensused_observations() {
     assert_eq!(alice.our_unpolled_observations().count(), 1);
     assert_eq!(*unwrap!(alice.our_unpolled_observations().next()), add_eric);
 
-    // Call `poll()` and retry - should have no effect to unconsensused and unpolled
-    // observations.
+    // Call `poll()` and retry - should have no effect to unpolled observations.
     assert!(alice.poll().is_none());
-    assert!(alice.has_unconsensused_observations());
+    assert!(alice.has_unpolled_observations());
     assert_eq!(alice.our_unpolled_observations().count(), 1);
     assert_eq!(*unwrap!(alice.our_unpolled_observations().next()), add_eric);
 
@@ -355,8 +354,7 @@ fn unpolled_and_unconsensused_observations() {
     unwrap!(alice.add_event(a_17));
 
     // Since we haven't call `poll()` again yet, should still return our vote for `Add(Eric)`.
-    // However, `has_unconsensused_observations()` should now return false.
-    assert!(!alice.has_unconsensused_observations());
+    assert!(alice.has_unpolled_observations());
     assert_eq!(alice.our_unpolled_observations().count(), 1);
     assert_eq!(*unwrap!(alice.our_unpolled_observations().next()), add_eric);
 
@@ -364,13 +362,14 @@ fn unpolled_and_unconsensused_observations() {
     unwrap!(alice.poll());
     assert!(alice.poll().is_none());
     assert!(alice.our_unpolled_observations().next().is_none());
+    assert!(!alice.has_unpolled_observations());
 
     // Vote for a new observation and check it is returned as unpolled, and that
-    // `has_unconsensused_observations()` returns false again.
+    // `has_unpolled_observations()` returns `true` again.
     let vote = Observation::OpaquePayload(Transaction::new("ABCD"));
     unwrap!(alice.vote_for(vote.clone()));
 
-    assert!(alice.has_unconsensused_observations());
+    assert!(alice.has_unpolled_observations());
     assert_eq!(alice.our_unpolled_observations().count(), 1);
     assert_eq!(*unwrap!(alice.our_unpolled_observations().next()), vote);
 
