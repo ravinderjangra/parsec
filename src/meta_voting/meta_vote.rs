@@ -10,6 +10,7 @@ use super::{bool_set::BoolSet, meta_vote_counts::MetaVoteCounts};
 use std::{
     collections::BTreeMap,
     fmt::{self, Debug, Formatter},
+    num::NonZeroUsize,
 };
 
 // This holds the state of a (binary) meta vote about which we're trying to achieve consensus.
@@ -76,7 +77,7 @@ impl MetaVote {
     pub fn new(
         initial_estimate: bool,
         others: &[&[MetaVote]],
-        total_peers: usize,
+        total_peers: NonZeroUsize,
         is_voter: bool,
     ) -> Vec<Self> {
         let mut initial = Self::default();
@@ -91,7 +92,7 @@ impl MetaVote {
     pub fn next_temp(
         parent: &[MetaVote],
         others: &[&[MetaVote]],
-        total_peers: usize,
+        total_peers: NonZeroUsize,
         is_voter: bool,
     ) -> Vec<Self> {
         Self::next_votes(parent, others, &BTreeMap::new(), total_peers, is_voter)
@@ -101,7 +102,7 @@ impl MetaVote {
     pub fn next_final(
         temp: &[MetaVote],
         coin_tosses: &BTreeMap<usize, bool>,
-        total_peers: usize,
+        total_peers: NonZeroUsize,
         is_voter: bool,
     ) -> Vec<Self> {
         Self::next_votes(temp, &[], coin_tosses, total_peers, is_voter)
@@ -111,7 +112,7 @@ impl MetaVote {
         prev: &[MetaVote],
         others: &[&[MetaVote]],
         coin_tosses: &BTreeMap<usize, bool>,
-        total_peers: usize,
+        total_peers: NonZeroUsize,
         is_voter: bool,
     ) -> Vec<Self> {
         let mut next = Vec::new();
@@ -162,7 +163,7 @@ impl MetaVote {
         parent: Option<&Self>,
         others: &[&[MetaVote]],
         coin_tosses: &BTreeMap<usize, bool>,
-        total_peers: usize,
+        total_peers: NonZeroUsize,
         is_voter: bool,
     ) -> Option<MetaVote> {
         let parent = parent?;
@@ -200,13 +201,13 @@ impl MetaVote {
                 self.estimates = BoolSet::from_bool(*toss);
             }
         } else {
-            if counts.at_least_one_third(counts.estimates_true)
+            if counts.is_at_least_one_third(counts.estimates_true)
                 && self.estimates.insert(true)
                 && is_voter
             {
                 counts.estimates_true += 1;
             }
-            if counts.at_least_one_third(counts.estimates_false)
+            if counts.is_at_least_one_third(counts.estimates_false)
                 && self.estimates.insert(false)
                 && is_voter
             {

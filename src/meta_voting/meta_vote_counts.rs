@@ -8,10 +8,11 @@
 
 use super::meta_vote::MetaVote;
 use crate::observation::is_more_than_two_thirds;
+use std::num::NonZeroUsize;
 
 // This is used to collect the meta votes of other events relating to a single (binary) meta vote at
 // a given round and step.
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub(crate) struct MetaVoteCounts {
     pub estimates_true: usize,
     pub estimates_false: usize,
@@ -20,7 +21,7 @@ pub(crate) struct MetaVoteCounts {
     pub aux_values_true: usize,
     pub aux_values_false: usize,
     pub decision: Option<bool>,
-    pub total_peers: usize,
+    pub total_peers: NonZeroUsize,
 }
 
 impl MetaVoteCounts {
@@ -30,11 +31,20 @@ impl MetaVoteCounts {
     pub fn new(
         parent: &MetaVote,
         others: &[&[MetaVote]],
-        total_peers: usize,
+        total_peers: NonZeroUsize,
         is_voter: bool,
     ) -> Self {
-        let mut counts = MetaVoteCounts::default();
-        counts.total_peers = total_peers;
+        let mut counts = Self {
+            estimates_true: 0,
+            estimates_false: 0,
+            bin_values_true: 0,
+            bin_values_false: 0,
+            aux_values_true: 0,
+            aux_values_false: 0,
+            decision: None,
+            total_peers,
+        };
+
         for vote in others
             .iter()
             .filter_map(|other| {
@@ -67,6 +77,7 @@ impl MetaVoteCounts {
                 counts.decision = vote.decision;
             }
         }
+
         counts
     }
 
@@ -75,23 +86,27 @@ impl MetaVoteCounts {
     }
 
     pub fn is_supermajority(&self, count: usize) -> bool {
-        is_more_than_two_thirds(count, self.total_peers)
+        is_more_than_two_thirds(count, self.total_peers())
     }
 
-    pub fn at_least_one_third(&self, count: usize) -> bool {
-        3 * count >= self.total_peers
+    pub fn is_at_least_one_third(&self, count: usize) -> bool {
+        3 * count >= self.total_peers()
     }
 
     pub fn check_exceeding(&self) {
-        let is_exceeding = self.estimates_true > self.total_peers
-            || self.estimates_false > self.total_peers
-            || self.bin_values_true > self.total_peers
-            || self.bin_values_false > self.total_peers
-            || self.aux_values_true > self.total_peers
-            || self.aux_values_false > self.total_peers;
+        let is_exceeding = self.estimates_true > self.total_peers()
+            || self.estimates_false > self.total_peers()
+            || self.bin_values_true > self.total_peers()
+            || self.bin_values_false > self.total_peers()
+            || self.aux_values_true > self.total_peers()
+            || self.aux_values_false > self.total_peers();
 
         if is_exceeding {
             log_or_panic!("Having count exceeding total peers {:?}", self);
         }
+    }
+
+    fn total_peers(&self) -> usize {
+        self.total_peers.get()
     }
 }
