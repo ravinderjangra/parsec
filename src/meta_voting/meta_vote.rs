@@ -185,3 +185,152 @@ impl MetaVote {
         next
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use crate::meta_voting::meta_vote_values::{AuxValue, BinValues, Estimates};
+    use std::num::NonZeroUsize;
+
+    #[test]
+    fn meta_vote_decide_if_any_decided() {
+        let mut collected_votes = vec![];
+        let mut others = vec![];
+        let decided_meta_vote = MetaVote {
+            round: 0,
+            step: Step::ForcedTrue,
+            values: MetaVoteValues::Decided(true),
+        };
+        let total_peers = 7;
+
+        collected_votes.push(vec![decided_meta_vote]);
+
+        let undecided_meta_vote = MetaVote {
+            round: 0,
+            step: Step::ForcedTrue,
+            values: MetaVoteValues::Undecided(UndecidedMetaVoteValues::default()),
+        };
+        for _ in 1..total_peers - 1 {
+            collected_votes.push(vec![undecided_meta_vote]);
+        }
+
+        for votes in collected_votes.iter() {
+            others.push(votes.as_slice());
+        }
+        let result = MetaVote::new_for_observer(
+            true,
+            others.as_slice(),
+            NonZeroUsize::new(total_peers).unwrap(),
+        );
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0], decided_meta_vote);
+    }
+
+    #[test]
+    fn meta_vote_progressing_step() {
+        let mut collected_votes = vec![];
+        let mut others = vec![];
+
+        let total_peers = 7;
+        let undecided_meta_vote = MetaVote {
+            round: 0,
+            step: Step::ForcedTrue,
+            values: MetaVoteValues::Undecided(UndecidedMetaVoteValues::new(
+                Estimates::new(BoolSet::Both),
+                BinValues::new(BoolSet::Both),
+                AuxValue::new(Some(false)),
+            )),
+        };
+        for _ in 0..total_peers - 1 {
+            collected_votes.push(vec![undecided_meta_vote]);
+        }
+
+        for votes in collected_votes.iter() {
+            others.push(votes.as_slice());
+        }
+        let result = MetaVote::new_for_observer(
+            true,
+            others.as_slice(),
+            NonZeroUsize::new(total_peers).unwrap(),
+        );
+        assert_eq!(result.len(), 2);
+        let expected_meta_votes = vec![
+            MetaVote {
+                round: 0,
+                step: Step::ForcedTrue,
+                values: MetaVoteValues::Undecided(UndecidedMetaVoteValues::new(
+                    Estimates::new(BoolSet::Both),
+                    BinValues::new(BoolSet::Both),
+                    AuxValue::new(Some(true)),
+                )),
+            },
+            MetaVote {
+                round: 0,
+                step: Step::ForcedFalse,
+                values: MetaVoteValues::Undecided(UndecidedMetaVoteValues::new(
+                    Estimates::new(BoolSet::Single(false)),
+                    BinValues::new(BoolSet::Empty),
+                    AuxValue::new(None),
+                )),
+            },
+        ];
+        assert_eq!(result, expected_meta_votes);
+    }
+
+    #[test]
+    fn meta_vote_reach_decision() {
+        let mut collected_votes = vec![];
+        let mut others = vec![];
+
+        let total_peers = 7;
+        let undecided_meta_vote_1 = MetaVote {
+            round: 0,
+            step: Step::ForcedTrue,
+            values: MetaVoteValues::Undecided(UndecidedMetaVoteValues::new(
+                Estimates::new(BoolSet::Both),
+                BinValues::new(BoolSet::Both),
+                AuxValue::new(Some(false)),
+            )),
+        };
+        let undecided_meta_vote_2 = MetaVote {
+            round: 0,
+            step: Step::ForcedFalse,
+            values: MetaVoteValues::Undecided(UndecidedMetaVoteValues::new(
+                Estimates::new(BoolSet::Single(false)),
+                BinValues::new(BoolSet::Single(false)),
+                AuxValue::new(Some(false)),
+            )),
+        };
+        for _ in 0..total_peers - 1 {
+            collected_votes.push(vec![undecided_meta_vote_1, undecided_meta_vote_2]);
+        }
+
+        for votes in collected_votes.iter() {
+            others.push(votes.as_slice());
+        }
+        let result = MetaVote::new_for_observer(
+            true,
+            others.as_slice(),
+            NonZeroUsize::new(total_peers).unwrap(),
+        );
+        assert_eq!(result.len(), 2);
+        let expected_meta_votes = vec![
+            MetaVote {
+                round: 0,
+                step: Step::ForcedTrue,
+                values: MetaVoteValues::Undecided(UndecidedMetaVoteValues::new(
+                    Estimates::new(BoolSet::Both),
+                    BinValues::new(BoolSet::Both),
+                    AuxValue::new(Some(true)),
+                )),
+            },
+            MetaVote {
+                round: 0,
+                step: Step::ForcedFalse,
+                values: MetaVoteValues::Decided(false),
+            },
+        ];
+        assert_eq!(result, expected_meta_votes);
+    }
+}
