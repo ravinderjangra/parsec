@@ -44,7 +44,9 @@ use std::{
     collections::{BTreeMap, BTreeSet, VecDeque},
     iter,
     marker::PhantomData,
-    mem, usize,
+    mem,
+    num::NonZeroUsize,
+    usize,
 };
 
 /// The main object which manages creating and receiving gossip about network events from peers, and
@@ -1063,6 +1065,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
 
         let voters = self.voters();
+        let voters_len = match NonZeroUsize::new(voters.len()) {
+            Some(num) => num,
+            None => {
+                log_or_panic!("{:?} has no voters", self.our_pub_id());
+                return Ok(());
+            }
+        };
+
         let is_voter = voters.contains(builder.event().creator());
         let ancestors_meta_votes =
             self.other_voting_ancestors_meta_votes(&voters, &builder.event());
@@ -1082,7 +1092,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 .map(|(peer_index, parent_votes)| {
                     let other_votes = Self::peer_meta_votes(&ancestors_meta_votes, peer_index);
                     let temp_votes =
-                        MetaVote::next_temp(parent_votes, &other_votes, voters.len(), is_voter);
+                        MetaVote::next_temp(parent_votes, &other_votes, voters_len, is_voter);
 
                     (peer_index, temp_votes)
                 })
@@ -1096,7 +1106,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             for (peer_index, temp_votes) in &context.temp_votes {
                 let coin_tosses = self.toss_coins(&voters, peer_index, temp_votes, &context)?;
                 let final_meta_votes =
-                    MetaVote::next_final(temp_votes, &coin_tosses, voters.len(), is_voter);
+                    MetaVote::next_final(temp_votes, &coin_tosses, voters_len, is_voter);
 
                 builder.add_meta_votes(peer_index, final_meta_votes);
             }
@@ -1107,7 +1117,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                     let other_votes = Self::peer_meta_votes(&ancestors_meta_votes, peer_index);
                     let initial_estimate = builder.has_observee(peer_index);
 
-                    MetaVote::new(initial_estimate, &other_votes, voters.len(), is_voter)
+                    MetaVote::new(initial_estimate, &other_votes, voters_len, is_voter)
                 };
 
                 builder.add_meta_votes(peer_index, new_meta_votes);
