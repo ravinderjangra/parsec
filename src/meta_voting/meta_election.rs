@@ -13,9 +13,8 @@ use super::{
 use crate::{
     gossip::{EventIndex, Graph},
     id::PublicId,
-    observation::{ObservationHash, ObservationKey},
+    observation::ObservationKey,
     peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerListChange},
-    round_hash::RoundHash,
 };
 use fnv::{FnvHashMap, FnvHashSet};
 use std::{cmp, collections::BTreeSet, usize};
@@ -36,9 +35,6 @@ pub(crate) struct UnconsensusedEvents {
 pub(crate) struct MetaElection {
     // Set of meta-events corresponding to the events in the gossip graph.
     pub(crate) meta_events: FnvHashMap<EventIndex, MetaEvent>,
-    // The "round hash" for each set of meta votes.  They are held in sequence in the `Vec`, i.e.
-    // the one for round `x` is held at index `x`.
-    pub(crate) round_hashes: PeerIndexMap<Vec<RoundHash>>,
     // Set of peers participating in this meta-election, i.e. all voters at the time the current
     // meta-election was started.
     pub(crate) voters: PeerIndexSet,
@@ -60,7 +56,6 @@ impl MetaElection {
     pub fn new(voters: PeerIndexSet) -> Self {
         MetaElection {
             meta_events: FnvHashMap::default(),
-            round_hashes: PeerIndexMap::default(),
             voters,
             interesting_events: PeerIndexMap::default(),
             unconsensused_events: UnconsensusedEvents::default(),
@@ -74,22 +69,6 @@ impl MetaElection {
         let event_index = builder.event().event_index();
         let creator = builder.event().creator();
         let meta_event = builder.finish();
-
-        // Update round hashes.
-        for (peer_index, event_votes) in &meta_event.meta_votes {
-            let hashes = if let Some(hashes) = self.round_hashes.get_mut(peer_index) {
-                hashes
-            } else {
-                continue;
-            };
-
-            for meta_vote in event_votes {
-                while hashes.len() < meta_vote.round + 1 {
-                    let next_round_hash = hashes[hashes.len() - 1].increment_round();
-                    hashes.push(next_round_hash);
-                }
-            }
-        }
 
         // Update interesting events.
         if !meta_event.interesting_content.is_empty() {
@@ -117,10 +96,6 @@ impl MetaElection {
             .get(&event_index)
             .map(|meta_event| &meta_event.meta_votes)
             .filter(|meta_votes| !meta_votes.is_empty())
-    }
-
-    pub fn round_hashes(&self, peer_index: PeerIndex) -> Option<&Vec<RoundHash>> {
-        self.round_hashes.get(peer_index)
     }
 
     /// List of voters participating in the current meta-election.
@@ -176,28 +151,7 @@ impl MetaElection {
         self.update_meta_events(&decided_keys, peer_list_changed);
         self.update_interesting_content(graph);
 
-        self.round_hashes.clear();
         self.consensus_history.extend(decided_keys);
-    }
-
-    pub fn initialise_round_hashes<'a, I, P>(&mut self, peer_ids: I)
-    where
-        I: IntoIterator<Item = (PeerIndex, &'a P)>,
-        P: PublicId + 'a,
-    {
-        let hash = self
-            .consensus_history
-            .last()
-            .map(|key| *key.hash())
-            .unwrap_or(ObservationHash::ZERO);
-
-        self.round_hashes = peer_ids
-            .into_iter()
-            .map(|(index, id)| {
-                let round_hash = RoundHash::new(id, hash);
-                (index, vec![round_hash])
-            })
-            .collect();
     }
 
     #[cfg(feature = "dump-graphs")]
@@ -357,7 +311,6 @@ pub(crate) mod snapshot {
     #[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]
     pub(crate) struct MetaElectionSnapshot<P: PublicId> {
         meta_events: BTreeMap<EventHash, MetaEventSnapshot<P>>,
-        round_hashes: BTreeMap<P, Vec<RoundHash>>,
         voters: BTreeSet<P>,
         interesting_events: BTreeMap<P, Vec<EventHash>>,
     }
@@ -401,15 +354,6 @@ pub(crate) mod snapshot {
 
             MetaElectionSnapshot {
                 meta_events,
-                round_hashes: meta_election
-                    .round_hashes
-                    .iter()
-                    .filter_map(|(peer_index, hashes)| {
-                        peer_list
-                            .get(peer_index)
-                            .map(|peer| (peer.id().clone(), hashes.clone()))
-                    })
-                    .collect(),
                 voters: meta_election
                     .voters
                     .iter()

@@ -6,10 +6,7 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use std::{
-    cmp::Ordering,
-    fmt::{self, Debug, Formatter},
-};
+use std::fmt::{self, Debug, Formatter};
 use tiny_keccak;
 
 pub const HASH_LEN: usize = 32;
@@ -19,23 +16,6 @@ pub struct Hash([u8; HASH_LEN]);
 
 impl Hash {
     pub const ZERO: Self = Hash([0; HASH_LEN]);
-
-    // Compares the distance of the arguments to `self`.  Returns `Less` if `lhs` is closer,
-    // `Greater` if `rhs` is closer, and `Equal` if `lhs == rhs`.  (The XOR distance can only be
-    // equal if the arguments are equal.)
-    pub fn xor_cmp(&self, lhs: &Self, rhs: &Self) -> Ordering {
-        for i in 0..HASH_LEN {
-            if lhs.0[i] != rhs.0[i] {
-                return Ord::cmp(&(lhs.0[i] ^ self.0[i]), &(rhs.0[i] ^ self.0[i]));
-            }
-        }
-        Ordering::Equal
-    }
-
-    /// Returns the least significant bit of this hash.
-    pub fn least_significant_bit(&self) -> bool {
-        (self.0[HASH_LEN - 1] & 1) != 0
-    }
 
     #[cfg(any(test, feature = "testing"))]
     pub fn from_bytes(bytes: [u8; HASH_LEN]) -> Self {

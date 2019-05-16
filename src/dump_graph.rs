@@ -700,37 +700,6 @@ mod detail {
 
             lines.push("".to_string());
 
-            // write round hashes
-            lines.push(format!(
-                "{}{}round_hashes: {{",
-                Self::COMMENT,
-                self.indentation()
-            ));
-            self.indent();
-            let round_hashes = self.convert_peer_index_map(&self.meta_election.round_hashes);
-            for (peer, hashes) in round_hashes {
-                lines.push(format!(
-                    "{}{}{:?} -> [",
-                    Self::COMMENT,
-                    self.indentation(),
-                    peer
-                ));
-                self.indent();
-                for hash in hashes {
-                    lines.push(format!(
-                        "{}{}RoundHash {{ round: {}, latest_block_hash: {} }}",
-                        Self::COMMENT,
-                        self.indentation(),
-                        hash.round(),
-                        hash.latest_block_hash().0.full_display(),
-                    ));
-                }
-                self.dedent();
-                lines.push(format!("{}{}]", Self::COMMENT, self.indentation()));
-            }
-            self.dedent();
-            lines.push(format!("{}{}}}", Self::COMMENT, self.indentation()));
-
             // write interesting events
             lines.push(format!(
                 "{}{}interesting_events: {{",

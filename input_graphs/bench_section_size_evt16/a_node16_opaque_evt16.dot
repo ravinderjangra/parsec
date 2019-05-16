@@ -8540,56 +8540,6 @@ digraph GossipGraph {
 /// 7a33039ff260ff252c407ba3e6e5fff825ed08950600d5177621e6961a930b02
 /// 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1
 
-/// round_hashes: {
-///   Alice -> [
-///     RoundHash { round: 0, latest_block_hash: 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1 }
-///   ]
-///   Bob -> [
-///     RoundHash { round: 0, latest_block_hash: 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1 }
-///   ]
-///   Carol -> [
-///     RoundHash { round: 0, latest_block_hash: 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1 }
-///   ]
-///   Dave -> [
-///     RoundHash { round: 0, latest_block_hash: 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1 }
-///   ]
-///   Eric -> [
-///     RoundHash { round: 0, latest_block_hash: 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1 }
-///   ]
-///   Fred -> [
-///     RoundHash { round: 0, latest_block_hash: 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1 }
-///   ]
-///   Gina -> [
-///     RoundHash { round: 0, latest_block_hash: 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1 }
-///   ]
-///   Hank -> [
-///     RoundHash { round: 0, latest_block_hash: 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1 }
-///   ]
-///   Iris -> [
-///     RoundHash { round: 0, latest_block_hash: 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1 }
-///   ]
-///   Judy -> [
-///     RoundHash { round: 0, latest_block_hash: 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1 }
-///   ]
-///   Kent -> [
-///     RoundHash { round: 0, latest_block_hash: 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1 }
-///   ]
-///   Lucy -> [
-///     RoundHash { round: 0, latest_block_hash: 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1 }
-///   ]
-///   Mike -> [
-///     RoundHash { round: 0, latest_block_hash: 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1 }
-///   ]
-///   Nina -> [
-///     RoundHash { round: 0, latest_block_hash: 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1 }
-///   ]
-///   Oran -> [
-///     RoundHash { round: 0, latest_block_hash: 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1 }
-///   ]
-///   Paul -> [
-///     RoundHash { round: 0, latest_block_hash: 9daa8f8e91616a1767775bb12b979b05e19803b113b76171a70542ea83e0a6b1 }
-///   ]
-/// }
 /// interesting_events: {
 /// }
 /// all_voters: {Alice, Bob, Carol, Dave, Eric, Fred, Gina, Hank, Iris, Judy, Kent, Lucy, Mike, Nina, Oran, Paul}

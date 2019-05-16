@@ -1056,20 +1056,6 @@ digraph GossipGraph {
 /// 536064db2b5377cf11e48ecceb446f92caf827a0cbe406f8d950f528ebcd7118
 /// 2de98dadad369c1db05f5d6bd01b5dc84d4e926cd2f246eff5aebc2fbe50b7d5
 
-/// round_hashes: {
-///   Alice -> [
-///     RoundHash { round: 0, latest_block_hash: 2de98dadad369c1db05f5d6bd01b5dc84d4e926cd2f246eff5aebc2fbe50b7d5 }
-///   ]
-///   Bob -> [
-///     RoundHash { round: 0, latest_block_hash: 2de98dadad369c1db05f5d6bd01b5dc84d4e926cd2f246eff5aebc2fbe50b7d5 }
-///   ]
-///   Carol -> [
-///     RoundHash { round: 0, latest_block_hash: 2de98dadad369c1db05f5d6bd01b5dc84d4e926cd2f246eff5aebc2fbe50b7d5 }
-///   ]
-///   Dave -> [
-///     RoundHash { round: 0, latest_block_hash: 2de98dadad369c1db05f5d6bd01b5dc84d4e926cd2f246eff5aebc2fbe50b7d5 }
-///   ]
-/// }
 /// interesting_events: {
 /// }
 /// all_voters: {Alice, Bob, Carol, Dave}

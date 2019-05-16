@@ -189,7 +189,6 @@ mod observation;
 mod parsec;
 mod parsec_helpers;
 mod peer_list;
-mod round_hash;
 mod vote;
 
 #[cfg(all(test, feature = "mock"))]

@@ -9,9 +9,7 @@
 use super::peer_state::PeerState;
 use crate::{
     gossip::{EventIndex, IndexedEventRef},
-    hash::Hash,
     id::PublicId,
-    serialise,
 };
 use itertools::Itertools;
 use std::{
@@ -22,7 +20,6 @@ use std::{
 #[derive(Debug)]
 pub(crate) struct Peer<P: PublicId> {
     id: P,
-    id_hash: Hash,
     presence: Presence,
     pub(super) events: Events,
     pub(super) last_gossiped_event: Option<EventIndex>,
@@ -34,11 +31,8 @@ pub(crate) struct Peer<P: PublicId> {
 
 impl<P: PublicId> Peer<P> {
     pub(super) fn new(id: P, state: PeerState) -> Self {
-        let id_hash = Hash::from(serialise(&id).as_slice());
-
         Self {
             id,
-            id_hash,
             presence: Presence::Present(state),
             events: Events::new(),
             last_gossiped_event: None,
@@ -49,10 +43,6 @@ impl<P: PublicId> Peer<P> {
 
     pub fn id(&self) -> &P {
         &self.id
-    }
-
-    pub fn id_hash(&self) -> &Hash {
-        &self.id_hash
     }
 
     pub fn state(&self) -> PeerState {

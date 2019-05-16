@@ -14092,23 +14092,6 @@ digraph GossipGraph {
 /// 8d6a3c732c13e19b06e45a30b758c7a2b7954bca00fb44d05366d3fedc44701b
 /// 8d6a3c732c13e19b06e45a30b758c7a2b7954bca00fb44d05366d3fedc44701b
 
-/// round_hashes: {
-///   PublicIdname931a51 -> [
-///     RoundHash { round: 0, latest_block_hash: 8d6a3c732c13e19b06e45a30b758c7a2b7954bca00fb44d05366d3fedc44701b }
-///   ]
-///   PublicIdname93b63e -> [
-///     RoundHash { round: 0, latest_block_hash: 8d6a3c732c13e19b06e45a30b758c7a2b7954bca00fb44d05366d3fedc44701b }
-///   ]
-///   PublicIdnameacee77 -> [
-///     RoundHash { round: 0, latest_block_hash: 8d6a3c732c13e19b06e45a30b758c7a2b7954bca00fb44d05366d3fedc44701b }
-///   ]
-///   PublicIdnameb0b36e -> [
-///     RoundHash { round: 0, latest_block_hash: 8d6a3c732c13e19b06e45a30b758c7a2b7954bca00fb44d05366d3fedc44701b }
-///   ]
-///   PublicIdnameb0e91c -> [
-///     RoundHash { round: 0, latest_block_hash: 8d6a3c732c13e19b06e45a30b758c7a2b7954bca00fb44d05366d3fedc44701b }
-///   ]
-/// }
 /// interesting_events: {
 /// }
 /// all_voters: {PublicIdname931a51, PublicIdname93b63e, PublicIdnameacee77, PublicIdnameb0b36e, PublicIdnameb0e91c}

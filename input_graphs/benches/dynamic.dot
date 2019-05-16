@@ -2031,26 +2031,6 @@ digraph GossipGraph {
 /// 431f0c951b12c7fc29b028eedbf84bd4e61ea6a02b1fa29d281255d6ac77a19b
 /// 04e107fe5c852eb519251f861059c5d5e74e4954257fb396490cd6d77371cac7
 
-/// round_hashes: {
-///   Alice -> [
-///     RoundHash { round: 0, latest_block_hash: 04e107fe5c852eb519251f861059c5d5e74e4954257fb396490cd6d77371cac7 }
-///   ]
-///   Bob -> [
-///     RoundHash { round: 0, latest_block_hash: 04e107fe5c852eb519251f861059c5d5e74e4954257fb396490cd6d77371cac7 }
-///   ]
-///   Carol -> [
-///     RoundHash { round: 0, latest_block_hash: 04e107fe5c852eb519251f861059c5d5e74e4954257fb396490cd6d77371cac7 }
-///   ]
-///   Dave -> [
-///     RoundHash { round: 0, latest_block_hash: 04e107fe5c852eb519251f861059c5d5e74e4954257fb396490cd6d77371cac7 }
-///   ]
-///   Eric -> [
-///     RoundHash { round: 0, latest_block_hash: 04e107fe5c852eb519251f861059c5d5e74e4954257fb396490cd6d77371cac7 }
-///   ]
-///   Fred -> [
-///     RoundHash { round: 0, latest_block_hash: 04e107fe5c852eb519251f861059c5d5e74e4954257fb396490cd6d77371cac7 }
-///   ]
-/// }
 /// interesting_events: {
 /// }
 /// all_voters: {Alice, Bob, Carol, Dave, Eric, Fred}

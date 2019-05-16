@@ -22,7 +22,6 @@ use crate::{
         ObservationKey, ObservationStore,
     },
     peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList, PeerState},
-    round_hash::RoundHash,
 };
 use fnv::{FnvHashMap, FnvHashSet};
 use itertools::Itertools;
@@ -401,7 +400,6 @@ fn parse_hash() -> Parser<u8, Hash> {
 
 #[derive(Debug)]
 struct ParsedMetaElection {
-    round_hashes: BTreeMap<PeerId, Vec<RoundHash>>,
     interesting_events: BTreeMap<PeerId, Vec<String>>,
     voters: BTreeSet<PeerId>,
     payload: Option<Observation<Transaction, PeerId>>,
@@ -422,7 +420,6 @@ fn parse_meta_election(ctx: &Rc<ParserCtx>) -> Parser<u8, ParsedMetaElection> {
     seq(b"/// ===== meta-elections =====")
         * next_line()
         * (parse_consensus_history() - next_line()
-            + parse_round_hashes()
             + parse_interesting_events()
             + parse_voters()
             + parse_payload().opt()
@@ -431,7 +428,7 @@ fn parse_meta_election(ctx: &Rc<ParserCtx>) -> Parser<u8, ParsedMetaElection> {
         .map(
             |(
                 (
-                    ((((consensus_history, round_hashes), interesting_events), voters), payload),
+                    (((consensus_history, interesting_events), voters), payload),
                     unconsensused_events,
                 ),
                 observation_map_and_meta_events,
@@ -444,7 +441,6 @@ fn parse_meta_election(ctx: &Rc<ParserCtx>) -> Parser<u8, ParsedMetaElection> {
                 }
 
                 ParsedMetaElection {
-                    round_hashes,
                     interesting_events,
                     voters,
                     payload,
@@ -455,38 +451,6 @@ fn parse_meta_election(ctx: &Rc<ParserCtx>) -> Parser<u8, ParsedMetaElection> {
                 }
             },
         )
-}
-
-fn parse_round_hashes() -> Parser<u8, BTreeMap<PeerId, Vec<RoundHash>>> {
-    (comment_prefix()
-        * seq(b"round_hashes: {")
-        * next_line()
-        * parse_round_hashes_for_peer().repeat(0..)
-        - comment_prefix()
-        - seq(b"}")
-        - next_line())
-    .map(|v| v.into_iter().collect())
-}
-
-fn parse_round_hashes_for_peer() -> Parser<u8, (PeerId, Vec<RoundHash>)> {
-    (comment_prefix() * parse_peer_id() - seq(b" -> [") - next_line()
-        + parse_single_round_hash().repeat(0..)
-        - comment_prefix()
-        - sym(b']')
-        - next_line())
-    .map(|(id, hashes)| {
-        let round_hashes = hashes
-            .into_iter()
-            .map(|hash| RoundHash::new_with_round(&id, ObservationHash(hash.1), hash.0))
-            .collect();
-        (id, round_hashes)
-    })
-}
-
-fn parse_single_round_hash() -> Parser<u8, (usize, Hash)> {
-    comment_prefix() * seq(b"RoundHash { round: ") * parse_usize() - seq(b", latest_block_hash: ")
-        + parse_hash()
-        - next_line()
 }
 
 fn parse_usize() -> Parser<u8, usize> {
@@ -1021,7 +985,6 @@ fn convert_to_meta_election(
 
     MetaElection {
         meta_events,
-        round_hashes: convert_peer_id_map(meta_election.round_hashes, peer_list),
         voters: convert_peer_id_set(meta_election.voters, peer_list),
         interesting_events,
         unconsensused_events,
