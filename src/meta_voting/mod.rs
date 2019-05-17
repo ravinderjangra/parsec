@@ -12,14 +12,14 @@ mod meta_event;
 mod meta_vote;
 mod meta_vote_counts;
 
-#[cfg(any(test, feature = "testing"))]
-pub(crate) use self::bool_set::BoolSet;
 #[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
 pub(crate) use self::meta_election::snapshot::MetaElectionSnapshot;
 #[cfg(any(test, feature = "testing"))]
 pub(crate) use self::meta_election::UnconsensusedEvents;
+#[cfg(any(test, feature = "testing"))]
+pub(crate) use self::{bool_set::BoolSet, meta_vote::Step};
 pub(crate) use self::{
     meta_election::MetaElection,
     meta_event::{MetaEvent, MetaEventBuilder, Observer},
-    meta_vote::{MetaVote, Step},
+    meta_vote::MetaVote,
 };

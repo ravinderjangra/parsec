@@ -812,20 +812,6 @@ digraph GossipGraph {
 /// a995f407be5a53b800900971a0ecb55be9c862c52a32edddf5dafb990a665a7f
 /// 9249dbc6baeb1915523f8b4ced2450ecaaded3ddc16a6f8c9c0d9e7fa6edc31b
 
-/// round_hashes: {
-///   PublicIdname12abcd -> [
-///     RoundHash { round: 0, latest_block_hash: 9249dbc6baeb1915523f8b4ced2450ecaaded3ddc16a6f8c9c0d9e7fa6edc31b }
-///   ]
-///   PublicIdnameab4598 -> [
-///     RoundHash { round: 0, latest_block_hash: 9249dbc6baeb1915523f8b4ced2450ecaaded3ddc16a6f8c9c0d9e7fa6edc31b }
-///   ]
-///   PublicIdnamecdb63e -> [
-///     RoundHash { round: 0, latest_block_hash: 9249dbc6baeb1915523f8b4ced2450ecaaded3ddc16a6f8c9c0d9e7fa6edc31b }
-///   ]
-///   PublicIdnameef4fb9 -> [
-///     RoundHash { round: 0, latest_block_hash: 9249dbc6baeb1915523f8b4ced2450ecaaded3ddc16a6f8c9c0d9e7fa6edc31b }
-///   ]
-/// }
 /// interesting_events: {
 ///   PublicIdname12abcd -> ["PublicIdname1_11"]
 ///   PublicIdnameab4598 -> ["PublicIdnamea_12"]
@@ -883,9 +869,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   -   -   - 
-///       PublicIdnamea: 0/0   t   -   -   - 
-///       PublicIdnamec: 0/0   t   -   -   - 
+///       PublicIdname1: 0/0   t   -   -   -
+///       PublicIdnamea: 0/0   t   -   -   -
+///       PublicIdnamec: 0/0   t   -   -   -
 ///     }
 ///   }
 ///   PublicIdname1_20 -> {
@@ -893,9 +879,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   -   -   - 
-///       PublicIdnamea: 0/0   t   -   -   - 
-///       PublicIdnamec: 0/0   t   -   -   - 
+///       PublicIdname1: 0/0   t   -   -   -
+///       PublicIdnamea: 0/0   t   -   -   -
+///       PublicIdnamec: 0/0   t   -   -   -
 ///     }
 ///   }
 ///   PublicIdname1_21 -> {
@@ -903,9 +889,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   -   -   - 
-///       PublicIdnamea: 0/0   t   -   -   - 
-///       PublicIdnamec: 0/0   t   -   -   - 
+///       PublicIdname1: 0/0   t   -   -   -
+///       PublicIdnamea: 0/0   t   -   -   -
+///       PublicIdnamec: 0/0   t   -   -   -
 ///     }
 ///   }
 ///   PublicIdname1_22 -> {
@@ -913,9 +899,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   t   t   - 
-///       PublicIdnamea: 0/0   t   t   t   - 
-///       PublicIdnamec: 0/0   t   t   t   - 
+///       PublicIdname1: 0/0   t   t   t   -
+///       PublicIdnamea: 0/0   t   t   t   -
+///       PublicIdnamec: 0/0   t   t   t   -
 ///     }
 ///   }
 ///   PublicIdname1_23 -> {
@@ -923,9 +909,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   t   t   - 
-///       PublicIdnamea: 0/0   t   t   t   - 
-///       PublicIdnamec: 0/0   t   t   t   - 
+///       PublicIdname1: 0/0   t   t   t   -
+///       PublicIdnamea: 0/0   t   t   t   -
+///       PublicIdnamec: 0/0   t   t   t   -
 ///     }
 ///   }
 ///   PublicIdname1_24 -> {
@@ -933,9 +919,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   t   t   - 
-///       PublicIdnamea: 0/0   t   t   t   - 
-///       PublicIdnamec: 0/0   t   t   t   - 
+///       PublicIdname1: 0/0   t   t   t   -
+///       PublicIdnamea: 0/0   t   t   t   -
+///       PublicIdnamec: 0/0   t   t   t   -
 ///     }
 ///   }
 ///   PublicIdnamea_4 -> {
@@ -999,9 +985,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   -   -   - 
-///       PublicIdnamea: 0/0   t   -   -   - 
-///       PublicIdnamec: 0/0   t   -   -   - 
+///       PublicIdname1: 0/0   t   -   -   -
+///       PublicIdnamea: 0/0   t   -   -   -
+///       PublicIdnamec: 0/0   t   -   -   -
 ///     }
 ///   }
 ///   PublicIdnamea_19 -> {
@@ -1009,9 +995,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   -   -   - 
-///       PublicIdnamea: 0/0   t   -   -   - 
-///       PublicIdnamec: 0/0   t   -   -   - 
+///       PublicIdname1: 0/0   t   -   -   -
+///       PublicIdnamea: 0/0   t   -   -   -
+///       PublicIdnamec: 0/0   t   -   -   -
 ///     }
 ///   }
 ///   PublicIdnamea_20 -> {
@@ -1019,9 +1005,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   -   -   - 
-///       PublicIdnamea: 0/0   t   -   -   - 
-///       PublicIdnamec: 0/0   t   -   -   - 
+///       PublicIdname1: 0/0   t   -   -   -
+///       PublicIdnamea: 0/0   t   -   -   -
+///       PublicIdnamec: 0/0   t   -   -   -
 ///     }
 ///   }
 ///   PublicIdnamea_21 -> {
@@ -1029,9 +1015,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   -   -   - 
-///       PublicIdnamea: 0/0   t   -   -   - 
-///       PublicIdnamec: 0/0   t   -   -   - 
+///       PublicIdname1: 0/0   t   -   -   -
+///       PublicIdnamea: 0/0   t   -   -   -
+///       PublicIdnamec: 0/0   t   -   -   -
 ///     }
 ///   }
 ///   PublicIdnamea_22 -> {
@@ -1039,9 +1025,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   t   t   t 
-///       PublicIdnamea: 0/0   t   t   t   t 
-///       PublicIdnamec: 0/0   t   t   t   t 
+///       PublicIdname1: 0/0   t   t   t   t
+///       PublicIdnamea: 0/0   t   t   t   t
+///       PublicIdnamec: 0/0   t   t   t   t
 ///     }
 ///   }
 ///   PublicIdnamec_7 -> {
@@ -1125,9 +1111,9 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   t   t   - 
-///       PublicIdnamea: 0/0   t   t   t   - 
-///       PublicIdnamec: 0/0   t   t   t   - 
+///       PublicIdname1: 0/0   t   t   t   -
+///       PublicIdnamea: 0/0   t   t   t   -
+///       PublicIdnamec: 0/0   t   t   t   -
 ///     }
 ///   }
 /// }

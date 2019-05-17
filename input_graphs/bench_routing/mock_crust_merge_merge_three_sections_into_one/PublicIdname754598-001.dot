@@ -32508,38 +32508,6 @@ digraph GossipGraph {
 /// c4db2f62d1c1586f6ff062b8b25c05f9684e09f2c3cf251a5818612dcf9ab895
 /// d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279
 
-/// round_hashes: {
-///   PublicIdname48840d -> [
-///     RoundHash { round: 0, latest_block_hash: d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279 }
-///   ]
-///   PublicIdname4b4fb9 -> [
-///     RoundHash { round: 0, latest_block_hash: d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279 }
-///   ]
-///   PublicIdname5c8502 -> [
-///     RoundHash { round: 0, latest_block_hash: d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279 }
-///   ]
-///   PublicIdname70ccc7 -> [
-///     RoundHash { round: 0, latest_block_hash: d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279 }
-///   ]
-///   PublicIdname754598 -> [
-///     RoundHash { round: 0, latest_block_hash: d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279 }
-///   ]
-///   PublicIdname93b63e -> [
-///     RoundHash { round: 0, latest_block_hash: d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279 }
-///   ]
-///   PublicIdnamecdfb7c -> [
-///     RoundHash { round: 0, latest_block_hash: d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279 }
-///   ]
-///   PublicIdnamee2d762 -> [
-///     RoundHash { round: 0, latest_block_hash: d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279 }
-///   ]
-///   PublicIdnamee5945a -> [
-///     RoundHash { round: 0, latest_block_hash: d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279 }
-///   ]
-///   PublicIdnamee870b5 -> [
-///     RoundHash { round: 0, latest_block_hash: d8c072dd52ed41636bf3dbdd997d57400aadd05f0d57793a3149a3a79dbe4279 }
-///   ]
-/// }
 /// interesting_events: {
 ///   PublicIdname48840d -> ["PublicIdname48_368", "PublicIdname48_372"]
 ///   PublicIdname4b4fb9 -> ["PublicIdname4b_531"]

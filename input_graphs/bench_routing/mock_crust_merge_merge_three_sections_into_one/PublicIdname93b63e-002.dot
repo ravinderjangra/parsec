@@ -41507,38 +41507,6 @@ digraph GossipGraph {
 /// eedeb1376acf66ea17bab80c6757789f3b2c2b0b704268ad92126f5495265201
 /// 9428b346ef77252dce1c6b9ba8573578fc8013c1b3f052ae67e7f648b0ca7cc2
 
-/// round_hashes: {
-///   PublicIdname931a51 -> [
-///     RoundHash { round: 0, latest_block_hash: 9428b346ef77252dce1c6b9ba8573578fc8013c1b3f052ae67e7f648b0ca7cc2 }
-///   ]
-///   PublicIdname93b63e -> [
-///     RoundHash { round: 0, latest_block_hash: 9428b346ef77252dce1c6b9ba8573578fc8013c1b3f052ae67e7f648b0ca7cc2 }
-///   ]
-///   PublicIdnameacee77 -> [
-///     RoundHash { round: 0, latest_block_hash: 9428b346ef77252dce1c6b9ba8573578fc8013c1b3f052ae67e7f648b0ca7cc2 }
-///   ]
-///   PublicIdnameb0b36e -> [
-///     RoundHash { round: 0, latest_block_hash: 9428b346ef77252dce1c6b9ba8573578fc8013c1b3f052ae67e7f648b0ca7cc2 }
-///   ]
-///   PublicIdnameb0e91c -> [
-///     RoundHash { round: 0, latest_block_hash: 9428b346ef77252dce1c6b9ba8573578fc8013c1b3f052ae67e7f648b0ca7cc2 }
-///   ]
-///   PublicIdnamecdfb7c -> [
-///     RoundHash { round: 0, latest_block_hash: 9428b346ef77252dce1c6b9ba8573578fc8013c1b3f052ae67e7f648b0ca7cc2 }
-///   ]
-///   PublicIdnamee2d762 -> [
-///     RoundHash { round: 0, latest_block_hash: 9428b346ef77252dce1c6b9ba8573578fc8013c1b3f052ae67e7f648b0ca7cc2 }
-///   ]
-///   PublicIdnamee5945a -> [
-///     RoundHash { round: 0, latest_block_hash: 9428b346ef77252dce1c6b9ba8573578fc8013c1b3f052ae67e7f648b0ca7cc2 }
-///   ]
-///   PublicIdnamee870b5 -> [
-///     RoundHash { round: 0, latest_block_hash: 9428b346ef77252dce1c6b9ba8573578fc8013c1b3f052ae67e7f648b0ca7cc2 }
-///   ]
-///   PublicIdnameed283c -> [
-///     RoundHash { round: 0, latest_block_hash: 9428b346ef77252dce1c6b9ba8573578fc8013c1b3f052ae67e7f648b0ca7cc2 }
-///   ]
-/// }
 /// interesting_events: {
 /// }
 /// all_voters: {PublicIdname931a51, PublicIdname93b63e, PublicIdnameacee77, PublicIdnameb0b36e, PublicIdnameb0e91c, PublicIdnamecdfb7c, PublicIdnamee2d762, PublicIdnamee5945a, PublicIdnamee870b5, PublicIdnameed283c}

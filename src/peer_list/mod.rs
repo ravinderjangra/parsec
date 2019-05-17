@@ -25,7 +25,6 @@ use crate::mock::PeerId;
 use crate::{
     error::Error,
     gossip::{EventIndex, IndexedEventRef},
-    hash::Hash,
     id::SecretId,
 };
 use std::{
@@ -142,11 +141,6 @@ impl<S: SecretId> PeerList<S> {
     /// Return public ids of all peers.
     pub fn all_ids(&self) -> impl Iterator<Item = (PeerIndex, &S::PublicId)> {
         self.iter().map(|(index, peer)| (index, peer.id()))
-    }
-
-    /// Returns an unsorted map of peer index => Hash(peer_id).
-    pub fn all_id_hashes(&self) -> impl Iterator<Item = (PeerIndex, &Hash)> {
-        self.iter().map(|(index, peer)| (index, peer.id_hash()))
     }
 
     pub fn peer_state(&self, index: PeerIndex) -> PeerState {
