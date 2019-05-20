@@ -432,3 +432,472 @@ fn write_optional_single_bool_value(
     }
     write!(f, "}} ")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::num::NonZeroUsize;
+
+    #[test]
+    /// Assert counting on initial constructed MetaVoteValues is correct.
+    fn meta_vote_value_initial_count() {
+        let total_peers = NonZeroUsize::new(4).unwrap();
+        let mvv = MetaVoteValues::from_initial_estimate(true);
+        let mvc = mvv.count(total_peers);
+
+        let mut expected_mvc = MetaVoteCounts::default_counts(total_peers);
+        expected_mvc.estimates_true = 1;
+
+        assert_eq!(expected_mvc, mvc);
+    }
+
+    #[test]
+    /// Assert calculation of new estimate is correct.
+    fn meta_vote_value_caculate_new_estimate() {
+        let total_peers = NonZeroUsize::new(4).unwrap();
+        // Default meta_vote_values calculates new estimate from toss coin only.
+        {
+            let mut mvv = MetaVoteValues::default();
+            let mut counts = MetaVoteCounts::default_counts(total_peers);
+            mvv.calculate_new_estimates(&mut counts, Some(true));
+
+            let expected_mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                estimates: Estimates(BoolSet::Single(true)),
+                ..Default::default()
+            });
+            assert_eq!(mvv, expected_mvv);
+            assert_eq!(counts.estimates_true, 1);
+        }
+
+        // Populated meta_vote_values calculates new estimate from counts.
+        {
+            let mut mvv = MetaVoteValues::from_initial_estimate(false);
+
+            // Less than one-third counts shall not result in any change.
+            {
+                let mut counts = MetaVoteCounts {
+                    estimates_true: 1,
+                    estimates_false: 1,
+                    ..MetaVoteCounts::default_counts(total_peers)
+                };
+                let expected_mvv = mvv;
+                mvv.calculate_new_estimates(&mut counts, None);
+
+                assert_eq!(mvv, expected_mvv);
+                assert_eq!(counts.estimates_true, 1);
+                assert_eq!(counts.estimates_false, 1);
+            }
+
+            // Larger than one-third counts shall update both MVV and MVC.
+            {
+                let mut counts = MetaVoteCounts {
+                    estimates_true: 2,
+                    estimates_false: 3,
+                    ..MetaVoteCounts::default_counts(total_peers)
+                };
+                mvv.calculate_new_estimates(&mut counts, None);
+
+                let expected_mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                    estimates: Estimates(BoolSet::Both),
+                    ..Default::default()
+                });
+                assert_eq!(mvv, expected_mvv);
+                assert_eq!(counts.estimates_true, 3);
+                assert_eq!(counts.estimates_false, 3);
+            }
+        }
+    }
+
+    #[test]
+    /// Assert calculation of new binary value is correct.
+    fn meta_vote_value_caculate_new_binary_value() {
+        let total_peers = NonZeroUsize::new(4).unwrap();
+        // Default meta_vote_values calculates new binary value from estimates counts.
+        {
+            let mut mvv = MetaVoteValues::default();
+
+            // Less than supermajority counts shall not result in any change.
+            {
+                let mut counts = MetaVoteCounts {
+                    estimates_true: 2,
+                    estimates_false: 2,
+                    ..MetaVoteCounts::default_counts(total_peers)
+                };
+                let expected_mvv = mvv;
+                mvv.calculate_new_bin_values(&mut counts);
+
+                assert_eq!(mvv, expected_mvv);
+                assert_eq!(counts.bin_values_true, 0);
+                assert_eq!(counts.bin_values_false, 0);
+            }
+
+            // Supermajority counts shall update both MVV and MVC.
+            {
+                let mut counts = MetaVoteCounts {
+                    estimates_true: 3,
+                    estimates_false: 3,
+                    ..MetaVoteCounts::default_counts(total_peers)
+                };
+                mvv.calculate_new_bin_values(&mut counts);
+
+                let expected_mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                    bin_values: BinValues(BoolSet::Both),
+                    ..Default::default()
+                });
+                assert_eq!(mvv, expected_mvv);
+                assert_eq!(counts.bin_values_true, 1);
+                assert_eq!(counts.bin_values_false, 1);
+            }
+        }
+
+        // Populated meta_vote_values calculates new binary value from estimates counts.
+        {
+            let mut mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                bin_values: BinValues(BoolSet::Single(false)),
+                ..Default::default()
+            });
+
+            // Less than supermajority counts shall not result in any change.
+            {
+                let mut counts = MetaVoteCounts {
+                    estimates_true: 2,
+                    estimates_false: 2,
+                    ..MetaVoteCounts::default_counts(total_peers)
+                };
+                let expected_mvv = mvv;
+                mvv.calculate_new_bin_values(&mut counts);
+
+                assert_eq!(mvv, expected_mvv);
+                assert_eq!(counts.bin_values_true, 0);
+                assert_eq!(counts.bin_values_false, 0);
+            }
+
+            // Supermajority counts shall update both MVV and MVC.
+            {
+                let mut counts = MetaVoteCounts {
+                    estimates_true: 3,
+                    estimates_false: 3,
+                    ..MetaVoteCounts::default_counts(total_peers)
+                };
+                mvv.calculate_new_bin_values(&mut counts);
+
+                let expected_mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                    bin_values: BinValues(BoolSet::Both),
+                    ..Default::default()
+                });
+                assert_eq!(mvv, expected_mvv);
+                assert_eq!(counts.bin_values_true, 1);
+                assert_eq!(counts.bin_values_false, 0);
+            }
+        }
+    }
+
+    #[test]
+    /// Assert calculation of new aux value is correct.
+    fn meta_vote_value_caculate_new_aux_value() {
+        let total_peers = NonZeroUsize::new(4).unwrap();
+        // Default meta_vote_values calculates new aux value.  No matter the status of the previous
+        // binary value, The meta_vote_values and the meta_vote_counts shall not be updated.
+        {
+            let mut mvv = MetaVoteValues::default();
+            let mut counts = MetaVoteCounts::default_counts(total_peers);
+            let expected_mvv = mvv;
+            mvv.calculate_new_auxiliary_value(&mut counts, BinValues::default());
+
+            let expected_counts = MetaVoteCounts::default_counts(total_peers);
+            assert_eq!(mvv, expected_mvv);
+            assert_eq!(counts, expected_counts);
+
+            mvv.calculate_new_auxiliary_value(&mut counts, BinValues(BoolSet::Single(true)));
+            assert_eq!(mvv, expected_mvv);
+            assert_eq!(counts, expected_counts);
+        }
+
+        // Single populated meta_vote_values calculates new aux value.
+        {
+            let mut mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                bin_values: BinValues(BoolSet::Single(false)),
+                ..Default::default()
+            });
+
+            // When the previous binary value is non-empty, nothing shall be updated.
+            {
+                let mut counts = MetaVoteCounts::default_counts(total_peers);
+                let expected_mvv = mvv;
+                mvv.calculate_new_auxiliary_value(&mut counts, BinValues(BoolSet::Single(false)));
+
+                let expected_counts = MetaVoteCounts::default_counts(total_peers);
+                assert_eq!(mvv, expected_mvv);
+                assert_eq!(counts, expected_counts);
+            }
+
+            // When the previous binary value is empty.
+            {
+                let mut counts = MetaVoteCounts::default_counts(total_peers);
+                mvv.calculate_new_auxiliary_value(&mut counts, BinValues(BoolSet::Empty));
+
+                let expected_mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                    bin_values: BinValues(BoolSet::Single(false)),
+                    aux_value: AuxValue(Some(false)),
+                    ..Default::default()
+                });
+                let expected_counts = MetaVoteCounts {
+                    aux_values_false: 1,
+                    ..MetaVoteCounts::default_counts(total_peers)
+                };
+                assert_eq!(mvv, expected_mvv);
+                assert_eq!(counts, expected_counts);
+            }
+        }
+
+        // Double populated meta_vote_values calculates new aux value.
+        {
+            let mut mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                bin_values: BinValues(BoolSet::Both),
+                ..Default::default()
+            });
+            let mut counts = MetaVoteCounts::default_counts(total_peers);
+            mvv.calculate_new_auxiliary_value(&mut counts, BinValues(BoolSet::Empty));
+
+            let expected_mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                bin_values: BinValues(BoolSet::Both),
+                aux_value: AuxValue(Some(true)),
+                ..Default::default()
+            });
+            let expected_counts = MetaVoteCounts {
+                aux_values_true: 1,
+                ..MetaVoteCounts::default_counts(total_peers)
+            };
+            assert_eq!(mvv, expected_mvv);
+            assert_eq!(counts, expected_counts);
+        }
+    }
+
+    #[test]
+    /// Assert calculation of new decision is correct.
+    fn meta_vote_value_caculate_new_decision() {
+        let total_peers = NonZeroUsize::new(4).unwrap();
+        // Decision deduced from current binary value and counts' aux_value.
+        {
+            let counts = MetaVoteCounts {
+                aux_values_true: 3,
+                aux_values_false: 3,
+                ..MetaVoteCounts::default_counts(total_peers)
+            };
+            // Decided on ForcedTrue step.
+            let mut mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                bin_values: BinValues(BoolSet::Both),
+                ..Default::default()
+            });
+            mvv.calculate_new_decision(&counts, Step::ForcedTrue);
+
+            let expected_mvv = MetaVoteValues::Decided(true);
+            assert_eq!(mvv, expected_mvv);
+
+            // Decided value shall not be updated.
+            mvv.calculate_new_decision(&counts, Step::ForcedFalse);
+            assert_eq!(mvv, expected_mvv);
+
+            // Decided on ForcedFalse step.
+            let mut mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                bin_values: BinValues(BoolSet::Both),
+                ..Default::default()
+            });
+            mvv.calculate_new_decision(&counts, Step::ForcedFalse);
+            assert_eq!(mvv, MetaVoteValues::Decided(false));
+        }
+
+        // Decision deduced from counts' decision
+        {
+            let counts = MetaVoteCounts::default_counts(total_peers);
+            let mut mvv = MetaVoteValues::default();
+            mvv.calculate_new_decision(&counts, Step::GenuineFlip);
+            assert_eq!(mvv, MetaVoteValues::default());
+
+            let counts = MetaVoteCounts {
+                decision: Some(false),
+                ..MetaVoteCounts::default_counts(total_peers)
+            };
+            mvv.calculate_new_decision(&counts, Step::GenuineFlip);
+            assert_eq!(mvv, MetaVoteValues::Decided(false));
+        }
+    }
+
+    #[test]
+    /// Assert updating during increasing step is correct.
+    fn meta_vote_value_increase_step() {
+        let total_peers = NonZeroUsize::new(4).unwrap();
+        let supermajority_counts = MetaVoteCounts {
+            aux_values_true: 3,
+            aux_values_false: 3,
+            ..MetaVoteCounts::default_counts(total_peers)
+        };
+        let less_supermajority_counts = MetaVoteCounts {
+            aux_values_true: 2,
+            aux_values_false: 2,
+            ..MetaVoteCounts::default_counts(total_peers)
+        };
+        let expected_mvv_true = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+            estimates: Estimates(BoolSet::Single(true)),
+            ..Default::default()
+        });
+        let expected_mvv_false = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+            estimates: Estimates(BoolSet::Single(false)),
+            ..Default::default()
+        });
+
+        // Decided meta_vote_values shall not be updated.
+        {
+            let mut mvv = MetaVoteValues::Decided(false);
+            mvv.increase_step(&supermajority_counts, None, Step::ForcedTrue);
+            assert_eq!(mvv, MetaVoteValues::Decided(false));
+            mvv.increase_step(&less_supermajority_counts, Some(true), Step::ForcedFalse);
+            assert_eq!(mvv, MetaVoteValues::Decided(false));
+            mvv.increase_step(&supermajority_counts, Some(false), Step::GenuineFlip);
+            assert_eq!(mvv, MetaVoteValues::Decided(false));
+        }
+
+        // From ForcedTrue to ForcedFalse.
+        {
+            let mut mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                estimates: Estimates(BoolSet::Both),
+                bin_values: BinValues(BoolSet::Both),
+                aux_value: AuxValue(Some(false)),
+            });
+            mvv.increase_step(&supermajority_counts, None, Step::ForcedTrue);
+            assert_eq!(mvv, expected_mvv_false);
+
+            mvv.increase_step(&less_supermajority_counts, Some(true), Step::ForcedTrue);
+            assert_eq!(mvv, expected_mvv_true);
+        }
+
+        // From ForcedFalse to GenuineFlip.
+        {
+            let mut mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                estimates: Estimates(BoolSet::Both),
+                bin_values: BinValues(BoolSet::Both),
+                aux_value: AuxValue(Some(false)),
+            });
+            mvv.increase_step(&supermajority_counts, None, Step::ForcedFalse);
+            assert_eq!(mvv, expected_mvv_true);
+
+            mvv.increase_step(&less_supermajority_counts, Some(true), Step::ForcedFalse);
+            assert_eq!(mvv, expected_mvv_false);
+        }
+
+        // From GenuineFlip to ForcedTrue.
+        {
+            // Duduce from aux_value_true count.
+            let mut mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                estimates: Estimates(BoolSet::Both),
+                bin_values: BinValues(BoolSet::Both),
+                aux_value: AuxValue(Some(false)),
+            });
+            mvv.increase_step(&supermajority_counts, None, Step::GenuineFlip);
+            assert_eq!(mvv, expected_mvv_true);
+
+            let counts = MetaVoteCounts {
+                aux_values_true: 2,
+                aux_values_false: 3,
+                ..MetaVoteCounts::default_counts(total_peers)
+            };
+            mvv.increase_step(&counts, None, Step::GenuineFlip);
+            assert_eq!(mvv, expected_mvv_false);
+
+            // Deduce from the toss_coin.
+            mvv.increase_step(&less_supermajority_counts, Some(false), Step::GenuineFlip);
+            assert_eq!(mvv, expected_mvv_false);
+
+            mvv.increase_step(&less_supermajority_counts, None, Step::GenuineFlip);
+            assert_eq!(mvv, MetaVoteValues::default());
+        }
+    }
+
+    #[test]
+    /// Assert meta_vote_value can be updated correctly.
+    fn meta_vote_value_update() {
+        let total_peers = NonZeroUsize::new(4).unwrap();
+        // Updated to decided whenever counts contains decision.
+        {
+            let mut mvv = MetaVoteValues::default();
+            let counts = MetaVoteCounts {
+                decision: Some(true),
+                ..MetaVoteCounts::default_counts(total_peers)
+            };
+            mvv.update(counts, Some(false), Step::GenuineFlip);
+            assert_eq!(mvv, MetaVoteValues::Decided(true));
+        }
+
+        // Deduced to decided.
+        {
+            // From default meta_vote_values.
+            let mut mvv = MetaVoteValues::default();
+            let counts = MetaVoteCounts {
+                estimates_false: 3,
+                bin_values_false: 3,
+                aux_values_false: 3,
+                ..MetaVoteCounts::default_counts(total_peers)
+            };
+            mvv.update(counts, None, Step::ForcedFalse);
+            assert_eq!(mvv, MetaVoteValues::Decided(false));
+
+            // From non-default meta_vote_values.
+            let mut mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                estimates: Estimates(BoolSet::Both),
+                bin_values: BinValues(BoolSet::Single(true)),
+                ..Default::default()
+            });
+            let counts = MetaVoteCounts {
+                estimates_true: 2,
+                bin_values_true: 3,
+                aux_values_true: 3,
+                ..MetaVoteCounts::default_counts(total_peers)
+            };
+            mvv.update(counts, None, Step::ForcedTrue);
+            assert_eq!(mvv, MetaVoteValues::Decided(true));
+        }
+
+        // Deduced to undecided.
+        {
+            // From default meta_vote_values.
+            let mut mvv = MetaVoteValues::default();
+            let counts = MetaVoteCounts {
+                estimates_true: 3,
+                estimates_false: 3,
+                bin_values_false: 3,
+                aux_values_false: 3,
+                ..MetaVoteCounts::default_counts(total_peers)
+            };
+
+            let expected_mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                estimates: Estimates(BoolSet::Single(false)),
+                bin_values: BinValues(BoolSet::Both),
+                aux_value: AuxValue(Some(true)),
+            });
+            mvv.update(counts, Some(false), Step::GenuineFlip);
+            assert_eq!(mvv, expected_mvv);
+
+            // From non-default meta_vote_values.
+            let mut mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                estimates: Estimates(BoolSet::Both),
+                bin_values: BinValues(BoolSet::Single(false)),
+                aux_value: AuxValue(Some(false)),
+            });
+            let counts = MetaVoteCounts {
+                estimates_true: 3,
+                estimates_false: 3,
+                bin_values_false: 3,
+                aux_values_false: 2,
+                ..MetaVoteCounts::default_counts(total_peers)
+            };
+            mvv.update(counts, None, Step::ForcedTrue);
+
+            let expected_mvv = MetaVoteValues::Undecided(UndecidedMetaVoteValues {
+                estimates: Estimates(BoolSet::Both),
+                bin_values: BinValues(BoolSet::Both),
+                aux_value: AuxValue(Some(false)),
+            });
+            assert_eq!(mvv, expected_mvv);
+        }
+    }
+}
