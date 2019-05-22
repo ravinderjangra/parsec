@@ -42,29 +42,11 @@ impl BoolSet {
         }
     }
 
-    pub fn clear(&mut self) {
-        *self = BoolSet::Empty
-    }
-
     pub fn len(self) -> usize {
         match self {
             BoolSet::Empty => 0,
             BoolSet::Single(_) => 1,
             BoolSet::Both => 2,
-        }
-    }
-
-    pub fn from_bool(val: bool) -> Self {
-        BoolSet::Single(val)
-    }
-
-    #[cfg(feature = "dump-graphs")]
-    pub(crate) fn as_short_string(self) -> &'static str {
-        match self {
-            BoolSet::Empty => "-",
-            BoolSet::Single(true) => "t",
-            BoolSet::Single(false) => "f",
-            BoolSet::Both => "b",
         }
     }
 }

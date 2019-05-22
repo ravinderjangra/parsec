@@ -8,7 +8,9 @@
 
 use super::meta_vote::MetaVote;
 use crate::observation::is_more_than_two_thirds;
+use std::iter;
 use std::num::NonZeroUsize;
+use std::ops::AddAssign;
 
 // This is used to collect the meta votes of other events relating to a single (binary) meta vote at
 // a given round and step.
@@ -24,17 +26,24 @@ pub(crate) struct MetaVoteCounts {
     pub total_peers: NonZeroUsize,
 }
 
+impl AddAssign for MetaVoteCounts {
+    fn add_assign(&mut self, other: MetaVoteCounts) {
+        self.estimates_true += other.estimates_true;
+        self.estimates_false += other.estimates_false;
+        self.bin_values_true += other.bin_values_true;
+        self.bin_values_false += other.bin_values_false;
+        self.aux_values_true += other.aux_values_true;
+        self.aux_values_false += other.aux_values_false;
+        self.decision = self.decision.or(other.decision);
+    }
+}
+
 impl MetaVoteCounts {
     // Construct a `MetaVoteCounts` by collecting details from all meta votes which are for the
     // given `parent`'s `round` and `step`.  These results will include info from our own `parent`
-    // meta vote, if `is_voter` is true.
-    pub fn new(
-        parent: &MetaVote,
-        others: &[&[MetaVote]],
-        total_peers: NonZeroUsize,
-        is_voter: bool,
-    ) -> Self {
-        let mut counts = Self {
+    // meta vote.
+    pub fn new(parent: &MetaVote, others: &[&[MetaVote]], total_peers: NonZeroUsize) -> Self {
+        let mut counts = MetaVoteCounts {
             estimates_true: 0,
             estimates_false: 0,
             bin_values_true: 0,
@@ -44,7 +53,6 @@ impl MetaVoteCounts {
             decision: None,
             total_peers,
         };
-
         for vote in others
             .iter()
             .filter_map(|other| {
@@ -53,29 +61,10 @@ impl MetaVoteCounts {
                     .filter(|vote| vote.round_and_step() == parent.round_and_step())
                     .last()
             })
-            .chain(if is_voter { Some(parent) } else { None })
+            .chain(iter::once(parent))
         {
-            if vote.estimates.contains(true) {
-                counts.estimates_true += 1;
-            }
-            if vote.estimates.contains(false) {
-                counts.estimates_false += 1;
-            }
-            if vote.bin_values.contains(true) {
-                counts.bin_values_true += 1;
-            }
-            if vote.bin_values.contains(false) {
-                counts.bin_values_false += 1;
-            }
-            match vote.aux_value {
-                Some(true) => counts.aux_values_true += 1,
-                Some(false) => counts.aux_values_false += 1,
-                None => (),
-            }
-
-            if counts.decision.is_none() {
-                counts.decision = vote.decision;
-            }
+            let contribution = vote.values.count(total_peers);
+            counts += contribution;
         }
 
         counts
@@ -106,6 +95,19 @@ impl MetaVoteCounts {
         }
     }
 
+    pub fn default_counts(total_peers: NonZeroUsize) -> MetaVoteCounts {
+        MetaVoteCounts {
+            estimates_true: 0,
+            estimates_false: 0,
+            bin_values_true: 0,
+            bin_values_false: 0,
+            aux_values_true: 0,
+            aux_values_false: 0,
+            decision: None,
+            total_peers,
+        }
+    }
+
     fn total_peers(&self) -> usize {
         self.total_peers.get()
     }
@@ -117,6 +119,9 @@ mod tests {
         super::{BoolSet, Step},
         *,
     };
+    use crate::meta_voting::meta_vote_values::{
+        AuxValue, BinValues, Estimates, MetaVoteValues, UndecidedMetaVoteValues,
+    };
     use std::{iter, slice};
 
     #[test]
@@ -127,7 +132,7 @@ mod tests {
         let expected = MetaVoteCounts {
             estimates_true: 0,
             estimates_false: 0,
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected);
 
@@ -135,7 +140,7 @@ mod tests {
         let expected = MetaVoteCounts {
             estimates_true: 1,
             estimates_false: 0,
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected);
 
@@ -143,7 +148,7 @@ mod tests {
         let expected = MetaVoteCounts {
             estimates_true: 0,
             estimates_false: 1,
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected);
 
@@ -151,7 +156,7 @@ mod tests {
         let expected = MetaVoteCounts {
             estimates_true: 1,
             estimates_false: 1,
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected);
 
@@ -159,7 +164,7 @@ mod tests {
         let expected = MetaVoteCounts {
             estimates_true: 2,
             estimates_false: 2,
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected);
 
@@ -167,7 +172,7 @@ mod tests {
         let expected = MetaVoteCounts {
             estimates_true: 3,
             estimates_false: 4,
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected);
     }
@@ -180,7 +185,7 @@ mod tests {
         let expected = MetaVoteCounts {
             aux_values_true: 0,
             aux_values_false: 0,
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected);
 
@@ -188,7 +193,7 @@ mod tests {
         let expected = MetaVoteCounts {
             aux_values_true: 1,
             aux_values_false: 0,
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected);
 
@@ -196,7 +201,7 @@ mod tests {
         let expected = MetaVoteCounts {
             aux_values_true: 0,
             aux_values_false: 1,
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected);
 
@@ -204,7 +209,7 @@ mod tests {
         let expected = MetaVoteCounts {
             aux_values_true: 2,
             aux_values_false: 3,
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected);
     }
@@ -216,43 +221,64 @@ mod tests {
         let actual = counts_with_decisions(&[None], total_peers);
         let expected = MetaVoteCounts {
             decision: None,
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected);
 
         let actual = counts_with_decisions(&[Some(false)], total_peers);
         let expected = MetaVoteCounts {
+            estimates_false: 1,
+            bin_values_false: 1,
+            aux_values_false: 1,
             decision: Some(false),
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected);
 
         let actual = counts_with_decisions(&[Some(true)], total_peers);
         let expected = MetaVoteCounts {
+            estimates_true: 1,
+            bin_values_true: 1,
+            aux_values_true: 1,
             decision: Some(true),
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected);
 
         // Only the first non-none decision counts.
         let actual = counts_with_decisions(&[None, Some(true), Some(false)], total_peers);
         let expected = MetaVoteCounts {
+            estimates_true: 1,
+            estimates_false: 1,
+            bin_values_true: 1,
+            bin_values_false: 1,
+            aux_values_true: 1,
+            aux_values_false: 1,
             decision: Some(true),
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected);
 
         let actual = counts_with_decisions(&[None, Some(false), Some(true)], total_peers);
         let expected = MetaVoteCounts {
+            estimates_true: 1,
+            estimates_false: 1,
+            bin_values_true: 1,
+            bin_values_false: 1,
+            aux_values_true: 1,
+            aux_values_false: 1,
             decision: Some(false),
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected);
 
         let actual = counts_with_decisions(&[Some(true), None], total_peers);
         let expected = MetaVoteCounts {
+            estimates_true: 1,
+            bin_values_true: 1,
+            aux_values_true: 1,
             decision: Some(true),
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected)
     }
@@ -266,50 +292,52 @@ mod tests {
             ..MetaVote::default()
         };
         let vote0 = MetaVote {
+            round: 0,
             step: Step::ForcedTrue,
-            estimates: BoolSet::Single(true),
-            ..MetaVote::default()
+            values: MetaVoteValues::Undecided(UndecidedMetaVoteValues::new(
+                Estimates::new(BoolSet::Single(true)),
+                BinValues::new(BoolSet::Empty),
+                AuxValue::new(None),
+            )),
         };
         let vote1 = MetaVote {
+            round: 0,
             step: Step::ForcedFalse,
-            estimates: BoolSet::Single(true),
-            ..MetaVote::default()
+            values: MetaVoteValues::Undecided(UndecidedMetaVoteValues::new(
+                Estimates::new(BoolSet::Single(true)),
+                BinValues::new(BoolSet::Empty),
+                AuxValue::new(None),
+            )),
         };
         let vote2 = MetaVote {
+            round: 0,
             step: Step::ForcedTrue,
-            estimates: BoolSet::Single(true),
-            ..MetaVote::default()
+            values: MetaVoteValues::Undecided(UndecidedMetaVoteValues::new(
+                Estimates::new(BoolSet::Single(true)),
+                BinValues::new(BoolSet::Empty),
+                AuxValue::new(None),
+            )),
         };
         let vote3 = MetaVote {
+            round: 0,
             step: Step::ForcedFalse,
-            estimates: BoolSet::Single(true),
-            ..MetaVote::default()
+            values: MetaVoteValues::Undecided(UndecidedMetaVoteValues::new(
+                Estimates::new(BoolSet::Single(true)),
+                BinValues::new(BoolSet::Empty),
+                AuxValue::new(None),
+            )),
         };
 
         let actual = MetaVoteCounts::new(
             &parent_vote,
             &[&[vote0], &[vote1], &[vote2, vote3]],
             total_peers,
-            true,
         );
         let expected = MetaVoteCounts {
             estimates_true: 2,
-            ..default_counts(total_peers)
+            ..MetaVoteCounts::default_counts(total_peers)
         };
         assert_eq!(actual, expected);
-    }
-
-    fn default_counts(total_peers: NonZeroUsize) -> MetaVoteCounts {
-        MetaVoteCounts {
-            estimates_true: 0,
-            estimates_false: 0,
-            bin_values_true: 0,
-            bin_values_false: 0,
-            aux_values_true: 0,
-            aux_values_false: 0,
-            decision: None,
-            total_peers,
-        }
     }
 
     fn counts_with_estimates(
@@ -321,8 +349,12 @@ mod tests {
     ) -> MetaVoteCounts {
         let repeat_votes = |count, estimates| {
             iter::repeat(MetaVote {
-                estimates,
-                ..MetaVote::default()
+                values: MetaVoteValues::Undecided(UndecidedMetaVoteValues::new(
+                    Estimates::new(estimates),
+                    BinValues::new(BoolSet::Empty),
+                    AuxValue::new(None),
+                )),
+                ..Default::default()
             })
             .take(count)
         };
@@ -344,8 +376,12 @@ mod tests {
     ) -> MetaVoteCounts {
         let repeat_votes = |count, aux_value| {
             iter::repeat(MetaVote {
-                aux_value,
-                ..MetaVote::default()
+                values: MetaVoteValues::Undecided(UndecidedMetaVoteValues::new(
+                    Estimates::new(BoolSet::Empty),
+                    BinValues::new(BoolSet::Empty),
+                    AuxValue::new(aux_value),
+                )),
+                ..Default::default()
             })
             .take(count)
         };
@@ -365,9 +401,22 @@ mod tests {
         let votes: Vec<_> = decisions
             .iter()
             .cloned()
-            .map(|decision| MetaVote {
-                decision,
-                ..MetaVote::default()
+            .map(|decision| {
+                if let Some(value) = decision {
+                    MetaVote {
+                        values: MetaVoteValues::Decided(value),
+                        ..Default::default()
+                    }
+                } else {
+                    MetaVote {
+                        values: MetaVoteValues::Undecided(UndecidedMetaVoteValues::new(
+                            Estimates::new(BoolSet::Empty),
+                            BinValues::new(BoolSet::Empty),
+                            AuxValue::new(None),
+                        )),
+                        ..Default::default()
+                    }
+                }
             })
             .collect();
         counts_with_votes(&votes, total_peers)
@@ -376,6 +425,6 @@ mod tests {
     fn counts_with_votes(votes: &[MetaVote], total_peers: NonZeroUsize) -> MetaVoteCounts {
         let parent_vote = MetaVote::default();
         let votes: Vec<_> = votes.iter().map(slice::from_ref).collect();
-        MetaVoteCounts::new(&parent_vote, votes.as_slice(), total_peers, false)
+        MetaVoteCounts::new(&parent_vote, votes.as_slice(), total_peers)
     }
 }
