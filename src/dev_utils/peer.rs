@@ -248,6 +248,7 @@ impl Peer {
         Self::new(WrappedParsec::Good(Parsec::from_genesis(
             id,
             genesis_group,
+            vec![],
             consensus_mode,
         )))
     }

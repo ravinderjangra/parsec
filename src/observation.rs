@@ -27,7 +27,14 @@ use std::{
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum Observation<T: NetworkEvent, P: PublicId> {
     /// Genesis group
-    Genesis(BTreeSet<P>),
+    Genesis {
+        /// Members of the genesis group.
+        group: BTreeSet<P>,
+        /// Extra arbitrary information for use by the client.
+        /// Note: this can be set through the `genesis_related_info` argument of
+        /// `Parsec::from_genesis`.
+        related_info: Vec<u8>,
+    },
     /// Vote to add the indicated peer to the network.
     Add {
         /// Public id of the peer to be added
@@ -67,7 +74,7 @@ impl<T: NetworkEvent, P: PublicId> Observation<T, P> {
 impl<T: NetworkEvent, P: PublicId> Debug for Observation<T, P> {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
-            Observation::Genesis(group) => write!(formatter, "Genesis({:?})", group),
+            Observation::Genesis { group, .. } => write!(formatter, "Genesis({:?})", group),
             Observation::Add { peer_id, .. } => write!(formatter, "Add({:?})", peer_id),
             Observation::Remove { peer_id, .. } => write!(formatter, "Remove({:?})", peer_id),
             Observation::Accusation { offender, malice } => {

@@ -979,7 +979,7 @@ mod detail {
             short_peer_ids: &PeerIndexMap<String>,
         ) -> Self {
             let value = match observation {
-                Observation::Genesis(group) => format!(
+                Observation::Genesis { group, .. } => format!(
                     "Genesis({:?})",
                     group.iter().map(sanitise_peer_id).collect::<BTreeSet<_>>()
                 ),

@@ -116,11 +116,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     /// * `our_id` is the value that will identify the owning peer in the network.
     /// * `genesis_group` is the set of public IDs of the peers that are present at the network
     /// startup.
+    /// * `genesis_related_info` extra arbitrary information attached to the genesis event for use
+    /// by the client.
     /// * `consensus_mode` determines how many votes are needed for an observation to become a
     /// candidate for consensus. For more details, see [ConsensusMode](enum.ConsensusMode.html)
     pub fn from_genesis(
         our_id: S,
         genesis_group: &BTreeSet<S::PublicId>,
+        genesis_related_info: Vec<u8>,
         consensus_mode: ConsensusMode,
     ) -> Self {
         if !genesis_group.contains(our_id.public_id()) {
@@ -147,7 +150,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         parsec.add_initial_event();
 
         // Add event carrying genesis observation.
-        let genesis_observation = Observation::Genesis(genesis_group.clone());
+        let genesis_observation = Observation::Genesis {
+            group: genesis_group.clone(),
+            related_info: genesis_related_info,
+        };
         let event = parsec.our_last_event_index().and_then(|self_parent| {
             parsec.new_event_from_observation(self_parent, genesis_observation)
         });
@@ -821,7 +827,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
                 self.handle_remove_peer(event_index, offender)
             }
-            Some(Observation::Genesis(_)) | Some(Observation::OpaquePayload(_)) => None,
+            Some(Observation::Genesis { .. }) | Some(Observation::OpaquePayload(_)) => None,
             None => {
                 log_or_panic!("Failed to get observation from hash.");
                 None
@@ -1589,7 +1595,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
     // Detect if the event carries an `Observation::Genesis` that doesn't match what we'd expect.
     fn detect_incorrect_genesis(&mut self, event: &Event<S::PublicId>) -> Result<()> {
-        if let Some(Observation::Genesis(ref group)) = self.event_payload(event) {
+        if let Some(Observation::Genesis { ref group, .. }) = self.event_payload(event) {
             if self.genesis_group() == group.iter().collect() {
                 return Ok(());
             }
@@ -1667,7 +1673,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 return;
             };
 
-            let genesis_group = if let Observation::Genesis(ref group) = *payload {
+            let genesis_group = if let Observation::Genesis { ref group, .. } = *payload {
                 group
             } else {
                 return;
@@ -1699,7 +1705,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             return;
         }
 
-        if let Some(&Observation::Genesis(_)) = self.event_payload(event) {
+        if let Some(&Observation::Genesis { .. }) = self.event_payload(event) {
             return;
         }
 
@@ -1966,9 +1972,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         };
 
         let starting_index = self.peer_list.accomplice_event_checkpoint_by(creator);
-        for (_, malice) in
-            self.detect_accomplice_for_our_accusations(event_index, starting_index)?
-        {
+        let accusations =
+            self.detect_accomplice_for_our_accusations(event_index, starting_index)?;
+        for (_, malice) in accusations {
             self.accuse(creator, Malice::Accomplice(event_hash, Box::new(malice)));
         }
 
@@ -2026,8 +2032,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             .iter()
             .filter_map(|event| {
                 let observation = self.event_payload(&*event)?;
-                if let Observation::Genesis(ref gen) = *observation {
-                    Some(gen.iter().collect())
+                if let Observation::Genesis { ref group, .. } = *observation {
+                    Some(group.iter().collect())
                 } else {
                     None
                 }
@@ -2157,7 +2163,12 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         genesis_group: &BTreeSet<S::PublicId>,
         consensus_mode: ConsensusMode,
     ) -> Self {
-        TestParsec(Parsec::from_genesis(our_id, genesis_group, consensus_mode))
+        TestParsec(Parsec::from_genesis(
+            our_id,
+            genesis_group,
+            vec![],
+            consensus_mode,
+        ))
     }
 
     pub fn from_existing(

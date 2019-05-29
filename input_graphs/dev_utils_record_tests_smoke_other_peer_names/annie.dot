@@ -5,6 +5,7 @@
 ///   Carol: PeerState(VOTE|SEND|RECV)
 ///   Claire: PeerState(VOTE|SEND|RECV)
 /// }
+/// consensus_mode: Supermajority
 digraph GossipGraph {
   splines=false
   rankdir=BT
@@ -1163,7 +1164,7 @@ digraph GossipGraph {
 
 /// ===== meta-elections =====
 /// consensus_history:
-/// ece3eaf86a7f7396aed2e4bdd0c67cf7b67df5aabbd5eced04924b154d0f3841
+/// 5d1bc22c2cce50873bffc1ba00ecbecce52085dc3bd15e8b43f5167bf72962cd
 
 /// interesting_events: {
 ///   Annie -> ["An_19"]
@@ -1174,10 +1175,6 @@ digraph GossipGraph {
 /// all_voters: {Annie, B, Carol, Claire}
 /// unconsensused_events: {"An_13", "B_9", "Ca_6", "Cl_10"}
 /// meta_events: {
-///   An_13 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
 ///   An_14 -> {
 ///     observees: {}
 ///     interesting_content: []
@@ -1353,10 +1350,6 @@ digraph GossipGraph {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
-///   B_9 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
 ///   B_10 -> {
 ///     observees: {}
 ///     interesting_content: []
@@ -1466,10 +1459,6 @@ digraph GossipGraph {
 ///       Ca: 0/0   t   t   t   t
 ///       Cl: 0/0   t   t   t   t
 ///     }
-///   }
-///   Ca_6 -> {
-///     observees: {}
-///     interesting_content: []
 ///   }
 ///   Ca_7 -> {
 ///     observees: {}
@@ -1617,10 +1606,6 @@ digraph GossipGraph {
 ///     }
 ///   }
 ///   Cl_9 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   Cl_10 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
