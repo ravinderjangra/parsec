@@ -69,7 +69,11 @@ use std::{
     process, usize,
 };
 
-const MIN_PEER_COUNT: usize = 2;
+// When we are down to 3 peers, if we attempt to remove one peer, and it becomes unresponsive
+// (which happens in the code), consensus can never be reached as this one inactive peer isn't
+// `< N/3` participants.
+// See https://github.com/maidsafe/parsec/issues/313 for details
+const MIN_PEER_COUNT: usize = 3;
 const MAX_EVENT_COUNT: usize = 1000;
 const GENESIS_PEERS_ARG_LONG_NAME: &str = "initial-peers";
 const GENESIS_PEERS_ARG_SHORT_NAME: &str = "i";
