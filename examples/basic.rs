@@ -107,7 +107,12 @@ impl Peer {
     fn from_genesis(our_id: PeerId, genesis_group: &BTreeSet<PeerId>) -> Self {
         Self {
             id: our_id.clone(),
-            parsec: Parsec::from_genesis(our_id, genesis_group, ConsensusMode::Supermajority),
+            parsec: Parsec::from_genesis(
+                our_id,
+                genesis_group,
+                vec![],
+                ConsensusMode::Supermajority,
+            ),
             observations: vec![],
             blocks: vec![],
         }

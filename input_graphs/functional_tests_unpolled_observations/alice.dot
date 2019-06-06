@@ -827,7 +827,7 @@ digraph GossipGraph {
 
 /// ===== meta-elections =====
 /// consensus_history:
-/// a137c1b54c5895b13a1e204869f650636920286bd5b903e0576a9a15a2f58c2c
+/// d98f8abc4ba966aadc391bb857a6879a122602074766f19fadf22ce59dd0410e
 
 /// interesting_events: {
 ///   Alice -> ["A_14"]

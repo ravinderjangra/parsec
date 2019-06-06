@@ -161,7 +161,13 @@ fn from_genesis() {
     assert_eq!(*parsec.event_creator_id(&genesis_observation), our_id);
     match parsec.event_payload(&genesis_observation) {
         Some(payload) => {
-            assert_eq!(*payload, Observation::Genesis(peers));
+            assert_eq!(
+                *payload,
+                Observation::Genesis {
+                    group: peers,
+                    related_info: vec![]
+                }
+            );
         }
         None => panic!("Expected observation, but event carried no vote"),
     }
@@ -341,6 +347,7 @@ fn unpolled_observations() {
         peer_id: PeerId::new("Eric"),
         related_info: vec![],
     };
+
     assert_eq!(alice.our_unpolled_observations().count(), 1);
     assert_eq!(*unwrap!(alice.our_unpolled_observations().next()), add_eric);
 
@@ -389,7 +396,7 @@ fn our_unpolled_observations_with_consensus_mode_single() {
     let mut alice = Record::from(parse_test_dot_file("alice.dot")).play();
 
     let block = unwrap!(alice.poll());
-    if let Observation::Genesis(_) = block.payload() {
+    if let Observation::Genesis { .. } = block.payload() {
     } else {
         panic!();
     }
@@ -587,9 +594,13 @@ mod handle_malice {
         ));
         let d_1_index = dave_contents.add_event(d_1);
 
-        let d_2 = unwrap!(
-            dave_contents.new_event_from_observation(d_1_index, Observation::Genesis(genesis),)
-        );
+        let d_2 = unwrap!(dave_contents.new_event_from_observation(
+            d_1_index,
+            Observation::Genesis {
+                group: genesis,
+                related_info: vec![]
+            }
+        ));
         let d_2_hash = *d_2.hash();
         let _ = dave_contents.add_event(d_2);
 
@@ -642,9 +653,13 @@ mod handle_malice {
         let e_0 = Event::new_initial(eric_contents.event_context());
         let e_0_index = eric_contents.add_event(e_0);
 
-        let e_1 = unwrap!(
-            eric_contents.new_event_from_observation(e_0_index, Observation::Genesis(genesis),)
-        );
+        let e_1 = unwrap!(eric_contents.new_event_from_observation(
+            e_0_index,
+            Observation::Genesis {
+                group: genesis,
+                related_info: vec![]
+            },
+        ));
         let e_1_hash = *e_1.hash();
         let _ = eric_contents.add_event(e_1);
 
@@ -703,7 +718,7 @@ mod handle_malice {
         // Pop Alice's last event, which is her genesis vote.
         let (_, genesis_event) = unwrap!(alice.remove_last_event());
         match unwrap!(alice.event_payload(&genesis_event)) {
-            Observation::Genesis(_) => (),
+            Observation::Genesis { .. } => (),
             _ => panic!("This should be Alice's genesis vote."),
         }
 
@@ -735,7 +750,10 @@ mod handle_malice {
             bob.our_pub_id().clone(),
             PeerId::new("Derp")
         ];
-        unwrap!(alice.vote_for(Observation::Genesis(invalid_genesis)));
+        unwrap!(alice.vote_for(Observation::Genesis {
+            group: invalid_genesis,
+            related_info: vec![]
+        }));
 
         // Create request from Alice to Carol.
         let request = unwrap!(alice.create_gossip(carol.our_pub_id()));

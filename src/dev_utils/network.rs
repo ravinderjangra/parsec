@@ -425,8 +425,8 @@ impl Network {
 
         for block_group in block_groups {
             for block in block_group {
-                if let ParsecObservation::Genesis(ref g) = *block.payload() {
-                    valid_voters = g.clone();
+                if let ParsecObservation::Genesis { ref group, .. } = *block.payload() {
+                    valid_voters = group.clone();
                 }
 
                 self.check_block_signatories(block, &valid_voters)?;
@@ -434,7 +434,7 @@ impl Network {
 
             for block in block_group {
                 match *block.payload() {
-                    ParsecObservation::Genesis(_) => (),
+                    ParsecObservation::Genesis { .. } => (),
                     ParsecObservation::Add { ref peer_id, .. } => {
                         let _ = valid_voters.insert(peer_id.clone());
                     }

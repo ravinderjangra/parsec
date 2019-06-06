@@ -526,7 +526,10 @@ fn parse_invalid() -> Parser<u8, MaliceInput> {
 }
 
 fn parse_genesis() -> Parser<u8, Observation<Transaction, PeerId>> {
-    (seq(b"Genesis(") * parse_peers() - seq(b")")).map(Observation::Genesis)
+    (seq(b"Genesis(") * parse_peers() - seq(b")")).map(|group| Observation::Genesis {
+        group,
+        related_info: vec![],
+    })
 }
 
 fn parse_add() -> Parser<u8, Observation<Transaction, PeerId>> {

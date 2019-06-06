@@ -41,8 +41,12 @@ impl Record {
     }
 
     pub fn play(self) -> Parsec<Transaction, PeerId> {
-        let mut parsec =
-            Parsec::from_genesis(self.our_id, &self.genesis_group, self.consensus_mode);
+        let mut parsec = Parsec::from_genesis(
+            self.our_id,
+            &self.genesis_group,
+            vec![],
+            self.consensus_mode,
+        );
 
         for action in self.actions {
             action.run(&mut parsec)
@@ -213,8 +217,8 @@ fn extract_genesis_group<'a>(
         .and_then(|key| observations.get(key))
         .map(|info| &info.observation)
         .and_then(|observation| {
-            if let Observation::Genesis(ref genesis_group) = *observation {
-                Some(genesis_group)
+            if let Observation::Genesis { ref group, .. } = *observation {
+                Some(group)
             } else {
                 None
             }
