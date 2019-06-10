@@ -63,12 +63,17 @@ use parsec::{
 };
 use rand::Rng;
 use std::{
+    cmp,
     collections::BTreeSet,
     fmt::{self, Debug, Formatter},
     process, usize,
 };
 
-const MIN_PEER_COUNT: usize = 2;
+// When we are down to 3 peers, if we attempt to remove one peer, and it becomes unresponsive
+// (which happens in the code), consensus can never be reached as this one inactive peer isn't
+// `< N/3` participants.
+// See https://github.com/maidsafe/parsec/issues/313 for details
+const MIN_PEER_COUNT: usize = 3;
 const MAX_EVENT_COUNT: usize = 1000;
 const GENESIS_PEERS_ARG_LONG_NAME: &str = "initial-peers";
 const GENESIS_PEERS_ARG_SHORT_NAME: &str = "i";
@@ -506,7 +511,21 @@ impl Environment {
             && self.params.remove_peers_count != self.peers_removed_count
             && self.rng.gen_weighted_bool(REMOVE_PEERS_CHANCE)
         {
-            self.rng.gen_range(1, (self.peers.len() + 2) / 3)
+            assert!(self.peers_removed_count < self.params.remove_peers_count);
+            let respect_remove_peers_count =
+                self.params.remove_peers_count - self.peers_removed_count;
+            let strictly_less_than_a_third_plus_one = (self.peers.len() + 2) / 3;
+            let max_peers_to_remove = cmp::min(
+                respect_remove_peers_count,
+                strictly_less_than_a_third_plus_one,
+            );
+            if max_peers_to_remove == 1 {
+                // gen_range(1, 1) would panic as the range must contain a strictly positive
+                // number of elements
+                1
+            } else {
+                self.rng.gen_range(1, max_peers_to_remove)
+            }
         } else {
             0
         }
