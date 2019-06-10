@@ -5,3 +5,4 @@ set -e -x
 cargo test $@ --release --features=testing
 cargo test $@ --release --features=testing,malice-detection
 cargo test $@ --release --features=dump-graphs dot_parser
+cargo bench $@ --features=testing -- --test
