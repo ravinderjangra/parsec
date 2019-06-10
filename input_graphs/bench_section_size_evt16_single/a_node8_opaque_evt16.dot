@@ -2726,7 +2726,7 @@ digraph GossipGraph {
 
 /// ===== meta-elections =====
 /// consensus_history:
-/// fa9aa847d9ca2e9075d31ae1966d70bc1757bc1c503d831bd0cca63f94adb2f6
+/// 7ce8787fdfefd07869cab35c5f345fec199904119e089fee3dbb2e5fb42cd0f1
 /// a88cc708be13c57ea94d3eca4088191103be47b752d807325625f7fbdbe864c6
 /// 2de98dadad369c1db05f5d6bd01b5dc84d4e926cd2f246eff5aebc2fbe50b7d5
 /// 52e6490de8f8901fd727af54b17c18b5256185e3c386cabc6278302071fc17a4
