@@ -76,31 +76,17 @@ impl PeerId {
 
     #[cfg(feature = "mock")]
     fn new_with_keypair(id: &str) -> Self {
-        Self::new_with_deterministic_keypair(id)
-    }
-
-    #[cfg(feature = "mock")]
-    fn new_with_deterministic_keypair(id: &str) -> Self {
         use crate::hash::Hash;
-        use rand::{SeedableRng, XorShiftRng};
-        use safe_crypto::init_with_rng;
+        use safe_crypto::{gen_sign_keypair_from_seed, Seed};
 
         let name_hash = Hash::from(id.as_bytes());
-        let seed = name_hash
-            .as_bytes()
-            .chunks_exact(4)
-            .map(|bytes| u32::from_le_bytes(Self::make_array_of_len_4(bytes)))
-            .collect::<Vec<_>>();
-
-        let mut rng = XorShiftRng::from_seed(Self::make_array_of_len_4(&seed));
-        unwrap!(init_with_rng(&mut rng));
-
-        Self::new_with_random_keypair(id)
-    }
-
-    #[cfg(feature = "mock")]
-    fn make_array_of_len_4<T: Copy>(values: &[T]) -> [T; 4] {
-        [values[0], values[1], values[2], values[3]]
+        let (pub_sign, sec_sign) =
+            gen_sign_keypair_from_seed(&Seed::from_bytes(*name_hash.as_bytes()));
+        Self {
+            id: id.to_string(),
+            pub_sign,
+            sec_sign,
+        }
     }
 
     // Only being used by the dot_parser.
