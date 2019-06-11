@@ -26,8 +26,14 @@ use std::collections::{BTreeMap, BTreeSet};
 use super::{KeyGen, Part, PartOutcome};
 use crate::id::{PublicId, SecretId};
 use crate::mock::PeerId;
+use crate::dev_utils::{Environment, RngChoice};
+
+// Alter the seed here to reproduce failures
+static SEED: RngChoice = RngChoice::SeededRandom;
 
 fn test_key_gen_with(threshold: usize, node_num: usize) {
+    let mut env = Environment::new(SEED);
+
     // Generate individual key pairs for encryption. These are not suitable for threshold schemes.
     let peer_ids: Vec<PeerId> = (0..node_num)
         .map(|idx| unwrap!(PeerId::from_index(idx)))
@@ -42,7 +48,7 @@ fn test_key_gen_with(threshold: usize, node_num: usize) {
             peer_id,
             pub_keys.clone(),
             threshold,
-            &mut rand::thread_rng(),
+            &mut env.rng,
         )
         .unwrap_or_else(|_err| panic!("Failed to create `KeyGen` instance {:?}", &peer_id));
         nodes.push(key_gen);
@@ -59,7 +65,7 @@ fn test_key_gen_with(threshold: usize, node_num: usize) {
                     &peer_ids[node_id],
                     &peer_ids[sender_id],
                     proposal,
-                    &mut rand::thread_rng(),
+                    &mut env.rng,
                 )
                 .expect("failed to handle part")
             {
