@@ -1,48 +1,53 @@
-// https://raw.githubusercontent.com/poanetwork/hbbft/520083de2e32e5fac75aff506a0d46044bf6a49d/COPYRIGHT
-
-hbbft is copyright 2018, POA Networks, Ltd.
-
-Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
-http://www.apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
-http://opensource.org/licenses/MIT>, at your option. All files in the project
-carrying such notice may not be copied, modified, or distributed except
-according to those terms.
-
+// Copyright 2018 MaidSafe.net limited.
+//
+// This SAFE Network Software is licensed to you under The General Public License (GPL), version 3.
+// Unless required by applicable law or agreed to in writing, the SAFE Network Software distributed
+// under the GPL Licence is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. Please review the Licences for the specific language governing
+// permissions and limitations relating to use of the SAFE Network Software.
+//
+//
+// hbbft is copyright 2018, POA Networks, Ltd.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. All files in the project
+// carrying such notice may not be copied, modified, or distributed except
+// according to those terms.
+//
+// Original copied from:
 // https://raw.githubusercontent.com/poanetwork/hbbft/eafa77d5fcbdaf549e09f101d618923d408b3468/tests/sync_key_gen.rs
 
 #![deny(unused_must_use)]
 //! Tests for synchronous distributed key generation.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
-use hbbft::crypto::{PublicKey, SecretKey};
-use hbbft::sync_key_gen::{PartOutcome, SyncKeyGen};
-use hbbft::util;
+use super::{KeyGen, Part, PartOutcome};
+use crate::id::{PublicId, SecretId};
+use crate::mock::PeerId;
 
-fn test_sync_key_gen_with(threshold: usize, node_num: usize) {
+fn test_key_gen_with(threshold: usize, node_num: usize) {
     // Generate individual key pairs for encryption. These are not suitable for threshold schemes.
-    let sec_keys: Vec<SecretKey> = (0..node_num).map(|_| SecretKey::random()).collect();
-    let pub_keys: BTreeMap<usize, PublicKey> = sec_keys
-        .iter()
-        .map(SecretKey::public_key)
-        .enumerate()
+    let peer_ids: Vec<PeerId> = (0..node_num)
+        .map(|idx| unwrap!(PeerId::from_index(idx)))
         .collect();
+    let pub_keys: BTreeSet<PeerId> = peer_ids.iter().cloned().collect();
 
-    // Create the `SyncKeyGen` instances and initial proposals.
+    // Create the `KeyGen` instances and initial proposals.
     let mut nodes = Vec::new();
-    let proposals: Vec<_> = sec_keys
-        .into_iter()
-        .enumerate()
-        .map(|(id, sk)| {
-            let (sync_key_gen, proposal) =
-                SyncKeyGen::new(id, sk, pub_keys.clone(), threshold, &mut rand::thread_rng())
-                    .unwrap_or_else(|_err| {
-                        panic!("Failed to create `SyncKeyGen` instance #{}", id)
-                    });
-            nodes.push(sync_key_gen);
-            proposal
-        })
-        .collect();
+    let mut proposals = Vec::new();
+    peer_ids.iter().for_each(|peer_id| {
+        let (key_gen, proposal) = KeyGen::new(
+            peer_id.clone(),
+            pub_keys.clone(),
+            threshold,
+            &mut rand::thread_rng(),
+        )
+        .unwrap_or_else(|_err| panic!("Failed to create `KeyGen` instance {:?}", &peer_id));
+        nodes.push(key_gen);
+        proposals.push(proposal);
+    });
 
     // Handle the first `threshold + 1` proposals. Those should suffice for key generation.
     let mut acks = Vec::new();
@@ -50,7 +55,12 @@ fn test_sync_key_gen_with(threshold: usize, node_num: usize) {
         for (node_id, node) in nodes.iter_mut().enumerate() {
             let proposal = proposal.clone().expect("proposal");
             let ack = match node
-                .handle_part(&sender_id, proposal, &mut rand::thread_rng())
+                .handle_part(
+                    &peer_ids[node_id],
+                    &peer_ids[sender_id],
+                    proposal,
+                    &mut rand::thread_rng(),
+                )
                 .expect("failed to handle part")
             {
                 PartOutcome::Valid(Some(ack)) => ack,
@@ -66,9 +76,10 @@ fn test_sync_key_gen_with(threshold: usize, node_num: usize) {
 
     // Handle the `Ack`s from `2 * threshold + 1` nodes.
     for (sender_id, ack) in acks {
-        for node in &mut nodes {
+        for (node_id, node) in nodes.iter_mut().enumerate() {
             assert!(!node.is_ready()); // Not enough `Ack`s yet.
-            node.handle_ack(&sender_id, ack.clone())
+            let _ = node
+                .handle_ack(&peer_ids[node_id], &peer_ids[sender_id], ack.clone())
                 .expect("error handling ack");
         }
     }
@@ -103,13 +114,36 @@ fn test_sync_key_gen_with(threshold: usize, node_num: usize) {
     assert!(pub_key_set.public_key().verify(&sig, msg));
 }
 
-#[test]
-fn test_sync_key_gen() {
-    // This returns an error in all but the first test.
-    let _ = env_logger::try_init();
+fn test_key_gen(node_num: usize) {
+    let threshold = (node_num - 1) / 3;
+    test_key_gen_with(threshold, node_num);
+}
 
-    for &node_num in &[1, 2, 3, 4, 8, 15] {
-        let threshold = util::max_faulty(node_num);
-        test_sync_key_gen_with(threshold, node_num);
-    }
+#[test]
+fn test_key_gen_1() {
+    test_key_gen(1);
+}
+
+#[test]
+fn test_key_gen_2() {
+    test_key_gen(2);
+}
+#[test]
+fn test_key_gen_3() {
+    test_key_gen(3);
+}
+
+#[test]
+fn test_key_gen_4() {
+    test_key_gen(4);
+}
+
+#[test]
+fn test_key_gen_8() {
+    test_key_gen(8);
+}
+
+#[test]
+fn test_key_gen_15() {
+    test_key_gen(15);
 }
