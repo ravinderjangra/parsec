@@ -24,9 +24,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use super::{KeyGen, Part, PartOutcome};
+use crate::dev_utils::{Environment, RngChoice};
 use crate::id::{PublicId, SecretId};
 use crate::mock::PeerId;
-use crate::dev_utils::{Environment, RngChoice};
 
 // Alter the seed here to reproduce failures
 static SEED: RngChoice = RngChoice::SeededRandom;
@@ -44,13 +44,8 @@ fn test_key_gen_with(threshold: usize, node_num: usize) {
     let mut nodes = Vec::new();
     let mut proposals = Vec::new();
     peer_ids.iter().for_each(|peer_id| {
-        let (key_gen, proposal) = KeyGen::new(
-            peer_id,
-            pub_keys.clone(),
-            threshold,
-            &mut env.rng,
-        )
-        .unwrap_or_else(|_err| panic!("Failed to create `KeyGen` instance {:?}", &peer_id));
+        let (key_gen, proposal) = KeyGen::new(peer_id, pub_keys.clone(), threshold, &mut env.rng)
+            .unwrap_or_else(|_err| panic!("Failed to create `KeyGen` instance {:?}", &peer_id));
         nodes.push(key_gen);
         proposals.push(proposal);
     });
