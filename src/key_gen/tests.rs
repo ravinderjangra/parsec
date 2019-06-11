@@ -39,7 +39,7 @@ fn test_key_gen_with(threshold: usize, node_num: usize) {
     let mut proposals = Vec::new();
     peer_ids.iter().for_each(|peer_id| {
         let (key_gen, proposal) = KeyGen::new(
-            peer_id.clone(),
+            peer_id,
             pub_keys.clone(),
             threshold,
             &mut rand::thread_rng(),

@@ -131,6 +131,9 @@ pub enum Error {
     /// Failed to serialize message.
     #[fail(display = "Serialization error: {}", _0)]
     Serialization(String),
+    /// Failed to encrypt message.
+    #[fail(display = "Encryption error")]
+    Encryption,
 }
 
 impl From<bincode::Error> for Error {
@@ -243,11 +246,12 @@ impl<S: SecretId> KeyGen<S> {
     /// If we are not a validator but only an observer, no `Part` message is produced and no
     /// messages need to be sent.
     pub fn new<R: rand::Rng>(
-        our_id: S::PublicId,
+        sec_key: &S,
         pub_keys: BTreeSet<S::PublicId>,
         threshold: usize,
         rng: &mut R,
     ) -> Result<(KeyGen<S>, Option<Part>), Error> {
+        let our_id = sec_key.public_id().clone();
         let our_idx = pub_keys
             .iter()
             .position(|id| *id == our_id)
@@ -267,7 +271,9 @@ impl<S: SecretId> KeyGen<S> {
         let commit = our_part.commitment();
         let encrypt = |(i, pk): (usize, &S::PublicId)| {
             let row = our_part.row(i + 1);
-            Ok(pk.encrypt_with_rng(rng, &bincode::serialize(&row)?))
+            sec_key
+                .encrypt(pk, &bincode::serialize(&row)?)
+                .ok_or(Error::Encryption)
         };
         let rows = key_gen
             .pub_keys
@@ -298,7 +304,7 @@ impl<S: SecretId> KeyGen<S> {
         rng: &mut R,
     ) -> Result<PartOutcome, Error> {
         let sender_idx = self.node_index(sender_id).ok_or(Error::UnknownSender)?;
-        let row = match self.handle_part_or_fault(sec_key, sender_idx, part) {
+        let row = match self.handle_part_or_fault(sec_key, sender_idx, sender_id, part) {
             Ok(Some(row)) => row,
             Ok(None) => return Ok(PartOutcome::Valid(None)),
             Err(fault) => return Ok(PartOutcome::Invalid(fault)),
@@ -308,7 +314,7 @@ impl<S: SecretId> KeyGen<S> {
         for (idx, pk) in self.pub_keys.iter().enumerate() {
             let val = row.evaluate(idx + 1);
             let ser_val = bincode::serialize(&FieldWrap(val))?;
-            values.push(pk.encrypt_with_rng(rng, ser_val));
+            values.push(sec_key.encrypt(pk, ser_val).ok_or(Error::Encryption)?);
         }
         Ok(PartOutcome::Valid(Some(Ack(sender_idx, values))))
     }
@@ -324,10 +330,12 @@ impl<S: SecretId> KeyGen<S> {
         ack: Ack,
     ) -> Result<AckOutcome, Error> {
         let sender_idx = self.node_index(sender_id).ok_or(Error::UnknownSender)?;
-        Ok(match self.handle_ack_or_fault(sec_key, sender_idx, ack) {
-            Ok(()) => AckOutcome::Valid,
-            Err(fault) => AckOutcome::Invalid(fault),
-        })
+        Ok(
+            match self.handle_ack_or_fault(sec_key, sender_id, sender_idx, ack) {
+                Ok(()) => AckOutcome::Valid,
+                Err(fault) => AckOutcome::Invalid(fault),
+            },
+        )
     }
 
     /// Returns the index of the node, or `None` if it is unknown.
@@ -386,6 +394,7 @@ impl<S: SecretId> KeyGen<S> {
         &mut self,
         sec_key: &S,
         sender_idx: u64,
+        sender_id: &S::PublicId,
         Part(commit, rows): Part,
     ) -> Result<Option<Poly>, PartFault> {
         if rows.len() != self.pub_keys.len() {
@@ -406,7 +415,7 @@ impl<S: SecretId> KeyGen<S> {
         };
         // We are a validator: Decrypt and deserialize our row and compare it to the commitment.
         let ser_row = sec_key
-            .decrypt(&rows[our_idx as usize])
+            .decrypt(sender_id, &rows[our_idx as usize])
             .ok_or(PartFault::DecryptRow)?;
         let row: Poly = bincode::deserialize(&ser_row).map_err(|_| PartFault::DeserializeRow)?;
         if row.commitment() != commit_row {
@@ -419,6 +428,7 @@ impl<S: SecretId> KeyGen<S> {
     fn handle_ack_or_fault(
         &mut self,
         sec_key: &S,
+        sender_id: &S::PublicId,
         sender_idx: u64,
         Ack(proposer_idx, values): Ack,
     ) -> Result<(), AckFault> {
@@ -438,7 +448,7 @@ impl<S: SecretId> KeyGen<S> {
         };
         // We are a validator: Decrypt and deserialize our value and compare it to the commitment.
         let ser_val = sec_key
-            .decrypt(&values[our_idx as usize])
+            .decrypt(sender_id, &values[our_idx as usize])
             .ok_or(AckFault::DecryptValue)?;
         let val = bincode::deserialize::<FieldWrap<Fr>>(&ser_val)
             .map_err(|_| AckFault::DeserializeValue)?
