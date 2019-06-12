@@ -148,6 +148,46 @@ impl SecretId for PeerId {
     fn sign_detached(&self, data: &[u8]) -> Signature {
         Signature(self.sec_sign.sign_detached(data))
     }
+
+    #[cfg(not(feature = "mock"))]
+    fn encrypt<M: AsRef<[u8]>>(&self, _to: &Self::PublicId, msg: M) -> Option<Vec<u8>> {
+        // Pass through: We cannot store encryption keys as they are not reproductible.
+        // This code is only used for test.
+        Some(msg.as_ref().to_vec())
+    }
+
+    #[cfg(not(feature = "mock"))]
+    fn decrypt(&self, _from: &Self::PublicId, ct: &[u8]) -> Option<Vec<u8>> {
+        // Pass through: We cannot store encryption keys as they are not reproductible.
+        // This code is only used for test.
+        Some(ct.to_vec())
+    }
+
+    #[cfg(feature = "mock")]
+    fn encrypt<M: AsRef<[u8]>>(&self, to: &Self::PublicId, msg: M) -> Option<Vec<u8>> {
+        use safe_crypto::{PublicEncryptKey, SecretEncryptKey};
+        // Create a deterministic key based on safe_crypto mock implementation.
+        let to_pub_encrypt = PublicEncryptKey::from_bytes(to.pub_sign.into_bytes());
+        let self_sec_encrypt = SecretEncryptKey::from_bytes(self.pub_sign.into_bytes());
+
+        self_sec_encrypt
+            .shared_secret(&to_pub_encrypt)
+            .encrypt_bytes(msg.as_ref())
+            .ok()
+    }
+
+    #[cfg(feature = "mock")]
+    fn decrypt(&self, from: &Self::PublicId, ct: &[u8]) -> Option<Vec<u8>> {
+        use safe_crypto::{PublicEncryptKey, SecretEncryptKey};
+        // Create a deterministic key based on safe_crypto mock implementation.
+        let from_pub_encrypt = PublicEncryptKey::from_bytes(from.pub_sign.into_bytes());
+        let self_sec_encrypt = SecretEncryptKey::from_bytes(self.pub_sign.into_bytes());
+
+        self_sec_encrypt
+            .shared_secret(&from_pub_encrypt)
+            .decrypt_bytes(ct)
+            .ok()
+    }
 }
 
 /// **NOT FOR PRODUCTION USE**: Mock type implementing `NetworkEvent` trait.

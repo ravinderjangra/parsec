@@ -37,6 +37,11 @@ pub trait SecretId {
             signature: self.sign_detached(data),
         }
     }
+
+    /// Encrypts the message using own Rng to `to`
+    fn encrypt<M: AsRef<[u8]>>(&self, to: &Self::PublicId, msg: M) -> Option<Vec<u8>>;
+    /// Decrypt message from `from`.
+    fn decrypt(&self, from: &Self::PublicId, ct: &[u8]) -> Option<Vec<u8>>;
 }
 
 /// A basic helper to carry a given [`Signature`](trait.PublicId.html#associatedtype.Signature)
