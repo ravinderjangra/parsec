@@ -1376,16 +1376,11 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     // Constructs a sync event to prove receipt of a `Request` or `Response` (depending on the value
     // of `is_request`) from `src`, then add it to our graph.
     fn create_sync_event(&mut self, is_request: bool, other_parent: EventIndex) -> Result<()> {
-        if self.peer_list.last_event(PeerIndex::OUR).is_none() {
-            self.pending_events.push(PendingEvent::Sync {
-                is_request,
-                other_parent,
-                _phantom: PhantomData,
-            });
-            return Ok(());
-        };
-
-        self.add_sync_event(is_request, other_parent)
+        self.process_or_queue_pending_event(PendingEvent::Sync {
+            is_request,
+            other_parent,
+            _phantom: PhantomData,
+        })
     }
 
     fn add_sync_event(&mut self, is_request: bool, other_parent: EventIndex) -> Result<()> {
@@ -1445,26 +1440,40 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
 
         for event in mem::replace(&mut self.pending_events, vec![]) {
-            match event {
-                PendingEvent::Sync {
-                    is_request,
-                    other_parent,
-                    ..
-                } => self.add_sync_event(is_request, other_parent)?,
-                #[cfg(feature = "malice-detection")]
-                PendingEvent::Accusation {
-                    offender,
-                    malice,
-                    other_parent,
-                } => {
-                    let _ = self
-                        .add_accusation_event(offender, malice, other_parent)?
-                        .map(|unhandled| self.pending_accusations.push((offender, unhandled)));
-                }
-            }
+            self.process_pending_event(event)?;
         }
 
         Ok(())
+    }
+
+    fn process_or_queue_pending_event(
+        &mut self,
+        event: PendingEvent<T, S::PublicId>,
+    ) -> Result<()> {
+        // Store as pending events if we do not have the initial event, which means we are
+        // not voter yet.
+        if self.peer_list.last_event(PeerIndex::OUR).is_none() {
+            self.pending_events.push(event);
+            Ok(())
+        } else {
+            self.process_pending_event(event)
+        }
+    }
+
+    fn process_pending_event(&mut self, event: PendingEvent<T, S::PublicId>) -> Result<()> {
+        match event {
+            PendingEvent::Sync {
+                is_request,
+                other_parent,
+                ..
+            } => self.add_sync_event(is_request, other_parent),
+            #[cfg(feature = "malice-detection")]
+            PendingEvent::Accusation {
+                offender,
+                malice,
+                other_parent,
+            } => self.add_accusation_event(offender, malice, other_parent),
+        }
     }
 
     fn event_context(&self) -> EventContextRef<T, S> {
@@ -1508,9 +1517,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     fn create_accusation_events(&mut self, other_parent: EventIndex) -> Result<()> {
         let pending_accusations = mem::replace(&mut self.pending_accusations, vec![]);
         for (offender, malice) in pending_accusations {
-            if let Some(unhandled) = self.create_accusation_event(offender, malice, other_parent)? {
-                self.pending_accusations.push((offender, unhandled));
-            }
+            self.create_accusation_event(offender, malice, other_parent)?;
         }
 
         Ok(())
@@ -1521,17 +1528,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         offender: PeerIndex,
         malice: Malice<T, S::PublicId>,
         other_parent: EventIndex,
-    ) -> Result<Option<Malice<T, S::PublicId>>> {
-        if self.peer_list.last_event(PeerIndex::OUR).is_none() {
-            self.pending_events.push(PendingEvent::Accusation {
-                offender,
-                malice,
-                other_parent,
-            });
-            return Ok(None);
-        }
-
-        self.add_accusation_event(offender, malice, other_parent)
+    ) -> Result<()> {
+        self.process_or_queue_pending_event(PendingEvent::Accusation {
+            offender,
+            malice,
+            other_parent,
+        })
     }
 
     // If the accusation specifies a malicious event in our graph which won't be an ancestor of the
@@ -1542,7 +1544,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         offender: PeerIndex,
         malice: Malice<T, S::PublicId>,
         other_parent: EventIndex,
-    ) -> Result<Option<Malice<T, S::PublicId>>> {
+    ) -> Result<()> {
         if self
             .will_be_ancestor_of_our_next_sync(&malice, other_parent)
             .unwrap_or(false)
@@ -1554,10 +1556,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             )?;
 
             let _ = self.add_event(event)?;
-            Ok(None)
         } else {
-            Ok(Some(malice))
+            self.pending_accusations.push((offender, malice));
         }
+        Ok(())
     }
 
     fn will_be_ancestor_of_our_next_sync(
