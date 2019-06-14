@@ -10,9 +10,10 @@ use crate::{
     gossip::{EventHash, PackedEvent},
     hash::Hash,
     id::{PublicId, SecretId},
+    key_gen::message::DkgMessage,
     network_event::NetworkEvent,
     peer_list::{Peer, PeerIndex, PeerList},
-    serialise,
+    serialise, DkgResult,
 };
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 use std::{
@@ -49,6 +50,7 @@ pub enum Observation<T: NetworkEvent, P: PublicId> {
         /// Extra arbitrary information for use by the client
         related_info: Vec<u8>,
     },
+    /// Output only: Do not vote for it.
     /// Vote to accuse a peer of malicious behaviour.
     Accusation {
         /// Public id of the peer committing the malice.
@@ -58,6 +60,16 @@ pub enum Observation<T: NetworkEvent, P: PublicId> {
     },
     /// Vote for an event which is opaque to Parsec.
     OpaquePayload(T),
+    /// Output only: Do not vote for it.
+    /// Will have empty proof set.
+    /// public_key_set will be shared state.
+    /// secret_key_share will be unique to each peers: all participating peers will
+    /// have one assuming less than 1/3 malicious.
+    DkgResult(DkgResult),
+    /// Internal only: Do not vote for it or expect it to come in blocks.
+    /// Vote for the next message (Part or Ack) to be handled for the Distributed Key Generation
+    /// algorithm used by our common coin.
+    DkgMessage(DkgMessage),
 }
 
 impl<T: NetworkEvent, P: PublicId> Observation<T, P> {
@@ -67,6 +79,22 @@ impl<T: NetworkEvent, P: PublicId> Observation<T, P> {
             true
         } else {
             false
+        }
+    }
+
+    /// Is this observation an internal `DkgMessage`
+    pub fn is_dkg_message(&self) -> bool {
+        match *self {
+            Observation::DkgMessage(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Is this observation a result only `DkgResult`
+    pub fn is_dkg_result(&self) -> bool {
+        match *self {
+            Observation::DkgResult(_) => true,
+            _ => false,
         }
     }
 }
@@ -80,6 +108,8 @@ impl<T: NetworkEvent, P: PublicId> Debug for Observation<T, P> {
             Observation::Accusation { offender, malice } => {
                 write!(formatter, "Accusation {{ {:?}, {:?} }}", offender, malice)
             }
+            Observation::DkgResult(result) => write!(formatter, "{:?}", result),
+            Observation::DkgMessage(msg) => write!(formatter, "{:?}", msg),
             Observation::OpaquePayload(payload) => {
                 write!(formatter, "OpaquePayload({:?})", payload)
             }
@@ -345,6 +375,8 @@ impl ConsensusMode {
     pub(crate) fn of<T: NetworkEvent, P: PublicId>(self, observation: &Observation<T, P>) -> Self {
         if observation.is_opaque() {
             self
+        } else if observation.is_dkg_message() {
+            ConsensusMode::Single
         } else {
             ConsensusMode::Supermajority
         }
