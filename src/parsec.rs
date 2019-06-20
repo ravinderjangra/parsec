@@ -22,7 +22,7 @@ use crate::{
         Event, EventContextRef, EventIndex, Graph, IndexedEventRef, PackedEvent, Request, Response,
     },
     id::{PublicId, SecretId},
-    key_gen::{message::DkgMessage, Ack, AckOutcome, KeyGen, Part, PartOutcome},
+    key_gen::{dkg_threshold, message::DkgMessage, Ack, AckOutcome, KeyGen, Part, PartOutcome},
     meta_voting::{MetaElection, MetaEvent, MetaEventBuilder, MetaVote, Observer},
     network_event::NetworkEvent,
     observation::{
@@ -93,6 +93,8 @@ pub(crate) type KeyGenId = usize;
 pub struct Parsec<T: NetworkEvent, S: SecretId> {
     // The PeerInfo of other nodes.
     peer_list: PeerList<S>,
+    // Set of KeyGen::new results pending use once their associated StartDkg reach consensus.
+    pending_key_gen: Vec<(KeyGen<S>, Option<Part>)>,
     // Set of active distributed key generation, with a KeyGenId used by `DkgMessage`.
     key_gen: BTreeMap<KeyGenId, KeyGen<S>>,
     // Next KeyGenId
@@ -240,6 +242,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
         Self {
             peer_list,
+            pending_key_gen: Vec::new(),
             key_gen: BTreeMap::new(),
             key_gen_next_id: KeyGenId::default(),
             graph: Graph::new(),
@@ -841,6 +844,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
                 self.handle_remove_peer(event_index, offender)
             }
+            Some(Observation::StartDkg(peers)) => {
+                if self.handle_dkg_start_consensus(&peers).is_none() {
+                    warn!("Not starting DKG on StartDkg consensus because of error");
+                }
+                None
+            }
             Some(Observation::DkgResult(_)) => {
                 log_or_panic!("Unexpected DkgResult consensus.");
                 None
@@ -944,17 +953,24 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         Some(())
     }
 
-    #[allow(unused)]
-    /// Start DKG: Needs to be called at the same block for all Nodes.
-    pub fn handle_dkg_start_consensus(&mut self, rng: &mut rand::Rng) -> Option<()> {
-        let voters: BTreeSet<S::PublicId> = self
-            .peer_list
-            .voters()
-            .map(|(_, p)| p.id().clone())
-            .collect();
-
-        let threshold = (voters.len() - 1) / 3;
-        let (key_gen, part) = KeyGen::new(self.peer_list.our_id(), voters, threshold, rng).ok()?;
+    // This function must be called on consensus on a `StartDkg` observation.
+    // This allow the call-site to meet two preconditions:
+    // * All DKG participants will call it in the same order, and
+    // * Incidentally, it will guarantee that `pending_key_gen` contains an
+    //   entry for this set of peers.
+    //
+    // This is a problem, it require vote that may not have arrived yet before reaching
+    // that consensus or the Keygen would not be there.
+    //  => It seem we cannot avoid having the ability to call KeyGen::new from within
+    //     this function.
+    fn handle_dkg_start_consensus(&mut self, peers: &BTreeSet<S::PublicId>) -> Option<()> {
+        let (key_gen, part) = {
+            let key_gen_idx = self
+                .pending_key_gen
+                .iter()
+                .position(|(gen, _)| gen.public_keys() == peers)?;
+            self.pending_key_gen.remove(key_gen_idx)
+        };
 
         let key_gen_id = self.key_gen_next_id;
         self.key_gen_next_id += 1;
@@ -965,6 +981,25 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         }
         let _ = self.key_gen.insert(key_gen_id, key_gen);
         Some(())
+    }
+
+    /// Vote to start a DKG with the given peers participating.
+    pub fn vote_for_new_dkg(
+        &mut self,
+        peers: BTreeSet<S::PublicId>,
+        rng: &mut rand::Rng,
+    ) -> Result<()> {
+        let threshold = dkg_threshold(peers.len());
+        match KeyGen::new(self.peer_list.our_id(), peers.clone(), threshold, rng) {
+            Ok(result) => {
+                self.pending_key_gen.push(result);
+                self.vote_for(Observation::StartDkg(peers))
+            }
+            Err(error) => {
+                error!("Vote for new DKG Error: {}", error);
+                Err(Error::FailedDkg)
+            }
+        }
     }
 
     fn handle_add_peer(&mut self, peer_id: &S::PublicId) -> PeerListChange {
@@ -1466,7 +1501,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 Err(_) => true,
                 Ok(block) => {
                     // Do not leak internal blocks to Parsec consumer
-                    !block.payload().is_dkg_message()
+                    !block.payload().is_internal()
                 }
             })
             .collect();

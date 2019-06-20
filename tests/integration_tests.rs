@@ -70,7 +70,7 @@ use parsec::{
 };
 use proptest::{prelude::ProptestConfig, test_runner::FileFailurePersistence};
 use rand::Rng;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 // Alter the seed here to reproduce failures
 static SEED: RngChoice = RngChoice::SeededRandom;
@@ -260,10 +260,11 @@ fn run_dkg() {
 
     let mut names = NAMES.iter();
     let mut env = Environment::new(SEED);
+    let peer_ids: BTreeSet<_> = names.by_ref().take(4).cloned().map(PeerId::new).collect();
 
     let obs_schedule = ObservationSchedule {
-        genesis: Genesis::new(names.by_ref().take(4).cloned().map(PeerId::new).collect()),
-        schedule: vec![(50, ObservationEvent::StartDkg)],
+        genesis: Genesis::new(peer_ids.clone()),
+        schedule: vec![(50, ObservationEvent::StartDkg(peer_ids))],
     };
 
     let options = ScheduleOptions::default();

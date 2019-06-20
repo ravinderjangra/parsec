@@ -992,6 +992,7 @@ mod detail {
                     sanitise_peer_id(offender),
                     write_malice_to_string(malice, graph, peer_list, short_peer_ids),
                 ),
+                Observation::StartDkg(peers) => format!("StartDkg({:?})", peers),
                 Observation::DkgResult(result) => format!("DkgResult({:?})", result),
                 Observation::DkgMessage(msg) => format!("DkgMessage({:?})", msg),
                 Observation::OpaquePayload(payload) => {

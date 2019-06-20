@@ -639,10 +639,10 @@ impl Network {
 
                 self.peer_mut(&voting_peer_id).vote_for(&observation);
             }
-            ScheduleEvent::StartDkg(_) => {
-                // For test purpose: simulate starting DKG on all nodes at the same time.
+            ScheduleEvent::StartDkg(peers) => {
+                // All valid peers should vote for new DKG.
                 for peer_id in self.running_peers_ids() {
-                    self.peer_mut(&peer_id).dkg_start_consensus(rng)
+                    self.peer_mut(&peer_id).vote_for_new_dkg(peers.clone(), rng)
                 }
             }
         }

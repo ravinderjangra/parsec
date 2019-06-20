@@ -322,8 +322,8 @@ impl Peer {
             .retain(|obs| !parsec.have_voted_for(obs) && parsec.vote_for(obs.clone()).is_err());
     }
 
-    pub fn dkg_start_consensus(&mut self, rng: &mut Rng) {
-        let _ = self.parsec.handle_dkg_start_consensus(rng);
+    pub fn vote_for_new_dkg(&mut self, peers: BTreeSet<PeerId>, rng: &mut Rng) {
+        let _ = self.parsec.vote_for_new_dkg(peers, rng);
     }
 
     pub fn gossip_recipients(&self) -> impl Iterator<Item = &PeerId> {

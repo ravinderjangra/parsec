@@ -53,6 +53,8 @@ pub enum Error {
     InvalidMessage,
     /// The request or response has already been handled by us.
     DuplicateMessage,
+    /// Faild DKG process
+    FailedDkg,
     /// Logic error.
     Logic,
 }
@@ -98,6 +100,7 @@ impl Display for Error {
             ),
             Error::InvalidMessage => write!(f, "This non-empty message is invalid."),
             Error::DuplicateMessage => write!(f, "This message has already been handled."),
+            Error::FailedDkg => write!(f, "The requested DKG could not proceed."),
             Error::Logic => write!(
                 f,
                 "This is a logic error and represents a flaw in the code."
