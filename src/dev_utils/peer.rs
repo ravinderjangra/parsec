@@ -244,12 +244,14 @@ impl Peer {
         id: PeerId,
         genesis_group: &BTreeSet<PeerId>,
         consensus_mode: ConsensusMode,
+        secure_rng: Box<dyn Rng>,
     ) -> Self {
         Self::new(WrappedParsec::Good(Parsec::from_genesis(
             id,
             genesis_group,
             vec![],
             consensus_mode,
+            secure_rng,
         )))
     }
 
@@ -257,9 +259,10 @@ impl Peer {
         id: PeerId,
         genesis_group: &BTreeSet<PeerId>,
         consensus_mode: ConsensusMode,
+        secure_rng: Box<dyn Rng>,
     ) -> Self {
         Self::new(WrappedParsec::Malicious(MaliciousComponents {
-            test_parsec: TestParsec::from_genesis(id, genesis_group, consensus_mode),
+            test_parsec: TestParsec::from_genesis(id, genesis_group, consensus_mode, secure_rng),
             forked_event: None,
         }))
     }
@@ -269,12 +272,14 @@ impl Peer {
         genesis_group: &BTreeSet<PeerId>,
         current_group: &BTreeSet<PeerId>,
         consensus_mode: ConsensusMode,
+        secure_rng: Box<dyn Rng>,
     ) -> Self {
         Self::new(WrappedParsec::Good(Parsec::from_existing(
             id,
             genesis_group,
             current_group,
             consensus_mode,
+            secure_rng,
         )))
     }
 
@@ -283,6 +288,7 @@ impl Peer {
         genesis_group: &BTreeSet<PeerId>,
         current_group: &BTreeSet<PeerId>,
         consensus_mode: ConsensusMode,
+        secure_rng: Box<dyn Rng>,
     ) -> Self {
         Self::new(WrappedParsec::Malicious(MaliciousComponents {
             test_parsec: TestParsec::from_existing(
@@ -290,6 +296,7 @@ impl Peer {
                 genesis_group,
                 current_group,
                 consensus_mode,
+                secure_rng,
             ),
             forked_event: None,
         }))

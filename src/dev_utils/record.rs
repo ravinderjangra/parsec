@@ -6,7 +6,10 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use super::dot_parser::{parse_dot_file, ParsedContents};
+use super::{
+    dot_parser::{parse_dot_file, ParsedContents},
+    new_common_rng, new_rng, RngChoice,
+};
 use crate::{
     gossip::{Cause, Event, IndexedEventRef, PackedEvent, Request, Response},
     hash::Hash,
@@ -16,6 +19,9 @@ use crate::{
     peer_list::PeerIndex,
 };
 use std::{collections::BTreeSet, io, path::Path};
+
+// Use Fixed seed for functional tests and replay: No randomization.
+static SEED: RngChoice = RngChoice::SeededXor([1, 2, 3, 4]);
 
 /// Record of a Parsec session which consist of sequence of operations (`vote_for`, `handle_request`
 /// and `handle_response`). Can be produced from a previously dumped DOT file and after replaying,
@@ -41,11 +47,22 @@ impl Record {
     }
 
     pub fn play(self) -> Parsec<Transaction, PeerId> {
+        let mut common_rng = new_common_rng(SEED);
         let mut parsec = Parsec::from_genesis(
             self.our_id,
             &self.genesis_group,
             vec![],
             self.consensus_mode,
+            // TODO: Build an Rng that will reproduce the value from dump-graph:
+            //       It could be for example wrapping a Rng, and implement Read,
+            //       reading from the Rng when needing value, storing them in a vector and
+            //       returning them, and wrapping that into a ReadRng.
+            //       Dump graph can then dump all these provided values, and we can create
+            //       A new ReadRng HERE to replay the graph.
+            //
+            // An alternative could be to store the generated Part, and dump them, and
+            // instead of providing a Rng, here we would provide something that generate the same Parts.
+            new_rng(&mut common_rng),
         );
 
         for action in self.actions {
@@ -307,9 +324,10 @@ mod tests {
 
     /// Run smoke test using given dot file.
     fn smoke<P: AsRef<Path>>(path: P) {
+        let mut common_rng = new_common_rng(SEED);
         let _p = PathPrinter(path.as_ref().to_owned());
         let contents = unwrap!(parse_dot_file(path.as_ref()));
-        let expected = Parsec::from_parsed_contents(contents);
+        let expected = Parsec::from_parsed_contents(contents, new_rng(&mut common_rng));
         let expected_events = {
             let ignore_last_events = 0;
             get_graph_snapshot(&expected, ignore_last_events)
