@@ -61,7 +61,7 @@ pub enum Observation<T: NetworkEvent, P: PublicId> {
     /// Vote for an event which is opaque to Parsec.
     OpaquePayload(T),
     /// Internal only: No blocks with it.
-    /// Only use vote_for_new_dkg to vote for that event: Will start the DKG on consensus.
+    /// Can be voted as an input.
     StartDkg(BTreeSet<P>),
     /// Output only: Do not vote for it.
     /// Will have empty proof set.
