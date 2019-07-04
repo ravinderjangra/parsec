@@ -13,6 +13,7 @@ use crate::gossip::EventContextRef;
 use crate::{
     gossip::{CauseInput, Event, EventIndex, Graph, IndexedEventRef},
     hash::{Hash, HASH_LEN},
+    maidsafe_utilities::serialisation::deserialise,
     meta_voting::{
         BoolSet, MetaElection, MetaEvent, MetaVote, Observer, Step, UnconsensusedEvents,
     },
@@ -81,6 +82,7 @@ struct ParsedFile {
     consensus_mode: ConsensusMode,
     graph: ParsedGraph,
     meta_election: ParsedMetaElection,
+    secure_rng_values: Vec<u32>,
 }
 
 struct ParserCtx {
@@ -124,16 +126,20 @@ fn parse_file(ctx: &Rc<ParserCtx>) -> Parser<u8, ParsedFile> {
     (parse_our_id()
         + parse_peer_list(ctx)
         + parse_consensus_mode()
+        + parse_secure_rng()
         + parse_graph()
         + parse_meta_election(ctx)
         - parse_end())
     .map(
-        |((((our_id, peer_list), consensus_mode), graph), meta_election)| ParsedFile {
-            our_id,
-            peer_list,
-            consensus_mode,
-            graph,
-            meta_election,
+        |(((((our_id, peer_list), consensus_mode), secure_rng_values), graph), meta_election)| {
+            ParsedFile {
+                our_id,
+                peer_list,
+                consensus_mode,
+                graph,
+                meta_election,
+                secure_rng_values,
+            }
         },
     )
 }
@@ -197,6 +203,20 @@ fn parse_consensus_mode() -> Parser<u8, ConsensusMode> {
     parser
         .opt()
         .map(|mode| mode.unwrap_or(ConsensusMode::Supermajority))
+}
+
+fn parse_secure_rng() -> Parser<u8, Vec<u32>> {
+    let parser_u32 = is_a(digit)
+        .repeat(1..)
+        .convert(String::from_utf8)
+        .convert(|s| u32::from_str(&s));
+
+    let parser_vec =
+        (seq(b"[") * list(parser_u32, seq(b", ")) - seq(b"]")).map(|v| v.into_iter().collect());
+    let parser = comment_prefix() * seq(b"secure_rng: ") * parser_vec - next_line();
+    parser
+        .opt()
+        .map(|secure_rng| secure_rng.unwrap_or_default())
 }
 
 #[derive(Debug)]
@@ -497,7 +517,12 @@ fn parse_unconsensused_events() -> Parser<u8, BTreeSet<String>> {
 }
 
 fn parse_observation() -> Parser<u8, Observation<Transaction, PeerId>> {
-    parse_genesis() | parse_add() | parse_remove() | parse_opaque()
+    parse_genesis()
+        | parse_add()
+        | parse_remove()
+        | parse_opaque()
+        | parse_start_dkg()
+        | parse_dkg_msg()
 }
 
 fn parse_accusation() -> Parser<u8, (PeerId, MaliceInput)> {
@@ -571,6 +596,28 @@ fn parse_opaque() -> Parser<u8, Observation<Transaction, PeerId>> {
     (seq(b"OpaquePayload(") * parse_transaction() - seq(b")"))
         .map(Transaction::new)
         .map(Observation::OpaquePayload)
+}
+
+fn parse_start_dkg() -> Parser<u8, Observation<Transaction, PeerId>> {
+    (seq(b"StartDkg(") * parse_peers() - seq(b")")).map(Observation::StartDkg)
+}
+
+fn parse_dkg_msg() -> Parser<u8, Observation<Transaction, PeerId>> {
+    let parser_u8 = is_a(digit)
+        .repeat(1..)
+        .convert(String::from_utf8)
+        .convert(|s| u8::from_str(&s));
+    let parser_vec =
+        (seq(b"[") * list(parser_u8, seq(b", ")) - seq(b"]")).map(|v| v.into_iter().collect_vec());
+
+    (seq(b"DkgMessage(")
+        * (seq(b"DkgPart(") | seq(b"DkgAck("))
+        * is_a(digit).repeat(1..)
+        * seq(b")), SerialisedDkgMessage(")
+        * parser_vec
+        - seq(b")"))
+    .map(|v| unwrap!(deserialise(&v)))
+    .map(Observation::DkgMessage)
 }
 
 fn parse_transaction() -> Parser<u8, String> {
@@ -704,6 +751,7 @@ pub(crate) struct ParsedContents {
     pub peer_list: PeerList<PeerId>,
     pub observations: ObservationStore<Transaction, PeerId>,
     pub consensus_mode: ConsensusMode,
+    pub secure_rng_values: Vec<u32>,
 }
 
 impl ParsedContents {
@@ -719,6 +767,7 @@ impl ParsedContents {
             peer_list,
             observations: ObservationStore::new(),
             consensus_mode: ConsensusMode::Supermajority,
+            secure_rng_values: Vec::new(),
         }
     }
 }
@@ -873,6 +922,7 @@ fn convert_into_parsed_contents(result: ParsedFile) -> ParsedContents {
         consensus_mode,
         mut graph,
         meta_election,
+        secure_rng_values,
     } = result;
 
     let mut parsed_contents = ParsedContents::new(our_id.clone());
@@ -904,6 +954,7 @@ fn convert_into_parsed_contents(result: ParsedFile) -> ParsedContents {
     parsed_contents.peer_list = peer_list;
     parsed_contents.meta_election = meta_election;
     parsed_contents.consensus_mode = consensus_mode;
+    parsed_contents.secure_rng_values = secure_rng_values;
     parsed_contents
 }
 

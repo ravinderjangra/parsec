@@ -97,6 +97,7 @@
 
 pub mod dkg_result;
 pub mod message;
+pub mod parsec_rng;
 mod rng_adapter;
 
 #[cfg(test)]

@@ -9,6 +9,7 @@
 use crate::{
     gossip::Graph,
     id::SecretId,
+    key_gen::parsec_rng::ParsecRng,
     meta_voting::MetaElection,
     network_event::NetworkEvent,
     observation::{ConsensusMode, ObservationStore},
@@ -30,6 +31,17 @@ pub enum DumpGraphContext {
     DroppingParsec,
 }
 
+pub(crate) struct ToFileInfo<'a, T: NetworkEvent, S: SecretId> {
+    pub owner_id: &'a S::PublicId,
+    pub consensus_mode: ConsensusMode,
+    pub gossip_graph: &'a Graph<S::PublicId>,
+    pub meta_election: &'a MetaElection,
+    pub peer_list: &'a PeerList<S>,
+    pub observations: &'a ObservationStore<T, S::PublicId>,
+    pub secure_rng: &'a ParsecRng,
+    pub info: &'a DumpGraphContext,
+}
+
 /// This function will dump the graphs from the specified peer in dot format to a random folder in
 /// the system's temp dir.  It will also try to create an SVG from each such dot file, but will not
 /// fail or report failure if the SVG files can't be created.  The location of this folder will be
@@ -37,46 +49,22 @@ pub enum DumpGraphContext {
 /// these files after a thread has already panicked, e.g. in the case of a test failure.  No-op for
 /// case where `dump-graphs` feature not enabled.
 #[cfg(feature = "dump-graphs")]
-pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
-    owner_id: &S::PublicId,
-    consensus_mode: ConsensusMode,
-    gossip_graph: &Graph<S::PublicId>,
-    meta_election: &MetaElection,
-    peer_list: &PeerList<S>,
-    observations: &ObservationStore<T, S::PublicId>,
-    info: &DumpGraphContext,
-) {
-    detail::to_file(
-        owner_id,
-        consensus_mode,
-        gossip_graph,
-        meta_election,
-        peer_list,
-        observations,
-        info,
-    )
+pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(info: ToFileInfo<T, S>) {
+    detail::to_file(info)
 }
 #[cfg(not(feature = "dump-graphs"))]
-pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
-    _: &S::PublicId,
-    _: ConsensusMode,
-    _: &Graph<S::PublicId>,
-    _: &MetaElection,
-    _: &PeerList<S>,
-    _: &ObservationStore<T, S::PublicId>,
-    _: &DumpGraphContext,
-) {
-}
+pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(_: ToFileInfo<T, S>) {}
 
 #[cfg(feature = "dump-graphs")]
 pub use self::detail::{DumpGraphMode, DIR, DUMP_MODE};
 
 #[cfg(feature = "dump-graphs")]
 mod detail {
-    use super::DumpGraphContext;
+    use super::{DumpGraphContext, ToFileInfo};
     use crate::{
         gossip::{Cause, Event, EventIndex, Graph, GraphSnapshot, IndexedEventRef},
         id::{PublicId, SecretId},
+        key_gen::parsec_rng::ParsecRng,
         meta_voting::{MetaElection, MetaElectionSnapshot, MetaEvent, MetaVote, Observer},
         network_event::NetworkEvent,
         observation::{ConsensusMode, Malice, Observation, ObservationKey, ObservationStore},
@@ -192,16 +180,8 @@ mod detail {
         DIR.with(|_| ());
     }
 
-    pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(
-        owner_id: &S::PublicId,
-        consensus_mode: ConsensusMode,
-        gossip_graph: &Graph<S::PublicId>,
-        meta_election: &MetaElection,
-        peer_list: &PeerList<S>,
-        observations: &ObservationStore<T, S::PublicId>,
-        info: &DumpGraphContext,
-    ) {
-        let need_process = DUMP_MODE.with(|mode| match (info, &*mode.borrow_mut()) {
+    pub(crate) fn to_file<T: NetworkEvent, S: SecretId>(info: ToFileInfo<T, S>) {
+        let need_process = DUMP_MODE.with(|mode| match (info.info, &*mode.borrow_mut()) {
             (DumpGraphContext::DroppingParsec, DumpGraphMode::OnParsecDrop)
             | (DumpGraphContext::ConsensusReached, DumpGraphMode::OnConsensus) => true,
             (DumpGraphContext::DroppingParsec, _) if thread::panicking() => true,
@@ -211,7 +191,7 @@ mod detail {
             return;
         }
 
-        let id = sanitise_string(format!("{:?}", owner_id));
+        let id = sanitise_string(format!("{:?}", info.owner_id));
 
         if let Some(ref filter_peers) = *FILTER_PEERS {
             if !filter_peers.contains(&id) {
@@ -226,23 +206,29 @@ mod detail {
             *count
         });
         let file_path = DIR.with(|dir| dir.join(format!("{}-{:03}.dot", id, call_count)));
-        catch_dump(file_path.clone(), gossip_graph, peer_list, meta_election);
+        catch_dump(
+            file_path.clone(),
+            info.gossip_graph,
+            info.peer_list,
+            info.meta_election,
+        );
 
-        let peer_ids = sanitise_peer_ids(peer_list);
+        let peer_ids = sanitise_peer_ids(info.peer_list);
         let short_peer_ids = short_peer_id_names(&peer_ids);
 
         match File::create(&file_path) {
             Ok(file) => {
                 let mut dot_writer = DotWriter {
                     file: BufWriter::new(file),
-                    consensus_mode,
-                    gossip_graph,
-                    meta_election,
-                    peer_list,
+                    consensus_mode: info.consensus_mode,
+                    gossip_graph: info.gossip_graph,
+                    meta_election: info.meta_election,
+                    peer_list: info.peer_list,
+                    secure_rng: info.secure_rng,
                     observations: &DotObservation::from_observations(
-                        &observations,
-                        gossip_graph,
-                        &peer_list,
+                        &info.observations,
+                        info.gossip_graph,
+                        &info.peer_list,
                         &short_peer_ids,
                     ),
                     peer_ids: &peer_ids,
@@ -368,6 +354,7 @@ mod detail {
         gossip_graph: &'a Graph<S::PublicId>,
         meta_election: &'a MetaElection,
         peer_list: &'a PeerList<S>,
+        secure_rng: &'a ParsecRng,
         observations: &'a DotObservationStore,
         peer_ids: &'a PeerIndexMap<DotPeerId>,
         short_peer_ids: &'a PeerIndexMap<String>,
@@ -406,6 +393,7 @@ mod detail {
         fn write(&mut self) -> io::Result<()> {
             self.write_peer_list()?;
             self.write_consensus_mode()?;
+            self.write_secure_rng()?;
 
             self.writeln(format_args!("digraph GossipGraph {{"))?;
             self.writeln(format_args!("  splines=false"))?;
@@ -465,6 +453,20 @@ mod detail {
                 Self::COMMENT,
                 indent,
                 consensus_mode
+            ))
+        }
+
+        fn write_secure_rng(&mut self) -> io::Result<()> {
+            if self.secure_rng.generated_values().is_empty() {
+                return Ok(());
+            }
+
+            let indent = self.indentation();
+            self.writeln(format_args!(
+                "{}{}secure_rng: {:?}",
+                Self::COMMENT,
+                indent,
+                self.secure_rng.generated_values()
             ))
         }
 
@@ -653,7 +655,14 @@ mod detail {
                 Cause::Response { .. } => "Response",
                 Cause::Observation { ref vote, .. } => {
                     if let Some(observation) = self.observations.get(vote.payload_key()) {
-                        buffer = format!("Observation({:?})", observation);
+                        if observation.additional_info.is_empty() {
+                            buffer = format!("Observation({:?})", observation);
+                        } else {
+                            buffer = format!(
+                                "Observation({}, {})",
+                                observation.value, observation.additional_info
+                            );
+                        }
                         buffer.as_str()
                     } else {
                         "Observation(?)"
@@ -941,6 +950,7 @@ mod detail {
 
     struct DotObservation {
         value: String,
+        additional_info: String,
     }
 
     impl Debug for DotObservation {
@@ -1013,7 +1023,17 @@ mod detail {
                 }
             };
 
-            DotObservation { value }
+            let additional_info = match observation {
+                Observation::DkgMessage(msg) => {
+                    format!("SerialisedDkgMessage({:?})", serialise(msg))
+                }
+                _ => String::new(),
+            };
+
+            DotObservation {
+                value,
+                additional_info,
+            }
         }
     }
 
