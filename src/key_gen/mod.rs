@@ -496,3 +496,8 @@ pub enum PartFault {
     #[fail(display = "Row does not match the commitment")]
     RowCommitment,
 }
+
+/// Threshold to use for running DKG
+pub fn dkg_threshold(participants_count: usize) -> usize {
+    participants_count.saturating_sub(1) / 3
+}

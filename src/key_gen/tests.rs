@@ -23,7 +23,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use super::{KeyGen, PartOutcome};
+use super::{dkg_threshold, KeyGen, PartOutcome};
 use crate::dev_utils::{Environment, RngChoice};
 use crate::mock::PeerId;
 
@@ -111,8 +111,7 @@ fn test_key_gen_with(threshold: usize, node_num: usize) {
 }
 
 fn test_key_gen(node_num: usize) {
-    let threshold = (node_num - 1) / 3;
-    test_key_gen_with(threshold, node_num);
+    test_key_gen_with(dkg_threshold(node_num), node_num);
 }
 
 #[test]

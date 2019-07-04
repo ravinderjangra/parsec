@@ -8,7 +8,7 @@
 
 use crate::{
     block::Block,
-    dev_utils::{parse_test_dot_file, Record, TestIterator},
+    dev_utils::{new_common_rng, new_rng, parse_test_dot_file, Record, RngChoice, TestIterator},
     error::Error,
     gossip::{Event, Graph, GraphSnapshot},
     id::{Proof, PublicId},
@@ -19,6 +19,9 @@ use crate::{
     peer_list::{PeerListSnapshot, PeerState},
 };
 use std::collections::BTreeSet;
+
+// Use Fixed seed for functional tests: No randomization.
+static SEED: RngChoice = RngChoice::SeededXor([1, 2, 3, 4]);
 
 type TestPeer = TestParsec<Transaction, PeerId>;
 
@@ -51,6 +54,7 @@ fn nth_event<P: PublicId>(graph: &Graph<P>, n: usize) -> &Event<P> {
 
 #[test]
 fn from_existing() {
+    let mut common_rng = new_common_rng(SEED);
     let mut peers = mock::create_ids(10);
     let our_id = unwrap!(peers.pop());
     let peers = peers.into_iter().collect();
@@ -60,6 +64,7 @@ fn from_existing() {
         &peers,
         &peers,
         ConsensusMode::Supermajority,
+        new_rng(&mut common_rng),
     );
 
     // Existing section + us
@@ -74,6 +79,7 @@ fn from_existing() {
 #[test]
 #[should_panic(expected = "Genesis group can't be empty")]
 fn from_existing_requires_non_empty_genesis_group() {
+    let mut common_rng = new_common_rng(SEED);
     let mut peers = mock::create_ids(10);
     let our_id = unwrap!(peers.pop());
     let peers = peers.into_iter().collect();
@@ -83,6 +89,7 @@ fn from_existing_requires_non_empty_genesis_group() {
         &BTreeSet::new(),
         &peers,
         ConsensusMode::Supermajority,
+        new_rng(&mut common_rng),
     );
 }
 
@@ -91,6 +98,7 @@ fn from_existing_requires_non_empty_genesis_group() {
 #[test]
 #[should_panic(expected = "Genesis group can't already contain us")]
 fn from_existing_requires_that_genesis_group_does_not_contain_us() {
+    let mut common_rng = new_common_rng(SEED);
     let peers = mock::create_ids(10);
     let our_id = unwrap!(peers.first()).clone();
     let genesis_group = peers.iter().cloned().collect();
@@ -101,6 +109,7 @@ fn from_existing_requires_that_genesis_group_does_not_contain_us() {
         &genesis_group,
         &section,
         ConsensusMode::Supermajority,
+        new_rng(&mut common_rng),
     );
 }
 
@@ -109,6 +118,7 @@ fn from_existing_requires_that_genesis_group_does_not_contain_us() {
 #[test]
 #[should_panic(expected = "Section can't be empty")]
 fn from_existing_requires_non_empty_section() {
+    let mut common_rng = new_common_rng(SEED);
     let mut peers = mock::create_ids(10);
     let our_id = unwrap!(peers.pop());
     let genesis_group = peers.into_iter().collect();
@@ -118,6 +128,7 @@ fn from_existing_requires_non_empty_section() {
         &genesis_group,
         &BTreeSet::new(),
         ConsensusMode::Supermajority,
+        new_rng(&mut common_rng),
     );
 }
 
@@ -126,6 +137,7 @@ fn from_existing_requires_non_empty_section() {
 #[test]
 #[should_panic(expected = "Section can't already contain us")]
 fn from_existing_requires_that_section_does_not_contain_us() {
+    let mut common_rng = new_common_rng(SEED);
     let peers = mock::create_ids(10);
     let our_id = unwrap!(peers.first()).clone();
     let genesis_group = peers.iter().skip(1).cloned().collect();
@@ -136,11 +148,13 @@ fn from_existing_requires_that_section_does_not_contain_us() {
         &genesis_group,
         &section,
         ConsensusMode::Supermajority,
+        new_rng(&mut common_rng),
     );
 }
 
 #[test]
 fn from_genesis() {
+    let mut common_rng = new_common_rng(SEED);
     let peers = mock::create_ids(10);
     let our_id = unwrap!(peers.first()).clone();
     let peers = peers.into_iter().collect();
@@ -149,6 +163,7 @@ fn from_genesis() {
         our_id.clone(),
         &peers,
         ConsensusMode::Supermajority,
+        new_rng(&mut common_rng),
     );
     // the peer_list should contain the entire genesis group
     assert_eq!(parsec.peer_list().all_ids().count(), peers.len());
@@ -178,6 +193,7 @@ fn from_genesis() {
 #[test]
 #[should_panic(expected = "Genesis group must contain us")]
 fn from_genesis_requires_the_genesis_group_contains_us() {
+    let mut common_rng = new_common_rng(SEED);
     let mut peers = mock::create_ids(10);
     let our_id = unwrap!(peers.pop());
     let peers = peers.into_iter().collect();
@@ -186,15 +202,17 @@ fn from_genesis_requires_the_genesis_group_contains_us() {
         our_id.clone(),
         &peers,
         ConsensusMode::Supermajority,
+        new_rng(&mut common_rng),
     );
 }
 
 #[test]
 fn from_parsed_contents() {
+    let mut common_rng = new_common_rng(SEED);
     let input_file = "0.dot";
     let parsed_contents = parse_test_dot_file(input_file);
     let parsed_contents_comparison = parse_test_dot_file(input_file);
-    let parsec = TestParsec::from_parsed_contents(parsed_contents);
+    let parsec = TestParsec::from_parsed_contents(parsed_contents, new_rng(&mut common_rng));
     assert_eq!(parsed_contents_comparison.graph, *parsec.graph());
     assert_eq!(
         parsed_contents_comparison.meta_election,
@@ -208,13 +226,14 @@ fn from_parsed_contents() {
 
 #[test]
 fn add_peer() {
+    let mut common_rng = new_common_rng(SEED);
     // Generated with RNG seed: [411278735, 3293288956, 208850454, 2872654992].
     let mut parsed_contents = parse_test_dot_file("alice.dot");
 
     // The final decision to add Fred is reached in E_25, so pop this event for now.
     let e_25 = unwrap!(parsed_contents.remove_last_event());
 
-    let mut alice = TestParsec::from_parsed_contents(parsed_contents);
+    let mut alice = TestParsec::from_parsed_contents(parsed_contents, new_rng(&mut common_rng));
     let genesis_group: BTreeSet<_> = alice
         .peer_list()
         .all_ids()
@@ -248,6 +267,7 @@ fn add_peer() {
         &genesis_group,
         &genesis_group,
         ConsensusMode::Supermajority,
+        new_rng(&mut common_rng),
     );
 
     // Now pass a valid initial request from Alice to Fred.  The generated response would
@@ -262,13 +282,14 @@ fn add_peer() {
 
 #[test]
 fn remove_peer() {
+    let mut common_rng = new_common_rng(SEED);
     // Generated with RNG seed: [1048220270, 1673192006, 3171321266, 2580820785].
     let mut parsed_contents = parse_test_dot_file("alice.dot");
 
     // The final decision to remove Eric is reached in the last event of Alice.
     let a_last = unwrap!(parsed_contents.remove_last_event());
 
-    let mut alice = TestParsec::from_parsed_contents(parsed_contents);
+    let mut alice = TestParsec::from_parsed_contents(parsed_contents, new_rng(&mut common_rng));
 
     let eric_id = PeerId::new("Eric");
     let eric_index = unwrap!(alice.peer_list().get_index(&eric_id));
@@ -310,6 +331,7 @@ fn remove_peer() {
         &section,
         &section,
         ConsensusMode::Supermajority,
+        new_rng(&mut common_rng),
     );
 
     // Peer state is (VOTE | SEND) when created from existing. Need to update the states to
@@ -330,12 +352,13 @@ fn remove_peer() {
 
 #[test]
 fn unpolled_observations() {
+    let mut common_rng = new_common_rng(SEED);
     // Generated with RNG seed: [3016139397, 1416620722, 2110786801, 3768414447], but using
     // Alice-002.dot to get the dot file where we get consensus on `Add(Eric)`.
     let mut alice_contents = parse_test_dot_file("alice.dot");
     let a_17 = unwrap!(alice_contents.remove_last_event());
 
-    let mut alice = TestParsec::from_parsed_contents(alice_contents);
+    let mut alice = TestParsec::from_parsed_contents(alice_contents, new_rng(&mut common_rng));
 
     // `Add(Eric)` should still be unpolled since A_17 would be the first gossip event to
     // reach consensus on `Add(Eric)`, but it was removed from the graph.
@@ -383,7 +406,10 @@ fn unpolled_observations() {
     // Reset, and re-run, this time adding Alice's vote early to check that it is returned in
     // the correct order, i.e. after `Add(Eric)` at the point where `Add(Eric)` is consensused
     // but has not been returned by `poll()`.
-    alice = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
+    alice = TestParsec::from_parsed_contents(
+        parse_test_dot_file("alice.dot"),
+        new_rng(&mut common_rng),
+    );
     unwrap!(alice.vote_for(vote.clone()));
     let mut unpolled_observations = alice.our_unpolled_observations();
     assert_eq!(*unwrap!(unpolled_observations.next()), add_eric);
@@ -415,6 +441,7 @@ fn our_unpolled_observations_with_consensus_mode_single() {
 
 #[test]
 fn gossip_after_fork() {
+    let mut common_rng = new_common_rng(SEED);
     let alice_id = PeerId::new("Alice");
     let bob_id = PeerId::new("Bob");
 
@@ -429,6 +456,7 @@ fn gossip_after_fork() {
         alice_id.clone(),
         &genesis_group,
         ConsensusMode::Supermajority,
+        new_rng(&mut common_rng),
     );
 
     // Alice creates couple of valid events.
@@ -450,8 +478,12 @@ fn gossip_after_fork() {
     let a_3_packed = alice.pack_event(&a_3);
     unwrap!(alice.unpack_and_add_event(a_3_packed));
 
-    let mut bob =
-        TestParsec::from_genesis(bob_id.clone(), &genesis_group, ConsensusMode::Supermajority);
+    let mut bob = TestParsec::from_genesis(
+        bob_id.clone(),
+        &genesis_group,
+        ConsensusMode::Supermajority,
+        new_rng(&mut common_rng),
+    );
 
     // Alice sends a gossip request to Bob and receives a response back.
     let req = unwrap!(alice.create_gossip(&bob_id));
@@ -481,8 +513,12 @@ fn gossip_after_fork() {
 
 #[test]
 fn sees() {
+    let mut common_rng = new_common_rng(SEED);
     // This graph contains a fork.
-    let alice = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
+    let alice = TestParsec::from_parsed_contents(
+        parse_test_dot_file("alice.dot"),
+        new_rng(&mut common_rng),
+    );
 
     let a2 = unwrap!(alice.graph().find_by_short_name("A_2"));
     let a3 = unwrap!(alice.graph().find_by_short_name("A_3"));
@@ -566,6 +602,7 @@ mod handle_malice {
 
     #[test]
     fn genesis_event_not_after_initial() {
+        let mut common_rng = new_common_rng(SEED);
         // Generated with RNG seed: [926181213, 2524489310, 392196615, 406869071].
         let alice_contents = parse_test_dot_file("alice.dot");
         let alice_id = alice_contents.peer_list.our_id().clone();
@@ -574,7 +611,7 @@ mod handle_malice {
             .all_ids()
             .map(|(_, id)| id.clone())
             .collect();
-        let mut alice = TestParsec::from_parsed_contents(alice_contents);
+        let mut alice = TestParsec::from_parsed_contents(alice_contents, new_rng(&mut common_rng));
 
         // Simulate Dave creating unexpected genesis.
         let dave_id = PeerId::new("Dave");
@@ -604,7 +641,7 @@ mod handle_malice {
         let d_2_hash = *d_2.hash();
         let _ = dave_contents.add_event(d_2);
 
-        let mut dave = TestParsec::from_parsed_contents(dave_contents);
+        let mut dave = TestParsec::from_parsed_contents(dave_contents, new_rng(&mut common_rng));
 
         // Dave sends malicious gossip to Alice.
         let request = unwrap!(dave.create_gossip(&alice_id));
@@ -627,6 +664,7 @@ mod handle_malice {
 
     #[test]
     fn genesis_event_creator_not_genesis_member() {
+        let mut common_rng = new_common_rng(SEED);
         // Generated with RNG seed: [848911612, 2362592349, 3178199135, 2458552022].
         let alice_contents = parse_test_dot_file("alice.dot");
         let alice_id = alice_contents.peer_list.our_id().clone();
@@ -636,7 +674,7 @@ mod handle_malice {
             .map(|(_, id)| id.clone())
             .collect();
 
-        let mut alice = TestParsec::from_parsed_contents(alice_contents);
+        let mut alice = TestParsec::from_parsed_contents(alice_contents, new_rng(&mut common_rng));
 
         // This is needed so the AddPeer(Eric) is consensused.
         unwrap!(alice.restart_consensus());
@@ -663,7 +701,7 @@ mod handle_malice {
         let e_1_hash = *e_1.hash();
         let _ = eric_contents.add_event(e_1);
 
-        let mut eric = TestParsec::from_parsed_contents(eric_contents);
+        let mut eric = TestParsec::from_parsed_contents(eric_contents, new_rng(&mut common_rng));
 
         // Eric sends malicious gossip to Alice.
         let request = unwrap!(eric.create_gossip(&alice_id));
@@ -685,11 +723,17 @@ mod handle_malice {
     }
 
     fn initialise_genesis_parsecs(count: usize) -> Vec<TestPeer> {
+        let mut common_rng = new_common_rng(SEED);
         let genesis_ids = mock::create_ids(count).into_iter().collect::<BTreeSet<_>>();
         genesis_ids
             .iter()
             .map(|id| {
-                TestParsec::from_genesis(id.clone(), &genesis_ids, ConsensusMode::Supermajority)
+                TestParsec::from_genesis(
+                    id.clone(),
+                    &genesis_ids,
+                    ConsensusMode::Supermajority,
+                    new_rng(&mut common_rng),
+                )
             })
             .collect()
     }
@@ -1107,11 +1151,15 @@ mod handle_malice {
 
     #[test]
     fn duplicate_votes() {
+        let mut common_rng = new_common_rng(SEED);
         // Generated with RNG seed: [1353978636, 426502568, 2862743769, 1583787884].
         //
         // Carol has already voted for "ABCD".  Create two new duplicate votes by Carol for this
         // opaque payload.
-        let mut carol = TestParsec::from_parsed_contents(parse_test_dot_file("carol.dot"));
+        let mut carol = TestParsec::from_parsed_contents(
+            parse_test_dot_file("carol.dot"),
+            new_rng(&mut common_rng),
+        );
 
         let duplicated_payload = Observation::OpaquePayload(Transaction::new("ABCD"));
         let first_duplicate = unwrap!(carol
@@ -1129,7 +1177,10 @@ mod handle_malice {
 
         // Check that the first duplicate triggers an accusation by Alice, but that the
         // duplicate is still added to the graph.
-        let mut alice = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
+        let mut alice = TestParsec::from_parsed_contents(
+            parse_test_dot_file("alice.dot"),
+            new_rng(&mut common_rng),
+        );
         let carols_valid_vote_hash = *unwrap!(alice.graph().find_by_short_name("C_5")).hash();
         unwrap!(alice.unpack_and_add_event(first_duplicate_clone_packed));
 
@@ -1294,18 +1345,31 @@ mod handle_malice {
 
     #[test]
     fn basic_fork() {
+        let mut common_rng = new_common_rng(SEED);
         // Generated with RNG seed: [1573595827, 2035773878, 1331264098, 154770609].
         //
         // In this scenario, Alice creates two descendants of A_20 and sends one of them to Bob,
         // and the other one to Dave. When Bob gossips to Dave afterwards, Dave is made aware of
         // both sides of the fork and should raise an accusation.
-        let mut alice0 = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
-        let mut bob = TestParsec::from_parsed_contents(parse_test_dot_file("bob.dot"));
+        let mut alice0 = TestParsec::from_parsed_contents(
+            parse_test_dot_file("alice.dot"),
+            new_rng(&mut common_rng),
+        );
+        let mut bob = TestParsec::from_parsed_contents(
+            parse_test_dot_file("bob.dot"),
+            new_rng(&mut common_rng),
+        );
         let message0 = unwrap!(alice0.create_gossip(bob.our_pub_id()));
         unwrap!(bob.handle_request(alice0.our_pub_id(), message0));
 
-        let mut alice1 = TestParsec::from_parsed_contents(parse_test_dot_file("alice.dot"));
-        let mut dave = TestParsec::from_parsed_contents(parse_test_dot_file("dave.dot"));
+        let mut alice1 = TestParsec::from_parsed_contents(
+            parse_test_dot_file("alice.dot"),
+            new_rng(&mut common_rng),
+        );
+        let mut dave = TestParsec::from_parsed_contents(
+            parse_test_dot_file("dave.dot"),
+            new_rng(&mut common_rng),
+        );
         let message1 = unwrap!(alice1.create_gossip(dave.our_pub_id()));
         unwrap!(dave.handle_request(alice1.our_pub_id(), message1));
 
@@ -1637,6 +1701,7 @@ mod handle_malice {
 
     #[test]
     fn premature_gossip() {
+        let mut common_rng = new_common_rng(SEED);
         // Generated with RNG seed: [411278735, 3293288956, 208850454, 2872654992].
         // Copied from add_peer
         let mut parsed_contents = parse_test_dot_file("alice.dot");
@@ -1644,7 +1709,7 @@ mod handle_malice {
         // The final decision to add Frank is reached in E_25, so we remove this event.
         let _e_25 = unwrap!(parsed_contents.remove_last_event());
 
-        let mut alice = TestParsec::from_parsed_contents(parsed_contents);
+        let mut alice = TestParsec::from_parsed_contents(parsed_contents, new_rng(&mut common_rng));
         let genesis_group: BTreeSet<_> = alice
             .peer_list()
             .all_ids()
@@ -1673,6 +1738,7 @@ mod handle_malice {
             &genesis_group,
             &genesis_group,
             ConsensusMode::Supermajority,
+            new_rng(&mut common_rng),
         );
 
         // Check that Fred has no events that Alice has

@@ -120,7 +120,7 @@ pub enum ScheduleEvent {
     /// It is similar to Fail in that the peer will stop responding; however, this will also
     /// cause the other peers to vote for removal
     RemovePeer(PeerId),
-    /// Start Dkg process: place-holder for Dkg participant to avoid clippy::large_enum_variant
+    /// Start Dkg process with set of DKG participants
     StartDkg(BTreeSet<PeerId>),
 }
 
@@ -343,7 +343,8 @@ pub enum ObservationEvent {
     AddPeer(PeerId),
     RemovePeer(PeerId),
     Fail(PeerId),
-    StartDkg,
+    /// Start Dkg process with set of DKG participants
+    StartDkg(BTreeSet<PeerId>),
 }
 
 impl ObservationEvent {
@@ -692,8 +693,8 @@ impl Schedule {
                         peers.fail_peer(&peer);
                         schedule.push(ScheduleEvent::Fail(peer));
                     }
-                    ObservationEvent::StartDkg => {
-                        schedule.push(ScheduleEvent::StartDkg(Default::default()));
+                    ObservationEvent::StartDkg(peers) => {
+                        schedule.push(ScheduleEvent::StartDkg(peers));
                     }
                 }
             }

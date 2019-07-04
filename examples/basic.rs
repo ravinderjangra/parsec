@@ -109,7 +109,11 @@ struct Peer {
 }
 
 impl Peer {
-    fn from_genesis(our_id: PeerId, genesis_group: &BTreeSet<PeerId>) -> Self {
+    fn from_genesis(
+        our_id: PeerId,
+        genesis_group: &BTreeSet<PeerId>,
+        secure_rng: Box<dyn Rng>,
+    ) -> Self {
         Self {
             id: our_id.clone(),
             parsec: Parsec::from_genesis(
@@ -117,6 +121,7 @@ impl Peer {
                 genesis_group,
                 vec![],
                 ConsensusMode::Supermajority,
+                secure_rng,
             ),
             observations: vec![],
             blocks: vec![],
@@ -127,6 +132,7 @@ impl Peer {
         our_id: PeerId,
         genesis_group: &BTreeSet<PeerId>,
         section: &BTreeSet<PeerId>,
+        secure_rng: Box<dyn Rng>,
     ) -> Self {
         Self {
             id: our_id.clone(),
@@ -135,6 +141,7 @@ impl Peer {
                 genesis_group,
                 section,
                 ConsensusMode::Supermajority,
+                secure_rng,
             ),
             observations: vec![],
             blocks: vec![],
@@ -472,15 +479,15 @@ impl Environment {
         };
 
         // Set up the requested number of peers and random network events.
-        env.genesis_group = (0..env.params.genesis_peer_count)
+        let genesis_group: BTreeSet<_> = (0..env.params.genesis_peer_count)
             .map(|_| env.new_peer_id())
             .collect();
 
-        env.peers = env
-            .genesis_group
+        env.peers = genesis_group
             .iter()
-            .map(|id| Peer::from_genesis(id.clone(), &env.genesis_group))
+            .map(|id| Peer::from_genesis(id.clone(), &genesis_group, Box::new(env.rng.new_rng())))
             .collect();
+        env.genesis_group = genesis_group;
 
         env.opaque_observations = (0..env.params.opaque_event_count)
             .map(|_| parsec::Observation::OpaquePayload(env.rng.gen()))
@@ -561,7 +568,12 @@ impl Environment {
             self.peers_added_count += 1;
             println!("Adding {:?}", new_peer_id);
             let section = self.peers.iter().map(|peer| peer.id.clone()).collect();
-            let new_peer = Peer::from_existing(new_peer_id.clone(), &self.genesis_group, &section);
+            let new_peer = Peer::from_existing(
+                new_peer_id.clone(),
+                &self.genesis_group,
+                &section,
+                Box::new(self.rng.new_rng()),
+            );
             self.peers.push(new_peer);
         }
     }

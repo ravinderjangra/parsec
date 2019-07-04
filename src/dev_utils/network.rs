@@ -7,6 +7,7 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::{
+    new_rng,
     peer::{NetworkView, Peer, PeerStatus},
     schedule::{Schedule, ScheduleEvent, ScheduleOptions},
     Observation,
@@ -537,13 +538,30 @@ impl Network {
                 let genesis_ids = genesis.all_ids();
                 let good_peers = genesis
                     .ids_of_good_peers()
-                    .map(|id| Peer::from_genesis(id.clone(), &genesis_ids, self.consensus_mode));
-                let malicious_peers = genesis.ids_of_malicious_peers().map(|id| {
-                    Peer::malicious_from_genesis(id.clone(), &genesis_ids, self.consensus_mode)
-                });
+                    .map(|id| {
+                        Peer::from_genesis(
+                            id.clone(),
+                            &genesis_ids,
+                            self.consensus_mode,
+                            new_rng(rng),
+                        )
+                    })
+                    .collect_vec();
+                let malicious_peers = genesis
+                    .ids_of_malicious_peers()
+                    .map(|id| {
+                        Peer::malicious_from_genesis(
+                            id.clone(),
+                            &genesis_ids,
+                            self.consensus_mode,
+                            new_rng(rng),
+                        )
+                    })
+                    .collect_vec();;
 
                 self.peers = good_peers
-                    .chain(malicious_peers)
+                    .into_iter()
+                    .chain(malicious_peers.into_iter())
                     .map(|peer| (peer.id().clone(), peer))
                     .collect();
 
@@ -574,6 +592,7 @@ impl Network {
                         &self.genesis,
                         &current_peers,
                         self.consensus_mode,
+                        new_rng(rng),
                     ),
                 );
             }
@@ -639,10 +658,11 @@ impl Network {
 
                 self.peer_mut(&voting_peer_id).vote_for(&observation);
             }
-            ScheduleEvent::StartDkg(_) => {
-                // For test purpose: simulate starting DKG on all nodes at the same time.
+            ScheduleEvent::StartDkg(peers) => {
+                // All valid peers should vote for new DKG.
                 for peer_id in self.running_peers_ids() {
-                    self.peer_mut(&peer_id).dkg_start_consensus(rng)
+                    self.peer_mut(&peer_id)
+                        .vote_for(&ParsecObservation::StartDkg(peers.clone()));
                 }
             }
         }

@@ -19,6 +19,7 @@ mod peer;
 mod peer_statuses;
 #[cfg(feature = "testing")]
 pub mod proptest;
+mod pseudo_random;
 #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 mod record;
 mod schedule;
@@ -30,11 +31,12 @@ pub(crate) use self::dot_parser::ParsedContents;
 #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 pub use self::record::Record;
 pub use self::{
-    environment::{Environment, RngChoice},
+    environment::Environment,
     misc::TestIterator,
     network::{ConsensusError, Network},
     peer::{NetworkView, Peer, PeerStatus},
     peer_statuses::PeerStatuses,
+    pseudo_random::{new_common_rng, new_rng, RngChoice, RngDebug},
     schedule::*,
 };
 

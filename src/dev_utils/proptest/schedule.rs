@@ -8,8 +8,8 @@
 
 use super::{Bounded, BoundedBoxedStrategy};
 use crate::dev_utils::{
-    environment::{Environment, RngChoice},
     schedule::{DelayDistribution, Schedule, ScheduleOptions},
+    Environment, RngChoice,
 };
 use proptest_crate::{
     prelude::{Just, RngCore},

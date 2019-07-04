@@ -22,7 +22,7 @@ use crate::{
         Event, EventContextRef, EventIndex, Graph, IndexedEventRef, PackedEvent, Request, Response,
     },
     id::{PublicId, SecretId},
-    key_gen::{message::DkgMessage, Ack, AckOutcome, KeyGen, Part, PartOutcome},
+    key_gen::{dkg_threshold, message::DkgMessage, Ack, AckOutcome, KeyGen, Part, PartOutcome},
     meta_voting::{MetaElection, MetaEvent, MetaEventBuilder, MetaVote, Observer},
     network_event::NetworkEvent,
     observation::{
@@ -117,6 +117,8 @@ pub struct Parsec<T: NetworkEvent, S: SecretId> {
     // parsec instances.
     #[cfg(any(test, feature = "testing"))]
     ignore_process_events: bool,
+    // Provided RNG: Needs to be cryptographically secure RNG as it is used for DKG key generation.
+    secure_rng: Box<dyn rand::Rng>,
 }
 
 impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
@@ -129,11 +131,13 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     /// by the client.
     /// * `consensus_mode` determines how many votes are needed for an observation to become a
     /// candidate for consensus. For more details, see [ConsensusMode](enum.ConsensusMode.html)
+    /// * `secure_rng` cryptographically secure RNG to use for DKG key generation.
     pub fn from_genesis(
         our_id: S,
         genesis_group: &BTreeSet<S::PublicId>,
         genesis_related_info: Vec<u8>,
         consensus_mode: ConsensusMode,
+        secure_rng: Box<dyn rand::Rng>,
     ) -> Self {
         if !genesis_group.contains(our_id.public_id()) {
             log_or_panic!("Genesis group must contain us");
@@ -153,7 +157,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             })
             .collect();
 
-        let mut parsec = Self::empty(peer_list, genesis_indices, consensus_mode);
+        let mut parsec = Self::empty(peer_list, genesis_indices, consensus_mode, secure_rng);
 
         // Add initial event.
         parsec.add_initial_event();
@@ -186,11 +190,13 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     /// of joining. They are the peers this `Parsec` instance will accept gossip from.
     /// * `consensus_mode` determines how many votes are needed for an observation to become a
     /// candidate for consensus. For more details, see [ConsensusMode](enum.ConsensusMode.html)
+    /// * `secure_rng` cryptographically secure RNG to use for DKG key generation.
     pub fn from_existing(
         our_id: S,
         genesis_group: &BTreeSet<S::PublicId>,
         section: &BTreeSet<S::PublicId>,
         consensus_mode: ConsensusMode,
+        secure_rng: Box<dyn rand::Rng>,
     ) -> Self {
         if genesis_group.is_empty() {
             log_or_panic!("Genesis group can't be empty");
@@ -227,7 +233,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             let _ = peer_list.add_peer(peer_id.clone(), PeerState::SEND);
         }
 
-        Self::empty(peer_list, genesis_indices, consensus_mode)
+        Self::empty(peer_list, genesis_indices, consensus_mode, secure_rng)
     }
 
     // Construct empty `Parsec` with no peers (except us) and no gossip events.
@@ -235,6 +241,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         peer_list: PeerList<S>,
         genesis_group: PeerIndexSet,
         consensus_mode: ConsensusMode,
+        secure_rng: Box<dyn rand::Rng>,
     ) -> Self {
         dump_graph::init();
 
@@ -254,6 +261,8 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
             #[cfg(any(test, feature = "testing"))]
             ignore_process_events: false,
+
+            secure_rng,
         }
     }
 
@@ -841,6 +850,12 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
                 self.handle_remove_peer(event_index, offender)
             }
+            Some(Observation::StartDkg(peers)) => {
+                if self.handle_dkg_start_consensus(&peers).is_none() {
+                    warn!("Not starting DKG on StartDkg consensus because of error");
+                }
+                None
+            }
             Some(Observation::DkgResult(_)) => {
                 log_or_panic!("Unexpected DkgResult consensus.");
                 None
@@ -944,17 +959,20 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         Some(())
     }
 
-    #[allow(unused)]
-    /// Start DKG: Needs to be called at the same block for all Nodes.
-    pub fn handle_dkg_start_consensus(&mut self, rng: &mut rand::Rng) -> Option<()> {
-        let voters: BTreeSet<S::PublicId> = self
-            .peer_list
-            .voters()
-            .map(|(_, p)| p.id().clone())
-            .collect();
+    // This function must be called on consensus on a `StartDkg` observation.
+    fn handle_dkg_start_consensus(&mut self, peers: &BTreeSet<S::PublicId>) -> Option<()> {
+        let threshold = dkg_threshold(peers.len());
 
-        let threshold = (voters.len() - 1) / 3;
-        let (key_gen, part) = KeyGen::new(self.peer_list.our_id(), voters, threshold, rng).ok()?;
+        let (key_gen, part) = KeyGen::new(
+            self.peer_list.our_id(),
+            peers.clone(),
+            threshold,
+            &mut self.secure_rng,
+        )
+        .map_err(|error| {
+            error!("Vote for new DKG Error: {}", error);
+        })
+        .ok()?;
 
         let key_gen_id = self.key_gen_next_id;
         self.key_gen_next_id += 1;
@@ -1466,7 +1484,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 Err(_) => true,
                 Ok(block) => {
                     // Do not leak internal blocks to Parsec consumer
-                    !block.payload().is_dkg_message()
+                    !block.payload().is_internal()
                 }
             })
             .collect();
@@ -2274,12 +2292,16 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 #[cfg(any(feature = "testing", all(test, feature = "mock")))]
 impl Parsec<Transaction, PeerId> {
     #[cfg(all(test, feature = "mock"))]
-    pub(crate) fn from_parsed_contents(mut parsed_contents: ParsedContents) -> Self {
+    pub(crate) fn from_parsed_contents(
+        mut parsed_contents: ParsedContents,
+        secure_rng: Box<dyn rand::Rng>,
+    ) -> Self {
         let peer_list = PeerList::new(parsed_contents.our_id);
         let mut parsec = Parsec::empty(
             peer_list,
             PeerIndexSet::default(),
             parsed_contents.consensus_mode,
+            secure_rng,
         );
 
         for event in &parsed_contents.graph {
@@ -2326,12 +2348,14 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         our_id: S,
         genesis_group: &BTreeSet<S::PublicId>,
         consensus_mode: ConsensusMode,
+        secure_rng: Box<dyn rand::Rng>,
     ) -> Self {
         TestParsec(Parsec::from_genesis(
             our_id,
             genesis_group,
             vec![],
             consensus_mode,
+            secure_rng,
         ))
     }
 
@@ -2340,12 +2364,14 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         genesis_group: &BTreeSet<S::PublicId>,
         section: &BTreeSet<S::PublicId>,
         consensus_mode: ConsensusMode,
+        secure_rng: Box<dyn rand::Rng>,
     ) -> Self {
         TestParsec(Parsec::from_existing(
             our_id,
             genesis_group,
             section,
             consensus_mode,
+            secure_rng,
         ))
     }
 
@@ -2391,8 +2417,11 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
 
 #[cfg(all(test, feature = "mock"))]
 impl TestParsec<Transaction, PeerId> {
-    pub fn from_parsed_contents(parsed_contents: ParsedContents) -> Self {
-        TestParsec(Parsec::from_parsed_contents(parsed_contents))
+    pub fn from_parsed_contents(
+        parsed_contents: ParsedContents,
+        secure_rng: Box<dyn rand::Rng>,
+    ) -> Self {
+        TestParsec(Parsec::from_parsed_contents(parsed_contents, secure_rng))
     }
 
     pub fn meta_election(&self) -> &MetaElection {

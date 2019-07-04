@@ -60,6 +60,9 @@ pub enum Observation<T: NetworkEvent, P: PublicId> {
     },
     /// Vote for an event which is opaque to Parsec.
     OpaquePayload(T),
+    /// Internal only: No blocks with it.
+    /// Can be voted as an input.
+    StartDkg(BTreeSet<P>),
     /// Output only: Do not vote for it.
     /// Will have empty proof set.
     /// public_key_set will be shared state.
@@ -90,6 +93,14 @@ impl<T: NetworkEvent, P: PublicId> Observation<T, P> {
         }
     }
 
+    /// Is this observation an internal and should not be published in a `Block`
+    pub fn is_internal(&self) -> bool {
+        match *self {
+            Observation::DkgMessage(_) | Observation::StartDkg(_) => true,
+            _ => false,
+        }
+    }
+
     /// Is this observation a result only `DkgResult`
     pub fn is_dkg_result(&self) -> bool {
         match *self {
@@ -108,6 +119,7 @@ impl<T: NetworkEvent, P: PublicId> Debug for Observation<T, P> {
             Observation::Accusation { offender, malice } => {
                 write!(formatter, "Accusation {{ {:?}, {:?} }}", offender, malice)
             }
+            Observation::StartDkg(result) => write!(formatter, "StartDkg({:?})", result),
             Observation::DkgResult(result) => write!(formatter, "{:?}", result),
             Observation::DkgMessage(msg) => write!(formatter, "{:?}", msg),
             Observation::OpaquePayload(payload) => {
