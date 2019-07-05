@@ -860,7 +860,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 }
                 None
             }
-            Some(Observation::DkgResult(_)) => {
+            Some(Observation::DkgResult { .. }) => {
                 log_or_panic!("Unexpected DkgResult consensus.");
                 None
             }

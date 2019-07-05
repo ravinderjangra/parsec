@@ -1003,7 +1003,10 @@ mod detail {
                     write_malice_to_string(malice, graph, peer_list, short_peer_ids),
                 ),
                 Observation::StartDkg(peers) => format!("StartDkg({:?})", peers),
-                Observation::DkgResult(result) => format!("DkgResult({:?})", result),
+                Observation::DkgResult {
+                    participants,
+                    dkg_result,
+                } => format!("DkgResult({:?}, {:?})", participants, dkg_result),
                 Observation::DkgMessage(msg) => format!("DkgMessage({:?})", msg),
                 Observation::OpaquePayload(payload) => {
                     let max_length = 16;

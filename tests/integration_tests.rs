@@ -66,7 +66,7 @@ use parsec::{
         Schedule, ScheduleOptions,
     },
     mock::{PeerId, Transaction, NAMES},
-    ConsensusMode,
+    ConsensusMode, Observation,
 };
 use proptest::{prelude::ProptestConfig, test_runner::FileFailurePersistence};
 use rand::Rng;
@@ -256,25 +256,107 @@ fn add_few_peers_and_vote() {
 
 #[test]
 fn run_dkg() {
-    use parsec::dev_utils::ObservationEvent;
+    let mut env = Environment::new(SEED);
 
     let mut names = NAMES.iter();
-    let mut env = Environment::new(SEED);
     let peer_ids: BTreeSet<_> = names.by_ref().take(4).cloned().map(PeerId::new).collect();
+    let dkgs = [(peer_ids.clone(), "dkg".to_string())]
+        .iter()
+        .cloned()
+        .collect();
 
+    run_dkgs(&mut env, peer_ids, dkgs);
+}
+
+#[test]
+fn run_split_dkg() {
+    let mut env = Environment::new(SEED);
+
+    let mut names = NAMES.iter();
+    let peer_ids: BTreeSet<_> = names.by_ref().take(8).cloned().map(PeerId::new).collect();
+
+    let left: BTreeSet<_> = peer_ids.iter().take(4).cloned().collect();
+    let right: BTreeSet<_> = peer_ids.iter().skip(4).take(4).cloned().collect();
+
+    let dkgs = [(left, "left".to_string()), (right, "right".to_string())]
+        .iter()
+        .cloned()
+        .collect();
+
+    run_dkgs(&mut env, peer_ids, dkgs);
+}
+
+fn run_dkgs(
+    env: &mut Environment,
+    peer_ids: BTreeSet<PeerId>,
+    dkgs: BTreeMap<BTreeSet<PeerId>, String>,
+) {
+    //
+    // Arrange
+    //
+    use parsec::dev_utils::ObservationEvent;
     let obs_schedule = ObservationSchedule {
-        genesis: Genesis::new(peer_ids.clone()),
-        schedule: vec![(50, ObservationEvent::StartDkg(peer_ids))],
+        genesis: Genesis::new(peer_ids.iter().cloned().collect()),
+        schedule: dkgs
+            .keys()
+            .map(|participants| (50, ObservationEvent::StartDkg(participants.clone())))
+            .collect(),
     };
 
     let options = ScheduleOptions::default();
-    let schedule = Schedule::from_observation_schedule(&mut env, &options, obs_schedule);
+    let schedule = Schedule::from_observation_schedule(env, &options, obs_schedule);
 
+    //
+    // Act
+    //
     unwrap!(env.network.execute_schedule(&mut env.rng, schedule));
 
-    let peer = unwrap!(env.network.active_non_malicious_peers().next());
-    let block = unwrap!(peer.blocks().last());
-    assert!(block.payload().is_dkg_result());
+    //
+    // Assert
+    // Each peer should have all the DkgResult from started DKGs with a secret key
+    // if it was participating.
+    //
+    let dkg_name = |participants: &BTreeSet<_>| {
+        dkgs.get(participants)
+            .cloned()
+            .unwrap_or_else(|| format!("{:?}", participants))
+    };
+
+    let actual: BTreeSet<_> = env
+        .network
+        .active_non_malicious_peers()
+        .flat_map(|peer| {
+            let id = peer.id().clone();
+            peer.blocks().map(move |block| (id.clone(), block))
+        })
+        .filter_map(|(id, block)| match block.payload() {
+            Observation::DkgResult {
+                participants,
+                dkg_result,
+            } => Some((
+                id.clone(),
+                dkg_name(participants),
+                dkg_result.secret_key_share.is_some(),
+            )),
+            _ => None,
+        })
+        .collect();
+
+    let expected: BTreeSet<_> = dkgs
+        .iter()
+        .flat_map(|(participants, dkg_name)| {
+            peer_ids
+                .iter()
+                .map(move |id| (id.clone(), dkg_name.clone(), participants.contains(&id)))
+        })
+        .collect();
+
+    assert_eq!(
+        actual, expected,
+        "\n\nEach peer should have all the DkgResult from started DKGs with a secret \
+         key if it was participating.\nStarted DKGs: {:?}",
+        dkgs
+    );
 }
 
 #[test]

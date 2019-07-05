@@ -84,18 +84,22 @@ fn test_key_gen_with(threshold: usize, node_num: usize) {
     let pub_key_set = nodes[0]
         .generate()
         .expect("Failed to generate `PublicKeySet` for node #0")
+        .1
         .public_key_set;
     let sig_shares: BTreeMap<_, _> = nodes
         .iter()
         .enumerate()
         .map(|(idx, node)| {
             assert!(node.is_ready());
-            let dkg_result = node.generate().unwrap_or_else(|_| {
-                panic!(
-                    "Failed to generate `PublicKeySet` and `SecretKeyShare` for node #{}",
-                    idx
-                )
-            });
+            let dkg_result = node
+                .generate()
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Failed to generate `PublicKeySet` and `SecretKeyShare` for node #{}",
+                        idx
+                    )
+                })
+                .1;
             let sk = dkg_result.secret_key_share.expect("new secret key");
             let pks = dkg_result.public_key_set;
             assert_eq!(pks, pub_key_set);

@@ -29,9 +29,12 @@ pub struct Block<T: NetworkEvent, P: PublicId> {
 
 impl<T: NetworkEvent, P: PublicId> Block<T, P> {
     /// Create a `Block` with no signatures for a single DkgResult
-    pub fn new_dkg_block(result: DkgResult) -> Self {
+    pub fn new_dkg_block((participants, dkg_result): (BTreeSet<P>, DkgResult)) -> Self {
         Self {
-            payload: Observation::DkgResult(result),
+            payload: Observation::DkgResult {
+                participants,
+                dkg_result,
+            },
             proofs: BTreeSet::new(),
         }
     }

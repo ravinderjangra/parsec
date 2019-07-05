@@ -32,8 +32,10 @@ impl DkgResult {
         }
     }
 
-    fn comparison_value(&self) -> (&PublicKeySet, bool) {
-        (&self.public_key_set, self.secret_key_share.is_some())
+    fn comparison_value(&self) -> &PublicKeySet {
+        // Ignore the secret_key_share as they will be different for each participants,
+        // non participants will have None.
+        &self.public_key_set
     }
 }
 
