@@ -13,7 +13,7 @@ use crate::{
     key_gen::message::DkgMessage,
     network_event::NetworkEvent,
     peer_list::{Peer, PeerIndex, PeerList},
-    serialise, DkgResult,
+    serialise, DkgResultWrapper,
 };
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 use std::{
@@ -72,7 +72,7 @@ pub enum Observation<T: NetworkEvent, P: PublicId> {
         /// public_key_set will be shared state.
         /// secret_key_share will be unique to each peers: all participating peers will
         /// have one assuming less than 1/3 malicious. (Ignored in comparaison and serialization).
-        dkg_result: DkgResult,
+        dkg_result: DkgResultWrapper,
     },
     /// Internal only: Do not vote for it or expect it to come in blocks.
     /// Vote for the next message (Part or Ack) to be handled for the Distributed Key Generation

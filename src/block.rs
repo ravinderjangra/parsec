@@ -12,7 +12,7 @@ use crate::{
     network_event::NetworkEvent,
     observation::Observation,
     vote::Vote,
-    DkgResult,
+    DkgResult, DkgResultWrapper,
 };
 use std::{
     collections::{vec_deque, BTreeMap, BTreeSet, VecDeque},
@@ -33,7 +33,7 @@ impl<T: NetworkEvent, P: PublicId> Block<T, P> {
         Self {
             payload: Observation::DkgResult {
                 participants,
-                dkg_result,
+                dkg_result: DkgResultWrapper(dkg_result),
             },
             proofs: BTreeSet::new(),
         }
