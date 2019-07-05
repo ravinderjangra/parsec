@@ -170,10 +170,18 @@ impl SecretId for PeerId {
         let to_pub_encrypt = PublicEncryptKey::from_bytes(to.pub_sign.into_bytes());
         let self_sec_encrypt = SecretEncryptKey::from_bytes(self.pub_sign.into_bytes());
 
-        self_sec_encrypt
-            .shared_secret(&to_pub_encrypt)
-            .encrypt_bytes(msg.as_ref())
-            .ok()
+        let shared_secret = self_sec_encrypt.shared_secret(&to_pub_encrypt);
+
+        // Cannot use encrypt_bytes/decrypt_bytes because encrypt add a radom nonce
+        // that cannot be replayed.
+        // Otherwise we would use `shared_secret.encrypt_bytes(msg.as_ref()).ok()`
+        let fake_encrypt = || {
+            let mut msg = msg.as_ref().to_vec();
+            msg.extend(shared_secret.into_bytes().iter());
+            Some(msg)
+        };
+
+        fake_encrypt()
     }
 
     #[cfg(feature = "mock")]
@@ -183,10 +191,21 @@ impl SecretId for PeerId {
         let from_pub_encrypt = PublicEncryptKey::from_bytes(from.pub_sign.into_bytes());
         let self_sec_encrypt = SecretEncryptKey::from_bytes(self.pub_sign.into_bytes());
 
-        self_sec_encrypt
-            .shared_secret(&from_pub_encrypt)
-            .decrypt_bytes(ct)
-            .ok()
+        let shared_secret = self_sec_encrypt.shared_secret(&from_pub_encrypt);
+
+        // Cannot use encrypt_bytes/decrypt_bytes because encrypt add a radom nonce
+        // that cannot be replayed.
+        // Otherwise we would use `shared_secret.decrypt_bytes(ct).ok()`
+        let fake_decrypt = || {
+            let shared_secret_bytes = shared_secret.into_bytes();
+            if ct.ends_with(&shared_secret_bytes) {
+                Some(ct[0..(ct.len() - shared_secret_bytes.len())].to_vec())
+            } else {
+                None
+            }
+        };
+
+        fake_decrypt()
     }
 }
 

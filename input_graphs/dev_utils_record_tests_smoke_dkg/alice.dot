@@ -1,0 +1,3509 @@
+/// our_id: Alice
+/// peer_list: {
+///   Alice: PeerState(VOTE|SEND|RECV)
+///   Bob: PeerState(VOTE|SEND|RECV)
+///   Carol: PeerState(VOTE|SEND|RECV)
+///   Dave: PeerState(VOTE|SEND|RECV)
+///   Eric: PeerState(VOTE|SEND|RECV)
+/// }
+/// consensus_mode: Supermajority
+/// secure_rng: [50356992, 33579588, 63550234, 14409741, 12819317, 30460779, 1339029800, 2429264724, 2362415627, 197366634, 1005923715, 4142528682, 101071806, 290037975, 2202144328, 987208226, 222006541, 1361632101, 3263934278, 1141586879, 2508817878, 2188220401, 486795621, 13172665]
+digraph GossipGraph {
+  splines=false
+  rankdir=BT
+
+  style=invis
+  subgraph cluster_Alice {
+    label="Alice"
+    "Alice" [style=invis]
+    "Alice" -> "A_0" [style=invis]
+    "A_0" -> "A_1" [minlen=1]
+    "A_1" -> "A_2" [minlen=1]
+    "A_2" -> "A_3" [minlen=5]
+    "A_3" -> "A_4" [minlen=1]
+    "A_4" -> "A_5" [minlen=1]
+    "A_5" -> "A_6" [minlen=1]
+    "A_6" -> "A_7" [minlen=5]
+    "A_7" -> "A_8" [minlen=1]
+    "A_8" -> "A_9" [minlen=1]
+    "A_9" -> "A_10" [minlen=1]
+    "A_10" -> "A_11" [minlen=1]
+    "A_11" -> "A_12" [minlen=2]
+    "A_12" -> "A_13" [minlen=1]
+    "A_13" -> "A_14" [minlen=2]
+    "A_14" -> "A_15" [minlen=1]
+    "A_15" -> "A_16" [minlen=2]
+    "A_16" -> "A_17" [minlen=1]
+    "A_17" -> "A_18" [minlen=1]
+    "A_18" -> "A_19" [minlen=1]
+    "A_19" -> "A_20" [minlen=1]
+    "A_20" -> "A_21" [minlen=1]
+    "A_21" -> "A_22" [minlen=4]
+    "A_22" -> "A_23" [minlen=1]
+    "A_23" -> "A_24" [minlen=1]
+    "A_24" -> "A_25" [minlen=1]
+    "A_25" -> "A_26" [minlen=1]
+    "A_26" -> "A_27" [minlen=3]
+    "A_27" -> "A_28" [minlen=1]
+    "A_28" -> "A_29" [minlen=1]
+    "A_29" -> "A_30" [minlen=1]
+    "A_30" -> "A_31" [minlen=1]
+    "A_31" -> "A_32" [minlen=1]
+    "A_32" -> "A_33" [minlen=4]
+    "A_33" -> "A_34" [minlen=6]
+    "A_34" -> "A_35" [minlen=7]
+    "A_35" -> "A_36" [minlen=1]
+    "A_36" -> "A_37" [minlen=1]
+    "A_37" -> "A_38" [minlen=1]
+    "A_38" -> "A_39" [minlen=1]
+    "A_39" -> "A_40" [minlen=1]
+    "A_40" -> "A_41" [minlen=1]
+    "A_41" -> "A_42" [minlen=1]
+    "A_42" -> "A_43" [minlen=1]
+    "A_43" -> "A_44" [minlen=1]
+    "A_44" -> "A_45" [minlen=1]
+    "A_45" -> "A_46" [minlen=2]
+    "A_46" -> "A_47" [minlen=1]
+    "A_47" -> "A_48" [minlen=1]
+    "A_48" -> "A_49" [minlen=1]
+    "A_49" -> "A_50" [minlen=1]
+    "A_50" -> "A_51" [minlen=1]
+    "A_51" -> "A_52" [minlen=1]
+    "A_52" -> "A_53" [minlen=1]
+    "A_53" -> "A_54" [minlen=2]
+    "A_54" -> "A_55" [minlen=6]
+    "A_55" -> "A_56" [minlen=1]
+    "A_56" -> "A_57" [minlen=1]
+    "A_57" -> "A_58" [minlen=2]
+    "A_58" -> "A_59" [minlen=1]
+    "A_59" -> "A_60" [minlen=1]
+    "A_60" -> "A_61" [minlen=1]
+    "A_61" -> "A_62" [minlen=4]
+    "A_62" -> "A_63" [minlen=1]
+    "A_63" -> "A_64" [minlen=1]
+    "A_64" -> "A_65" [minlen=4]
+    "A_65" -> "A_66" [minlen=6]
+    "A_66" -> "A_67" [minlen=1]
+    "A_67" -> "A_68" [minlen=1]
+    "A_68" -> "A_69" [minlen=1]
+    "A_69" -> "A_70" [minlen=1]
+    "A_70" -> "A_71" [minlen=2]
+    "A_71" -> "A_72" [minlen=3]
+    "A_72" -> "A_73" [minlen=6]
+    "A_73" -> "A_74" [minlen=7]
+    "A_74" -> "A_75" [minlen=1]
+    "A_75" -> "A_76" [minlen=1]
+    "A_76" -> "A_77" [minlen=1]
+    "A_77" -> "A_78" [minlen=1]
+    "A_78" -> "A_79" [minlen=4]
+    "A_79" -> "A_80" [minlen=3]
+    "A_80" -> "A_81" [minlen=1]
+    "A_81" -> "A_82" [minlen=1]
+    "A_82" -> "A_83" [minlen=10]
+    "A_83" -> "A_84" [minlen=1]
+    "A_84" -> "A_85" [minlen=1]
+    "A_85" -> "A_86" [minlen=2]
+  }
+  "B_5" -> "A_3" [constraint=false]
+  "B_6" -> "A_4" [constraint=false]
+  "E_3" -> "A_6" [constraint=false]
+  "D_6" -> "A_7" [constraint=false]
+  "B_11" -> "A_8" [constraint=false]
+  "E_5" -> "A_11" [constraint=false]
+  "C_11" -> "A_12" [constraint=false]
+  "D_9" -> "A_14" [constraint=false]
+  "D_10" -> "A_15" [constraint=false]
+  "D_12" -> "A_16" [constraint=false]
+  "C_13" -> "A_18" [constraint=false]
+  "C_14" -> "A_19" [constraint=false]
+  "E_8" -> "A_20" [constraint=false]
+  "C_20" -> "A_22" [constraint=false]
+  "B_20" -> "A_23" [constraint=false]
+  "B_23" -> "A_25" [constraint=false]
+  "D_18" -> "A_26" [constraint=false]
+  "B_26" -> "A_27" [constraint=false]
+  "D_19" -> "A_28" [constraint=false]
+  "E_13" -> "A_29" [constraint=false]
+  "C_26" -> "A_31" [constraint=false]
+  "D_22" -> "A_32" [constraint=false]
+  "B_32" -> "A_33" [constraint=false]
+  "B_36" -> "A_34" [constraint=false]
+  "B_41" -> "A_35" [constraint=false]
+  "C_39" -> "A_36" [constraint=false]
+  "E_25" -> "A_44" [constraint=false]
+  "E_33" -> "A_46" [constraint=false]
+  "E_35" -> "A_49" [constraint=false]
+  "B_52" -> "A_50" [constraint=false]
+  "E_36" -> "A_51" [constraint=false]
+  "C_50" -> "A_52" [constraint=false]
+  "C_53" -> "A_54" [constraint=false]
+  "B_58" -> "A_55" [constraint=false]
+  "C_57" -> "A_56" [constraint=false]
+  "C_61" -> "A_58" [constraint=false]
+  "C_62" -> "A_60" [constraint=false]
+  "C_63" -> "A_61" [constraint=false]
+  "C_67" -> "A_62" [constraint=false]
+  "D_45" -> "A_63" [constraint=false]
+  "D_48" -> "A_65" [constraint=false]
+  "D_52" -> "A_66" [constraint=false]
+  "D_53" -> "A_67" [constraint=false]
+  "E_60" -> "A_68" [constraint=false]
+  "E_64" -> "A_71" [constraint=false]
+  "C_73" -> "A_72" [constraint=false]
+  "D_67" -> "A_73" [constraint=false]
+  "D_71" -> "A_74" [constraint=false]
+  "C_84" -> "A_75" [constraint=false]
+  "B_80" -> "A_76" [constraint=false]
+  "B_81" -> "A_77" [constraint=false]
+  "C_87" -> "A_79" [constraint=false]
+  "D_75" -> "A_80" [constraint=false]
+  "B_98" -> "A_83" [constraint=false]
+  "D_80" -> "A_84" [constraint=false]
+  "B_101" -> "A_86" [constraint=false]
+
+  style=invis
+  subgraph cluster_Bob {
+    label="Bob"
+    "Bob" [style=invis]
+    "Bob" -> "B_0" [style=invis]
+    "B_0" -> "B_1" [minlen=1]
+    "B_1" -> "B_2" [minlen=1]
+    "B_2" -> "B_3" [minlen=1]
+    "B_3" -> "B_4" [minlen=2]
+    "B_4" -> "B_5" [minlen=1]
+    "B_5" -> "B_6" [minlen=1]
+    "B_6" -> "B_7" [minlen=1]
+    "B_7" -> "B_8" [minlen=1]
+    "B_8" -> "B_9" [minlen=1]
+    "B_9" -> "B_10" [minlen=1]
+    "B_10" -> "B_11" [minlen=1]
+    "B_11" -> "B_12" [minlen=5]
+    "B_12" -> "B_13" [minlen=1]
+    "B_13" -> "B_14" [minlen=1]
+    "B_14" -> "B_15" [minlen=1]
+    "B_15" -> "B_16" [minlen=9]
+    "B_16" -> "B_17" [minlen=1]
+    "B_17" -> "B_18" [minlen=2]
+    "B_18" -> "B_19" [minlen=1]
+    "B_19" -> "B_20" [minlen=1]
+    "B_20" -> "B_21" [minlen=1]
+    "B_21" -> "B_22" [minlen=1]
+    "B_22" -> "B_23" [minlen=1]
+    "B_23" -> "B_24" [minlen=3]
+    "B_24" -> "B_25" [minlen=1]
+    "B_25" -> "B_26" [minlen=1]
+    "B_26" -> "B_27" [minlen=1]
+    "B_27" -> "B_28" [minlen=1]
+    "B_28" -> "B_29" [minlen=1]
+    "B_29" -> "B_30" [minlen=1]
+    "B_30" -> "B_31" [minlen=4]
+    "B_31" -> "B_32" [minlen=1]
+    "B_32" -> "B_33" [minlen=2]
+    "B_33" -> "B_34" [minlen=2]
+    "B_34" -> "B_35" [minlen=1]
+    "B_35" -> "B_36" [minlen=1]
+    "B_36" -> "B_37" [minlen=1]
+    "B_37" -> "B_38" [minlen=1]
+    "B_38" -> "B_39" [minlen=1]
+    "B_39" -> "B_40" [minlen=3]
+    "B_40" -> "B_41" [minlen=1]
+    "B_41" -> "B_42" [minlen=2]
+    "B_42" -> "B_43" [minlen=1]
+    "B_43" -> "B_44" [minlen=1]
+    "B_44" -> "B_45" [minlen=1]
+    "B_45" -> "B_46" [minlen=1]
+    "B_46" -> "B_47" [minlen=1]
+    "B_47" -> "B_48" [minlen=1]
+    "B_48" -> "B_49" [minlen=1]
+    "B_49" -> "B_50" [minlen=1]
+    "B_50" -> "B_51" [minlen=1]
+    "B_51" -> "B_52" [minlen=5]
+    "B_52" -> "B_53" [minlen=1]
+    "B_53" -> "B_54" [minlen=2]
+    "B_54" -> "B_55" [minlen=1]
+    "B_55" -> "B_56" [minlen=3]
+    "B_56" -> "B_57" [minlen=3]
+    "B_57" -> "B_58" [minlen=1]
+    "B_58" -> "B_59" [minlen=2]
+    "B_59" -> "B_60" [minlen=1]
+    "B_60" -> "B_61" [minlen=6]
+    "B_61" -> "B_62" [minlen=1]
+    "B_62" -> "B_63" [minlen=1]
+    "B_63" -> "B_64" [minlen=2]
+    "B_64" -> "B_65" [minlen=1]
+    "B_65" -> "B_66" [minlen=2]
+    "B_66" -> "B_67" [minlen=1]
+    "B_67" -> "B_68" [minlen=2]
+    "B_68" -> "B_69" [minlen=2]
+    "B_69" -> "B_70" [minlen=1]
+    "B_70" -> "B_71" [minlen=11]
+    "B_71" -> "B_72" [minlen=3]
+    "B_72" -> "B_73" [minlen=1]
+    "B_73" -> "B_74" [minlen=1]
+    "B_74" -> "B_75" [minlen=1]
+    "B_75" -> "B_76" [minlen=1]
+    "B_76" -> "B_77" [minlen=2]
+    "B_77" -> "B_78" [minlen=1]
+    "B_78" -> "B_79" [minlen=1]
+    "B_79" -> "B_80" [minlen=1]
+    "B_80" -> "B_81" [minlen=1]
+    "B_81" -> "B_82" [minlen=1]
+    "B_82" -> "B_83" [minlen=2]
+    "B_83" -> "B_84" [minlen=1]
+    "B_84" -> "B_85" [minlen=1]
+    "B_85" -> "B_86" [minlen=2]
+    "B_86" -> "B_87" [minlen=1]
+    "B_87" -> "B_88" [minlen=1]
+    "B_88" -> "B_89" [minlen=1]
+    "B_89" -> "B_90" [minlen=1]
+    "B_90" -> "B_91" [minlen=1]
+    "B_91" -> "B_92" [minlen=2]
+    "B_92" -> "B_93" [minlen=1]
+    "B_93" -> "B_94" [minlen=1]
+    "B_94" -> "B_95" [minlen=1]
+    "B_95" -> "B_96" [minlen=3]
+    "B_96" -> "B_97" [minlen=1]
+    "B_97" -> "B_98" [minlen=1]
+    "B_98" -> "B_99" [minlen=1]
+    "B_99" -> "B_100" [minlen=1]
+    "B_100" -> "B_101" [minlen=2]
+  }
+  "C_3" -> "B_4" [constraint=false]
+  "A_3" -> "B_7" [constraint=false]
+  "C_4" -> "B_8" [constraint=false]
+  "A_4" -> "B_9" [constraint=false]
+  "D_3" -> "B_10" [constraint=false]
+  "A_8" -> "B_12" [constraint=false]
+  "C_9" -> "B_14" [constraint=false]
+  "C_10" -> "B_15" [constraint=false]
+  "D_14" -> "B_16" [constraint=false]
+  "C_16" -> "B_18" [constraint=false]
+  "A_21" -> "B_20" [constraint=false]
+  "C_19" -> "B_21" [constraint=false]
+  "E_10" -> "B_22" [constraint=false]
+  "C_24" -> "B_24" [constraint=false]
+  "A_25" -> "B_25" [constraint=false]
+  "A_27" -> "B_28" [constraint=false]
+  "D_20" -> "B_29" [constraint=false]
+  "C_29" -> "B_31" [constraint=false]
+  "A_33" -> "B_33" [constraint=false]
+  "C_32" -> "B_34" [constraint=false]
+  "E_20" -> "B_37" [constraint=false]
+  "A_34" -> "B_38" [constraint=false]
+  "E_21" -> "B_39" [constraint=false]
+  "C_36" -> "B_40" [constraint=false]
+  "A_35" -> "B_42" [constraint=false]
+  "D_33" -> "B_45" [constraint=false]
+  "C_43" -> "B_46" [constraint=false]
+  "A_48" -> "B_52" [constraint=false]
+  "D_39" -> "B_54" [constraint=false]
+  "E_39" -> "B_55" [constraint=false]
+  "C_54" -> "B_56" [constraint=false]
+  "C_56" -> "B_57" [constraint=false]
+  "A_55" -> "B_59" [constraint=false]
+  "E_43" -> "B_60" [constraint=false]
+  "C_64" -> "B_61" [constraint=false]
+  "E_49" -> "B_62" [constraint=false]
+  "E_52" -> "B_64" [constraint=false]
+  "E_53" -> "B_66" [constraint=false]
+  "E_55" -> "B_68" [constraint=false]
+  "E_57" -> "B_69" [constraint=false]
+  "D_61" -> "B_71" [constraint=false]
+  "C_75" -> "B_72" [constraint=false]
+  "C_77" -> "B_75" [constraint=false]
+  "C_78" -> "B_76" [constraint=false]
+  "C_80" -> "B_77" [constraint=false]
+  "E_71" -> "B_79" [constraint=false]
+  "E_72" -> "B_82" [constraint=false]
+  "A_76" -> "B_83" [constraint=false]
+  "A_77" -> "B_84" [constraint=false]
+  "C_86" -> "B_86" [constraint=false]
+  "E_74" -> "B_89" [constraint=false]
+  "E_75" -> "B_90" [constraint=false]
+  "E_77" -> "B_92" [constraint=false]
+  "D_79" -> "B_96" [constraint=false]
+  "D_76" -> "B_97" [constraint=false]
+  "A_81" -> "B_98" [constraint=false]
+  "D_78" -> "B_99" [constraint=false]
+  "A_85" -> "B_101" [constraint=false]
+
+  style=invis
+  subgraph cluster_Carol {
+    label="Carol"
+    "Carol" [style=invis]
+    "Carol" -> "C_0" [style=invis]
+    "C_0" -> "C_1" [minlen=1]
+    "C_1" -> "C_2" [minlen=1]
+    "C_2" -> "C_3" [minlen=2]
+    "C_3" -> "C_4" [minlen=1]
+    "C_4" -> "C_5" [minlen=5]
+    "C_5" -> "C_6" [minlen=1]
+    "C_6" -> "C_7" [minlen=3]
+    "C_7" -> "C_8" [minlen=2]
+    "C_8" -> "C_9" [minlen=1]
+    "C_9" -> "C_10" [minlen=2]
+    "C_10" -> "C_11" [minlen=1]
+    "C_11" -> "C_12" [minlen=1]
+    "C_12" -> "C_13" [minlen=1]
+    "C_13" -> "C_14" [minlen=7]
+    "C_14" -> "C_15" [minlen=1]
+    "C_15" -> "C_16" [minlen=1]
+    "C_16" -> "C_17" [minlen=1]
+    "C_17" -> "C_18" [minlen=1]
+    "C_18" -> "C_19" [minlen=1]
+    "C_19" -> "C_20" [minlen=1]
+    "C_20" -> "C_21" [minlen=1]
+    "C_21" -> "C_22" [minlen=1]
+    "C_22" -> "C_23" [minlen=1]
+    "C_23" -> "C_24" [minlen=1]
+    "C_24" -> "C_25" [minlen=2]
+    "C_25" -> "C_26" [minlen=1]
+    "C_26" -> "C_27" [minlen=1]
+    "C_27" -> "C_28" [minlen=5]
+    "C_28" -> "C_29" [minlen=1]
+    "C_29" -> "C_30" [minlen=2]
+    "C_30" -> "C_31" [minlen=2]
+    "C_31" -> "C_32" [minlen=1]
+    "C_32" -> "C_33" [minlen=2]
+    "C_33" -> "C_34" [minlen=2]
+    "C_34" -> "C_35" [minlen=3]
+    "C_35" -> "C_36" [minlen=1]
+    "C_36" -> "C_37" [minlen=1]
+    "C_37" -> "C_38" [minlen=1]
+    "C_38" -> "C_39" [minlen=1]
+    "C_39" -> "C_40" [minlen=1]
+    "C_40" -> "C_41" [minlen=1]
+    "C_41" -> "C_42" [minlen=1]
+    "C_42" -> "C_43" [minlen=1]
+    "C_43" -> "C_44" [minlen=1]
+    "C_44" -> "C_45" [minlen=1]
+    "C_45" -> "C_46" [minlen=1]
+    "C_46" -> "C_47" [minlen=1]
+    "C_47" -> "C_48" [minlen=1]
+    "C_48" -> "C_49" [minlen=4]
+    "C_49" -> "C_50" [minlen=1]
+    "C_50" -> "C_51" [minlen=2]
+    "C_51" -> "C_52" [minlen=3]
+    "C_52" -> "C_53" [minlen=1]
+    "C_53" -> "C_54" [minlen=1]
+    "C_54" -> "C_55" [minlen=2]
+    "C_55" -> "C_56" [minlen=1]
+    "C_56" -> "C_57" [minlen=1]
+    "C_57" -> "C_58" [minlen=1]
+    "C_58" -> "C_59" [minlen=1]
+    "C_59" -> "C_60" [minlen=2]
+    "C_60" -> "C_61" [minlen=1]
+    "C_61" -> "C_62" [minlen=1]
+    "C_62" -> "C_63" [minlen=2]
+    "C_63" -> "C_64" [minlen=1]
+    "C_64" -> "C_65" [minlen=1]
+    "C_65" -> "C_66" [minlen=1]
+    "C_66" -> "C_67" [minlen=1]
+    "C_67" -> "C_68" [minlen=2]
+    "C_68" -> "C_69" [minlen=1]
+    "C_69" -> "C_70" [minlen=1]
+    "C_70" -> "C_71" [minlen=15]
+    "C_71" -> "C_72" [minlen=1]
+    "C_72" -> "C_73" [minlen=1]
+    "C_73" -> "C_74" [minlen=2]
+    "C_74" -> "C_75" [minlen=1]
+    "C_75" -> "C_76" [minlen=2]
+    "C_76" -> "C_77" [minlen=1]
+    "C_77" -> "C_78" [minlen=1]
+    "C_78" -> "C_79" [minlen=1]
+    "C_79" -> "C_80" [minlen=1]
+    "C_80" -> "C_81" [minlen=1]
+    "C_81" -> "C_82" [minlen=1]
+    "C_82" -> "C_83" [minlen=2]
+    "C_83" -> "C_84" [minlen=1]
+    "C_84" -> "C_85" [minlen=2]
+    "C_85" -> "C_86" [minlen=4]
+    "C_86" -> "C_87" [minlen=1]
+    "C_87" -> "C_88" [minlen=1]
+  }
+  "B_3" -> "C_3" [constraint=false]
+  "B_8" -> "C_5" [constraint=false]
+  "D_5" -> "C_7" [constraint=false]
+  "D_7" -> "C_8" [constraint=false]
+  "B_13" -> "C_10" [constraint=false]
+  "A_10" -> "C_11" [constraint=false]
+  "B_14" -> "C_12" [constraint=false]
+  "A_17" -> "C_14" [constraint=false]
+  "B_17" -> "C_16" [constraint=false]
+  "A_18" -> "C_17" [constraint=false]
+  "D_17" -> "C_18" [constraint=false]
+  "B_21" -> "C_21" [constraint=false]
+  "A_22" -> "C_22" [constraint=false]
+  "E_11" -> "C_23" [constraint=false]
+  "B_24" -> "C_25" [constraint=false]
+  "A_31" -> "C_28" [constraint=false]
+  "B_31" -> "C_30" [constraint=false]
+  "E_17" -> "C_31" [constraint=false]
+  "B_34" -> "C_33" [constraint=false]
+  "D_29" -> "C_34" [constraint=false]
+  "D_31" -> "C_35" [constraint=false]
+  "E_23" -> "C_37" [constraint=false]
+  "B_40" -> "C_38" [constraint=false]
+  "E_24" -> "C_40" [constraint=false]
+  "A_36" -> "C_42" [constraint=false]
+  "B_44" -> "C_43" [constraint=false]
+  "E_34" -> "C_49" [constraint=false]
+  "E_37" -> "C_51" [constraint=false]
+  "A_52" -> "C_52" [constraint=false]
+  "A_53" -> "C_53" [constraint=false]
+  "B_56" -> "C_55" [constraint=false]
+  "B_57" -> "C_58" [constraint=false]
+  "E_42" -> "C_59" [constraint=false]
+  "A_56" -> "C_60" [constraint=false]
+  "A_57" -> "C_61" [constraint=false]
+  "A_59" -> "C_63" [constraint=false]
+  "A_60" -> "C_65" [constraint=false]
+  "B_61" -> "C_66" [constraint=false]
+  "A_62" -> "C_68" [constraint=false]
+  "D_44" -> "C_69" [constraint=false]
+  "D_58" -> "C_71" [constraint=false]
+  "A_69" -> "C_73" [constraint=false]
+  "D_62" -> "C_74" [constraint=false]
+  "B_72" -> "C_76" [constraint=false]
+  "B_73" -> "C_77" [constraint=false]
+  "E_67" -> "C_79" [constraint=false]
+  "B_74" -> "C_80" [constraint=false]
+  "B_76" -> "C_81" [constraint=false]
+  "D_70" -> "C_83" [constraint=false]
+  "A_75" -> "C_85" [constraint=false]
+  "B_85" -> "C_86" [constraint=false]
+  "A_78" -> "C_87" [constraint=false]
+  "D_73" -> "C_88" [constraint=false]
+
+  style=invis
+  subgraph cluster_Dave {
+    label="Dave"
+    "Dave" [style=invis]
+    "Dave" -> "D_0" [style=invis]
+    "D_0" -> "D_1" [minlen=1]
+    "D_1" -> "D_2" [minlen=1]
+    "D_2" -> "D_3" [minlen=1]
+    "D_3" -> "D_4" [minlen=9]
+    "D_4" -> "D_5" [minlen=1]
+    "D_5" -> "D_6" [minlen=1]
+    "D_6" -> "D_7" [minlen=1]
+    "D_7" -> "D_8" [minlen=2]
+    "D_8" -> "D_9" [minlen=6]
+    "D_9" -> "D_10" [minlen=1]
+    "D_10" -> "D_11" [minlen=1]
+    "D_11" -> "D_12" [minlen=1]
+    "D_12" -> "D_13" [minlen=1]
+    "D_13" -> "D_14" [minlen=1]
+    "D_14" -> "D_15" [minlen=1]
+    "D_15" -> "D_16" [minlen=1]
+    "D_16" -> "D_17" [minlen=1]
+    "D_17" -> "D_18" [minlen=8]
+    "D_18" -> "D_19" [minlen=1]
+    "D_19" -> "D_20" [minlen=4]
+    "D_20" -> "D_21" [minlen=1]
+    "D_21" -> "D_22" [minlen=1]
+    "D_22" -> "D_23" [minlen=1]
+    "D_23" -> "D_24" [minlen=2]
+    "D_24" -> "D_25" [minlen=1]
+    "D_25" -> "D_26" [minlen=2]
+    "D_26" -> "D_27" [minlen=1]
+    "D_27" -> "D_28" [minlen=3]
+    "D_28" -> "D_29" [minlen=1]
+    "D_29" -> "D_30" [minlen=2]
+    "D_30" -> "D_31" [minlen=1]
+    "D_31" -> "D_32" [minlen=2]
+    "D_32" -> "D_33" [minlen=6]
+    "D_33" -> "D_34" [minlen=1]
+    "D_34" -> "D_35" [minlen=1]
+    "D_35" -> "D_36" [minlen=1]
+    "D_36" -> "D_37" [minlen=1]
+    "D_37" -> "D_38" [minlen=1]
+    "D_38" -> "D_39" [minlen=9]
+    "D_39" -> "D_40" [minlen=1]
+    "D_40" -> "D_41" [minlen=4]
+    "D_41" -> "D_42" [minlen=10]
+    "D_42" -> "D_43" [minlen=3]
+    "D_43" -> "D_44" [minlen=1]
+    "D_44" -> "D_45" [minlen=1]
+    "D_45" -> "D_46" [minlen=4]
+    "D_46" -> "D_47" [minlen=1]
+    "D_47" -> "D_48" [minlen=1]
+    "D_48" -> "D_49" [minlen=1]
+    "D_49" -> "D_50" [minlen=1]
+    "D_50" -> "D_51" [minlen=3]
+    "D_51" -> "D_52" [minlen=1]
+    "D_52" -> "D_53" [minlen=1]
+    "D_53" -> "D_54" [minlen=1]
+    "D_54" -> "D_55" [minlen=1]
+    "D_55" -> "D_56" [minlen=1]
+    "D_56" -> "D_57" [minlen=1]
+    "D_57" -> "D_58" [minlen=1]
+    "D_58" -> "D_59" [minlen=1]
+    "D_59" -> "D_60" [minlen=1]
+    "D_60" -> "D_61" [minlen=1]
+    "D_61" -> "D_62" [minlen=1]
+    "D_62" -> "D_63" [minlen=1]
+    "D_63" -> "D_64" [minlen=1]
+    "D_64" -> "D_65" [minlen=1]
+    "D_65" -> "D_66" [minlen=1]
+    "D_66" -> "D_67" [minlen=1]
+    "D_67" -> "D_68" [minlen=1]
+    "D_68" -> "D_69" [minlen=1]
+    "D_69" -> "D_70" [minlen=4]
+    "D_70" -> "D_71" [minlen=1]
+    "D_71" -> "D_72" [minlen=2]
+    "D_72" -> "D_73" [minlen=1]
+    "D_73" -> "D_74" [minlen=7]
+    "D_74" -> "D_75" [minlen=1]
+    "D_75" -> "D_76" [minlen=6]
+    "D_76" -> "D_77" [minlen=1]
+    "D_77" -> "D_78" [minlen=1]
+    "D_78" -> "D_79" [minlen=1]
+    "D_79" -> "D_80" [minlen=1]
+  }
+  "B_10" -> "D_4" [constraint=false]
+  "C_6" -> "D_5" [constraint=false]
+  "A_5" -> "D_6" [constraint=false]
+  "C_8" -> "D_8" [constraint=false]
+  "A_13" -> "D_9" [constraint=false]
+  "E_6" -> "D_11" [constraint=false]
+  "A_15" -> "D_13" [constraint=false]
+  "A_16" -> "D_15" [constraint=false]
+  "B_16" -> "D_16" [constraint=false]
+  "C_15" -> "D_17" [constraint=false]
+  "A_24" -> "D_18" [constraint=false]
+  "B_27" -> "D_20" [constraint=false]
+  "A_28" -> "D_21" [constraint=false]
+  "A_32" -> "D_24" [constraint=false]
+  "E_16" -> "D_26" [constraint=false]
+  "E_19" -> "D_28" [constraint=false]
+  "C_34" -> "D_30" [constraint=false]
+  "C_35" -> "D_32" [constraint=false]
+  "B_43" -> "D_33" [constraint=false]
+  "B_53" -> "D_39" [constraint=false]
+  "E_41" -> "D_41" [constraint=false]
+  "E_46" -> "D_42" [constraint=false]
+  "E_48" -> "D_43" [constraint=false]
+  "C_69" -> "D_46" [constraint=false]
+  "A_63" -> "D_47" [constraint=false]
+  "A_64" -> "D_48" [constraint=false]
+  "E_54" -> "D_49" [constraint=false]
+  "E_58" -> "D_51" [constraint=false]
+  "A_67" -> "D_56" [constraint=false]
+  "A_66" -> "D_57" [constraint=false]
+  "C_70" -> "D_58" [constraint=false]
+  "E_61" -> "D_59" [constraint=false]
+  "E_63" -> "D_60" [constraint=false]
+  "B_70" -> "D_61" [constraint=false]
+  "C_72" -> "D_62" [constraint=false]
+  "E_65" -> "D_65" [constraint=false]
+  "E_66" -> "D_66" [constraint=false]
+  "E_68" -> "D_68" [constraint=false]
+  "A_73" -> "D_69" [constraint=false]
+  "C_82" -> "D_70" [constraint=false]
+  "A_74" -> "D_72" [constraint=false]
+  "C_88" -> "D_74" [constraint=false]
+  "B_93" -> "D_76" [constraint=false]
+  "A_80" -> "D_77" [constraint=false]
+  "B_94" -> "D_78" [constraint=false]
+  "B_95" -> "D_79" [constraint=false]
+  "A_82" -> "D_80" [constraint=false]
+
+  style=invis
+  subgraph cluster_Eric {
+    label="Eric"
+    "Eric" [style=invis]
+    "Eric" -> "E_0" [style=invis]
+    "E_0" -> "E_1" [minlen=1]
+    "E_1" -> "E_2" [minlen=1]
+    "E_2" -> "E_3" [minlen=1]
+    "E_3" -> "E_4" [minlen=8]
+    "E_4" -> "E_5" [minlen=7]
+    "E_5" -> "E_6" [minlen=1]
+    "E_6" -> "E_7" [minlen=7]
+    "E_7" -> "E_8" [minlen=1]
+    "E_8" -> "E_9" [minlen=5]
+    "E_9" -> "E_10" [minlen=2]
+    "E_10" -> "E_11" [minlen=1]
+    "E_11" -> "E_12" [minlen=4]
+    "E_12" -> "E_13" [minlen=1]
+    "E_13" -> "E_14" [minlen=1]
+    "E_14" -> "E_15" [minlen=5]
+    "E_15" -> "E_16" [minlen=5]
+    "E_16" -> "E_17" [minlen=1]
+    "E_17" -> "E_18" [minlen=2]
+    "E_18" -> "E_19" [minlen=1]
+    "E_19" -> "E_20" [minlen=2]
+    "E_20" -> "E_21" [minlen=1]
+    "E_21" -> "E_22" [minlen=3]
+    "E_22" -> "E_23" [minlen=1]
+    "E_23" -> "E_24" [minlen=1]
+    "E_24" -> "E_25" [minlen=5]
+    "E_25" -> "E_26" [minlen=1]
+    "E_26" -> "E_27" [minlen=1]
+    "E_27" -> "E_28" [minlen=1]
+    "E_28" -> "E_29" [minlen=1]
+    "E_29" -> "E_30" [minlen=1]
+    "E_30" -> "E_31" [minlen=1]
+    "E_31" -> "E_32" [minlen=1]
+    "E_32" -> "E_33" [minlen=1]
+    "E_33" -> "E_34" [minlen=1]
+    "E_34" -> "E_35" [minlen=1]
+    "E_35" -> "E_36" [minlen=1]
+    "E_36" -> "E_37" [minlen=1]
+    "E_37" -> "E_38" [minlen=2]
+    "E_38" -> "E_39" [minlen=1]
+    "E_39" -> "E_40" [minlen=2]
+    "E_40" -> "E_41" [minlen=1]
+    "E_41" -> "E_42" [minlen=1]
+    "E_42" -> "E_43" [minlen=1]
+    "E_43" -> "E_44" [minlen=5]
+    "E_44" -> "E_45" [minlen=2]
+    "E_45" -> "E_46" [minlen=1]
+    "E_46" -> "E_47" [minlen=2]
+    "E_47" -> "E_48" [minlen=1]
+    "E_48" -> "E_49" [minlen=1]
+    "E_49" -> "E_50" [minlen=1]
+    "E_50" -> "E_51" [minlen=1]
+    "E_51" -> "E_52" [minlen=1]
+    "E_52" -> "E_53" [minlen=3]
+    "E_53" -> "E_54" [minlen=1]
+    "E_54" -> "E_55" [minlen=2]
+    "E_55" -> "E_56" [minlen=1]
+    "E_56" -> "E_57" [minlen=1]
+    "E_57" -> "E_58" [minlen=1]
+    "E_58" -> "E_59" [minlen=1]
+    "E_59" -> "E_60" [minlen=1]
+    "E_60" -> "E_61" [minlen=3]
+    "E_61" -> "E_62" [minlen=1]
+    "E_62" -> "E_63" [minlen=1]
+    "E_63" -> "E_64" [minlen=1]
+    "E_64" -> "E_65" [minlen=6]
+    "E_65" -> "E_66" [minlen=1]
+    "E_66" -> "E_67" [minlen=1]
+    "E_67" -> "E_68" [minlen=1]
+    "E_68" -> "E_69" [minlen=2]
+    "E_69" -> "E_70" [minlen=1]
+    "E_70" -> "E_71" [minlen=1]
+    "E_71" -> "E_72" [minlen=2]
+    "E_72" -> "E_73" [minlen=1]
+    "E_73" -> "E_74" [minlen=10]
+    "E_74" -> "E_75" [minlen=1]
+    "E_75" -> "E_76" [minlen=1]
+    "E_76" -> "E_77" [minlen=2]
+  }
+  "A_6" -> "E_4" [constraint=false]
+  "A_9" -> "E_5" [constraint=false]
+  "D_11" -> "E_7" [constraint=false]
+  "A_20" -> "E_9" [constraint=false]
+  "B_19" -> "E_10" [constraint=false]
+  "C_23" -> "E_12" [constraint=false]
+  "A_29" -> "E_15" [constraint=false]
+  "D_25" -> "E_16" [constraint=false]
+  "C_31" -> "E_18" [constraint=false]
+  "D_27" -> "E_19" [constraint=false]
+  "B_35" -> "E_20" [constraint=false]
+  "B_39" -> "E_22" [constraint=false]
+  "A_37" -> "E_25" [constraint=false]
+  "C_40" -> "E_31" [constraint=false]
+  "C_37" -> "E_32" [constraint=false]
+  "A_38" -> "E_33" [constraint=false]
+  "C_41" -> "E_34" [constraint=false]
+  "A_45" -> "E_35" [constraint=false]
+  "A_47" -> "E_36" [constraint=false]
+  "C_51" -> "E_38" [constraint=false]
+  "B_55" -> "E_40" [constraint=false]
+  "D_40" -> "E_41" [constraint=false]
+  "C_59" -> "E_44" [constraint=false]
+  "B_60" -> "E_45" [constraint=false]
+  "D_42" -> "E_47" [constraint=false]
+  "D_43" -> "E_50" [constraint=false]
+  "B_62" -> "E_51" [constraint=false]
+  "B_63" -> "E_52" [constraint=false]
+  "B_65" -> "E_53" [constraint=false]
+  "B_67" -> "E_55" [constraint=false]
+  "D_49" -> "E_56" [constraint=false]
+  "D_50" -> "E_58" [constraint=false]
+  "B_69" -> "E_59" [constraint=false]
+  "D_54" -> "E_61" [constraint=false]
+  "A_68" -> "E_62" [constraint=false]
+  "D_55" -> "E_63" [constraint=false]
+  "A_70" -> "E_64" [constraint=false]
+  "D_63" -> "E_65" [constraint=false]
+  "D_64" -> "E_66" [constraint=false]
+  "D_68" -> "E_69" [constraint=false]
+  "C_79" -> "E_70" [constraint=false]
+  "B_78" -> "E_72" [constraint=false]
+  "B_79" -> "E_73" [constraint=false]
+  "B_87" -> "E_74" [constraint=false]
+  "B_88" -> "E_75" [constraint=false]
+  "B_91" -> "E_77" [constraint=false]
+
+  {
+    rank=same
+    "Alice" [style=filled, color=white]
+    "Bob" [style=filled, color=white]
+    "Carol" [style=filled, color=white]
+    "Dave" [style=filled, color=white]
+    "Eric" [style=filled, color=white]
+  }
+  "Alice" -> "Bob" -> "Carol" -> "Dave" -> "Eric" [style=invis]
+
+/// ===== details of events =====
+  "A_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_0</td></tr>
+</table>>]
+/// cause: Initial
+/// last_ancestors: {Alice: 0}
+
+  "A_1" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_1</td></tr>
+<tr><td colspan="6">Genesis({Alice, Bob, Carol, Dave, Eric})</td></tr>
+</table>>]
+/// cause: Observation(Genesis({Alice, Bob, Carol, Dave, Eric}))
+/// last_ancestors: {Alice: 1}
+
+  "A_2" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_2</td></tr>
+<tr><td colspan="6">StartDkg({Alice, Bob, Carol, Dave, Eric})</td></tr>
+</table>>]
+/// cause: Observation(StartDkg({Alice, Bob, Carol, Dave, Eric}))
+/// last_ancestors: {Alice: 2}
+
+  "A_3" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_3</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 3, Bob: 5, Carol: 3}
+
+  "A_4" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_4</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 4, Bob: 6, Carol: 3}
+
+  "A_5" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_5</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 5, Bob: 6, Carol: 3}
+
+  "A_6" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_6</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 6, Bob: 6, Carol: 3, Eric: 3}
+
+  "A_7" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_7</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 7, Bob: 10, Carol: 6, Dave: 6, Eric: 3}
+
+  "A_8" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_8</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 8, Bob: 11, Carol: 6, Dave: 6, Eric: 3}
+
+  "A_9" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_9</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 9, Bob: 11, Carol: 6, Dave: 6, Eric: 3}
+
+  "A_10" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_10</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 10, Bob: 11, Carol: 6, Dave: 6, Eric: 3}
+
+  "A_11" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_11</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 11, Bob: 11, Carol: 6, Dave: 6, Eric: 5}
+
+  "A_12" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_12</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 12, Bob: 13, Carol: 11, Dave: 7, Eric: 5}
+
+  "A_13" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_13</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 13, Bob: 13, Carol: 11, Dave: 7, Eric: 5}
+
+  "A_14" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_14</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 14, Bob: 13, Carol: 11, Dave: 9, Eric: 5}
+
+  "A_15" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_15</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 15, Bob: 13, Carol: 11, Dave: 10, Eric: 5}
+
+  "A_16" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_16</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 16, Bob: 13, Carol: 11, Dave: 12, Eric: 6}
+
+  "A_17" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_17</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 17, Bob: 13, Carol: 11, Dave: 12, Eric: 6}
+
+  "A_18" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_18</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 18, Bob: 14, Carol: 13, Dave: 12, Eric: 6}
+
+  "A_19" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_19</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 19, Bob: 14, Carol: 14, Dave: 12, Eric: 6}
+
+  "A_20" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_20</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 20, Bob: 14, Carol: 14, Dave: 12, Eric: 8}
+
+  "A_21" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_21</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 21, Bob: 14, Carol: 14, Dave: 12, Eric: 8}
+
+  "A_22" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_22</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 22, Bob: 17, Carol: 20, Dave: 17, Eric: 8}
+
+  "A_23" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_23</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 23, Bob: 20, Carol: 20, Dave: 17, Eric: 8}
+
+  "A_24" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_24</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 24, Bob: 20, Carol: 20, Dave: 17, Eric: 8}
+
+  "A_25" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_25</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 25, Bob: 23, Carol: 20, Dave: 17, Eric: 10}
+
+  "A_26" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_26</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 26, Bob: 23, Carol: 20, Dave: 18, Eric: 10}
+
+  "A_27" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_27</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 27, Bob: 26, Carol: 24, Dave: 18, Eric: 11}
+
+  "A_28" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_28</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 28, Bob: 26, Carol: 24, Dave: 19, Eric: 11}
+
+  "A_29" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_29</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 29, Bob: 26, Carol: 24, Dave: 19, Eric: 13}
+
+  "A_30" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_30</td></tr>
+<tr><td colspan="6">DkgMessage(DkgPart(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgPart(0)), SerialisedDkgMessage([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 152, 214, 162, 242, 91, 155, 191, 217, 36, 142, 44, 157, 129, 14, 160, 111, 138, 146, 236, 179, 65, 12, 58, 178, 92, 48, 130, 97, 119, 165, 208, 173, 17, 131, 25, 30, 40, 190, 229, 182, 209, 43, 52, 226, 141, 185, 109, 62, 142, 210, 67, 37, 118, 68, 153, 249, 218, 1, 39, 190, 6, 55, 250, 201, 19, 179, 16, 12, 182, 116, 20, 54, 71, 192, 250, 39, 208, 94, 212, 22, 149, 77, 158, 224, 176, 225, 147, 104, 143, 162, 187, 79, 106, 84, 60, 203, 160, 238, 218, 198, 105, 160, 116, 38, 65, 121, 47, 214, 104, 112, 138, 119, 184, 84, 146, 151, 178, 148, 195, 41, 154, 147, 145, 55, 17, 163, 119, 94, 87, 225, 4, 111, 111, 44, 210, 175, 65, 116, 4, 85, 76, 222, 117, 58, 5, 0, 0, 0, 0, 0, 0, 0, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 59, 234, 6, 78, 2, 1, 148, 68, 95, 138, 45, 212, 79, 5, 160, 54, 21, 237, 86, 1, 86, 175, 136, 255, 92, 169, 130, 76, 199, 3, 179, 91, 148, 1, 28, 206, 83, 17, 158, 32, 94, 7, 165, 234, 14, 5, 204, 85, 184, 243, 231, 154, 64, 159, 37, 194, 3, 53, 103, 109, 94, 215, 87, 93, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 77, 45, 121, 54, 128, 220, 155, 16, 212, 31, 180, 230, 60, 69, 127, 189, 36, 147, 12, 188, 3, 251, 92, 127, 237, 202, 47, 116, 184, 55, 46, 109, 21, 192, 197, 179, 42, 71, 52, 117, 72, 29, 197, 194, 45, 38, 251, 208, 91, 105, 120, 113, 203, 26, 61, 209, 46, 203, 131, 137, 120, 211, 70, 53, 249, 113, 5, 251, 33, 55, 31, 7, 124, 72, 72, 234, 5, 181, 231, 108, 49, 117, 71, 80, 190, 172, 67, 29, 43, 4, 68, 197, 146, 144, 94, 21, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 94, 112, 235, 30, 255, 183, 163, 220, 73, 89, 60, 249, 38, 225, 160, 240, 46, 97, 32, 109, 169, 110, 247, 203, 53, 111, 63, 114, 86, 196, 187, 10, 150, 126, 111, 153, 1, 125, 202, 201, 50, 51, 229, 154, 76, 71, 42, 76, 255, 222, 8, 72, 86, 150, 84, 224, 89, 97, 160, 165, 146, 207, 53, 13, 13, 97, 221, 111, 254, 86, 159, 183, 65, 16, 32, 2, 110, 161, 149, 195, 35, 24, 127, 75, 210, 168, 13, 190, 119, 14, 70, 100, 183, 60, 150, 74, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 112, 179, 93, 7, 125, 147, 171, 168, 190, 238, 194, 11, 20, 33, 128, 119, 62, 7, 214, 39, 87, 186, 203, 75, 198, 144, 236, 153, 71, 248, 54, 28, 24, 61, 25, 127, 215, 178, 96, 30, 28, 165, 3, 115, 110, 12, 23, 27, 168, 44, 59, 40, 233, 233, 165, 34, 205, 116, 90, 235, 255, 114, 18, 89, 64, 166, 31, 111, 80, 243, 237, 218, 128, 99, 235, 161, 18, 51, 51, 204, 36, 139, 54, 91, 248, 119, 68, 247, 194, 139, 63, 119, 46, 98, 167, 250, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 130, 246, 207, 239, 250, 110, 179, 116, 51, 132, 73, 30, 1, 97, 95, 254, 77, 173, 139, 226, 4, 6, 160, 203, 86, 178, 153, 193, 56, 44, 178, 45, 153, 251, 194, 100, 174, 232, 246, 114, 6, 187, 35, 75, 141, 45, 70, 150, 75, 162, 203, 254, 115, 101, 189, 49, 248, 10, 119, 7, 26, 111, 1, 49, 149, 24, 16, 4, 247, 29, 115, 11, 211, 174, 28, 90, 55, 159, 254, 106, 184, 240, 255, 107, 31, 207, 137, 148, 222, 126, 115, 77, 56, 205, 134, 32]))
+/// last_ancestors: {Alice: 30, Bob: 26, Carol: 24, Dave: 19, Eric: 13}
+
+  "A_31" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_31</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 31, Bob: 26, Carol: 26, Dave: 19, Eric: 13}
+
+  "A_32" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_32</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 32, Bob: 27, Carol: 26, Dave: 22, Eric: 13}
+
+  "A_33" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_33</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 33, Bob: 32, Carol: 29, Dave: 22, Eric: 13}
+
+  "A_34" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_34</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 34, Bob: 36, Carol: 32, Dave: 25, Eric: 17}
+
+  "A_35" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_35</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 35, Bob: 41, Carol: 36, Dave: 31, Eric: 21}
+
+  "A_36" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_36</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 36, Bob: 41, Carol: 39, Dave: 31, Eric: 23}
+
+  "A_37" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_37</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 37, Bob: 41, Carol: 39, Dave: 31, Eric: 23}
+
+  "A_38" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_38</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 38, Bob: 41, Carol: 39, Dave: 31, Eric: 23}
+
+  "A_39" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_39</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 216, 35, 226, 28, 80, 143, 22, 169, 93, 234, 240, 228, 76, 167, 137, 95, 108, 82, 193, 175, 232, 163, 86, 11, 218, 218, 82, 221, 210, 206, 166, 108, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 68, 129, 178, 19, 163, 33, 127, 93, 97, 163, 9, 136, 67, 163, 179, 107, 109, 87, 252, 27, 117, 225, 129, 232, 222, 174, 191, 220, 198, 122, 0, 43, 249, 113, 5, 251, 33, 55, 31, 7, 124, 72, 72, 234, 5, 181, 231, 108, 49, 117, 71, 80, 190, 172, 67, 29, 43, 4, 68, 197, 146, 144, 94, 21, 64, 0, 0, 0, 0, 0, 0, 0, 177, 222, 130, 10, 245, 179, 231, 17, 100, 184, 32, 43, 61, 67, 155, 203, 115, 52, 217, 145, 9, 247, 230, 248, 43, 0, 202, 5, 14, 206, 71, 93, 13, 97, 221, 111, 254, 86, 159, 183, 65, 16, 32, 2, 110, 161, 149, 195, 35, 24, 127, 75, 210, 168, 13, 190, 119, 14, 70, 100, 183, 60, 150, 74, 64, 0, 0, 0, 0, 0, 0, 0, 29, 60, 83, 1, 72, 70, 80, 198, 103, 113, 57, 206, 51, 63, 197, 215, 116, 57, 20, 254, 149, 52, 18, 214, 48, 212, 54, 5, 2, 122, 161, 27, 64, 166, 31, 111, 80, 243, 237, 218, 128, 99, 235, 161, 18, 51, 51, 204, 36, 139, 54, 91, 248, 119, 68, 247, 194, 139, 63, 119, 46, 98, 167, 250, 64, 0, 0, 0, 0, 0, 0, 0, 138, 153, 35, 248, 153, 216, 184, 122, 106, 134, 80, 113, 45, 223, 172, 55, 123, 22, 241, 115, 42, 74, 119, 230, 125, 37, 65, 46, 73, 205, 232, 77, 149, 24, 16, 4, 247, 29, 115, 11, 211, 174, 28, 90, 55, 159, 254, 106, 184, 240, 255, 107, 31, 207, 137, 148, 222, 126, 115, 77, 56, 205, 134, 32]))
+/// last_ancestors: {Alice: 39, Bob: 41, Carol: 39, Dave: 31, Eric: 23}
+
+  "A_40" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_40</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 92, 180, 42, 179, 144, 122, 79, 57, 244, 133, 183, 213, 120, 215, 237, 249, 79, 7, 39, 159, 220, 158, 191, 241, 175, 157, 76, 55, 249, 239, 58, 107, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 3, 116, 13, 232, 218, 125, 192, 55, 120, 229, 107, 4, 255, 112, 39, 70, 136, 241, 109, 143, 221, 199, 110, 220, 216, 232, 147, 243, 96, 231, 39, 12, 249, 113, 5, 251, 33, 55, 31, 7, 124, 72, 72, 234, 5, 181, 231, 108, 49, 117, 71, 80, 190, 172, 67, 29, 43, 4, 68, 197, 146, 144, 94, 21, 64, 0, 0, 0, 0, 0, 0, 0, 171, 51, 240, 28, 36, 129, 49, 54, 251, 160, 30, 51, 136, 174, 30, 230, 197, 179, 86, 137, 230, 200, 87, 250, 73, 177, 120, 217, 27, 134, 2, 33, 13, 97, 221, 111, 254, 86, 159, 183, 65, 16, 32, 2, 110, 161, 149, 195, 35, 24, 127, 75, 210, 168, 13, 190, 119, 14, 70, 100, 183, 60, 150, 74, 64, 0, 0, 0, 0, 0, 0, 0, 83, 243, 210, 81, 109, 132, 162, 52, 126, 92, 209, 97, 17, 236, 21, 134, 3, 118, 63, 131, 239, 201, 64, 24, 187, 121, 93, 191, 214, 36, 221, 53, 64, 166, 31, 111, 80, 243, 237, 218, 128, 99, 235, 161, 18, 51, 51, 204, 36, 139, 54, 91, 248, 119, 68, 247, 194, 139, 63, 119, 46, 98, 167, 250, 64, 0, 0, 0, 0, 0, 0, 0, 251, 178, 181, 134, 182, 135, 19, 51, 1, 24, 132, 144, 154, 41, 13, 38, 65, 56, 40, 125, 248, 202, 41, 54, 44, 66, 66, 165, 145, 195, 183, 74, 149, 24, 16, 4, 247, 29, 115, 11, 211, 174, 28, 90, 55, 159, 254, 106, 184, 240, 255, 107, 31, 207, 137, 148, 222, 126, 115, 77, 56, 205, 134, 32]))
+/// last_ancestors: {Alice: 40, Bob: 41, Carol: 39, Dave: 31, Eric: 23}
+
+  "A_41" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_41</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 121, 203, 29, 85, 57, 202, 159, 160, 182, 213, 13, 123, 32, 207, 107, 60, 118, 149, 125, 114, 62, 207, 67, 63, 98, 246, 45, 71, 229, 95, 161, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 129, 54, 86, 39, 17, 94, 98, 25, 103, 85, 231, 57, 59, 104, 229, 214, 247, 42, 57, 87, 164, 129, 193, 1, 164, 93, 100, 136, 64, 162, 95, 106, 249, 113, 5, 251, 33, 55, 31, 7, 124, 72, 72, 234, 5, 181, 231, 108, 49, 117, 71, 80, 190, 172, 67, 29, 43, 4, 68, 197, 146, 144, 94, 21, 64, 0, 0, 0, 0, 0, 0, 0, 136, 161, 142, 249, 233, 241, 36, 146, 24, 121, 194, 248, 82, 93, 161, 29, 116, 232, 82, 50, 2, 92, 5, 145, 157, 71, 253, 159, 72, 61, 48, 88, 13, 97, 221, 111, 254, 86, 159, 183, 65, 16, 32, 2, 110, 161, 149, 195, 35, 24, 127, 75, 210, 168, 13, 190, 119, 14, 70, 100, 183, 60, 150, 74, 64, 0, 0, 0, 0, 0, 0, 0, 143, 12, 199, 203, 194, 133, 231, 10, 202, 156, 157, 183, 106, 82, 93, 100, 240, 165, 108, 13, 96, 54, 73, 32, 151, 49, 150, 183, 80, 216, 0, 70, 64, 166, 31, 111, 80, 243, 237, 218, 128, 99, 235, 161, 18, 51, 51, 204, 36, 139, 54, 91, 248, 119, 68, 247, 194, 139, 63, 119, 46, 98, 167, 250, 64, 0, 0, 0, 0, 0, 0, 0, 150, 119, 255, 157, 155, 25, 170, 131, 123, 192, 120, 118, 130, 71, 25, 171, 108, 99, 134, 232, 189, 16, 141, 175, 144, 27, 47, 207, 88, 115, 209, 51, 149, 24, 16, 4, 247, 29, 115, 11, 211, 174, 28, 90, 55, 159, 254, 106, 184, 240, 255, 107, 31, 207, 137, 148, 222, 126, 115, 77, 56, 205, 134, 32]))
+/// last_ancestors: {Alice: 41, Bob: 41, Carol: 39, Dave: 31, Eric: 23}
+
+  "A_42" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_42</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 44, 143, 84, 69, 182, 206, 207, 216, 217, 126, 66, 225, 25, 184, 174, 94, 114, 230, 55, 228, 72, 11, 98, 81, 220, 170, 87, 140, 89, 5, 123, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 14, 163, 152, 15, 59, 89, 56, 220, 247, 233, 12, 160, 251, 40, 13, 106, 229, 62, 77, 161, 196, 85, 2, 200, 74, 206, 89, 217, 211, 128, 105, 115, 249, 113, 5, 251, 33, 55, 31, 7, 124, 72, 72, 234, 5, 181, 231, 108, 49, 117, 71, 80, 190, 172, 67, 29, 43, 4, 68, 197, 146, 144, 94, 21, 64, 0, 0, 0, 0, 0, 0, 0, 239, 182, 220, 217, 192, 227, 160, 223, 22, 249, 216, 94, 218, 245, 173, 33, 83, 191, 192, 84, 56, 200, 104, 11, 113, 116, 190, 252, 250, 84, 106, 71, 13, 97, 221, 111, 254, 86, 159, 183, 65, 16, 32, 2, 110, 161, 149, 195, 35, 24, 127, 75, 210, 168, 13, 190, 119, 14, 70, 100, 183, 60, 150, 74, 64, 0, 0, 0, 0, 0, 0, 0, 208, 202, 32, 164, 70, 110, 9, 227, 53, 8, 165, 29, 185, 194, 78, 217, 192, 63, 52, 8, 172, 58, 207, 78, 151, 26, 35, 32, 34, 41, 107, 27, 64, 166, 31, 111, 80, 243, 237, 218, 128, 99, 235, 161, 18, 51, 51, 204, 36, 139, 54, 91, 248, 119, 68, 247, 194, 139, 63, 119, 46, 98, 167, 250, 64, 0, 0, 0, 0, 0, 0, 0, 178, 222, 100, 110, 203, 248, 113, 230, 83, 115, 111, 220, 154, 51, 173, 228, 51, 152, 73, 197, 39, 133, 111, 197, 5, 62, 37, 109, 156, 164, 89, 99, 149, 24, 16, 4, 247, 29, 115, 11, 211, 174, 28, 90, 55, 159, 254, 106, 184, 240, 255, 107, 31, 207, 137, 148, 222, 126, 115, 77, 56, 205, 134, 32]))
+/// last_ancestors: {Alice: 42, Bob: 41, Carol: 39, Dave: 31, Eric: 23}
+
+  "A_43" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_43</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 206, 235, 34, 28, 87, 18, 50, 101, 190, 53, 212, 190, 91, 102, 174, 56, 200, 8, 157, 146, 142, 118, 116, 142, 24, 97, 76, 144, 210, 51, 29, 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 97, 237, 62, 234, 171, 35, 208, 133, 29, 225, 122, 169, 103, 199, 188, 58, 123, 36, 227, 35, 199, 61, 96, 29, 212, 24, 22, 212, 221, 99, 135, 46, 249, 113, 5, 251, 33, 55, 31, 7, 124, 72, 72, 234, 5, 181, 231, 108, 49, 117, 71, 80, 190, 172, 67, 29, 43, 4, 68, 197, 146, 144, 94, 21, 64, 0, 0, 0, 0, 0, 0, 0, 244, 238, 90, 184, 0, 53, 110, 166, 124, 140, 33, 148, 115, 40, 203, 60, 46, 64, 41, 181, 255, 4, 76, 172, 143, 208, 223, 23, 233, 147, 241, 23, 13, 97, 221, 111, 254, 86, 159, 183, 65, 16, 32, 2, 110, 161, 149, 195, 35, 24, 127, 75, 210, 168, 13, 190, 119, 14, 70, 100, 183, 60, 150, 74, 64, 0, 0, 0, 0, 0, 0, 0, 135, 240, 118, 134, 85, 70, 12, 199, 219, 55, 200, 126, 127, 137, 217, 62, 225, 91, 111, 70, 56, 204, 55, 59, 75, 136, 169, 91, 244, 195, 91, 1, 64, 166, 31, 111, 80, 243, 237, 218, 128, 99, 235, 161, 18, 51, 51, 204, 36, 139, 54, 91, 248, 119, 68, 247, 194, 139, 63, 119, 46, 98, 167, 250, 64, 0, 0, 0, 0, 0, 0, 0, 27, 242, 146, 84, 169, 87, 170, 231, 57, 63, 109, 105, 142, 142, 165, 148, 153, 79, 87, 225, 120, 107, 93, 253, 78, 189, 16, 201, 82, 155, 179, 94, 149, 24, 16, 4, 247, 29, 115, 11, 211, 174, 28, 90, 55, 159, 254, 106, 184, 240, 255, 107, 31, 207, 137, 148, 222, 126, 115, 77, 56, 205, 134, 32]))
+/// last_ancestors: {Alice: 43, Bob: 41, Carol: 39, Dave: 31, Eric: 23}
+
+  "A_44" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_44</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 44, Bob: 41, Carol: 39, Dave: 31, Eric: 25}
+
+  "A_45" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_45</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 45, Bob: 41, Carol: 39, Dave: 31, Eric: 25}
+
+  "A_46" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_46</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 46, Bob: 41, Carol: 40, Dave: 31, Eric: 33}
+
+  "A_47" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_47</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 47, Bob: 41, Carol: 40, Dave: 31, Eric: 33}
+
+  "A_48" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_48</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 48, Bob: 41, Carol: 40, Dave: 31, Eric: 33}
+
+  "A_49" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_49</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 49, Bob: 41, Carol: 41, Dave: 31, Eric: 35}
+
+  "A_50" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_50</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 50, Bob: 52, Carol: 43, Dave: 33, Eric: 35}
+
+  "A_51" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_51</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 51, Bob: 52, Carol: 43, Dave: 33, Eric: 36}
+
+  "A_52" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_52</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 52, Bob: 52, Carol: 50, Dave: 33, Eric: 36}
+
+  "A_53" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_53</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 53, Bob: 52, Carol: 50, Dave: 33, Eric: 36}
+
+  "A_54" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_54</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 54, Bob: 52, Carol: 53, Dave: 33, Eric: 37}
+
+  "A_55" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_55</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 55, Bob: 58, Carol: 56, Dave: 39, Eric: 39}
+
+  "A_56" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_56</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 56, Bob: 58, Carol: 57, Dave: 39, Eric: 39}
+
+  "A_57" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_57</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 57, Bob: 58, Carol: 57, Dave: 39, Eric: 39}
+
+  "A_58" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_58</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 58, Bob: 58, Carol: 61, Dave: 40, Eric: 42}
+
+  "A_59" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_59</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 59, Bob: 58, Carol: 61, Dave: 40, Eric: 42}
+
+  "A_60" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_60</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 60, Bob: 58, Carol: 62, Dave: 40, Eric: 42}
+
+  "A_61" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_61</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 61, Bob: 58, Carol: 63, Dave: 40, Eric: 42}
+
+  "A_62" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_62</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 62, Bob: 61, Carol: 67, Dave: 40, Eric: 43}
+
+  "A_63" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_63</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 63, Bob: 61, Carol: 67, Dave: 45, Eric: 48}
+
+  "A_64" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_64</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 64, Bob: 61, Carol: 67, Dave: 45, Eric: 48}
+
+  "A_65" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_65</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 65, Bob: 61, Carol: 69, Dave: 48, Eric: 48}
+
+  "A_66" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_66</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 66, Bob: 67, Carol: 69, Dave: 52, Eric: 58}
+
+  "A_67" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_67</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 67, Bob: 67, Carol: 69, Dave: 53, Eric: 58}
+
+  "A_68" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_68</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 68, Bob: 69, Carol: 69, Dave: 53, Eric: 60}
+
+  "A_69" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_69</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 69, Bob: 69, Carol: 69, Dave: 53, Eric: 60}
+
+  "A_70" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_70</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 70, Bob: 69, Carol: 69, Dave: 53, Eric: 60}
+
+  "A_71" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_71</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 71, Bob: 69, Carol: 69, Dave: 55, Eric: 64}
+
+  "A_72" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_72</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 72, Bob: 69, Carol: 73, Dave: 58, Eric: 64}
+
+  "A_73" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_73</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 73, Bob: 70, Carol: 73, Dave: 67, Eric: 66}
+
+  "A_74" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_74</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 74, Bob: 76, Carol: 82, Dave: 71, Eric: 68}
+
+  "A_75" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_75</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 75, Bob: 76, Carol: 84, Dave: 71, Eric: 68}
+
+  "A_76" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_76</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 76, Bob: 80, Carol: 84, Dave: 71, Eric: 71}
+
+  "A_77" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_77</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 77, Bob: 81, Carol: 84, Dave: 71, Eric: 71}
+
+  "A_78" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_78</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 78, Bob: 81, Carol: 84, Dave: 71, Eric: 71}
+
+  "A_79" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_79</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 79, Bob: 85, Carol: 87, Dave: 71, Eric: 72}
+
+  "A_80" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_80</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 80, Bob: 85, Carol: 88, Dave: 75, Eric: 72}
+
+  "A_81" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_81</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 81, Bob: 85, Carol: 88, Dave: 75, Eric: 72}
+
+  "A_82" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_82</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 82, Bob: 85, Carol: 88, Dave: 75, Eric: 72}
+
+  "A_83" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_83</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 83, Bob: 98, Carol: 88, Dave: 79, Eric: 77}
+
+  "A_84" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_84</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 84, Bob: 98, Carol: 88, Dave: 80, Eric: 77}
+
+  "A_85" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_85</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 85, Bob: 98, Carol: 88, Dave: 80, Eric: 77}
+
+  "A_86" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">A_86</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 86, Bob: 101, Carol: 88, Dave: 80, Eric: 77}
+
+  "B_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_0</td></tr>
+</table>>]
+/// cause: Initial
+/// last_ancestors: {Bob: 0}
+
+  "B_1" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_1</td></tr>
+<tr><td colspan="6">Genesis({Alice, Bob, Carol, Dave, Eric})</td></tr>
+</table>>]
+/// cause: Observation(Genesis({Alice, Bob, Carol, Dave, Eric}))
+/// last_ancestors: {Bob: 1}
+
+  "B_2" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_2</td></tr>
+<tr><td colspan="6">StartDkg({Alice, Bob, Carol, Dave, Eric})</td></tr>
+</table>>]
+/// cause: Observation(StartDkg({Alice, Bob, Carol, Dave, Eric}))
+/// last_ancestors: {Bob: 2}
+
+  "B_3" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_3</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Bob: 3}
+
+  "B_4" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_4</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Bob: 4, Carol: 3}
+
+  "B_5" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_5</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Bob: 5, Carol: 3}
+
+  "B_6" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_6</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Bob: 6, Carol: 3}
+
+  "B_7" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_7</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 3, Bob: 7, Carol: 3}
+
+  "B_8" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_8</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 3, Bob: 8, Carol: 4}
+
+  "B_9" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_9</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 4, Bob: 9, Carol: 4}
+
+  "B_10" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_10</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 4, Bob: 10, Carol: 4, Dave: 3}
+
+  "B_11" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_11</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 4, Bob: 11, Carol: 4, Dave: 3}
+
+  "B_12" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_12</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 8, Bob: 12, Carol: 6, Dave: 6, Eric: 3}
+
+  "B_13" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_13</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 8, Bob: 13, Carol: 6, Dave: 6, Eric: 3}
+
+  "B_14" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_14</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 8, Bob: 14, Carol: 9, Dave: 7, Eric: 3}
+
+  "B_15" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_15</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 8, Bob: 15, Carol: 10, Dave: 7, Eric: 3}
+
+  "B_16" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_16</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 15, Bob: 16, Carol: 11, Dave: 14, Eric: 6}
+
+  "B_17" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_17</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 15, Bob: 17, Carol: 11, Dave: 14, Eric: 6}
+
+  "B_18" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_18</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 17, Bob: 18, Carol: 16, Dave: 14, Eric: 6}
+
+  "B_19" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_19</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 17, Bob: 19, Carol: 16, Dave: 14, Eric: 6}
+
+  "B_20" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_20</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 21, Bob: 20, Carol: 16, Dave: 14, Eric: 8}
+
+  "B_21" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_21</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 21, Bob: 21, Carol: 19, Dave: 17, Eric: 8}
+
+  "B_22" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_22</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 21, Bob: 22, Carol: 19, Dave: 17, Eric: 10}
+
+  "B_23" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_23</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 21, Bob: 23, Carol: 19, Dave: 17, Eric: 10}
+
+  "B_24" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_24</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 22, Bob: 24, Carol: 24, Dave: 17, Eric: 11}
+
+  "B_25" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_25</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 25, Bob: 25, Carol: 24, Dave: 17, Eric: 11}
+
+  "B_26" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_26</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 25, Bob: 26, Carol: 24, Dave: 17, Eric: 11}
+
+  "B_27" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_27</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 25, Bob: 27, Carol: 24, Dave: 17, Eric: 11}
+
+  "B_28" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_28</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 27, Bob: 28, Carol: 24, Dave: 18, Eric: 11}
+
+  "B_29" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_29</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 27, Bob: 29, Carol: 24, Dave: 20, Eric: 11}
+
+  "B_30" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_30</td></tr>
+<tr><td colspan="6">DkgMessage(DkgPart(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgPart(0)), SerialisedDkgMessage([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 149, 143, 248, 59, 10, 156, 133, 41, 35, 148, 248, 4, 180, 208, 116, 114, 227, 118, 155, 169, 5, 108, 154, 118, 22, 76, 137, 191, 191, 50, 76, 39, 136, 167, 112, 233, 113, 50, 129, 18, 104, 235, 236, 213, 242, 115, 181, 232, 163, 92, 155, 208, 49, 30, 50, 20, 199, 132, 212, 147, 82, 151, 119, 72, 27, 15, 151, 250, 213, 106, 227, 217, 38, 21, 201, 202, 215, 125, 60, 195, 246, 12, 120, 33, 6, 103, 254, 9, 151, 161, 112, 228, 55, 171, 161, 185, 148, 237, 77, 117, 232, 14, 129, 221, 219, 64, 166, 216, 73, 88, 143, 20, 31, 111, 49, 122, 149, 18, 177, 52, 48, 23, 193, 149, 251, 144, 102, 177, 136, 206, 23, 172, 85, 135, 73, 175, 227, 149, 65, 226, 239, 5, 177, 147, 5, 0, 0, 0, 0, 0, 0, 0, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 75, 123, 16, 123, 48, 68, 103, 213, 186, 111, 118, 34, 59, 235, 13, 167, 4, 102, 196, 48, 213, 152, 251, 13, 182, 4, 243, 104, 50, 49, 122, 87, 226, 19, 68, 202, 132, 138, 104, 3, 30, 107, 202, 190, 225, 112, 94, 11, 115, 88, 21, 189, 123, 74, 160, 118, 110, 35, 2, 77, 122, 123, 238, 71, 249, 113, 5, 251, 33, 55, 31, 7, 124, 72, 72, 234, 5, 181, 231, 108, 49, 117, 71, 80, 190, 172, 67, 29, 43, 4, 68, 197, 146, 144, 94, 21, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 64, 31, 26, 21, 150, 64, 24, 105, 208, 208, 27, 194, 33, 23, 95, 181, 101, 13, 120, 78, 14, 190, 199, 165, 70, 130, 198, 208, 189, 116, 158, 107, 206, 131, 126, 250, 164, 24, 32, 115, 39, 25, 241, 221, 217, 17, 174, 180, 127, 49, 213, 82, 182, 151, 58, 34, 4, 76, 147, 8, 22, 12, 203, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 52, 195, 35, 175, 252, 60, 201, 252, 230, 213, 194, 97, 5, 159, 242, 111, 193, 220, 137, 98, 63, 11, 90, 10, 143, 130, 252, 14, 246, 16, 213, 11, 187, 243, 184, 42, 196, 166, 215, 226, 47, 35, 22, 253, 212, 86, 187, 177, 145, 226, 54, 242, 248, 188, 14, 1, 226, 241, 193, 237, 4, 68, 149, 59, 244, 16, 216, 148, 223, 97, 128, 176, 61, 88, 104, 232, 107, 20, 114, 175, 18, 109, 56, 27, 108, 4, 78, 163, 92, 10, 2, 161, 37, 172, 200, 95, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 41, 103, 45, 73, 98, 57, 122, 144, 252, 54, 104, 1, 236, 202, 67, 126, 34, 132, 61, 128, 120, 48, 38, 162, 31, 0, 208, 118, 129, 84, 249, 31, 168, 99, 243, 90, 227, 52, 143, 82, 56, 45, 59, 28, 208, 155, 200, 174, 163, 147, 152, 145, 59, 226, 226, 223, 191, 151, 240, 210, 243, 123, 95, 111, 185, 215, 26, 148, 113, 196, 242, 221, 252, 43, 163, 75, 23, 134, 212, 160, 21, 254, 113, 11, 70, 219, 7, 234, 233, 143, 123, 178, 188, 242, 249, 239, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 30, 11, 55, 227, 199, 53, 43, 36, 18, 152, 13, 161, 210, 246, 148, 140, 131, 43, 241, 157, 177, 85, 242, 57, 176, 125, 163, 222, 12, 152, 29, 52, 148, 211, 45, 139, 3, 195, 70, 194, 65, 219, 97, 59, 200, 60, 24, 88, 176, 108, 88, 39, 118, 47, 125, 139, 85, 192, 129, 142, 143, 12, 60, 47, 108, 105, 21, 255, 214, 42, 108, 12, 175, 230, 84, 176, 50, 42, 25, 6, 137, 133, 184, 59, 161, 99, 202, 137, 245, 122, 55, 136, 170, 93, 216, 53]))
+/// last_ancestors: {Alice: 27, Bob: 30, Carol: 24, Dave: 20, Eric: 11}
+
+  "B_31" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_31</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 31, Bob: 31, Carol: 29, Dave: 20, Eric: 13}
+
+  "B_32" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_32</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 31, Bob: 32, Carol: 29, Dave: 20, Eric: 13}
+
+  "B_33" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_33</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 33, Bob: 33, Carol: 29, Dave: 22, Eric: 13}
+
+  "B_34" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_34</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 33, Bob: 34, Carol: 32, Dave: 25, Eric: 17}
+
+  "B_35" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_35</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 33, Bob: 35, Carol: 32, Dave: 25, Eric: 17}
+
+  "B_36" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_36</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 33, Bob: 36, Carol: 32, Dave: 25, Eric: 17}
+
+  "B_37" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_37</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 33, Bob: 37, Carol: 32, Dave: 27, Eric: 20}
+
+  "B_38" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_38</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 34, Bob: 38, Carol: 32, Dave: 27, Eric: 20}
+
+  "B_39" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_39</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 34, Bob: 39, Carol: 32, Dave: 27, Eric: 21}
+
+  "B_40" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_40</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 34, Bob: 40, Carol: 36, Dave: 31, Eric: 21}
+
+  "B_41" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_41</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 34, Bob: 41, Carol: 36, Dave: 31, Eric: 21}
+
+  "B_42" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_42</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 35, Bob: 42, Carol: 36, Dave: 31, Eric: 21}
+
+  "B_43" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_43</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 35, Bob: 43, Carol: 36, Dave: 31, Eric: 21}
+
+  "B_44" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_44</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 35, Bob: 44, Carol: 36, Dave: 31, Eric: 21}
+
+  "B_45" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_45</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 35, Bob: 45, Carol: 36, Dave: 33, Eric: 21}
+
+  "B_46" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_46</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 36, Bob: 46, Carol: 43, Dave: 33, Eric: 24}
+
+  "B_47" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_47</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 68, 129, 178, 19, 163, 33, 127, 93, 97, 163, 9, 136, 67, 163, 179, 107, 109, 87, 252, 27, 117, 225, 129, 232, 222, 174, 191, 220, 198, 122, 0, 43, 249, 113, 5, 251, 33, 55, 31, 7, 124, 72, 72, 234, 5, 181, 231, 108, 49, 117, 71, 80, 190, 172, 67, 29, 43, 4, 68, 197, 146, 144, 94, 21, 64, 0, 0, 0, 0, 0, 0, 0, 171, 83, 235, 10, 122, 71, 73, 84, 230, 111, 145, 52, 112, 118, 87, 85, 159, 88, 39, 57, 242, 188, 219, 103, 110, 113, 29, 183, 190, 24, 246, 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 18, 38, 36, 2, 81, 109, 19, 75, 107, 60, 25, 225, 156, 73, 251, 62, 209, 89, 82, 86, 111, 152, 53, 231, 253, 51, 123, 145, 182, 182, 235, 96, 244, 16, 216, 148, 223, 97, 128, 176, 61, 88, 104, 232, 107, 20, 114, 175, 18, 109, 56, 27, 108, 4, 78, 163, 92, 10, 2, 161, 37, 172, 200, 95, 64, 0, 0, 0, 0, 0, 0, 0, 120, 248, 92, 249, 40, 147, 221, 65, 241, 172, 162, 141, 198, 120, 225, 212, 253, 130, 219, 105, 228, 155, 85, 51, 69, 121, 59, 66, 91, 173, 243, 7, 185, 215, 26, 148, 113, 196, 242, 221, 252, 43, 163, 75, 23, 134, 212, 160, 21, 254, 113, 11, 70, 219, 7, 234, 233, 143, 123, 178, 188, 242, 249, 239, 64, 0, 0, 0, 0, 0, 0, 0, 223, 202, 149, 240, 255, 184, 167, 56, 118, 121, 42, 58, 243, 75, 133, 190, 47, 132, 6, 135, 97, 119, 175, 178, 212, 59, 153, 28, 83, 75, 233, 34, 108, 105, 21, 255, 214, 42, 108, 12, 175, 230, 84, 176, 50, 42, 25, 6, 137, 133, 184, 59, 161, 99, 202, 137, 245, 122, 55, 136, 170, 93, 216, 53]))
+/// last_ancestors: {Alice: 36, Bob: 47, Carol: 43, Dave: 33, Eric: 24}
+
+  "B_48" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_48</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 3, 116, 13, 232, 218, 125, 192, 55, 120, 229, 107, 4, 255, 112, 39, 70, 136, 241, 109, 143, 221, 199, 110, 220, 216, 232, 147, 243, 96, 231, 39, 12, 249, 113, 5, 251, 33, 55, 31, 7, 124, 72, 72, 234, 5, 181, 231, 108, 49, 117, 71, 80, 190, 172, 67, 29, 43, 4, 68, 197, 146, 144, 94, 21, 64, 0, 0, 0, 0, 0, 0, 0, 206, 250, 104, 41, 252, 52, 31, 63, 38, 145, 129, 245, 147, 107, 205, 161, 92, 63, 64, 128, 177, 183, 148, 210, 45, 32, 15, 120, 237, 156, 152, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 153, 129, 196, 106, 29, 236, 125, 70, 212, 60, 151, 230, 40, 102, 115, 253, 48, 141, 18, 113, 133, 167, 186, 200, 130, 87, 138, 252, 121, 82, 9, 89, 244, 16, 216, 148, 223, 97, 128, 176, 61, 88, 104, 232, 107, 20, 114, 175, 18, 109, 56, 27, 108, 4, 78, 163, 92, 10, 2, 161, 37, 172, 200, 95, 64, 0, 0, 0, 0, 0, 0, 0, 99, 8, 32, 172, 63, 163, 220, 77, 131, 140, 174, 215, 186, 188, 91, 5, 0, 3, 67, 88, 81, 191, 166, 139, 143, 17, 104, 87, 179, 96, 140, 11, 185, 215, 26, 148, 113, 196, 242, 221, 252, 43, 163, 75, 23, 134, 212, 160, 21, 254, 113, 11, 70, 219, 7, 234, 233, 143, 123, 178, 188, 242, 249, 239, 64, 0, 0, 0, 0, 0, 0, 0, 46, 143, 123, 237, 96, 90, 59, 85, 49, 56, 196, 200, 79, 183, 1, 97, 212, 80, 21, 73, 37, 175, 204, 129, 228, 72, 227, 219, 63, 22, 253, 49, 108, 105, 21, 255, 214, 42, 108, 12, 175, 230, 84, 176, 50, 42, 25, 6, 137, 133, 184, 59, 161, 99, 202, 137, 245, 122, 55, 136, 170, 93, 216, 53]))
+/// last_ancestors: {Alice: 36, Bob: 48, Carol: 43, Dave: 33, Eric: 24}
+
+  "B_49" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_49</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 129, 54, 86, 39, 17, 94, 98, 25, 103, 85, 231, 57, 59, 104, 229, 214, 247, 42, 57, 87, 164, 129, 193, 1, 164, 93, 100, 136, 64, 162, 95, 106, 249, 113, 5, 251, 33, 55, 31, 7, 124, 72, 72, 234, 5, 181, 231, 108, 49, 117, 71, 80, 190, 172, 67, 29, 43, 4, 68, 197, 146, 144, 94, 21, 64, 0, 0, 0, 0, 0, 0, 0, 64, 157, 7, 31, 103, 44, 191, 167, 4, 168, 199, 137, 53, 164, 247, 115, 15, 160, 213, 200, 199, 35, 232, 216, 173, 21, 212, 2, 197, 206, 225, 88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 255, 3, 185, 22, 189, 250, 27, 54, 162, 250, 167, 217, 47, 224, 9, 17, 39, 21, 114, 58, 235, 197, 14, 176, 183, 205, 67, 125, 73, 251, 99, 71, 244, 16, 216, 148, 223, 97, 128, 176, 61, 88, 104, 232, 107, 20, 114, 175, 18, 109, 56, 27, 108, 4, 78, 163, 92, 10, 2, 161, 37, 172, 200, 95, 64, 0, 0, 0, 0, 0, 0, 0, 190, 106, 106, 14, 19, 201, 120, 196, 63, 77, 136, 41, 42, 28, 28, 174, 62, 138, 14, 172, 14, 104, 53, 135, 193, 133, 179, 247, 205, 39, 230, 53, 185, 215, 26, 148, 113, 196, 242, 221, 252, 43, 163, 75, 23, 134, 212, 160, 21, 254, 113, 11, 70, 219, 7, 234, 233, 143, 123, 178, 188, 242, 249, 239, 64, 0, 0, 0, 0, 0, 0, 0, 125, 209, 27, 6, 105, 151, 213, 82, 221, 159, 104, 121, 36, 88, 46, 75, 86, 255, 170, 29, 50, 10, 92, 94, 203, 61, 35, 114, 82, 84, 104, 36, 108, 105, 21, 255, 214, 42, 108, 12, 175, 230, 84, 176, 50, 42, 25, 6, 137, 133, 184, 59, 161, 99, 202, 137, 245, 122, 55, 136, 170, 93, 216, 53]))
+/// last_ancestors: {Alice: 36, Bob: 49, Carol: 43, Dave: 33, Eric: 24}
+
+  "B_50" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_50</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 14, 163, 152, 15, 59, 89, 56, 220, 247, 233, 12, 160, 251, 40, 13, 106, 229, 62, 77, 161, 196, 85, 2, 200, 74, 206, 89, 217, 211, 128, 105, 115, 249, 113, 5, 251, 33, 55, 31, 7, 124, 72, 72, 234, 5, 181, 231, 108, 49, 117, 71, 80, 190, 172, 67, 29, 43, 4, 68, 197, 146, 144, 94, 21, 64, 0, 0, 0, 0, 0, 0, 0, 219, 38, 23, 10, 225, 113, 88, 79, 32, 167, 255, 125, 210, 150, 253, 202, 95, 152, 128, 234, 114, 21, 3, 183, 6, 157, 79, 184, 150, 229, 70, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 169, 170, 149, 4, 134, 138, 120, 194, 71, 192, 240, 91, 172, 168, 171, 127, 223, 201, 85, 61, 41, 173, 61, 217, 10, 233, 226, 192, 172, 241, 17, 15, 244, 16, 216, 148, 223, 97, 128, 176, 61, 88, 104, 232, 107, 20, 114, 175, 18, 109, 56, 27, 108, 4, 78, 163, 92, 10, 2, 161, 37, 172, 200, 95, 64, 0, 0, 0, 0, 0, 0, 0, 119, 46, 20, 255, 42, 163, 152, 53, 111, 217, 225, 57, 134, 186, 89, 52, 95, 251, 42, 144, 223, 68, 120, 251, 14, 53, 118, 201, 194, 253, 220, 22, 185, 215, 26, 148, 113, 196, 242, 221, 252, 43, 163, 75, 23, 134, 212, 160, 21, 254, 113, 11, 70, 219, 7, 234, 233, 143, 123, 178, 188, 242, 249, 239, 64, 0, 0, 0, 0, 0, 0, 0, 69, 178, 146, 249, 207, 187, 184, 168, 150, 242, 210, 23, 96, 204, 7, 233, 222, 44, 0, 227, 149, 220, 178, 29, 19, 129, 9, 210, 216, 9, 168, 30, 108, 105, 21, 255, 214, 42, 108, 12, 175, 230, 84, 176, 50, 42, 25, 6, 137, 133, 184, 59, 161, 99, 202, 137, 245, 122, 55, 136, 170, 93, 216, 53]))
+/// last_ancestors: {Alice: 36, Bob: 50, Carol: 43, Dave: 33, Eric: 24}
+
+  "B_51" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_51</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 97, 237, 62, 234, 171, 35, 208, 133, 29, 225, 122, 169, 103, 199, 188, 58, 123, 36, 227, 35, 199, 61, 96, 29, 212, 24, 22, 212, 221, 99, 135, 46, 249, 113, 5, 251, 33, 55, 31, 7, 124, 72, 72, 234, 5, 181, 231, 108, 49, 117, 71, 80, 190, 172, 67, 29, 43, 4, 68, 197, 146, 144, 94, 21, 64, 0, 0, 0, 0, 0, 0, 0, 118, 173, 4, 158, 214, 106, 4, 251, 101, 254, 63, 108, 149, 237, 183, 11, 215, 141, 91, 149, 146, 88, 157, 238, 2, 228, 153, 93, 86, 55, 206, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 138, 109, 202, 81, 2, 178, 56, 112, 175, 191, 6, 47, 192, 111, 245, 136, 45, 31, 50, 253, 85, 155, 160, 140, 233, 49, 128, 189, 123, 99, 39, 37, 244, 16, 216, 148, 223, 97, 128, 176, 61, 88, 104, 232, 107, 20, 114, 175, 18, 109, 56, 27, 108, 4, 78, 163, 92, 10, 2, 161, 37, 172, 200, 95, 64, 0, 0, 0, 0, 0, 0, 0, 159, 45, 144, 5, 45, 249, 108, 229, 247, 220, 203, 241, 237, 149, 240, 89, 137, 136, 170, 110, 33, 182, 221, 93, 24, 253, 3, 71, 244, 54, 110, 90, 185, 215, 26, 148, 113, 196, 242, 221, 252, 43, 163, 75, 23, 134, 212, 160, 21, 254, 113, 11, 70, 219, 7, 234, 233, 143, 123, 178, 188, 242, 249, 239, 64, 0, 0, 0, 0, 0, 0, 0, 179, 237, 85, 185, 88, 64, 161, 90, 65, 158, 146, 180, 24, 24, 46, 215, 223, 25, 129, 214, 228, 248, 224, 251, 254, 74, 234, 166, 25, 99, 199, 27, 108, 105, 21, 255, 214, 42, 108, 12, 175, 230, 84, 176, 50, 42, 25, 6, 137, 133, 184, 59, 161, 99, 202, 137, 245, 122, 55, 136, 170, 93, 216, 53]))
+/// last_ancestors: {Alice: 36, Bob: 51, Carol: 43, Dave: 33, Eric: 24}
+
+  "B_52" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_52</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 48, Bob: 52, Carol: 43, Dave: 33, Eric: 33}
+
+  "B_53" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_53</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 48, Bob: 53, Carol: 43, Dave: 33, Eric: 33}
+
+  "B_54" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_54</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 48, Bob: 54, Carol: 43, Dave: 39, Eric: 33}
+
+  "B_55" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_55</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 48, Bob: 55, Carol: 51, Dave: 39, Eric: 39}
+
+  "B_56" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_56</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 53, Bob: 56, Carol: 54, Dave: 39, Eric: 39}
+
+  "B_57" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_57</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 53, Bob: 57, Carol: 56, Dave: 39, Eric: 39}
+
+  "B_58" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_58</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 53, Bob: 58, Carol: 56, Dave: 39, Eric: 39}
+
+  "B_59" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_59</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 55, Bob: 59, Carol: 56, Dave: 39, Eric: 39}
+
+  "B_60" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_60</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 55, Bob: 60, Carol: 56, Dave: 40, Eric: 43}
+
+  "B_61" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_61</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 59, Bob: 61, Carol: 64, Dave: 40, Eric: 43}
+
+  "B_62" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_62</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 59, Bob: 62, Carol: 64, Dave: 42, Eric: 49}
+
+  "B_63" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_63</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 59, Bob: 63, Carol: 64, Dave: 42, Eric: 49}
+
+  "B_64" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_64</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 59, Bob: 64, Carol: 64, Dave: 43, Eric: 52}
+
+  "B_65" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_65</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 59, Bob: 65, Carol: 64, Dave: 43, Eric: 52}
+
+  "B_66" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_66</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 59, Bob: 66, Carol: 64, Dave: 43, Eric: 53}
+
+  "B_67" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_67</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 59, Bob: 67, Carol: 64, Dave: 43, Eric: 53}
+
+  "B_68" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_68</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 59, Bob: 68, Carol: 64, Dave: 43, Eric: 55}
+
+  "B_69" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_69</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 64, Bob: 69, Carol: 69, Dave: 49, Eric: 57}
+
+  "B_70" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_70</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 64, Bob: 70, Carol: 69, Dave: 49, Eric: 57}
+
+  "B_71" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_71</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 68, Bob: 71, Carol: 70, Dave: 61, Eric: 63}
+
+  "B_72" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_72</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 69, Bob: 72, Carol: 75, Dave: 62, Eric: 63}
+
+  "B_73" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_73</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 69, Bob: 73, Carol: 75, Dave: 62, Eric: 63}
+
+  "B_74" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_74</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 69, Bob: 74, Carol: 75, Dave: 62, Eric: 63}
+
+  "B_75" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_75</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 69, Bob: 75, Carol: 77, Dave: 62, Eric: 63}
+
+  "B_76" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_76</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 69, Bob: 76, Carol: 78, Dave: 62, Eric: 63}
+
+  "B_77" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_77</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 70, Bob: 77, Carol: 80, Dave: 64, Eric: 67}
+
+  "B_78" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_78</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 70, Bob: 78, Carol: 80, Dave: 64, Eric: 67}
+
+  "B_79" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_79</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 70, Bob: 79, Carol: 80, Dave: 68, Eric: 71}
+
+  "B_80" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_80</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 70, Bob: 80, Carol: 80, Dave: 68, Eric: 71}
+
+  "B_81" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_81</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 70, Bob: 81, Carol: 80, Dave: 68, Eric: 71}
+
+  "B_82" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_82</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 70, Bob: 82, Carol: 80, Dave: 68, Eric: 72}
+
+  "B_83" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_83</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 76, Bob: 83, Carol: 84, Dave: 71, Eric: 72}
+
+  "B_84" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_84</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 77, Bob: 84, Carol: 84, Dave: 71, Eric: 72}
+
+  "B_85" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_85</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 77, Bob: 85, Carol: 84, Dave: 71, Eric: 72}
+
+  "B_86" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_86</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 77, Bob: 86, Carol: 86, Dave: 71, Eric: 72}
+
+  "B_87" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_87</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 77, Bob: 87, Carol: 86, Dave: 71, Eric: 72}
+
+  "B_88" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_88</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 77, Bob: 88, Carol: 86, Dave: 71, Eric: 72}
+
+  "B_89" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_89</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 77, Bob: 89, Carol: 86, Dave: 71, Eric: 74}
+
+  "B_90" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_90</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 77, Bob: 90, Carol: 86, Dave: 71, Eric: 75}
+
+  "B_91" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_91</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 77, Bob: 91, Carol: 86, Dave: 71, Eric: 75}
+
+  "B_92" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_92</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 77, Bob: 92, Carol: 86, Dave: 71, Eric: 77}
+
+  "B_93" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_93</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 77, Bob: 93, Carol: 86, Dave: 71, Eric: 77}
+
+  "B_94" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_94</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 77, Bob: 94, Carol: 86, Dave: 71, Eric: 77}
+
+  "B_95" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_95</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 77, Bob: 95, Carol: 86, Dave: 71, Eric: 77}
+
+  "B_96" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_96</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 80, Bob: 96, Carol: 88, Dave: 79, Eric: 77}
+
+  "B_97" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_97</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 80, Bob: 97, Carol: 88, Dave: 79, Eric: 77}
+
+  "B_98" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_98</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 81, Bob: 98, Carol: 88, Dave: 79, Eric: 77}
+
+  "B_99" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_99</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 81, Bob: 99, Carol: 88, Dave: 79, Eric: 77}
+
+  "B_100" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_100</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 81, Bob: 100, Carol: 88, Dave: 79, Eric: 77}
+
+  "B_101" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_101</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 85, Bob: 101, Carol: 88, Dave: 80, Eric: 77}
+
+  "C_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_0</td></tr>
+</table>>]
+/// cause: Initial
+/// last_ancestors: {Carol: 0}
+
+  "C_1" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_1</td></tr>
+<tr><td colspan="6">Genesis({Alice, Bob, Carol, Dave, Eric})</td></tr>
+</table>>]
+/// cause: Observation(Genesis({Alice, Bob, Carol, Dave, Eric}))
+/// last_ancestors: {Carol: 1}
+
+  "C_2" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_2</td></tr>
+<tr><td colspan="6">StartDkg({Alice, Bob, Carol, Dave, Eric})</td></tr>
+</table>>]
+/// cause: Observation(StartDkg({Alice, Bob, Carol, Dave, Eric}))
+/// last_ancestors: {Carol: 2}
+
+  "C_3" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_3</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Bob: 3, Carol: 3}
+
+  "C_4" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_4</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Bob: 3, Carol: 4}
+
+  "C_5" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_5</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 3, Bob: 8, Carol: 5}
+
+  "C_6" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_6</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 3, Bob: 8, Carol: 6}
+
+  "C_7" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_7</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 4, Bob: 10, Carol: 7, Dave: 5}
+
+  "C_8" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_8</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 5, Bob: 10, Carol: 8, Dave: 7}
+
+  "C_9" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_9</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 5, Bob: 10, Carol: 9, Dave: 7}
+
+  "C_10" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_10</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 8, Bob: 13, Carol: 10, Dave: 7, Eric: 3}
+
+  "C_11" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_11</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 10, Bob: 13, Carol: 11, Dave: 7, Eric: 3}
+
+  "C_12" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_12</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 10, Bob: 14, Carol: 12, Dave: 7, Eric: 3}
+
+  "C_13" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_13</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 10, Bob: 14, Carol: 13, Dave: 7, Eric: 3}
+
+  "C_14" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_14</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 17, Bob: 14, Carol: 14, Dave: 12, Eric: 6}
+
+  "C_15" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_15</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 17, Bob: 14, Carol: 15, Dave: 12, Eric: 6}
+
+  "C_16" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_16</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 17, Bob: 17, Carol: 16, Dave: 14, Eric: 6}
+
+  "C_17" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_17</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 18, Bob: 17, Carol: 17, Dave: 14, Eric: 6}
+
+  "C_18" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_18</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 18, Bob: 17, Carol: 18, Dave: 17, Eric: 6}
+
+  "C_19" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_19</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 18, Bob: 17, Carol: 19, Dave: 17, Eric: 6}
+
+  "C_20" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_20</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 18, Bob: 17, Carol: 20, Dave: 17, Eric: 6}
+
+  "C_21" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_21</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 21, Bob: 21, Carol: 21, Dave: 17, Eric: 8}
+
+  "C_22" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_22</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 22, Bob: 21, Carol: 22, Dave: 17, Eric: 8}
+
+  "C_23" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_23</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 22, Bob: 21, Carol: 23, Dave: 17, Eric: 11}
+
+  "C_24" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_24</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 22, Bob: 21, Carol: 24, Dave: 17, Eric: 11}
+
+  "C_25" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_25</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 22, Bob: 24, Carol: 25, Dave: 17, Eric: 11}
+
+  "C_26" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_26</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 22, Bob: 24, Carol: 26, Dave: 17, Eric: 11}
+
+  "C_27" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_27</td></tr>
+<tr><td colspan="6">DkgMessage(DkgPart(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgPart(0)), SerialisedDkgMessage([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 146, 65, 94, 29, 131, 12, 161, 31, 227, 114, 53, 217, 3, 132, 207, 113, 123, 6, 64, 102, 123, 156, 167, 168, 181, 177, 35, 124, 214, 129, 220, 18, 205, 139, 25, 135, 238, 62, 48, 11, 181, 204, 238, 12, 89, 235, 246, 64, 138, 72, 21, 120, 64, 84, 112, 150, 59, 69, 231, 40, 48, 68, 40, 34, 79, 246, 188, 18, 49, 187, 196, 60, 28, 254, 222, 78, 212, 194, 214, 122, 23, 0, 24, 152, 178, 110, 237, 39, 203, 194, 15, 44, 223, 171, 139, 16, 165, 208, 145, 34, 249, 213, 158, 240, 7, 63, 110, 207, 106, 215, 87, 33, 6, 68, 245, 198, 122, 153, 132, 164, 224, 132, 118, 182, 50, 56, 134, 31, 120, 162, 30, 127, 11, 76, 224, 158, 78, 101, 36, 19, 124, 122, 21, 206, 5, 0, 0, 0, 0, 0, 0, 0, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 107, 198, 17, 38, 254, 252, 173, 244, 90, 213, 217, 65, 83, 7, 162, 255, 101, 117, 228, 57, 84, 142, 241, 250, 140, 137, 72, 180, 139, 123, 95, 58, 109, 93, 208, 246, 81, 146, 104, 180, 2, 21, 23, 163, 249, 159, 231, 95, 6, 221, 220, 117, 148, 21, 101, 16, 77, 81, 10, 41, 71, 83, 71, 50, 13, 97, 221, 111, 254, 86, 159, 183, 65, 16, 32, 2, 110, 161, 149, 195, 35, 24, 127, 75, 210, 168, 13, 190, 119, 14, 70, 100, 183, 60, 150, 74, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 221, 174, 121, 28, 204, 251, 180, 102, 220, 214, 129, 219, 22, 208, 15, 130, 59, 86, 209, 254, 247, 5, 40, 105, 79, 236, 97, 2, 207, 220, 10, 16, 103, 210, 56, 247, 214, 37, 202, 246, 132, 204, 135, 172, 44, 211, 163, 233, 49, 1, 43, 29, 125, 219, 89, 127, 143, 194, 93, 218, 247, 157, 245, 26, 244, 16, 216, 148, 223, 97, 128, 176, 61, 88, 104, 232, 107, 20, 114, 175, 18, 109, 56, 27, 108, 4, 78, 163, 92, 10, 2, 161, 37, 172, 200, 95, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 80, 151, 225, 18, 153, 250, 187, 216, 92, 52, 40, 117, 221, 60, 59, 88, 22, 15, 96, 205, 163, 85, 152, 10, 90, 204, 24, 122, 101, 229, 163, 89, 97, 71, 161, 247, 91, 185, 43, 57, 7, 132, 248, 181, 95, 6, 96, 115, 93, 37, 121, 196, 101, 161, 78, 238, 209, 51, 177, 139, 168, 232, 163, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 194, 127, 73, 9, 103, 249, 194, 74, 222, 53, 208, 14, 161, 5, 169, 218, 235, 239, 76, 146, 71, 205, 206, 120, 28, 47, 50, 200, 168, 70, 79, 47, 92, 188, 9, 248, 223, 76, 141, 123, 136, 151, 103, 191, 149, 221, 217, 80, 142, 33, 105, 117, 86, 63, 125, 144, 92, 34, 162, 102, 172, 218, 63, 96, 77, 199, 194, 0, 174, 165, 114, 109, 193, 115, 203, 163, 124, 146, 166, 15, 7, 147, 73, 16, 42, 223, 73, 73, 181, 133, 121, 19, 153, 94, 49, 176, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 52, 104, 177, 255, 52, 248, 201, 188, 95, 55, 120, 168, 100, 206, 22, 93, 193, 208, 57, 87, 235, 68, 5, 231, 222, 145, 75, 22, 236, 167, 250, 4, 86, 49, 114, 248, 100, 224, 238, 189, 10, 79, 216, 200, 200, 16, 150, 218, 185, 69, 183, 28, 63, 5, 114, 255, 158, 147, 245, 23, 93, 37, 238, 72, 152, 121, 205, 107, 9, 75, 236, 188, 146, 190, 60, 88, 89, 62, 107, 169, 155, 232, 128, 32, 205, 103, 132, 42, 169, 112, 53, 41, 143, 241, 16, 106]))
+/// last_ancestors: {Alice: 22, Bob: 24, Carol: 27, Dave: 17, Eric: 11}
+
+  "C_28" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_28</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 31, Bob: 26, Carol: 28, Dave: 19, Eric: 13}
+
+  "C_29" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_29</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 31, Bob: 26, Carol: 29, Dave: 19, Eric: 13}
+
+  "C_30" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_30</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 31, Bob: 31, Carol: 30, Dave: 20, Eric: 13}
+
+  "C_31" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_31</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 32, Bob: 31, Carol: 31, Dave: 25, Eric: 17}
+
+  "C_32" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_32</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 32, Bob: 31, Carol: 32, Dave: 25, Eric: 17}
+
+  "C_33" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_33</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 33, Bob: 34, Carol: 33, Dave: 25, Eric: 17}
+
+  "C_34" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_34</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 33, Bob: 34, Carol: 34, Dave: 29, Eric: 19}
+
+  "C_35" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_35</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 33, Bob: 34, Carol: 35, Dave: 31, Eric: 19}
+
+  "C_36" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_36</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 33, Bob: 34, Carol: 36, Dave: 31, Eric: 19}
+
+  "C_37" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_37</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 34, Bob: 39, Carol: 37, Dave: 31, Eric: 23}
+
+  "C_38" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_38</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 34, Bob: 40, Carol: 38, Dave: 31, Eric: 23}
+
+  "C_39" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_39</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 34, Bob: 40, Carol: 39, Dave: 31, Eric: 23}
+
+  "C_40" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_40</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 34, Bob: 40, Carol: 40, Dave: 31, Eric: 24}
+
+  "C_41" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_41</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 34, Bob: 40, Carol: 41, Dave: 31, Eric: 24}
+
+  "C_42" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_42</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 36, Bob: 41, Carol: 42, Dave: 31, Eric: 24}
+
+  "C_43" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_43</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 36, Bob: 44, Carol: 43, Dave: 31, Eric: 24}
+
+  "C_44" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_44</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 177, 222, 130, 10, 245, 179, 231, 17, 100, 184, 32, 43, 61, 67, 155, 203, 115, 52, 217, 145, 9, 247, 230, 248, 43, 0, 202, 5, 14, 206, 71, 93, 13, 97, 221, 111, 254, 86, 159, 183, 65, 16, 32, 2, 110, 161, 149, 195, 35, 24, 127, 75, 210, 168, 13, 190, 119, 14, 70, 100, 183, 60, 150, 74, 64, 0, 0, 0, 0, 0, 0, 0, 18, 38, 36, 2, 81, 109, 19, 75, 107, 60, 25, 225, 156, 73, 251, 62, 209, 89, 82, 86, 111, 152, 53, 231, 253, 51, 123, 145, 182, 182, 235, 96, 244, 16, 216, 148, 223, 97, 128, 176, 61, 88, 104, 232, 107, 20, 114, 175, 18, 109, 56, 27, 108, 4, 78, 163, 92, 10, 2, 161, 37, 172, 200, 95, 64, 0, 0, 0, 0, 0, 0, 0, 115, 109, 197, 249, 172, 38, 63, 132, 114, 192, 17, 151, 252, 79, 91, 178, 46, 127, 203, 26, 213, 57, 132, 213, 207, 103, 44, 29, 95, 159, 143, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 212, 180, 102, 241, 8, 224, 106, 189, 121, 68, 10, 77, 92, 86, 187, 37, 140, 164, 68, 223, 58, 219, 210, 195, 161, 155, 221, 168, 7, 136, 51, 104, 77, 199, 194, 0, 174, 165, 114, 109, 193, 115, 203, 163, 124, 146, 166, 15, 7, 147, 73, 16, 42, 223, 73, 73, 181, 133, 121, 19, 153, 94, 49, 176, 64, 0, 0, 0, 0, 0, 0, 0, 53, 252, 7, 233, 100, 153, 150, 246, 128, 200, 2, 3, 188, 92, 27, 153, 233, 201, 189, 163, 160, 124, 33, 178, 115, 207, 142, 52, 176, 112, 215, 107, 152, 121, 205, 107, 9, 75, 236, 188, 146, 190, 60, 88, 89, 62, 107, 169, 155, 232, 128, 32, 205, 103, 132, 42, 169, 112, 53, 41, 143, 241, 16, 106]))
+/// last_ancestors: {Alice: 36, Bob: 44, Carol: 44, Dave: 31, Eric: 24}
+
+  "C_45" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_45</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 171, 51, 240, 28, 36, 129, 49, 54, 251, 160, 30, 51, 136, 174, 30, 230, 197, 179, 86, 137, 230, 200, 87, 250, 73, 177, 120, 217, 27, 134, 2, 33, 13, 97, 221, 111, 254, 86, 159, 183, 65, 16, 32, 2, 110, 161, 149, 195, 35, 24, 127, 75, 210, 168, 13, 190, 119, 14, 70, 100, 183, 60, 150, 74, 64, 0, 0, 0, 0, 0, 0, 0, 153, 129, 196, 106, 29, 236, 125, 70, 212, 60, 151, 230, 40, 102, 115, 253, 48, 141, 18, 113, 133, 167, 186, 200, 130, 87, 138, 252, 121, 82, 9, 89, 244, 16, 216, 148, 223, 97, 128, 176, 61, 88, 104, 232, 107, 20, 114, 175, 18, 109, 56, 27, 108, 4, 78, 163, 92, 10, 2, 161, 37, 172, 200, 95, 64, 0, 0, 0, 0, 0, 0, 0, 134, 207, 152, 184, 23, 87, 202, 86, 174, 124, 17, 154, 198, 121, 10, 193, 150, 142, 44, 79, 28, 174, 227, 99, 115, 128, 254, 245, 132, 119, 34, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 116, 29, 109, 6, 17, 194, 22, 103, 135, 24, 138, 77, 103, 49, 95, 216, 1, 104, 232, 54, 187, 140, 70, 50, 172, 38, 16, 25, 227, 67, 41, 85, 77, 199, 194, 0, 174, 165, 114, 109, 193, 115, 203, 163, 124, 146, 166, 15, 7, 147, 73, 16, 42, 223, 73, 73, 181, 133, 121, 19, 153, 94, 49, 176, 64, 0, 0, 0, 0, 0, 0, 0, 97, 107, 65, 84, 11, 45, 99, 119, 97, 88, 4, 1, 5, 69, 246, 155, 103, 105, 2, 21, 82, 147, 111, 205, 156, 79, 132, 18, 238, 104, 66, 25, 152, 121, 205, 107, 9, 75, 236, 188, 146, 190, 60, 88, 89, 62, 107, 169, 155, 232, 128, 32, 205, 103, 132, 42, 169, 112, 53, 41, 143, 241, 16, 106]))
+/// last_ancestors: {Alice: 36, Bob: 44, Carol: 45, Dave: 31, Eric: 24}
+
+  "C_46" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_46</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 136, 161, 142, 249, 233, 241, 36, 146, 24, 121, 194, 248, 82, 93, 161, 29, 116, 232, 82, 50, 2, 92, 5, 145, 157, 71, 253, 159, 72, 61, 48, 88, 13, 97, 221, 111, 254, 86, 159, 183, 65, 16, 32, 2, 110, 161, 149, 195, 35, 24, 127, 75, 210, 168, 13, 190, 119, 14, 70, 100, 183, 60, 150, 74, 64, 0, 0, 0, 0, 0, 0, 0, 255, 3, 185, 22, 189, 250, 27, 54, 162, 250, 167, 217, 47, 224, 9, 17, 39, 21, 114, 58, 235, 197, 14, 176, 183, 205, 67, 125, 73, 251, 99, 71, 244, 16, 216, 148, 223, 97, 128, 176, 61, 88, 104, 232, 107, 20, 114, 175, 18, 109, 56, 27, 108, 4, 78, 163, 92, 10, 2, 161, 37, 172, 200, 95, 64, 0, 0, 0, 0, 0, 0, 0, 118, 102, 227, 51, 144, 3, 19, 218, 43, 124, 141, 186, 12, 99, 114, 4, 218, 65, 145, 66, 212, 47, 24, 207, 209, 83, 138, 90, 74, 185, 151, 54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 237, 200, 13, 81, 99, 12, 10, 126, 181, 253, 114, 155, 233, 229, 218, 247, 140, 110, 176, 74, 189, 153, 33, 238, 235, 217, 208, 55, 75, 119, 203, 37, 77, 199, 194, 0, 174, 165, 114, 109, 193, 115, 203, 163, 124, 146, 166, 15, 7, 147, 73, 16, 42, 223, 73, 73, 181, 133, 121, 19, 153, 94, 49, 176, 64, 0, 0, 0, 0, 0, 0, 0, 100, 43, 56, 110, 54, 21, 1, 34, 63, 127, 88, 124, 198, 104, 67, 235, 63, 155, 207, 82, 166, 3, 43, 13, 6, 96, 23, 21, 76, 53, 255, 20, 152, 121, 205, 107, 9, 75, 236, 188, 146, 190, 60, 88, 89, 62, 107, 169, 155, 232, 128, 32, 205, 103, 132, 42, 169, 112, 53, 41, 143, 241, 16, 106]))
+/// last_ancestors: {Alice: 36, Bob: 44, Carol: 46, Dave: 31, Eric: 24}
+
+  "C_47" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_47</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 239, 182, 220, 217, 192, 227, 160, 223, 22, 249, 216, 94, 218, 245, 173, 33, 83, 191, 192, 84, 56, 200, 104, 11, 113, 116, 190, 252, 250, 84, 106, 71, 13, 97, 221, 111, 254, 86, 159, 183, 65, 16, 32, 2, 110, 161, 149, 195, 35, 24, 127, 75, 210, 168, 13, 190, 119, 14, 70, 100, 183, 60, 150, 74, 64, 0, 0, 0, 0, 0, 0, 0, 169, 170, 149, 4, 134, 138, 120, 194, 71, 192, 240, 91, 172, 168, 171, 127, 223, 201, 85, 61, 41, 173, 61, 217, 10, 233, 226, 192, 172, 241, 17, 15, 244, 16, 216, 148, 223, 97, 128, 176, 61, 88, 104, 232, 107, 20, 114, 175, 18, 109, 56, 27, 108, 4, 78, 163, 92, 10, 2, 161, 37, 172, 200, 95, 64, 0, 0, 0, 0, 0, 0, 0, 100, 158, 78, 47, 74, 49, 80, 165, 119, 227, 6, 89, 129, 255, 102, 49, 113, 172, 140, 47, 34, 106, 76, 218, 236, 218, 164, 174, 177, 53, 167, 74, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 30, 146, 7, 90, 15, 216, 39, 136, 168, 170, 30, 86, 83, 178, 100, 143, 253, 182, 33, 24, 19, 79, 33, 168, 134, 79, 201, 114, 99, 210, 78, 18, 77, 199, 194, 0, 174, 165, 114, 109, 193, 115, 203, 163, 124, 146, 166, 15, 7, 147, 73, 16, 42, 223, 73, 73, 181, 133, 121, 19, 153, 94, 49, 176, 64, 0, 0, 0, 0, 0, 0, 0, 217, 133, 192, 132, 211, 126, 255, 106, 216, 205, 52, 83, 40, 9, 32, 65, 143, 153, 88, 10, 12, 12, 48, 169, 104, 65, 139, 96, 104, 22, 228, 77, 152, 121, 205, 107, 9, 75, 236, 188, 146, 190, 60, 88, 89, 62, 107, 169, 155, 232, 128, 32, 205, 103, 132, 42, 169, 112, 53, 41, 143, 241, 16, 106]))
+/// last_ancestors: {Alice: 36, Bob: 44, Carol: 47, Dave: 31, Eric: 24}
+
+  "C_48" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_48</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 244, 238, 90, 184, 0, 53, 110, 166, 124, 140, 33, 148, 115, 40, 203, 60, 46, 64, 41, 181, 255, 4, 76, 172, 143, 208, 223, 23, 233, 147, 241, 23, 13, 97, 221, 111, 254, 86, 159, 183, 65, 16, 32, 2, 110, 161, 149, 195, 35, 24, 127, 75, 210, 168, 13, 190, 119, 14, 70, 100, 183, 60, 150, 74, 64, 0, 0, 0, 0, 0, 0, 0, 138, 109, 202, 81, 2, 178, 56, 112, 175, 191, 6, 47, 192, 111, 245, 136, 45, 31, 50, 253, 85, 155, 160, 140, 233, 49, 128, 189, 123, 99, 39, 37, 244, 16, 216, 148, 223, 97, 128, 176, 61, 88, 104, 232, 107, 20, 114, 175, 18, 109, 56, 27, 108, 4, 78, 163, 92, 10, 2, 161, 37, 172, 200, 95, 64, 0, 0, 0, 0, 0, 0, 0, 32, 236, 57, 235, 3, 47, 3, 58, 226, 242, 235, 201, 12, 183, 31, 213, 44, 254, 58, 69, 172, 49, 245, 108, 67, 147, 32, 99, 14, 51, 93, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 182, 106, 169, 132, 5, 172, 205, 3, 21, 38, 209, 100, 89, 254, 73, 33, 44, 221, 67, 141, 2, 200, 73, 77, 157, 244, 192, 8, 161, 2, 147, 63, 77, 199, 194, 0, 174, 165, 114, 109, 193, 115, 203, 163, 124, 146, 166, 15, 7, 147, 73, 16, 42, 223, 73, 73, 181, 133, 121, 19, 153, 94, 49, 176, 64, 0, 0, 0, 0, 0, 0, 0, 76, 233, 24, 30, 7, 41, 152, 205, 71, 89, 182, 255, 165, 69, 116, 109, 43, 188, 76, 213, 88, 94, 158, 45, 247, 85, 97, 174, 51, 210, 200, 76, 152, 121, 205, 107, 9, 75, 236, 188, 146, 190, 60, 88, 89, 62, 107, 169, 155, 232, 128, 32, 205, 103, 132, 42, 169, 112, 53, 41, 143, 241, 16, 106]))
+/// last_ancestors: {Alice: 36, Bob: 44, Carol: 48, Dave: 31, Eric: 24}
+
+  "C_49" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_49</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 38, Bob: 44, Carol: 49, Dave: 31, Eric: 34}
+
+  "C_50" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_50</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 38, Bob: 44, Carol: 50, Dave: 31, Eric: 34}
+
+  "C_51" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_51</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 47, Bob: 44, Carol: 51, Dave: 31, Eric: 37}
+
+  "C_52" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_52</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 52, Bob: 52, Carol: 52, Dave: 33, Eric: 37}
+
+  "C_53" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_53</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 53, Bob: 52, Carol: 53, Dave: 33, Eric: 37}
+
+  "C_54" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_54</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 53, Bob: 52, Carol: 54, Dave: 33, Eric: 37}
+
+  "C_55" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_55</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 53, Bob: 56, Carol: 55, Dave: 39, Eric: 39}
+
+  "C_56" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_56</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 53, Bob: 56, Carol: 56, Dave: 39, Eric: 39}
+
+  "C_57" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_57</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 53, Bob: 56, Carol: 57, Dave: 39, Eric: 39}
+
+  "C_58" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_58</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 53, Bob: 57, Carol: 58, Dave: 39, Eric: 39}
+
+  "C_59" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_59</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 53, Bob: 57, Carol: 59, Dave: 40, Eric: 42}
+
+  "C_60" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_60</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 56, Bob: 58, Carol: 60, Dave: 40, Eric: 42}
+
+  "C_61" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_61</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 57, Bob: 58, Carol: 61, Dave: 40, Eric: 42}
+
+  "C_62" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_62</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 57, Bob: 58, Carol: 62, Dave: 40, Eric: 42}
+
+  "C_63" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_63</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 59, Bob: 58, Carol: 63, Dave: 40, Eric: 42}
+
+  "C_64" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_64</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 59, Bob: 58, Carol: 64, Dave: 40, Eric: 42}
+
+  "C_65" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_65</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 60, Bob: 58, Carol: 65, Dave: 40, Eric: 42}
+
+  "C_66" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_66</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 60, Bob: 61, Carol: 66, Dave: 40, Eric: 43}
+
+  "C_67" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_67</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 60, Bob: 61, Carol: 67, Dave: 40, Eric: 43}
+
+  "C_68" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_68</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 62, Bob: 61, Carol: 68, Dave: 40, Eric: 43}
+
+  "C_69" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_69</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 62, Bob: 61, Carol: 69, Dave: 44, Eric: 48}
+
+  "C_70" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_70</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 62, Bob: 61, Carol: 70, Dave: 44, Eric: 48}
+
+  "C_71" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_71</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 67, Bob: 67, Carol: 71, Dave: 58, Eric: 58}
+
+  "C_72" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_72</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 67, Bob: 67, Carol: 72, Dave: 58, Eric: 58}
+
+  "C_73" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_73</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 69, Bob: 69, Carol: 73, Dave: 58, Eric: 60}
+
+  "C_74" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_74</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 69, Bob: 70, Carol: 74, Dave: 62, Eric: 63}
+
+  "C_75" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_75</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 69, Bob: 70, Carol: 75, Dave: 62, Eric: 63}
+
+  "C_76" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_76</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 69, Bob: 72, Carol: 76, Dave: 62, Eric: 63}
+
+  "C_77" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_77</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 69, Bob: 73, Carol: 77, Dave: 62, Eric: 63}
+
+  "C_78" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_78</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 69, Bob: 73, Carol: 78, Dave: 62, Eric: 63}
+
+  "C_79" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_79</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 70, Bob: 73, Carol: 79, Dave: 64, Eric: 67}
+
+  "C_80" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_80</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 70, Bob: 74, Carol: 80, Dave: 64, Eric: 67}
+
+  "C_81" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_81</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 70, Bob: 76, Carol: 81, Dave: 64, Eric: 67}
+
+  "C_82" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_82</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 70, Bob: 76, Carol: 82, Dave: 64, Eric: 67}
+
+  "C_83" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_83</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 73, Bob: 76, Carol: 83, Dave: 70, Eric: 68}
+
+  "C_84" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_84</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 73, Bob: 76, Carol: 84, Dave: 70, Eric: 68}
+
+  "C_85" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_85</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 75, Bob: 76, Carol: 85, Dave: 71, Eric: 68}
+
+  "C_86" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_86</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 77, Bob: 85, Carol: 86, Dave: 71, Eric: 72}
+
+  "C_87" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_87</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 78, Bob: 85, Carol: 87, Dave: 71, Eric: 72}
+
+  "C_88" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">C_88</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 78, Bob: 85, Carol: 88, Dave: 73, Eric: 72}
+
+  "D_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_0</td></tr>
+</table>>]
+/// cause: Initial
+/// last_ancestors: {Dave: 0}
+
+  "D_1" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_1</td></tr>
+<tr><td colspan="6">Genesis({Alice, Bob, Carol, Dave, Eric})</td></tr>
+</table>>]
+/// cause: Observation(Genesis({Alice, Bob, Carol, Dave, Eric}))
+/// last_ancestors: {Dave: 1}
+
+  "D_2" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_2</td></tr>
+<tr><td colspan="6">StartDkg({Alice, Bob, Carol, Dave, Eric})</td></tr>
+</table>>]
+/// cause: Observation(StartDkg({Alice, Bob, Carol, Dave, Eric}))
+/// last_ancestors: {Dave: 2}
+
+  "D_3" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_3</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Dave: 3}
+
+  "D_4" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_4</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 4, Bob: 10, Carol: 4, Dave: 4}
+
+  "D_5" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_5</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 4, Bob: 10, Carol: 6, Dave: 5}
+
+  "D_6" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_6</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 5, Bob: 10, Carol: 6, Dave: 6}
+
+  "D_7" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_7</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 5, Bob: 10, Carol: 6, Dave: 7}
+
+  "D_8" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_8</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 5, Bob: 10, Carol: 8, Dave: 8}
+
+  "D_9" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_9</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 13, Bob: 13, Carol: 11, Dave: 9, Eric: 5}
+
+  "D_10" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_10</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 13, Bob: 13, Carol: 11, Dave: 10, Eric: 5}
+
+  "D_11" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_11</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 13, Bob: 13, Carol: 11, Dave: 11, Eric: 6}
+
+  "D_12" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_12</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 13, Bob: 13, Carol: 11, Dave: 12, Eric: 6}
+
+  "D_13" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_13</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 15, Bob: 13, Carol: 11, Dave: 13, Eric: 6}
+
+  "D_14" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_14</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 15, Bob: 13, Carol: 11, Dave: 14, Eric: 6}
+
+  "D_15" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_15</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 16, Bob: 13, Carol: 11, Dave: 15, Eric: 6}
+
+  "D_16" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_16</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 16, Bob: 16, Carol: 11, Dave: 16, Eric: 6}
+
+  "D_17" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_17</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 17, Bob: 16, Carol: 15, Dave: 17, Eric: 6}
+
+  "D_18" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_18</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 24, Bob: 20, Carol: 20, Dave: 18, Eric: 8}
+
+  "D_19" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_19</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 24, Bob: 20, Carol: 20, Dave: 19, Eric: 8}
+
+  "D_20" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_20</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 25, Bob: 27, Carol: 24, Dave: 20, Eric: 11}
+
+  "D_21" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_21</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 28, Bob: 27, Carol: 24, Dave: 21, Eric: 11}
+
+  "D_22" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_22</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 28, Bob: 27, Carol: 24, Dave: 22, Eric: 11}
+
+  "D_23" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_23</td></tr>
+<tr><td colspan="6">DkgMessage(DkgPart(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgPart(0)), SerialisedDkgMessage([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 128, 149, 181, 112, 251, 146, 66, 236, 25, 81, 132, 140, 50, 226, 157, 80, 39, 17, 221, 214, 4, 245, 113, 12, 78, 219, 9, 183, 179, 231, 110, 242, 149, 20, 248, 25, 12, 107, 238, 124, 8, 129, 52, 227, 168, 77, 59, 251, 164, 144, 176, 199, 56, 32, 90, 218, 187, 24, 41, 240, 161, 202, 163, 183, 213, 5, 71, 103, 214, 242, 199, 250, 189, 148, 230, 33, 32, 71, 10, 102, 9, 28, 0, 196, 172, 232, 253, 92, 83, 238, 205, 18, 139, 26, 52, 193, 137, 218, 60, 24, 95, 56, 228, 106, 98, 1, 138, 7, 73, 15, 59, 34, 194, 80, 238, 68, 22, 60, 30, 62, 174, 155, 5, 244, 182, 224, 67, 73, 46, 128, 14, 78, 140, 220, 140, 157, 43, 209, 130, 205, 87, 235, 114, 227, 5, 0, 0, 0, 0, 0, 0, 0, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 114, 96, 229, 130, 96, 54, 221, 39, 5, 178, 50, 188, 8, 218, 175, 245, 249, 215, 99, 151, 224, 244, 255, 175, 104, 12, 149, 47, 221, 196, 208, 26, 8, 107, 56, 210, 215, 147, 194, 120, 176, 127, 217, 190, 26, 153, 121, 154, 129, 149, 187, 228, 101, 178, 125, 194, 65, 103, 54, 65, 91, 66, 190, 97, 64, 166, 31, 111, 80, 243, 237, 218, 128, 99, 235, 161, 18, 51, 51, 204, 36, 139, 54, 91, 248, 119, 68, 247, 194, 139, 63, 119, 46, 98, 167, 250, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 193, 207, 164, 47, 188, 143, 5, 139, 202, 166, 8, 234, 61, 136, 21, 230, 218, 221, 250, 219, 120, 7, 97, 247, 81, 40, 87, 228, 104, 206, 239, 7, 192, 102, 177, 247, 84, 206, 92, 142, 156, 174, 222, 79, 253, 223, 207, 240, 28, 77, 62, 123, 43, 122, 96, 10, 82, 53, 13, 164, 215, 211, 111, 98, 185, 215, 26, 148, 113, 196, 242, 221, 252, 43, 163, 75, 23, 134, 212, 160, 21, 254, 113, 11, 70, 219, 7, 234, 233, 143, 123, 178, 188, 242, 249, 239, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 17, 63, 100, 220, 22, 233, 45, 238, 142, 247, 220, 23, 118, 218, 56, 42, 193, 187, 51, 42, 25, 242, 251, 113, 131, 193, 182, 194, 71, 127, 252, 104, 120, 98, 42, 29, 210, 8, 247, 163, 136, 221, 227, 224, 223, 38, 38, 71, 184, 4, 193, 17, 241, 65, 67, 82, 98, 3, 228, 6, 84, 101, 33, 99, 77, 199, 194, 0, 174, 165, 114, 109, 193, 115, 203, 163, 124, 146, 166, 15, 7, 147, 73, 16, 42, 223, 73, 73, 181, 133, 121, 19, 153, 94, 49, 176, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 96, 174, 35, 137, 114, 66, 86, 81, 84, 236, 178, 69, 171, 136, 158, 26, 162, 193, 202, 110, 177, 4, 93, 185, 108, 221, 120, 119, 211, 136, 27, 86, 48, 94, 163, 66, 79, 67, 145, 185, 116, 12, 233, 113, 194, 109, 124, 157, 83, 188, 67, 168, 182, 9, 38, 154, 114, 209, 186, 105, 208, 246, 210, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 175, 29, 227, 53, 206, 155, 126, 180, 25, 225, 136, 115, 224, 54, 4, 11, 131, 199, 97, 179, 73, 23, 190, 0, 86, 249, 58, 44, 95, 146, 58, 67, 232, 89, 28, 104, 204, 125, 43, 207, 96, 59, 238, 2, 165, 180, 210, 243, 238, 115, 198, 62, 124, 209, 8, 226, 130, 159, 145, 204, 76, 136, 132, 100, 213, 190, 15, 107, 167, 238, 158, 209, 83, 205, 247, 251, 37, 172, 205, 166, 156, 123, 201, 48, 231, 184, 205, 99, 28, 245, 76, 58, 22, 175, 33, 218]))
+/// last_ancestors: {Alice: 28, Bob: 27, Carol: 24, Dave: 23, Eric: 11}
+
+  "D_24" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_24</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 32, Bob: 27, Carol: 26, Dave: 24, Eric: 13}
+
+  "D_25" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_25</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 32, Bob: 27, Carol: 26, Dave: 25, Eric: 13}
+
+  "D_26" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_26</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 32, Bob: 27, Carol: 26, Dave: 26, Eric: 16}
+
+  "D_27" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_27</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 32, Bob: 27, Carol: 26, Dave: 27, Eric: 16}
+
+  "D_28" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_28</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 32, Bob: 31, Carol: 31, Dave: 28, Eric: 19}
+
+  "D_29" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_29</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 32, Bob: 31, Carol: 31, Dave: 29, Eric: 19}
+
+  "D_30" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_30</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 33, Bob: 34, Carol: 34, Dave: 30, Eric: 19}
+
+  "D_31" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_31</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 33, Bob: 34, Carol: 34, Dave: 31, Eric: 19}
+
+  "D_32" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_32</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 33, Bob: 34, Carol: 35, Dave: 32, Eric: 19}
+
+  "D_33" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_33</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 35, Bob: 43, Carol: 36, Dave: 33, Eric: 21}
+
+  "D_34" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_34</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 29, 60, 83, 1, 72, 70, 80, 198, 103, 113, 57, 206, 51, 63, 197, 215, 116, 57, 20, 254, 149, 52, 18, 214, 48, 212, 54, 5, 2, 122, 161, 27, 64, 166, 31, 111, 80, 243, 237, 218, 128, 99, 235, 161, 18, 51, 51, 204, 36, 139, 54, 91, 248, 119, 68, 247, 194, 139, 63, 119, 46, 98, 167, 250, 64, 0, 0, 0, 0, 0, 0, 0, 120, 248, 92, 249, 40, 147, 221, 65, 241, 172, 162, 141, 198, 120, 225, 212, 253, 130, 219, 105, 228, 155, 85, 51, 69, 121, 59, 66, 91, 173, 243, 7, 185, 215, 26, 148, 113, 196, 242, 221, 252, 43, 163, 75, 23, 134, 212, 160, 21, 254, 113, 11, 70, 219, 7, 234, 233, 143, 123, 178, 188, 242, 249, 239, 64, 0, 0, 0, 0, 0, 0, 0, 212, 180, 102, 241, 8, 224, 106, 189, 121, 68, 10, 77, 92, 86, 187, 37, 140, 164, 68, 223, 58, 219, 210, 195, 161, 155, 221, 168, 7, 136, 51, 104, 77, 199, 194, 0, 174, 165, 114, 109, 193, 115, 203, 163, 124, 146, 166, 15, 7, 147, 73, 16, 42, 223, 73, 73, 181, 133, 121, 19, 153, 94, 49, 176, 64, 0, 0, 0, 0, 0, 0, 0, 47, 113, 112, 233, 233, 44, 248, 56, 3, 128, 115, 12, 239, 143, 215, 34, 21, 238, 11, 75, 137, 66, 22, 33, 182, 64, 226, 229, 96, 187, 133, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 138, 45, 122, 225, 202, 121, 133, 180, 140, 187, 220, 203, 129, 201, 243, 31, 158, 55, 211, 182, 215, 169, 89, 126, 202, 229, 230, 34, 186, 238, 215, 64, 213, 190, 15, 107, 167, 238, 158, 209, 83, 205, 247, 251, 37, 172, 205, 166, 156, 123, 201, 48, 231, 184, 205, 99, 28, 245, 76, 58, 22, 175, 33, 218]))
+/// last_ancestors: {Alice: 35, Bob: 43, Carol: 36, Dave: 34, Eric: 21}
+
+  "D_35" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_35</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 83, 243, 210, 81, 109, 132, 162, 52, 126, 92, 209, 97, 17, 236, 21, 134, 3, 118, 63, 131, 239, 201, 64, 24, 187, 121, 93, 191, 214, 36, 221, 53, 64, 166, 31, 111, 80, 243, 237, 218, 128, 99, 235, 161, 18, 51, 51, 204, 36, 139, 54, 91, 248, 119, 68, 247, 194, 139, 63, 119, 46, 98, 167, 250, 64, 0, 0, 0, 0, 0, 0, 0, 99, 8, 32, 172, 63, 163, 220, 77, 131, 140, 174, 215, 186, 188, 91, 5, 0, 3, 67, 88, 81, 191, 166, 139, 143, 17, 104, 87, 179, 96, 140, 11, 185, 215, 26, 148, 113, 196, 242, 221, 252, 43, 163, 75, 23, 134, 212, 160, 21, 254, 113, 11, 70, 219, 7, 234, 233, 143, 123, 178, 188, 242, 249, 239, 64, 0, 0, 0, 0, 0, 0, 0, 116, 29, 109, 6, 17, 194, 22, 103, 135, 24, 138, 77, 103, 49, 95, 216, 1, 104, 232, 54, 187, 140, 70, 50, 172, 38, 16, 25, 227, 67, 41, 85, 77, 199, 194, 0, 174, 165, 114, 109, 193, 115, 203, 163, 124, 146, 166, 15, 7, 147, 73, 16, 42, 223, 73, 73, 181, 133, 121, 19, 153, 94, 49, 176, 64, 0, 0, 0, 0, 0, 0, 0, 132, 50, 186, 96, 227, 224, 80, 128, 140, 72, 103, 195, 16, 2, 165, 87, 254, 244, 235, 11, 29, 130, 172, 165, 128, 190, 26, 177, 191, 127, 216, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 148, 71, 7, 187, 181, 255, 138, 153, 145, 120, 68, 57, 186, 210, 234, 214, 250, 129, 239, 224, 126, 119, 18, 25, 85, 86, 37, 73, 156, 187, 135, 0, 213, 190, 15, 107, 167, 238, 158, 209, 83, 205, 247, 251, 37, 172, 205, 166, 156, 123, 201, 48, 231, 184, 205, 99, 28, 245, 76, 58, 22, 175, 33, 218]))
+/// last_ancestors: {Alice: 35, Bob: 43, Carol: 36, Dave: 35, Eric: 21}
+
+  "D_36" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_36</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 143, 12, 199, 203, 194, 133, 231, 10, 202, 156, 157, 183, 106, 82, 93, 100, 240, 165, 108, 13, 96, 54, 73, 32, 151, 49, 150, 183, 80, 216, 0, 70, 64, 166, 31, 111, 80, 243, 237, 218, 128, 99, 235, 161, 18, 51, 51, 204, 36, 139, 54, 91, 248, 119, 68, 247, 194, 139, 63, 119, 46, 98, 167, 250, 64, 0, 0, 0, 0, 0, 0, 0, 190, 106, 106, 14, 19, 201, 120, 196, 63, 77, 136, 41, 42, 28, 28, 174, 62, 138, 14, 172, 14, 104, 53, 135, 193, 133, 179, 247, 205, 39, 230, 53, 185, 215, 26, 148, 113, 196, 242, 221, 252, 43, 163, 75, 23, 134, 212, 160, 21, 254, 113, 11, 70, 219, 7, 234, 233, 143, 123, 178, 188, 242, 249, 239, 64, 0, 0, 0, 0, 0, 0, 0, 237, 200, 13, 81, 99, 12, 10, 126, 181, 253, 114, 155, 233, 229, 218, 247, 140, 110, 176, 74, 189, 153, 33, 238, 235, 217, 208, 55, 75, 119, 203, 37, 77, 199, 194, 0, 174, 165, 114, 109, 193, 115, 203, 163, 124, 146, 166, 15, 7, 147, 73, 16, 42, 223, 73, 73, 181, 133, 121, 19, 153, 94, 49, 176, 64, 0, 0, 0, 0, 0, 0, 0, 28, 39, 177, 147, 179, 79, 155, 55, 43, 174, 93, 13, 169, 175, 153, 65, 219, 82, 82, 233, 107, 203, 13, 85, 22, 46, 238, 119, 200, 198, 176, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 75, 133, 84, 214, 3, 147, 44, 241, 160, 94, 72, 127, 104, 121, 88, 139, 41, 55, 244, 135, 26, 253, 249, 187, 64, 130, 11, 184, 69, 22, 150, 5, 213, 190, 15, 107, 167, 238, 158, 209, 83, 205, 247, 251, 37, 172, 205, 166, 156, 123, 201, 48, 231, 184, 205, 99, 28, 245, 76, 58, 22, 175, 33, 218]))
+/// last_ancestors: {Alice: 35, Bob: 43, Carol: 36, Dave: 36, Eric: 21}
+
+  "D_37" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_37</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 208, 202, 32, 164, 70, 110, 9, 227, 53, 8, 165, 29, 185, 194, 78, 217, 192, 63, 52, 8, 172, 58, 207, 78, 151, 26, 35, 32, 34, 41, 107, 27, 64, 166, 31, 111, 80, 243, 237, 218, 128, 99, 235, 161, 18, 51, 51, 204, 36, 139, 54, 91, 248, 119, 68, 247, 194, 139, 63, 119, 46, 98, 167, 250, 64, 0, 0, 0, 0, 0, 0, 0, 119, 46, 20, 255, 42, 163, 152, 53, 111, 217, 225, 57, 134, 186, 89, 52, 95, 251, 42, 144, 223, 68, 120, 251, 14, 53, 118, 201, 194, 253, 220, 22, 185, 215, 26, 148, 113, 196, 242, 221, 252, 43, 163, 75, 23, 134, 212, 160, 21, 254, 113, 11, 70, 219, 7, 234, 233, 143, 123, 178, 188, 242, 249, 239, 64, 0, 0, 0, 0, 0, 0, 0, 30, 146, 7, 90, 15, 216, 39, 136, 168, 170, 30, 86, 83, 178, 100, 143, 253, 182, 33, 24, 19, 79, 33, 168, 134, 79, 201, 114, 99, 210, 78, 18, 77, 199, 194, 0, 174, 165, 114, 109, 193, 115, 203, 163, 124, 146, 166, 15, 7, 147, 73, 16, 42, 223, 73, 73, 181, 133, 121, 19, 153, 94, 49, 176, 64, 0, 0, 0, 0, 0, 0, 0, 197, 245, 250, 180, 243, 12, 183, 218, 225, 123, 91, 114, 32, 170, 111, 234, 155, 114, 24, 160, 70, 89, 202, 84, 254, 105, 28, 28, 4, 167, 192, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 108, 89, 238, 15, 216, 65, 70, 45, 27, 77, 152, 142, 237, 161, 122, 69, 58, 46, 15, 40, 122, 99, 115, 1, 118, 132, 111, 197, 164, 123, 50, 9, 213, 190, 15, 107, 167, 238, 158, 209, 83, 205, 247, 251, 37, 172, 205, 166, 156, 123, 201, 48, 231, 184, 205, 99, 28, 245, 76, 58, 22, 175, 33, 218]))
+/// last_ancestors: {Alice: 35, Bob: 43, Carol: 36, Dave: 37, Eric: 21}
+
+  "D_38" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_38</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 135, 240, 118, 134, 85, 70, 12, 199, 219, 55, 200, 126, 127, 137, 217, 62, 225, 91, 111, 70, 56, 204, 55, 59, 75, 136, 169, 91, 244, 195, 91, 1, 64, 166, 31, 111, 80, 243, 237, 218, 128, 99, 235, 161, 18, 51, 51, 204, 36, 139, 54, 91, 248, 119, 68, 247, 194, 139, 63, 119, 46, 98, 167, 250, 64, 0, 0, 0, 0, 0, 0, 0, 159, 45, 144, 5, 45, 249, 108, 229, 247, 220, 203, 241, 237, 149, 240, 89, 137, 136, 170, 110, 33, 182, 221, 93, 24, 253, 3, 71, 244, 54, 110, 90, 185, 215, 26, 148, 113, 196, 242, 221, 252, 43, 163, 75, 23, 134, 212, 160, 21, 254, 113, 11, 70, 219, 7, 234, 233, 143, 123, 178, 188, 242, 249, 239, 64, 0, 0, 0, 0, 0, 0, 0, 182, 106, 169, 132, 5, 172, 205, 3, 21, 38, 209, 100, 89, 254, 73, 33, 44, 221, 67, 141, 2, 200, 73, 77, 157, 244, 192, 8, 161, 2, 147, 63, 77, 199, 194, 0, 174, 165, 114, 109, 193, 115, 203, 163, 124, 146, 166, 15, 7, 147, 73, 16, 42, 223, 73, 73, 181, 133, 121, 19, 153, 94, 49, 176, 64, 0, 0, 0, 0, 0, 0, 0, 205, 167, 194, 3, 222, 94, 46, 34, 50, 111, 214, 215, 196, 102, 163, 232, 206, 49, 221, 171, 227, 217, 181, 60, 34, 236, 125, 202, 77, 206, 183, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 228, 228, 219, 130, 182, 17, 143, 64, 79, 184, 219, 74, 48, 207, 252, 175, 113, 134, 118, 202, 196, 235, 33, 44, 167, 227, 58, 140, 250, 153, 220, 9, 213, 190, 15, 107, 167, 238, 158, 209, 83, 205, 247, 251, 37, 172, 205, 166, 156, 123, 201, 48, 231, 184, 205, 99, 28, 245, 76, 58, 22, 175, 33, 218]))
+/// last_ancestors: {Alice: 35, Bob: 43, Carol: 36, Dave: 38, Eric: 21}
+
+  "D_39" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_39</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 48, Bob: 53, Carol: 43, Dave: 39, Eric: 33}
+
+  "D_40" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_40</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 48, Bob: 53, Carol: 43, Dave: 40, Eric: 33}
+
+  "D_41" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_41</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 48, Bob: 55, Carol: 51, Dave: 41, Eric: 41}
+
+  "D_42" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_42</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 55, Bob: 60, Carol: 59, Dave: 42, Eric: 46}
+
+  "D_43" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_43</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 55, Bob: 60, Carol: 59, Dave: 43, Eric: 48}
+
+  "D_44" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_44</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 55, Bob: 60, Carol: 59, Dave: 44, Eric: 48}
+
+  "D_45" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_45</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 55, Bob: 60, Carol: 59, Dave: 45, Eric: 48}
+
+  "D_46" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_46</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 62, Bob: 61, Carol: 69, Dave: 46, Eric: 48}
+
+  "D_47" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_47</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 63, Bob: 61, Carol: 69, Dave: 47, Eric: 48}
+
+  "D_48" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_48</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 64, Bob: 61, Carol: 69, Dave: 48, Eric: 48}
+
+  "D_49" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_49</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 64, Bob: 65, Carol: 69, Dave: 49, Eric: 54}
+
+  "D_50" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_50</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 64, Bob: 65, Carol: 69, Dave: 50, Eric: 54}
+
+  "D_51" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_51</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 64, Bob: 67, Carol: 69, Dave: 51, Eric: 58}
+
+  "D_52" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_52</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 64, Bob: 67, Carol: 69, Dave: 52, Eric: 58}
+
+  "D_53" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_53</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 64, Bob: 67, Carol: 69, Dave: 53, Eric: 58}
+
+  "D_54" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_54</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 64, Bob: 67, Carol: 69, Dave: 54, Eric: 58}
+
+  "D_55" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_55</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 64, Bob: 67, Carol: 69, Dave: 55, Eric: 58}
+
+  "D_56" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_56</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 67, Bob: 67, Carol: 69, Dave: 56, Eric: 58}
+
+  "D_57" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_57</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 67, Bob: 67, Carol: 69, Dave: 57, Eric: 58}
+
+  "D_58" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_58</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 67, Bob: 67, Carol: 70, Dave: 58, Eric: 58}
+
+  "D_59" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_59</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 67, Bob: 69, Carol: 70, Dave: 59, Eric: 61}
+
+  "D_60" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_60</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 68, Bob: 69, Carol: 70, Dave: 60, Eric: 63}
+
+  "D_61" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_61</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 68, Bob: 70, Carol: 70, Dave: 61, Eric: 63}
+
+  "D_62" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_62</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 68, Bob: 70, Carol: 72, Dave: 62, Eric: 63}
+
+  "D_63" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_63</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 68, Bob: 70, Carol: 72, Dave: 63, Eric: 63}
+
+  "D_64" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_64</td></tr>
+</table>>]
+/// cause: Requesting(Eric)
+/// last_ancestors: {Alice: 68, Bob: 70, Carol: 72, Dave: 64, Eric: 63}
+
+  "D_65" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_65</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 70, Bob: 70, Carol: 72, Dave: 65, Eric: 65}
+
+  "D_66" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_66</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 70, Bob: 70, Carol: 72, Dave: 66, Eric: 66}
+
+  "D_67" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_67</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 70, Bob: 70, Carol: 72, Dave: 67, Eric: 66}
+
+  "D_68" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_68</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 70, Bob: 70, Carol: 72, Dave: 68, Eric: 68}
+
+  "D_69" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_69</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 73, Bob: 70, Carol: 73, Dave: 69, Eric: 68}
+
+  "D_70" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_70</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 73, Bob: 76, Carol: 82, Dave: 70, Eric: 68}
+
+  "D_71" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_71</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 73, Bob: 76, Carol: 82, Dave: 71, Eric: 68}
+
+  "D_72" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_72</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 74, Bob: 76, Carol: 82, Dave: 72, Eric: 68}
+
+  "D_73" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_73</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 74, Bob: 76, Carol: 82, Dave: 73, Eric: 68}
+
+  "D_74" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_74</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 78, Bob: 85, Carol: 88, Dave: 74, Eric: 72}
+
+  "D_75" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_75</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 78, Bob: 85, Carol: 88, Dave: 75, Eric: 72}
+
+  "D_76" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_76</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 78, Bob: 93, Carol: 88, Dave: 76, Eric: 77}
+
+  "D_77" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_77</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 80, Bob: 93, Carol: 88, Dave: 77, Eric: 77}
+
+  "D_78" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_78</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 80, Bob: 94, Carol: 88, Dave: 78, Eric: 77}
+
+  "D_79" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_79</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 80, Bob: 95, Carol: 88, Dave: 79, Eric: 77}
+
+  "D_80" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">D_80</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 82, Bob: 95, Carol: 88, Dave: 80, Eric: 77}
+
+  "E_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_0</td></tr>
+</table>>]
+/// cause: Initial
+/// last_ancestors: {Eric: 0}
+
+  "E_1" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_1</td></tr>
+<tr><td colspan="6">Genesis({Alice, Bob, Carol, Dave, Eric})</td></tr>
+</table>>]
+/// cause: Observation(Genesis({Alice, Bob, Carol, Dave, Eric}))
+/// last_ancestors: {Eric: 1}
+
+  "E_2" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_2</td></tr>
+<tr><td colspan="6">StartDkg({Alice, Bob, Carol, Dave, Eric})</td></tr>
+</table>>]
+/// cause: Observation(StartDkg({Alice, Bob, Carol, Dave, Eric}))
+/// last_ancestors: {Eric: 2}
+
+  "E_3" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_3</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Eric: 3}
+
+  "E_4" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_4</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 6, Bob: 6, Carol: 3, Eric: 4}
+
+  "E_5" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_5</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 9, Bob: 11, Carol: 6, Dave: 6, Eric: 5}
+
+  "E_6" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_6</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 9, Bob: 11, Carol: 6, Dave: 6, Eric: 6}
+
+  "E_7" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_7</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 13, Bob: 13, Carol: 11, Dave: 11, Eric: 7}
+
+  "E_8" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_8</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 13, Bob: 13, Carol: 11, Dave: 11, Eric: 8}
+
+  "E_9" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_9</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 20, Bob: 14, Carol: 14, Dave: 12, Eric: 9}
+
+  "E_10" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_10</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 20, Bob: 19, Carol: 16, Dave: 14, Eric: 10}
+
+  "E_11" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_11</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 20, Bob: 19, Carol: 16, Dave: 14, Eric: 11}
+
+  "E_12" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_12</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 22, Bob: 21, Carol: 23, Dave: 17, Eric: 12}
+
+  "E_13" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_13</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 22, Bob: 21, Carol: 23, Dave: 17, Eric: 13}
+
+  "E_14" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_14</td></tr>
+<tr><td colspan="6">DkgMessage(DkgPart(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgPart(0)), SerialisedDkgMessage([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 146, 55, 35, 29, 36, 20, 58, 236, 255, 168, 21, 248, 158, 44, 198, 97, 133, 45, 44, 235, 184, 123, 48, 111, 224, 194, 213, 143, 210, 126, 192, 37, 28, 103, 213, 75, 149, 190, 129, 43, 35, 21, 228, 109, 218, 200, 114, 1, 131, 53, 217, 20, 228, 75, 255, 233, 50, 195, 236, 159, 1, 13, 211, 68, 131, 243, 67, 85, 164, 204, 10, 171, 60, 216, 3, 212, 111, 251, 255, 18, 128, 176, 227, 139, 172, 212, 96, 124, 191, 101, 211, 193, 51, 223, 208, 113, 143, 97, 166, 167, 184, 92, 51, 253, 202, 188, 127, 0, 32, 68, 85, 205, 208, 239, 109, 18, 106, 55, 136, 7, 47, 43, 114, 138, 225, 60, 210, 248, 175, 184, 70, 242, 158, 165, 195, 152, 196, 183, 182, 122, 108, 134, 190, 225, 5, 0, 0, 0, 0, 0, 0, 0, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 180, 244, 71, 126, 71, 119, 222, 58, 113, 202, 4, 167, 239, 153, 246, 89, 18, 69, 62, 165, 211, 157, 214, 211, 62, 213, 103, 81, 62, 81, 96, 86, 168, 191, 226, 52, 73, 3, 113, 254, 130, 187, 178, 46, 137, 61, 247, 159, 61, 194, 232, 249, 8, 1, 233, 29, 113, 200, 228, 229, 186, 158, 218, 20, 149, 24, 16, 4, 247, 29, 115, 11, 211, 174, 28, 90, 55, 159, 254, 106, 184, 240, 255, 107, 31, 207, 137, 148, 222, 126, 115, 77, 56, 205, 134, 32, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 57, 237, 177, 166, 184, 198, 97, 48, 201, 149, 84, 19, 109, 26, 63, 62, 185, 123, 61, 168, 17, 176, 130, 25, 204, 46, 182, 152, 39, 217, 164, 89, 203, 134, 91, 65, 33, 183, 94, 7, 174, 171, 21, 241, 148, 250, 165, 91, 212, 77, 210, 240, 211, 239, 37, 246, 84, 55, 123, 132, 140, 181, 112, 38, 108, 105, 21, 255, 214, 42, 108, 12, 175, 230, 84, 176, 50, 42, 25, 6, 137, 133, 184, 59, 161, 99, 202, 137, 245, 122, 55, 136, 170, 93, 216, 53, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 190, 229, 27, 207, 41, 22, 229, 37, 33, 97, 164, 127, 234, 154, 135, 34, 96, 178, 60, 171, 79, 194, 46, 95, 89, 136, 4, 224, 16, 97, 233, 92, 238, 77, 212, 77, 249, 106, 76, 16, 217, 155, 120, 179, 160, 183, 84, 23, 107, 217, 187, 231, 158, 222, 98, 206, 56, 166, 17, 35, 94, 204, 6, 56, 152, 121, 205, 107, 9, 75, 236, 188, 146, 190, 60, 88, 89, 62, 107, 169, 155, 232, 128, 32, 205, 103, 132, 42, 169, 112, 53, 41, 143, 241, 16, 106, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 67, 222, 133, 247, 154, 101, 104, 27, 121, 44, 244, 235, 103, 27, 208, 6, 7, 233, 59, 174, 141, 212, 218, 164, 230, 225, 82, 39, 250, 232, 45, 96, 17, 21, 77, 90, 209, 30, 58, 25, 4, 140, 219, 117, 172, 116, 3, 211, 1, 101, 165, 222, 105, 205, 159, 166, 28, 21, 168, 193, 47, 227, 156, 73, 213, 190, 15, 107, 167, 238, 158, 209, 83, 205, 247, 251, 37, 172, 205, 166, 156, 123, 201, 48, 231, 184, 205, 99, 28, 245, 76, 58, 22, 175, 33, 218, 104, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 200, 214, 239, 31, 12, 181, 235, 16, 209, 247, 67, 88, 229, 155, 24, 235, 173, 31, 59, 177, 203, 230, 134, 234, 115, 59, 161, 110, 227, 112, 114, 99, 52, 220, 197, 102, 169, 210, 39, 34, 47, 124, 62, 56, 184, 49, 178, 142, 152, 240, 142, 213, 52, 188, 220, 126, 0, 132, 62, 96, 1, 250, 50, 91, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+/// last_ancestors: {Alice: 22, Bob: 21, Carol: 23, Dave: 17, Eric: 14}
+
+  "E_15" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_15</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 29, Bob: 26, Carol: 24, Dave: 19, Eric: 15}
+
+  "E_16" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_16</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 32, Bob: 27, Carol: 26, Dave: 25, Eric: 16}
+
+  "E_17" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_17</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 32, Bob: 27, Carol: 26, Dave: 25, Eric: 17}
+
+  "E_18" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_18</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 32, Bob: 31, Carol: 31, Dave: 25, Eric: 18}
+
+  "E_19" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_19</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 32, Bob: 31, Carol: 31, Dave: 27, Eric: 19}
+
+  "E_20" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_20</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 33, Bob: 35, Carol: 32, Dave: 27, Eric: 20}
+
+  "E_21" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_21</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 33, Bob: 35, Carol: 32, Dave: 27, Eric: 21}
+
+  "E_22" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_22</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 34, Bob: 39, Carol: 32, Dave: 27, Eric: 22}
+
+  "E_23" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_23</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 34, Bob: 39, Carol: 32, Dave: 27, Eric: 23}
+
+  "E_24" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_24</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 34, Bob: 39, Carol: 32, Dave: 27, Eric: 24}
+
+  "E_25" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_25</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 37, Bob: 41, Carol: 39, Dave: 31, Eric: 25}
+
+  "E_26" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_26</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 138, 153, 35, 248, 153, 216, 184, 122, 106, 134, 80, 113, 45, 223, 172, 55, 123, 22, 241, 115, 42, 74, 119, 230, 125, 37, 65, 46, 73, 205, 232, 77, 149, 24, 16, 4, 247, 29, 115, 11, 211, 174, 28, 90, 55, 159, 254, 106, 184, 240, 255, 107, 31, 207, 137, 148, 222, 126, 115, 77, 56, 205, 134, 32, 64, 0, 0, 0, 0, 0, 0, 0, 223, 202, 149, 240, 255, 184, 167, 56, 118, 121, 42, 58, 243, 75, 133, 190, 47, 132, 6, 135, 97, 119, 175, 178, 212, 59, 153, 28, 83, 75, 233, 34, 108, 105, 21, 255, 214, 42, 108, 12, 175, 230, 84, 176, 50, 42, 25, 6, 137, 133, 184, 59, 161, 99, 202, 137, 245, 122, 55, 136, 170, 93, 216, 53, 64, 0, 0, 0, 0, 0, 0, 0, 53, 252, 7, 233, 100, 153, 150, 246, 128, 200, 2, 3, 188, 92, 27, 153, 233, 201, 189, 163, 160, 124, 33, 178, 115, 207, 142, 52, 176, 112, 215, 107, 152, 121, 205, 107, 9, 75, 236, 188, 146, 190, 60, 88, 89, 62, 107, 169, 155, 232, 128, 32, 205, 103, 132, 42, 169, 112, 53, 41, 143, 241, 16, 106, 64, 0, 0, 0, 0, 0, 0, 0, 138, 45, 122, 225, 202, 121, 133, 180, 140, 187, 220, 203, 129, 201, 243, 31, 158, 55, 211, 182, 215, 169, 89, 126, 202, 229, 230, 34, 186, 238, 215, 64, 213, 190, 15, 107, 167, 238, 158, 209, 83, 205, 247, 251, 37, 172, 205, 166, 156, 123, 201, 48, 231, 184, 205, 99, 28, 245, 76, 58, 22, 175, 33, 218, 64, 0, 0, 0, 0, 0, 0, 0, 223, 94, 236, 217, 48, 90, 116, 114, 152, 174, 182, 148, 71, 54, 204, 166, 82, 165, 232, 201, 14, 215, 145, 74, 33, 252, 62, 17, 196, 108, 216, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+/// last_ancestors: {Alice: 37, Bob: 41, Carol: 39, Dave: 31, Eric: 26}
+
+  "E_27" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_27</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 251, 178, 181, 134, 182, 135, 19, 51, 1, 24, 132, 144, 154, 41, 13, 38, 65, 56, 40, 125, 248, 202, 41, 54, 44, 66, 66, 165, 145, 195, 183, 74, 149, 24, 16, 4, 247, 29, 115, 11, 211, 174, 28, 90, 55, 159, 254, 106, 184, 240, 255, 107, 31, 207, 137, 148, 222, 126, 115, 77, 56, 205, 134, 32, 64, 0, 0, 0, 0, 0, 0, 0, 46, 143, 123, 237, 96, 90, 59, 85, 49, 56, 196, 200, 79, 183, 1, 97, 212, 80, 21, 73, 37, 175, 204, 129, 228, 72, 227, 219, 63, 22, 253, 49, 108, 105, 21, 255, 214, 42, 108, 12, 175, 230, 84, 176, 50, 42, 25, 6, 137, 133, 184, 59, 161, 99, 202, 137, 245, 122, 55, 136, 170, 93, 216, 53, 64, 0, 0, 0, 0, 0, 0, 0, 97, 107, 65, 84, 11, 45, 99, 119, 97, 88, 4, 1, 5, 69, 246, 155, 103, 105, 2, 21, 82, 147, 111, 205, 156, 79, 132, 18, 238, 104, 66, 25, 152, 121, 205, 107, 9, 75, 236, 188, 146, 190, 60, 88, 89, 62, 107, 169, 155, 232, 128, 32, 205, 103, 132, 42, 169, 112, 53, 41, 143, 241, 16, 106, 64, 0, 0, 0, 0, 0, 0, 0, 148, 71, 7, 187, 181, 255, 138, 153, 145, 120, 68, 57, 186, 210, 234, 214, 250, 129, 239, 224, 126, 119, 18, 25, 85, 86, 37, 73, 156, 187, 135, 0, 213, 190, 15, 107, 167, 238, 158, 209, 83, 205, 247, 251, 37, 172, 205, 166, 156, 123, 201, 48, 231, 184, 205, 99, 28, 245, 76, 58, 22, 175, 33, 218, 64, 0, 0, 0, 0, 0, 0, 0, 200, 35, 205, 33, 95, 210, 178, 187, 192, 244, 130, 113, 114, 4, 157, 101, 147, 114, 126, 182, 179, 51, 239, 151, 85, 218, 99, 169, 157, 181, 186, 91, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+/// last_ancestors: {Alice: 37, Bob: 41, Carol: 39, Dave: 31, Eric: 27}
+
+  "E_28" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_28</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 150, 119, 255, 157, 155, 25, 170, 131, 123, 192, 120, 118, 130, 71, 25, 171, 108, 99, 134, 232, 189, 16, 141, 175, 144, 27, 47, 207, 88, 115, 209, 51, 149, 24, 16, 4, 247, 29, 115, 11, 211, 174, 28, 90, 55, 159, 254, 106, 184, 240, 255, 107, 31, 207, 137, 148, 222, 126, 115, 77, 56, 205, 134, 32, 64, 0, 0, 0, 0, 0, 0, 0, 125, 209, 27, 6, 105, 151, 213, 82, 221, 159, 104, 121, 36, 88, 46, 75, 86, 255, 170, 29, 50, 10, 92, 94, 203, 61, 35, 114, 82, 84, 104, 36, 108, 105, 21, 255, 214, 42, 108, 12, 175, 230, 84, 176, 50, 42, 25, 6, 137, 133, 184, 59, 161, 99, 202, 137, 245, 122, 55, 136, 170, 93, 216, 53, 64, 0, 0, 0, 0, 0, 0, 0, 100, 43, 56, 110, 54, 21, 1, 34, 63, 127, 88, 124, 198, 104, 67, 235, 63, 155, 207, 82, 166, 3, 43, 13, 6, 96, 23, 21, 76, 53, 255, 20, 152, 121, 205, 107, 9, 75, 236, 188, 146, 190, 60, 88, 89, 62, 107, 169, 155, 232, 128, 32, 205, 103, 132, 42, 169, 112, 53, 41, 143, 241, 16, 106, 64, 0, 0, 0, 0, 0, 0, 0, 75, 133, 84, 214, 3, 147, 44, 241, 160, 94, 72, 127, 104, 121, 88, 139, 41, 55, 244, 135, 26, 253, 249, 187, 64, 130, 11, 184, 69, 22, 150, 5, 213, 190, 15, 107, 167, 238, 158, 209, 83, 205, 247, 251, 37, 172, 205, 166, 156, 123, 201, 48, 231, 184, 205, 99, 28, 245, 76, 58, 22, 175, 33, 218, 64, 0, 0, 0, 0, 0, 0, 0, 51, 223, 112, 62, 208, 16, 88, 192, 1, 154, 54, 130, 13, 46, 43, 127, 24, 171, 186, 198, 150, 206, 2, 158, 195, 33, 157, 132, 146, 158, 26, 106, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+/// last_ancestors: {Alice: 37, Bob: 41, Carol: 39, Dave: 31, Eric: 28}
+
+  "E_29" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_29</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 178, 222, 100, 110, 203, 248, 113, 230, 83, 115, 111, 220, 154, 51, 173, 228, 51, 152, 73, 197, 39, 133, 111, 197, 5, 62, 37, 109, 156, 164, 89, 99, 149, 24, 16, 4, 247, 29, 115, 11, 211, 174, 28, 90, 55, 159, 254, 106, 184, 240, 255, 107, 31, 207, 137, 148, 222, 126, 115, 77, 56, 205, 134, 32, 64, 0, 0, 0, 0, 0, 0, 0, 69, 178, 146, 249, 207, 187, 184, 168, 150, 242, 210, 23, 96, 204, 7, 233, 222, 44, 0, 227, 149, 220, 178, 29, 19, 129, 9, 210, 216, 9, 168, 30, 108, 105, 21, 255, 214, 42, 108, 12, 175, 230, 84, 176, 50, 42, 25, 6, 137, 133, 184, 59, 161, 99, 202, 137, 245, 122, 55, 136, 170, 93, 216, 53, 64, 0, 0, 0, 0, 0, 0, 0, 217, 133, 192, 132, 211, 126, 255, 106, 216, 205, 52, 83, 40, 9, 32, 65, 143, 153, 88, 10, 12, 12, 48, 169, 104, 65, 139, 96, 104, 22, 228, 77, 152, 121, 205, 107, 9, 75, 236, 188, 146, 190, 60, 88, 89, 62, 107, 169, 155, 232, 128, 32, 205, 103, 132, 42, 169, 112, 53, 41, 143, 241, 16, 106, 64, 0, 0, 0, 0, 0, 0, 0, 108, 89, 238, 15, 216, 65, 70, 45, 27, 77, 152, 142, 237, 161, 122, 69, 58, 46, 15, 40, 122, 99, 115, 1, 118, 132, 111, 197, 164, 123, 50, 9, 213, 190, 15, 107, 167, 238, 158, 209, 83, 205, 247, 251, 37, 172, 205, 166, 156, 123, 201, 48, 231, 184, 205, 99, 28, 245, 76, 58, 22, 175, 33, 218, 64, 0, 0, 0, 0, 0, 0, 0, 0, 45, 28, 155, 219, 4, 141, 239, 92, 40, 250, 201, 181, 222, 146, 157, 234, 154, 103, 79, 240, 146, 240, 140, 203, 68, 241, 83, 52, 136, 110, 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+/// last_ancestors: {Alice: 37, Bob: 41, Carol: 39, Dave: 31, Eric: 29}
+
+  "E_30" [style=filled, fillcolor=cyan, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_30</td></tr>
+<tr><td colspan="6">DkgMessage(DkgAck(0))</td></tr>
+</table>>]
+/// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 27, 242, 146, 84, 169, 87, 170, 231, 57, 63, 109, 105, 142, 142, 165, 148, 153, 79, 87, 225, 120, 107, 93, 253, 78, 189, 16, 201, 82, 155, 179, 94, 149, 24, 16, 4, 247, 29, 115, 11, 211, 174, 28, 90, 55, 159, 254, 106, 184, 240, 255, 107, 31, 207, 137, 148, 222, 126, 115, 77, 56, 205, 134, 32, 64, 0, 0, 0, 0, 0, 0, 0, 179, 237, 85, 185, 88, 64, 161, 90, 65, 158, 146, 180, 24, 24, 46, 215, 223, 25, 129, 214, 228, 248, 224, 251, 254, 74, 234, 166, 25, 99, 199, 27, 108, 105, 21, 255, 214, 42, 108, 12, 175, 230, 84, 176, 50, 42, 25, 6, 137, 133, 184, 59, 161, 99, 202, 137, 245, 122, 55, 136, 170, 93, 216, 53, 64, 0, 0, 0, 0, 0, 0, 0, 76, 233, 24, 30, 7, 41, 152, 205, 71, 89, 182, 255, 165, 69, 116, 109, 43, 188, 76, 213, 88, 94, 158, 45, 247, 85, 97, 174, 51, 210, 200, 76, 152, 121, 205, 107, 9, 75, 236, 188, 146, 190, 60, 88, 89, 62, 107, 169, 155, 232, 128, 32, 205, 103, 132, 42, 169, 112, 53, 41, 143, 241, 16, 106, 64, 0, 0, 0, 0, 0, 0, 0, 228, 228, 219, 130, 182, 17, 143, 64, 79, 184, 219, 74, 48, 207, 252, 175, 113, 134, 118, 202, 196, 235, 33, 44, 167, 227, 58, 140, 250, 153, 220, 9, 213, 190, 15, 107, 167, 238, 158, 209, 83, 205, 247, 251, 37, 172, 205, 166, 156, 123, 201, 48, 231, 184, 205, 99, 28, 245, 76, 58, 22, 175, 33, 218, 64, 0, 0, 0, 0, 0, 0, 0, 125, 224, 158, 231, 100, 250, 133, 179, 85, 115, 255, 149, 189, 252, 66, 70, 189, 40, 66, 201, 56, 81, 223, 93, 159, 238, 177, 147, 20, 9, 222, 58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+/// last_ancestors: {Alice: 37, Bob: 41, Carol: 39, Dave: 31, Eric: 30}
+
+  "E_31" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_31</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 37, Bob: 41, Carol: 40, Dave: 31, Eric: 31}
+
+  "E_32" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_32</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 37, Bob: 41, Carol: 40, Dave: 31, Eric: 32}
+
+  "E_33" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_33</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 38, Bob: 41, Carol: 40, Dave: 31, Eric: 33}
+
+  "E_34" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_34</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 38, Bob: 41, Carol: 41, Dave: 31, Eric: 34}
+
+  "E_35" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_35</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 45, Bob: 41, Carol: 41, Dave: 31, Eric: 35}
+
+  "E_36" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_36</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 47, Bob: 41, Carol: 41, Dave: 31, Eric: 36}
+
+  "E_37" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_37</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 47, Bob: 41, Carol: 41, Dave: 31, Eric: 37}
+
+  "E_38" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_38</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 47, Bob: 44, Carol: 51, Dave: 31, Eric: 38}
+
+  "E_39" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_39</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 47, Bob: 44, Carol: 51, Dave: 31, Eric: 39}
+
+  "E_40" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_40</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 48, Bob: 55, Carol: 51, Dave: 39, Eric: 40}
+
+  "E_41" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_41</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 48, Bob: 55, Carol: 51, Dave: 40, Eric: 41}
+
+  "E_42" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_42</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 48, Bob: 55, Carol: 51, Dave: 40, Eric: 42}
+
+  "E_43" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_43</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 48, Bob: 55, Carol: 51, Dave: 40, Eric: 43}
+
+  "E_44" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_44</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 53, Bob: 57, Carol: 59, Dave: 40, Eric: 44}
+
+  "E_45" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_45</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 55, Bob: 60, Carol: 59, Dave: 40, Eric: 45}
+
+  "E_46" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_46</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 55, Bob: 60, Carol: 59, Dave: 40, Eric: 46}
+
+  "E_47" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_47</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 55, Bob: 60, Carol: 59, Dave: 42, Eric: 47}
+
+  "E_48" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_48</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 55, Bob: 60, Carol: 59, Dave: 42, Eric: 48}
+
+  "E_49" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_49</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 55, Bob: 60, Carol: 59, Dave: 42, Eric: 49}
+
+  "E_50" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_50</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 55, Bob: 60, Carol: 59, Dave: 43, Eric: 50}
+
+  "E_51" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_51</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 59, Bob: 62, Carol: 64, Dave: 43, Eric: 51}
+
+  "E_52" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_52</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 59, Bob: 63, Carol: 64, Dave: 43, Eric: 52}
+
+  "E_53" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_53</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 59, Bob: 65, Carol: 64, Dave: 43, Eric: 53}
+
+  "E_54" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_54</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 59, Bob: 65, Carol: 64, Dave: 43, Eric: 54}
+
+  "E_55" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_55</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 59, Bob: 67, Carol: 64, Dave: 43, Eric: 55}
+
+  "E_56" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_56</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 64, Bob: 67, Carol: 69, Dave: 49, Eric: 56}
+
+  "E_57" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_57</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 64, Bob: 67, Carol: 69, Dave: 49, Eric: 57}
+
+  "E_58" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_58</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 64, Bob: 67, Carol: 69, Dave: 50, Eric: 58}
+
+  "E_59" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_59</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 64, Bob: 69, Carol: 69, Dave: 50, Eric: 59}
+
+  "E_60" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_60</td></tr>
+</table>>]
+/// cause: Requesting(Alice)
+/// last_ancestors: {Alice: 64, Bob: 69, Carol: 69, Dave: 50, Eric: 60}
+
+  "E_61" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_61</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 64, Bob: 69, Carol: 69, Dave: 54, Eric: 61}
+
+  "E_62" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_62</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 68, Bob: 69, Carol: 69, Dave: 54, Eric: 62}
+
+  "E_63" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_63</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 68, Bob: 69, Carol: 69, Dave: 55, Eric: 63}
+
+  "E_64" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_64</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 70, Bob: 69, Carol: 69, Dave: 55, Eric: 64}
+
+  "E_65" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_65</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 70, Bob: 70, Carol: 72, Dave: 63, Eric: 65}
+
+  "E_66" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_66</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 70, Bob: 70, Carol: 72, Dave: 64, Eric: 66}
+
+  "E_67" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_67</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 70, Bob: 70, Carol: 72, Dave: 64, Eric: 67}
+
+  "E_68" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_68</td></tr>
+</table>>]
+/// cause: Requesting(Dave)
+/// last_ancestors: {Alice: 70, Bob: 70, Carol: 72, Dave: 64, Eric: 68}
+
+  "E_69" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_69</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 70, Bob: 70, Carol: 72, Dave: 68, Eric: 69}
+
+  "E_70" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_70</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 70, Bob: 73, Carol: 79, Dave: 68, Eric: 70}
+
+  "E_71" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_71</td></tr>
+</table>>]
+/// cause: Requesting(Bob)
+/// last_ancestors: {Alice: 70, Bob: 73, Carol: 79, Dave: 68, Eric: 71}
+
+  "E_72" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_72</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 70, Bob: 78, Carol: 80, Dave: 68, Eric: 72}
+
+  "E_73" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_73</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 70, Bob: 79, Carol: 80, Dave: 68, Eric: 73}
+
+  "E_74" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_74</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 77, Bob: 87, Carol: 86, Dave: 71, Eric: 74}
+
+  "E_75" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_75</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 77, Bob: 88, Carol: 86, Dave: 71, Eric: 75}
+
+  "E_76" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_76</td></tr>
+</table>>]
+/// cause: Requesting(Carol)
+/// last_ancestors: {Alice: 77, Bob: 88, Carol: 86, Dave: 71, Eric: 76}
+
+  "E_77" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">E_77</td></tr>
+</table>>]
+/// cause: Request
+/// last_ancestors: {Alice: 77, Bob: 91, Carol: 86, Dave: 71, Eric: 77}
+
+}
+
+/// ===== meta-elections =====
+/// consensus_history:
+/// ea47a3b8d596df9dce6c2658e06eac7fd94f060ba92c695cb5b9923b0702e219
+/// 8a1489034a48bd6202b99050822a67e0fc109b9478109d75a8cfe66c4233912b
+/// 37af3643a25292963841c28ef26a43951df93c6bc5f9229c124bb20704b5d1d6
+/// 7c14e4fdff94f1632e39e11342a6ac6c1e023f244a75cded465c05fb6d740f8f
+/// 89862abbf4b32ae5bc3a58cfd978ab85addbfee65ba237f6f08075a6ee9d45ff
+/// 943bdbd8c4df9373bde28ec4275d02a19ab25e2ca9b7a502c8a765a757c83452
+/// f6c56e14bf038ffe07cd7c8e179160366cd15b90190e8b0ceada12675b3eda90
+/// 2ca9f846e056f80853af4b105acf1503d4ff13471c229be80d585b83304054ac
+/// 3edfb40ce4d6e4c99204964bafa4df6aad9750a1ac58318f3b21417571fb42fb
+/// 50f54db460a0f9f0e5a21cc8cf649338494e88a67b1669cac7027d3dff82bdbc
+/// 98d18826bd9712b4bfb15c2cbc88383489f53efb77e50a63d4785b5f1806e26c
+/// af91b5e40d269c60a32b9f211db8193533adcaff2c0c28f2b60730ba0de07719
+/// 37bc389a55a6f1764319d2446ddb872126633b935d8a2474f687570a2153796a
+/// 7a07dade075a08cc7f5592385ed18c60edde56773804f15dc0d7053868f83ea7
+/// aa89548d6904c9f51c296c224dbfa813aee86dff7d0257a0cd677ddd440ac9d5
+/// ae1f6d8fdb496ca5abe6f7fbe1aab5ec750edfcf620f22fbbb8fe087e8eb42c0
+/// f82919a8e8ea0f5bb41e116c346d4bd1bf62f04052d44b8ef907422a3b036af7
+/// 1146a3d8854878703249a47d1754484eceac5d4a2354ed8993119b2b7ec679e0
+/// 4b5fcd300614bffa87014bd4055a7eabfd8df0ae14c556907b5ba692f9ddea0e
+/// 4f27c06a73441e2292f9f64cb21f8cdf528a4fd445f3d03a6d577ec98a364945
+/// a6df423ebca5901c0bdfc7bcc71511d0e847120970665a7ebabffb08229038a9
+/// b1161bdd833b581ed48f280fa75e9a49b70789bb57c188666b63136d625148be
+/// 129e1aefc908d0c5605a489a710b401e48cfa456ee076d0b6346359acbbe3ca3
+/// 3de79832ece875ec2d4e766d9fd0f6f2dd52e6cd9510c23816c36b8ae65edd28
+/// 3dff07475d7d06bf38f8fa961ac426a1984b85aa3dc19b05260eaa2fa8e6cae3
+/// 78f0a2c02b89bb1bb85d77509e6896ea083b5559f831119d2d4de24fda4b32d7
+/// 816b31666ea7804992740072e4071b118adb9c064aef782db34e9ea3d9958d6a
+/// 4d9dae47feed87d6974ed2963ec39dd7eb1f0781a1d0fa2940a95cc925d7a96c
+/// 51c0a0d9dac04ab3c11232b6ba7e1e63384d8ac4426c640e25c0f49b8b50b55b
+/// acc1c915df983d86374f5773ef628972e0b8140f3d3c5a9e57079abd2d9e2709
+/// afbd36ddbc1873fcfd836a57778f9f81bc6898d99fd1793efcf7d46e68866ae6
+/// c5f65a06b24dcea4234da432663421fb1f94055ad582e0a43c0edf95862ae488
+
+/// interesting_events: {
+/// }
+/// all_voters: {Alice, Bob, Carol, Dave, Eric}
+/// unconsensused_events: {}
+/// meta_events: {
+///   A_83 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   A_84 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   A_85 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   A_86 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   B_96 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   B_97 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   B_98 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   B_99 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   B_100 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   B_101 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   D_78 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   D_79 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   D_80 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+/// }

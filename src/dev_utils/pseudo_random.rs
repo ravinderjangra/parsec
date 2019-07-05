@@ -46,3 +46,24 @@ pub fn new_rng<R: Rng>(rng: &mut R) -> Box<dyn Rng> {
     ];
     Box::new(XorShiftRng::from_seed(new_seed))
 }
+
+/// Create a RNG that will replay the given value and when complete will panic if more value needed.
+pub struct ReplayRng {
+    values: Vec<u32>,
+    index: usize,
+}
+
+impl ReplayRng {
+    /// Create ReplayRng that will replay the given `values`.
+    pub fn new(values: Vec<u32>) -> Self {
+        Self { values, index: 0 }
+    }
+}
+
+impl Rng for ReplayRng {
+    fn next_u32(&mut self) -> u32 {
+        let value = unwrap!(self.values.get(self.index));
+        self.index += 1;
+        *value
+    }
+}

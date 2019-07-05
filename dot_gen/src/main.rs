@@ -347,6 +347,19 @@ fn add_dev_utils_record_smoke_tests(scenarios: &mut Scenarios) {
         })
         .seed([1, 2, 3, 4])
         .file("PublicIdname12abcd", "minimal.dot");
+
+    let _ = scenarios
+        .add("dev_utils::record::tests::smoke_dkg", |env| {
+            let peer_ids = peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric");
+            let obs = ObservationSchedule {
+                genesis: Genesis::new(peer_ids.clone()),
+                schedule: vec![(1, StartDkg(peer_ids))],
+            };
+            Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+        })
+        .seed([1, 2, 3, 4])
+        .file("Alice", "alice.dot")
+        .dump_mode(DumpGraphMode::OnParsecDrop);;
 }
 
 fn add_benches(scenarios: &mut Scenarios) {

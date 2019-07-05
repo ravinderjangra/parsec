@@ -22,7 +22,10 @@ use crate::{
         Event, EventContextRef, EventIndex, Graph, IndexedEventRef, PackedEvent, Request, Response,
     },
     id::{PublicId, SecretId},
-    key_gen::{dkg_threshold, message::DkgMessage, Ack, AckOutcome, KeyGen, Part, PartOutcome},
+    key_gen::{
+        dkg_threshold, message::DkgMessage, parsec_rng::ParsecRng, Ack, AckOutcome, KeyGen, Part,
+        PartOutcome,
+    },
     meta_voting::{MetaElection, MetaEvent, MetaEventBuilder, MetaVote, Observer},
     network_event::NetworkEvent,
     observation::{
@@ -118,7 +121,7 @@ pub struct Parsec<T: NetworkEvent, S: SecretId> {
     #[cfg(any(test, feature = "testing"))]
     ignore_process_events: bool,
     // Provided RNG: Needs to be cryptographically secure RNG as it is used for DKG key generation.
-    secure_rng: Box<dyn rand::Rng>,
+    secure_rng: ParsecRng,
 }
 
 impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
@@ -262,7 +265,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             #[cfg(any(test, feature = "testing"))]
             ignore_process_events: false,
 
-            secure_rng,
+            secure_rng: ParsecRng::new(secure_rng),
         }
     }
 
@@ -783,15 +786,16 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     fn output_consensus_info(&self, payload_keys: &[ObservationKey]) {
-        dump_graph::to_file(
-            self.our_pub_id(),
-            self.consensus_mode,
-            &self.graph,
-            &self.meta_election,
-            &self.peer_list,
-            &self.observations,
-            &dump_graph::DumpGraphContext::ConsensusReached,
-        );
+        dump_graph::to_file(dump_graph::ToFileInfo {
+            owner_id: self.our_pub_id(),
+            consensus_mode: self.consensus_mode,
+            gossip_graph: &self.graph,
+            meta_election: &self.meta_election,
+            peer_list: &self.peer_list,
+            observations: &self.observations,
+            secure_rng: &self.secure_rng,
+            info: &dump_graph::DumpGraphContext::ConsensusReached,
+        });
 
         for (index, payload_key) in payload_keys.iter().enumerate() {
             let payload = self
@@ -2224,15 +2228,16 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
 impl<T: NetworkEvent, S: SecretId> Drop for Parsec<T, S> {
     fn drop(&mut self) {
-        dump_graph::to_file(
-            self.our_pub_id(),
-            self.consensus_mode,
-            &self.graph,
-            &self.meta_election,
-            &self.peer_list,
-            &self.observations,
-            &dump_graph::DumpGraphContext::DroppingParsec,
-        );
+        dump_graph::to_file(dump_graph::ToFileInfo {
+            owner_id: self.our_pub_id(),
+            consensus_mode: self.consensus_mode,
+            gossip_graph: &self.graph,
+            meta_election: &self.meta_election,
+            peer_list: &self.peer_list,
+            observations: &self.observations,
+            secure_rng: &self.secure_rng,
+            info: &dump_graph::DumpGraphContext::DroppingParsec,
+        });
     }
 }
 

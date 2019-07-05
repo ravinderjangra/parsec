@@ -8,7 +8,7 @@
 
 use super::{
     dot_parser::{parse_dot_file, ParsedContents},
-    new_common_rng, new_rng, RngChoice,
+    ReplayRng,
 };
 use crate::{
     gossip::{Cause, Event, IndexedEventRef, PackedEvent, Request, Response},
@@ -20,9 +20,6 @@ use crate::{
 };
 use std::{collections::BTreeSet, io, path::Path};
 
-// Use Fixed seed for functional tests and replay: No randomization.
-static SEED: RngChoice = RngChoice::SeededXor([1, 2, 3, 4]);
-
 /// Record of a Parsec session which consist of sequence of operations (`vote_for`, `handle_request`
 /// and `handle_response`). Can be produced from a previously dumped DOT file and after replaying,
 /// produces the same gossip graph. Useful for benchmarking.
@@ -30,6 +27,7 @@ static SEED: RngChoice = RngChoice::SeededXor([1, 2, 3, 4]);
 pub struct Record {
     our_id: PeerId,
     genesis_group: BTreeSet<PeerId>,
+    secure_rng_values: Vec<u32>,
     actions: Vec<Action>,
     // Keys of the consensused blocks' payloads in the order they were consensused.
     consensus_history: Vec<ObservationKey>,
@@ -47,22 +45,12 @@ impl Record {
     }
 
     pub fn play(self) -> Parsec<Transaction, PeerId> {
-        let mut common_rng = new_common_rng(SEED);
         let mut parsec = Parsec::from_genesis(
             self.our_id,
             &self.genesis_group,
             vec![],
             self.consensus_mode,
-            // TODO: Build an Rng that will reproduce the value from dump-graph:
-            //       It could be for example wrapping a Rng, and implement Read,
-            //       reading from the Rng when needing value, storing them in a vector and
-            //       returning them, and wrapping that into a ReadRng.
-            //       Dump graph can then dump all these provided values, and we can create
-            //       A new ReadRng HERE to replay the graph.
-            //
-            // An alternative could be to store the generated Part, and dump them, and
-            // instead of providing a Rng, here we would provide something that generate the same Parts.
-            new_rng(&mut common_rng),
+            Box::new(ReplayRng::new(self.secure_rng_values.clone())),
         );
 
         for action in self.actions {
@@ -124,13 +112,20 @@ impl From<ParsedContents> for Record {
                 {
                     known[event.topological_index()] = true;
 
-                    if let Observation::Accusation { .. } = *observation {
-                        if skip_our_accusations {
-                            continue;
-                        } else {
-                            // Accusations by us must follow our sync event.
-                            panic!("Unexpected accusation {:?}", *event);
+                    match *observation {
+                        Observation::Accusation { .. } => {
+                            if skip_our_accusations {
+                                continue;
+                            } else {
+                                // Accusations by us must follow our sync event.
+                                panic!("Unexpected accusation {:?}", *event);
+                            }
                         }
+                        Observation::DkgMessage(_) => {
+                            // Skip DkgMessage that we generate.
+                            continue;
+                        }
+                        _ => (),
                     }
 
                     actions.push(Action::Vote(observation.clone()));
@@ -194,6 +189,7 @@ impl From<ParsedContents> for Record {
         Record {
             our_id: contents.our_id,
             genesis_group,
+            secure_rng_values: contents.secure_rng_values,
             actions,
             consensus_history: contents.meta_election.consensus_history,
             consensus_mode: contents.consensus_mode,
@@ -283,9 +279,13 @@ fn collect_remaining_events_to_gossip(
 
 #[cfg(test)]
 mod tests {
+    use super::super::{new_common_rng, new_rng, RngChoice};
     use super::*;
     use crate::parsec::get_graph_snapshot;
     use std::{iter, path::PathBuf, thread};
+
+    // Use Fixed seed for functional tests and replay: No randomization.
+    static SEED: RngChoice = RngChoice::SeededXor([1, 2, 3, 4]);
 
     #[derive(PartialEq, Eq, Debug)]
     struct TruncatedHashes<'th> {
@@ -423,6 +423,15 @@ mod tests {
         let missing_one_consensus = true;
         smoke_consensus_history(
             "input_graphs/dev_utils_record_tests_smoke_other_peer_names/annie.dot",
+            missing_one_consensus,
+        )
+    }
+
+    #[test]
+    fn smoke_consensus_history_dkg() {
+        let missing_one_consensus = false;
+        smoke_consensus_history(
+            "input_graphs/dev_utils_record_tests_smoke_dkg/alice.dot",
             missing_one_consensus,
         )
     }
