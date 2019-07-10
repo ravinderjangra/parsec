@@ -120,8 +120,6 @@ pub enum ScheduleEvent {
     /// It is similar to Fail in that the peer will stop responding; however, this will also
     /// cause the other peers to vote for removal
     RemovePeer(PeerId),
-    /// Start Dkg process with set of DKG participants
-    StartDkg(BTreeSet<PeerId>),
 }
 
 impl ScheduleEvent {
@@ -141,7 +139,6 @@ impl ScheduleEvent {
             ScheduleEvent::AddPeer(ref peer) => peer,
             ScheduleEvent::RemovePeer(ref peer) => peer,
             ScheduleEvent::Genesis(_) => panic!("ScheduleEvent::get_peer called on Genesis!"),
-            ScheduleEvent::StartDkg(_) => panic!("ScheduleEvent::get_peer called on StartDkg!"),
         }
     }
 }
@@ -575,6 +572,7 @@ impl Schedule {
             obs_schedule.count_observations() + obs_schedule.count_expected_accusations() + 1;
 
         let mut peers = PeerStatuses::new(&obs_schedule.genesis.all_ids());
+        let mut added_peers: BTreeSet<_> = peers.all_peers().cloned().collect();
         let mut step = 0;
 
         // genesis has to be first
@@ -624,8 +622,10 @@ impl Schedule {
                             step,
                             &observation,
                         );
-                        schedule.push(ScheduleEvent::AddPeer(new_peer.clone()));
 
+                        if added_peers.insert(new_peer.clone()) {
+                            schedule.push(ScheduleEvent::AddPeer(new_peer.clone()));
+                        }
                         // vote for all observations that were made before this peer joined
                         // this prevents situations in which peers joining reach consensus before
                         // some other observations they haven't seen, which cause those
@@ -693,8 +693,21 @@ impl Schedule {
                         peers.fail_peer(&peer);
                         schedule.push(ScheduleEvent::Fail(peer));
                     }
-                    ObservationEvent::StartDkg(peers) => {
-                        schedule.push(ScheduleEvent::StartDkg(peers));
+                    ObservationEvent::StartDkg(dkg_peers) => {
+                        for peer in &dkg_peers {
+                            if added_peers.insert(peer.clone()) {
+                                schedule.push(ScheduleEvent::AddPeer(peer.clone()));
+                            }
+                        }
+
+                        let observation = ParsecObservation::StartDkg(dkg_peers);
+                        pending.peers_make_observation(
+                            &mut env.rng,
+                            peers.all_peers(),
+                            options.transparent_voters,
+                            step,
+                            &observation,
+                        );
                     }
                 }
             }

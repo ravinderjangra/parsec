@@ -658,13 +658,6 @@ impl Network {
 
                 self.peer_mut(&voting_peer_id).vote_for(&observation);
             }
-            ScheduleEvent::StartDkg(peers) => {
-                // All valid peers should vote for new DKG.
-                for peer_id in self.running_peers_ids() {
-                    self.peer_mut(&peer_id)
-                        .vote_for(&ParsecObservation::StartDkg(peers.clone()));
-                }
-            }
         }
         Ok(true)
     }

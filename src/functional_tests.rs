@@ -917,7 +917,7 @@ mod handle_malice {
         let request_msg = unwrap!(alice.create_gossip(bob.our_pub_id()));
         let a_1 = nth_event(alice.graph(), 1);
         assert!(
-            !a_1.is_requesting()
+            !a_1.is_requesting(),
             "A_1 should not be a 'Requesting(Bob)' event to ensure a 'Request' using this as its \
              other-parent is invalid.",
         );
@@ -1070,7 +1070,7 @@ mod handle_malice {
         // event as an other-parent for her Response event, as it is not a Request event.)
         let b_1 = nth_event(bob.graph(), 1);
         assert!(
-            !b_1.is_request()
+            !b_1.is_request(),
             "B_1 should not be a Request event to ensure a 'Response' using this as its \
              other-parent is invalid.",
         );
