@@ -31,10 +31,6 @@ impl DkgResult {
             secret_key_share,
         }
     }
-
-    fn comparison_value(&self) -> (&PublicKeySet, bool) {
-        (&self.public_key_set, self.secret_key_share.is_some())
-    }
 }
 
 impl Debug for DkgResult {
@@ -48,37 +44,59 @@ impl Debug for DkgResult {
     }
 }
 
-impl PartialEq for DkgResult {
+#[derive(Clone)]
+/// Wrapper providing necessary functionality to be stored in an Observation.
+/// Do not add these directly to DkgResult as they are not semantically correct for it.
+/// Ignore secret key for all of these: blocks are expected to be the same between peers.
+pub struct DkgResultWrapper(pub DkgResult);
+
+impl Debug for DkgResultWrapper {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        self.0.fmt(formatter)
+    }
+}
+
+impl DkgResultWrapper {
+    fn comparison_value(&self) -> &PublicKeySet {
+        // Ignore the secret_key_share as they will be different for each participants,
+        // non participants will have None.
+        &self.0.public_key_set
+    }
+}
+
+impl PartialEq for DkgResultWrapper {
     fn eq(&self, rhs: &Self) -> bool {
         self.comparison_value().eq(&rhs.comparison_value())
     }
 }
 
-impl Eq for DkgResult {}
+impl Eq for DkgResultWrapper {}
 
-impl PartialOrd for DkgResult {
+impl PartialOrd for DkgResultWrapper {
     fn partial_cmp(&self, rhs: &Self) -> Option<Ordering> {
         self.comparison_value().partial_cmp(&rhs.comparison_value())
     }
 }
 
-impl Ord for DkgResult {
+impl Ord for DkgResultWrapper {
     fn cmp(&self, rhs: &Self) -> Ordering {
         self.comparison_value().cmp(&rhs.comparison_value())
     }
 }
 
-impl Serialize for DkgResult {
+impl Serialize for DkgResultWrapper {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        self.public_key_set.serialize(s)
+        self.0.public_key_set.serialize(s)
     }
 }
 
-impl<'a> Deserialize<'a> for DkgResult {
+impl<'a> Deserialize<'a> for DkgResultWrapper {
     fn deserialize<D: Deserializer<'a>>(deserializer: D) -> Result<Self, D::Error> {
-        PublicKeySet::deserialize(deserializer).map(|public_key_set| Self {
-            public_key_set,
-            secret_key_share: None,
+        PublicKeySet::deserialize(deserializer).map(|public_key_set| {
+            DkgResultWrapper(DkgResult {
+                public_key_set,
+                secret_key_share: None,
+            })
         })
     }
 }

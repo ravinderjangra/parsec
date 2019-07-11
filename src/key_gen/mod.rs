@@ -365,7 +365,7 @@ impl<S: SecretId> KeyGen<S> {
     ///
     /// All participating nodes must have handled the exact same sequence of `Part` and `Ack`
     /// messages before calling this method. Otherwise their key shares will not match.
-    pub fn generate(&self) -> Result<DkgResult, Error> {
+    pub fn generate(&self) -> Result<(BTreeSet<S::PublicId>, DkgResult), Error> {
         let mut pk_commit = Poly::zero().commitment();
         let mut opt_sk_val = self.our_idx.map(|_| Fr::zero());
         let is_complete = |part: &&ProposalState| part.is_complete(self.threshold);
@@ -382,7 +382,10 @@ impl<S: SecretId> KeyGen<S> {
         } else {
             None
         };
-        Ok(DkgResult::new(pk_commit.into(), opt_sk))
+        Ok((
+            self.pub_keys.clone(),
+            DkgResult::new(pk_commit.into(), opt_sk),
+        ))
     }
 
     /// Handles a `Part` message, or returns a `PartFault` if it is invalid.

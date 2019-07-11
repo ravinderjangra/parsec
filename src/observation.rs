@@ -13,7 +13,7 @@ use crate::{
     key_gen::message::DkgMessage,
     network_event::NetworkEvent,
     peer_list::{Peer, PeerIndex, PeerList},
-    serialise, DkgResult,
+    serialise, DkgResultWrapper,
 };
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 use std::{
@@ -65,10 +65,15 @@ pub enum Observation<T: NetworkEvent, P: PublicId> {
     StartDkg(BTreeSet<P>),
     /// Output only: Do not vote for it.
     /// Will have empty proof set.
-    /// public_key_set will be shared state.
-    /// secret_key_share will be unique to each peers: all participating peers will
-    /// have one assuming less than 1/3 malicious.
-    DkgResult(DkgResult),
+    DkgResult {
+        /// DKG Participants: These peers have a secret key.
+        participants: BTreeSet<P>,
+        /// DKG result.
+        /// public_key_set will be shared state.
+        /// secret_key_share will be unique to each peers: all participating peers will
+        /// have one assuming less than 1/3 malicious. (Ignored in comparaison and serialization).
+        dkg_result: DkgResultWrapper,
+    },
     /// Internal only: Do not vote for it or expect it to come in blocks.
     /// Vote for the next message (Part or Ack) to be handled for the Distributed Key Generation
     /// algorithm used by our common coin.
@@ -104,7 +109,7 @@ impl<T: NetworkEvent, P: PublicId> Observation<T, P> {
     /// Is this observation a result only `DkgResult`
     pub fn is_dkg_result(&self) -> bool {
         match *self {
-            Observation::DkgResult(_) => true,
+            Observation::DkgResult { .. } => true,
             _ => false,
         }
     }
@@ -120,7 +125,10 @@ impl<T: NetworkEvent, P: PublicId> Debug for Observation<T, P> {
                 write!(formatter, "Accusation {{ {:?}, {:?} }}", offender, malice)
             }
             Observation::StartDkg(result) => write!(formatter, "StartDkg({:?})", result),
-            Observation::DkgResult(result) => write!(formatter, "{:?}", result),
+            Observation::DkgResult {
+                participants,
+                dkg_result,
+            } => write!(formatter, "({:?}, {:?})", participants, dkg_result),
             Observation::DkgMessage(msg) => write!(formatter, "{:?}", msg),
             Observation::OpaquePayload(payload) => {
                 write!(formatter, "OpaquePayload({:?})", payload)
