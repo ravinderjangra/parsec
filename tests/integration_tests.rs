@@ -265,7 +265,7 @@ fn run_dkg() {
         .cloned()
         .collect();
 
-    run_dkgs(&mut env, peer_ids, dkgs);
+    run_dkgs(&mut env, &peer_ids, &peer_ids, &dkgs);
 }
 
 #[test]
@@ -283,7 +283,7 @@ fn run_split_dkg() {
         .cloned()
         .collect();
 
-    run_dkgs(&mut env, peer_ids, dkgs);
+    run_dkgs(&mut env, &peer_ids, &peer_ids, &dkgs);
 }
 
 #[test]
@@ -301,13 +301,14 @@ fn run_non_member_dkg() {
         .cloned()
         .collect();
 
-    run_dkgs(&mut env, peer_ids, dkgs);
+    run_dkgs(&mut env, &peer_ids, &all_peer_ids, &dkgs);
 }
 
 fn run_dkgs(
     env: &mut Environment,
-    peer_ids: BTreeSet<PeerId>,
-    dkgs: BTreeMap<BTreeSet<PeerId>, String>,
+    peer_ids: &BTreeSet<PeerId>,
+    all_peer_ids: &BTreeSet<PeerId>,
+    dkgs: &BTreeMap<BTreeSet<PeerId>, String>,
 ) {
     //
     // Arrange
@@ -342,7 +343,7 @@ fn run_dkgs(
 
     let actual: BTreeSet<_> = env
         .network
-        .active_non_malicious_peers()
+        .running_non_malicious_peers()
         .flat_map(|peer| {
             let id = peer.id().clone();
             peer.blocks().map(move |block| (id.clone(), block))
@@ -363,8 +364,7 @@ fn run_dkgs(
     let expected: BTreeSet<_> = dkgs
         .iter()
         .flat_map(|(participants, dkg_name)| {
-            // TODO: need to validate the participants when they are not voters
-            peer_ids
+            all_peer_ids
                 .iter()
                 .map(move |id| (id.clone(), dkg_name.clone(), participants.contains(&id)))
         })
