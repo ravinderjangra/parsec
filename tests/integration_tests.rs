@@ -304,6 +304,43 @@ fn run_non_member_dkg() {
     run_dkgs(&mut env, &peer_ids, &all_peer_ids, &dkgs);
 }
 
+#[test]
+fn run_non_member_single_add_remove_dkg() {
+    let mut env = Environment::new(SEED);
+
+    let mut names = NAMES.iter();
+    let all_peer_ids: BTreeSet<_> = names.by_ref().take(5).cloned().map(PeerId::new).collect();
+
+    let peer_ids: BTreeSet<_> = all_peer_ids.iter().take(4).cloned().collect();
+    let non_members: BTreeSet<_> = all_peer_ids.iter().skip(1).take(4).cloned().collect();
+
+    let dkgs = [(non_members, "single_add_remove".to_string())]
+        .iter()
+        .cloned()
+        .collect();
+
+    run_dkgs(&mut env, &peer_ids, &all_peer_ids, &dkgs);
+}
+
+#[test]
+fn run_non_member_split_dkg() {
+    let mut env = Environment::new(SEED);
+
+    let mut names = NAMES.iter();
+    let all_peer_ids: BTreeSet<_> = names.by_ref().take(8).cloned().map(PeerId::new).collect();
+
+    let genesis: BTreeSet<_> = all_peer_ids.iter().skip(2).take(4).cloned().collect();
+    let left: BTreeSet<_> = all_peer_ids.iter().take(4).cloned().collect();
+    let right: BTreeSet<_> = all_peer_ids.iter().skip(4).take(4).cloned().collect();
+
+    let dkgs = [(left, "left".to_string()), (right, "right".to_string())]
+        .iter()
+        .cloned()
+        .collect();
+
+    run_dkgs(&mut env, &genesis, &all_peer_ids, &dkgs);
+}
+
 fn run_dkgs(
     env: &mut Environment,
     peer_ids: &BTreeSet<PeerId>,
