@@ -350,10 +350,11 @@ fn add_dev_utils_record_smoke_tests(scenarios: &mut Scenarios) {
 
     let _ = scenarios
         .add("dev_utils::record::tests::smoke_dkg", |env| {
-            let peer_ids = peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric");
+            let peer_ids = peer_ids!("Alice", "Bob", "Carol");
+            let dkg_peer_ids = peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric");
             let obs = ObservationSchedule {
                 genesis: Genesis::new(peer_ids.clone()),
-                schedule: vec![(1, StartDkg(peer_ids))],
+                schedule: vec![(1, StartDkg(dkg_peer_ids))],
             };
             Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
         })
