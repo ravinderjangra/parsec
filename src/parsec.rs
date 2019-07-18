@@ -990,6 +990,17 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     fn handle_add_peer(&mut self, peer_id: &S::PublicId) -> PeerListChange {
+        let state = if self.new_peer_can_recv(peer_id) {
+            PeerState::VOTE | PeerState::SEND | PeerState::RECV
+        } else {
+            PeerState::VOTE | PeerState::SEND
+        };
+
+        let peer_index = self.add_gossip_peer(peer_id, state);
+        PeerListChange::Add(peer_index)
+    }
+
+    fn new_peer_can_recv(&self, peer_id: &S::PublicId) -> bool {
         // - If we are already full member of the section, we can start sending gossips to
         //   the new peer from this moment.
         // - If we are the new peer, we must wait for the other members to send gossips to
@@ -997,8 +1008,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         //
         // To distinguish between the two, we check whether everyone we reached consensus on
         // adding also reached consensus on adding us.
-        let recv = self
-            .peer_list
+        self.peer_list
             .iter()
             .filter(|(peer_index, peer)| {
                 // Peers that can vote, which means we got consensus on adding them.
@@ -1012,14 +1022,10 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 // Peers that can receive, which implies they've already sent us at least
                 // one message which implies they've already reached consensus on adding us.
                 peer.state().can_recv()
-            });
+            })
+    }
 
-        let state = if recv {
-            PeerState::VOTE | PeerState::SEND | PeerState::RECV
-        } else {
-            PeerState::VOTE | PeerState::SEND
-        };
-
+    fn add_gossip_peer(&mut self, peer_id: &S::PublicId, state: PeerState) -> PeerIndex {
         let peer_index = if let Some(peer_index) = self.peer_list.get_index(peer_id) {
             self.peer_list.change_peer_state(peer_index, state);
             peer_index
@@ -1031,7 +1037,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             self.add_initial_event();
         }
 
-        PeerListChange::Add(peer_index)
+        peer_index
     }
 
     fn handle_remove_peer(
