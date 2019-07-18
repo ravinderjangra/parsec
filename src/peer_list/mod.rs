@@ -129,7 +129,7 @@ impl<S: SecretId> PeerList<S> {
             let iter = self
                 .iter()
                 .skip(1)
-                .filter(|(_, peer)| peer.state().can_vote() && peer.state().can_recv());
+                .filter(|(_, peer)| peer.state().can_dkg() && peer.state().can_recv());
             Some(iter)
         } else {
             None

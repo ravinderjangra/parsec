@@ -498,10 +498,11 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
     fn confirm_allowed_to_gossip_to(&self, peer_index: PeerIndex) -> Result<()> {
         self.confirm_self_state(PeerState::SEND)?;
-        // We require `PeerState::VOTE` in addition to `PeerState::RECV` here, because if the
-        // peer does not have `PeerState::VOTE`, it means we haven't yet reached consensus on
+        // We require `PeerState::DKG` in addition to `PeerState::RECV` here, because if the
+        // peer does not have `PeerState::DKG`, it means we haven't yet reached consensus on
         // adding them to the section so we shouldn't contact them yet.
-        self.confirm_peer_state(peer_index, PeerState::VOTE | PeerState::RECV)
+        // `PeerState::VOTE` automatically includes `PeerState::DKG`.
+        self.confirm_peer_state(peer_index, PeerState::DKG | PeerState::RECV)
     }
 
     fn confirm_peer_state(&self, peer_index: PeerIndex, required: PeerState) -> Result<()> {
@@ -753,10 +754,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             return Ok(PostProcessAction::Continue);
         }
 
-        // Only add meta events for sync events
-        if get_known_event(self.our_pub_id(), &self.graph, event_index)?.is_sync_event() {
-            self.create_meta_event(event_index)?;
-        }
+        self.create_needed_meta_event(event_index)?;
 
         let payload_keys = self.compute_consensus(event_index);
         if payload_keys.is_empty() {
@@ -965,8 +963,25 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
     // This function must be called on consensus on a `StartDkg` observation.
     fn handle_dkg_start_consensus(&mut self, peers: &BTreeSet<S::PublicId>) -> Option<()> {
-        let threshold = dkg_threshold(peers.len());
+        let state = if self.new_peer_can_recv(self.our_pub_id()) {
+            PeerState::DKG | PeerState::SEND | PeerState::RECV
+        } else {
+            PeerState::DKG | PeerState::SEND
+        };
 
+        for peer_id in peers {
+            if !self
+                .peer_list
+                .get_index(peer_id)
+                .and_then(|index| self.peer_list.get(index))
+                .map(|peer| peer.state().can_dkg())
+                .unwrap_or(false)
+            {
+                let _ = self.add_gossip_peer(peer_id, state);
+            }
+        }
+
+        let threshold = dkg_threshold(peers.len());
         let (key_gen, part) = KeyGen::new(
             self.peer_list.our_id(),
             peers.clone(),
@@ -1051,8 +1066,14 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         })
     }
 
-    fn create_meta_event(&mut self, event_index: EventIndex) -> Result<()> {
+    fn create_needed_meta_event(&mut self, event_index: EventIndex) -> Result<()> {
         let event = get_known_event(self.our_pub_id(), &self.graph, event_index)?;
+
+        if !event.is_sync_event() || !self.voters().contains(event.creator()) {
+            // Only add meta events for sync events created by a valid voter.
+            // Other events have no meta event.
+            return Ok(());
+        }
 
         trace!(
             "{:?} creating a meta-event for event {:?}",
@@ -1115,23 +1136,20 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         peers_that_can_vote: &PeerIndexSet,
         payload_key: &ObservationKey,
     ) -> bool {
-        let num_peers_that_did_vote = || {
-            self.num_creators_of_ancestors_carrying_payload(
-                peers_that_can_vote,
-                builder.event(),
-                payload_key,
-            )
-        };
-
         match payload_key.consensus_mode() {
             ConsensusMode::Single => {
                 let num_ancestor_peers =
                     self.num_creators_of_ancestors(peers_that_can_vote, &*builder.event());
                 is_more_than_two_thirds(num_ancestor_peers, peers_that_can_vote.len())
-                    && num_peers_that_did_vote() > 0
+                    && self.has_ancestor_carrying_payload(builder.event(), payload_key)
             }
             ConsensusMode::Supermajority => {
-                is_more_than_two_thirds(num_peers_that_did_vote(), peers_that_can_vote.len())
+                let num_peers_that_did_vote = self.num_creators_of_ancestors_carrying_payload(
+                    peers_that_can_vote,
+                    builder.event(),
+                    payload_key,
+                );
+                is_more_than_two_thirds(num_peers_that_did_vote, peers_that_can_vote.len())
             }
         }
     }
@@ -1166,6 +1184,16 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 })
             })
             .count()
+    }
+
+    // At least one ancestor of the given event carries the given payload.
+    fn has_ancestor_carrying_payload(
+        &self,
+        event: IndexedEventRef<S::PublicId>,
+        payload_key: &ObservationKey,
+    ) -> bool {
+        self.unconsensused_events(Some(payload_key))
+            .any(|that_event| event.is_descendant_of(that_event))
     }
 
     fn set_observer(&self, builder: &mut MetaEventBuilder<S::PublicId>) {
@@ -2055,7 +2083,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     }
 
     fn detect_premature_gossip(&self) -> Result<()> {
-        self.confirm_self_state(PeerState::VOTE)
+        self.confirm_self_state(PeerState::DKG)
             .map_err(|_| Error::PrematureGossip)
     }
 

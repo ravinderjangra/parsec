@@ -190,6 +190,7 @@ fn parse_single_state() -> Parser<u8, PeerState> {
     seq(b"VOTE").map(|_| PeerState::VOTE)
         | seq(b"SEND").map(|_| PeerState::SEND)
         | seq(b"RECV").map(|_| PeerState::RECV)
+        | seq(b"DKG").map(|_| PeerState::DKG)
 }
 
 fn parse_peers() -> Parser<u8, BTreeSet<PeerId>> {

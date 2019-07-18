@@ -9,7 +9,7 @@
 use super::{
     new_rng,
     peer::{NetworkView, Peer, PeerStatus},
-    schedule::{Schedule, ScheduleEvent, ScheduleOptions},
+    schedule::{AddPeerType, Schedule, ScheduleEvent, ScheduleOptions},
     Observation,
 };
 use crate::{
@@ -580,8 +580,8 @@ impl Network {
                 // Do a full reset while we're at it.
                 self.msg_queue.clear();
             }
-            ScheduleEvent::AddPeer(peer_id) => {
-                if !self.allow_addition_of_peer() {
+            ScheduleEvent::AddPeer(peer_id, add_type) => {
+                if add_type == AddPeerType::Voter && !self.allow_addition_of_peer() {
                     return Ok(false);
                 }
                 let current_peers = self.active_peers().map(|peer| peer.id().clone()).collect();

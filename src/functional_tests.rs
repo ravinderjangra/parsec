@@ -314,7 +314,7 @@ fn remove_peer() {
     assert_eq!(
         alice.create_gossip(&eric_id),
         Err(Error::InvalidPeerState {
-            required: PeerState::VOTE | PeerState::RECV,
+            required: PeerState::DKG | PeerState::RECV,
             actual: PeerState::inactive()
         })
     );

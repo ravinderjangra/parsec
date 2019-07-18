@@ -98,6 +98,13 @@ impl Genesis {
     }
 }
 
+/// Role of new peer: voter or DKG.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum AddPeerType {
+    Voter,
+    Dkg,
+}
+
 /// Represents an event the network is supposed to simulate.
 /// The simulation proceeds in steps. During every global step, every node has some probability
 /// of being scheduled to perform a local step, consisting of receiving messages that reached it
@@ -115,7 +122,7 @@ pub enum ScheduleEvent {
     /// This event makes a node vote on the given observation.
     VoteFor(PeerId, Observation),
     /// Adds a peer to the network (this is separate from nodes voting to add the peer)
-    AddPeer(PeerId),
+    AddPeer(PeerId, AddPeerType),
     /// Removes a peer from the network (this is separate from nodes voting to remove the peer)
     /// It is similar to Fail in that the peer will stop responding; however, this will also
     /// cause the other peers to vote for removal
@@ -136,7 +143,7 @@ impl ScheduleEvent {
             ScheduleEvent::LocalStep(_) => panic!("ScheduleEvent::get_peer called on LocalStep!"),
             ScheduleEvent::Fail(ref peer) => peer,
             ScheduleEvent::VoteFor(ref peer, _) => peer,
-            ScheduleEvent::AddPeer(ref peer) => peer,
+            ScheduleEvent::AddPeer(ref peer, _) => peer,
             ScheduleEvent::RemovePeer(ref peer) => peer,
             ScheduleEvent::Genesis(_) => panic!("ScheduleEvent::get_peer called on Genesis!"),
         }
@@ -624,7 +631,8 @@ impl Schedule {
                         );
 
                         if added_peers.insert(new_peer.clone()) {
-                            schedule.push(ScheduleEvent::AddPeer(new_peer.clone()));
+                            schedule
+                                .push(ScheduleEvent::AddPeer(new_peer.clone(), AddPeerType::Voter));
                         }
                         // vote for all observations that were made before this peer joined
                         // this prevents situations in which peers joining reach consensus before
@@ -696,7 +704,8 @@ impl Schedule {
                     ObservationEvent::StartDkg(dkg_peers) => {
                         for peer in &dkg_peers {
                             if added_peers.insert(peer.clone()) {
-                                schedule.push(ScheduleEvent::AddPeer(peer.clone()));
+                                schedule
+                                    .push(ScheduleEvent::AddPeer(peer.clone(), AddPeerType::Dkg));
                             }
                         }
 
@@ -737,6 +746,10 @@ impl Schedule {
         } else {
             max_observations
         };
+
+        for peer in added_peers {
+            peers.add_dkg_peer(peer);
+        }
 
         let result = Schedule {
             peers: peers.into(),

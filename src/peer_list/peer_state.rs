@@ -25,11 +25,14 @@ pub struct PeerState(u8);
 
 impl PeerState {
     /// The peer is counted towards supermajority.
-    pub const VOTE: Self = PeerState(0b0000_0001);
+    /// Automatically DKG as well
+    pub const VOTE: Self = PeerState(0b0000_1001);
     /// The peer can send gossips.
     pub const SEND: Self = PeerState(0b0000_0010);
     /// The peer can receive gossips.
     pub const RECV: Self = PeerState(0b0000_0100);
+    /// The peer can participate in DKG.
+    pub const DKG: Self = PeerState(0b0000_1000);
 
     pub fn inactive() -> Self {
         PeerState(0)
@@ -45,6 +48,10 @@ impl PeerState {
 
     pub fn can_vote(self) -> bool {
         self.contains(Self::VOTE)
+    }
+
+    pub fn can_dkg(self) -> bool {
+        self.contains(Self::DKG)
     }
 
     pub fn can_send(self) -> bool {
@@ -93,7 +100,15 @@ impl Debug for PeerState {
             if separator {
                 write!(f, "|")?;
             }
+            separator = true;
             write!(f, "RECV")?;
+        }
+
+        if self.contains(Self::DKG) {
+            if separator {
+                write!(f, "|")?;
+            }
+            write!(f, "DKG")?;
         }
 
         write!(f, ")")
