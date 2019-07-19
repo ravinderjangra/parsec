@@ -254,47 +254,91 @@ fn add_few_peers_and_vote() {
     unwrap!(env.network.execute_schedule(&mut env.rng, schedule));
 }
 
+// Run DKG with the 4 voters in genesis
 #[test]
 fn run_dkg() {
     let mut env = Environment::new(SEED);
+    let named_peer_ids = PeerId::named_peer_ids();
 
-    let mut names = NAMES.iter();
-    let peer_ids: BTreeSet<_> = names.by_ref().take(4).cloned().map(PeerId::new).collect();
-    let dkgs = [(peer_ids.clone(), "dkg".to_string())]
-        .iter()
-        .cloned()
-        .collect();
+    let genesis: BTreeSet<_> = named_peer_ids[0..4].iter().cloned().collect();
 
-    run_dkgs(&mut env, peer_ids, dkgs);
+    let dkgs = vec![(genesis.clone(), "dkg".to_string())];
+
+    run_dkgs(&mut env, &genesis, &genesis, dkgs);
 }
 
+// Run 2 DKGs with disjoint sets of 4 peers from the 8 voters in genesis
 #[test]
 fn run_split_dkg() {
     let mut env = Environment::new(SEED);
+    let named_peer_ids = PeerId::named_peer_ids();
 
-    let mut names = NAMES.iter();
-    let peer_ids: BTreeSet<_> = names.by_ref().take(8).cloned().map(PeerId::new).collect();
+    let genesis: BTreeSet<_> = named_peer_ids[0..8].iter().cloned().collect();
+    let left: BTreeSet<_> = named_peer_ids[0..4].iter().cloned().collect();
+    let right: BTreeSet<_> = named_peer_ids[4..8].iter().cloned().collect();
 
-    let left: BTreeSet<_> = peer_ids.iter().take(4).cloned().collect();
-    let right: BTreeSet<_> = peer_ids.iter().skip(4).take(4).cloned().collect();
+    let dkgs = vec![(left, "left".to_string()), (right, "right".to_string())];
 
-    let dkgs = [(left, "left".to_string()), (right, "right".to_string())]
-        .iter()
-        .cloned()
-        .collect();
+    run_dkgs(&mut env, &genesis, &genesis, dkgs);
+}
 
-    run_dkgs(&mut env, peer_ids, dkgs);
+// Run a DKG with 4 peers not in the 4 voters in genesis
+#[test]
+fn run_non_voters_dkg() {
+    let mut env = Environment::new(SEED);
+    let named_peer_ids = PeerId::named_peer_ids();
+
+    let all_peer_ids: BTreeSet<_> = named_peer_ids[0..8].iter().cloned().collect();
+    let genesis: BTreeSet<_> = named_peer_ids[0..4].iter().cloned().collect();
+    let non_voters: BTreeSet<_> = named_peer_ids[4..8].iter().cloned().collect();
+
+    let dkgs = vec![(non_voters, "non_voters".to_string())];
+
+    run_dkgs(&mut env, &genesis, &all_peer_ids, dkgs);
+}
+
+// Run a DKG with 4 peers with one of them not in the 4 voters in genesis
+#[test]
+fn run_non_member_single_add_remove_dkg() {
+    let mut env = Environment::new(SEED);
+    let named_peer_ids = PeerId::named_peer_ids();
+
+    let all_peer_ids: BTreeSet<_> = named_peer_ids[0..5].iter().cloned().collect();
+    let genesis: BTreeSet<_> = named_peer_ids[0..4].iter().cloned().collect();
+    let single_add_remove: BTreeSet<_> = named_peer_ids[1..5].iter().cloned().collect();
+
+    let dkgs = vec![(single_add_remove, "single_add_remove".to_string())];
+
+    run_dkgs(&mut env, &genesis, &all_peer_ids, dkgs);
+}
+
+// Run 2 DKGs with disjoint sets of 4 peers, each with 2 of the 4 voters in genesis
+#[test]
+fn run_non_member_split_dkg() {
+    let mut env = Environment::new(SEED);
+    let named_peer_ids = PeerId::named_peer_ids();
+
+    let all_peer_ids: BTreeSet<_> = named_peer_ids[0..8].iter().cloned().collect();
+    let genesis: BTreeSet<_> = named_peer_ids[2..6].iter().cloned().collect();
+    let left: BTreeSet<_> = named_peer_ids[0..4].iter().cloned().collect();
+    let right: BTreeSet<_> = named_peer_ids[4..8].iter().cloned().collect();
+
+    let dkgs = vec![(left, "left".to_string()), (right, "right".to_string())];
+
+    run_dkgs(&mut env, &genesis, &all_peer_ids, dkgs);
 }
 
 fn run_dkgs(
     env: &mut Environment,
-    peer_ids: BTreeSet<PeerId>,
-    dkgs: BTreeMap<BTreeSet<PeerId>, String>,
+    peer_ids: &BTreeSet<PeerId>,
+    all_peer_ids: &BTreeSet<PeerId>,
+    dkgs: Vec<(BTreeSet<PeerId>, String)>,
 ) {
     //
     // Arrange
     //
     use parsec::dev_utils::ObservationEvent;
+    let dkgs: BTreeMap<_, _> = dkgs.into_iter().collect();
     let obs_schedule = ObservationSchedule {
         genesis: Genesis::new(peer_ids.iter().cloned().collect()),
         schedule: dkgs
@@ -324,7 +368,7 @@ fn run_dkgs(
 
     let actual: BTreeSet<_> = env
         .network
-        .active_non_malicious_peers()
+        .running_non_malicious_peers()
         .flat_map(|peer| {
             let id = peer.id().clone();
             peer.blocks().map(move |block| (id.clone(), block))
@@ -345,7 +389,7 @@ fn run_dkgs(
     let expected: BTreeSet<_> = dkgs
         .iter()
         .flat_map(|(participants, dkg_name)| {
-            peer_ids
+            all_peer_ids
                 .iter()
                 .map(move |id| (id.clone(), dkg_name.clone(), participants.contains(&id)))
         })

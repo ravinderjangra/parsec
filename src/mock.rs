@@ -60,6 +60,10 @@ impl PeerId {
             .unwrap_or_else(|| PeerId::new_with_keypair(id))
     }
 
+    pub fn named_peer_ids() -> &'static [PeerId] {
+        &PEERS
+    }
+
     pub fn new_with_random_keypair(id: &str) -> Self {
         let (pub_sign, sec_sign) = gen_sign_keypair();
         Self {

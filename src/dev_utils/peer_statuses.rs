@@ -85,6 +85,11 @@ impl PeerStatuses {
         let _ = self.statuses.insert(p, PeerStatus::Active);
     }
 
+    /// Adds a Dkg peer with Pending status.
+    pub fn add_dkg_peer(&mut self, p: PeerId) {
+        let _ = self.statuses.entry(p).or_insert(PeerStatus::Pending);
+    }
+
     /// Randomly chooses a peer to remove.
     pub fn remove_random_peer<R: Rng>(&mut self, rng: &mut R, min_active: usize) -> Option<PeerId> {
         let name = self.choose_name_to_remove(rng);

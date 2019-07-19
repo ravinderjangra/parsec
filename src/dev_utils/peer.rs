@@ -511,10 +511,6 @@ impl Peer {
             })
     }
 
-    pub fn is_active_and_has_block(&self, payload: &Observation) -> bool {
-        self.status == PeerStatus::Active && self.blocks().any(|block| block.payload() == payload)
-    }
-
     pub fn is_malicious(&self) -> bool {
         match self.parsec {
             WrappedParsec::Good(..) => false,

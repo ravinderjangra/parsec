@@ -9,7 +9,7 @@
 use super::{
     new_rng,
     peer::{NetworkView, Peer, PeerStatus},
-    schedule::{Schedule, ScheduleEvent, ScheduleOptions},
+    schedule::{AddPeerType, Schedule, ScheduleEvent, ScheduleOptions},
     Observation,
 };
 use crate::{
@@ -122,14 +122,15 @@ impl Network {
         self.consensus_mode
     }
 
-    fn active_peers(&self) -> impl Iterator<Item = &Peer> {
+    fn running_non_ignoring_peers(&self) -> impl Iterator<Item = &Peer> {
         self.peers
             .values()
-            .filter(|peer| peer.status() == PeerStatus::Active && !peer.ignore_process_events())
+            .filter(|peer| peer.is_running() && !peer.ignore_process_events())
     }
 
-    pub fn active_non_malicious_peers(&self) -> impl Iterator<Item = &Peer> {
-        self.active_peers().filter(|peer| !peer.is_malicious())
+    pub fn running_non_malicious_peers(&self) -> impl Iterator<Item = &Peer> {
+        self.running_non_ignoring_peers()
+            .filter(|peer| !peer.is_malicious())
     }
 
     /// Returns the IDs of peers which consider themselves to be still running correctly, i.e. those
@@ -157,10 +158,10 @@ impl Network {
 
     /// Returns true if all peers hold the same sequence of stable blocks.
     fn check_blocks_all_in_sequence(&self) -> Result<(), ConsensusError> {
-        let first_peer = unwrap!(self.active_non_malicious_peers().next());
+        let first_peer = unwrap!(self.running_non_malicious_peers().next());
         let payloads = first_peer.blocks_payloads();
         if let Some(peer) = self
-            .active_non_malicious_peers()
+            .running_non_malicious_peers()
             .find(|peer| peer.blocks_payloads() != payloads)
         {
             Err(ConsensusError::DifferingBlocksOrder(DifferingBlocksOrder {
@@ -289,7 +290,7 @@ impl Network {
 
     fn check_consensus_broken(&self) -> Result<(), ConsensusError> {
         let mut block_order = BTreeMap::new();
-        for peer in self.active_non_malicious_peers() {
+        for peer in self.running_non_malicious_peers() {
             for (index, block) in peer.blocks().enumerate() {
                 let key = self.block_key(block);
 
@@ -352,7 +353,7 @@ impl Network {
     ) -> Result<(), ConsensusError> {
         // Check the number of consensused blocks.
         let (got_min, got_max) = unwrap!(self
-            .active_non_malicious_peers()
+            .running_non_malicious_peers()
             .map(|peer| peer.blocks_payloads().len())
             .minmax()
             .into_option());
@@ -421,7 +422,7 @@ impl Network {
 
     /// Checks if the blocks are only signed by valid voters.
     fn check_blocks_signatories(&self) -> Result<(), ConsensusError> {
-        let block_groups = unwrap!(self.active_non_malicious_peers().next()).grouped_blocks();
+        let block_groups = unwrap!(self.running_non_malicious_peers().next()).grouped_blocks();
         let mut valid_voters = BTreeSet::new();
 
         for block_group in block_groups {
@@ -580,11 +581,14 @@ impl Network {
                 // Do a full reset while we're at it.
                 self.msg_queue.clear();
             }
-            ScheduleEvent::AddPeer(peer_id) => {
-                if !self.allow_addition_of_peer() {
+            ScheduleEvent::AddPeer(peer_id, add_type) => {
+                if add_type == AddPeerType::Voter && !self.allow_addition_of_peer() {
                     return Ok(false);
                 }
-                let current_peers = self.active_peers().map(|peer| peer.id().clone()).collect();
+                let current_peers = self
+                    .running_non_ignoring_peers()
+                    .map(|peer| peer.id().clone())
+                    .collect();
                 let _ = self.peers.insert(
                     peer_id.clone(),
                     Peer::from_existing(
@@ -657,13 +661,6 @@ impl Network {
                 }
 
                 self.peer_mut(&voting_peer_id).vote_for(&observation);
-            }
-            ScheduleEvent::StartDkg(peers) => {
-                // All valid peers should vote for new DKG.
-                for peer_id in self.running_peers_ids() {
-                    self.peer_mut(&peer_id)
-                        .vote_for(&ParsecObservation::StartDkg(peers.clone()));
-                }
             }
         }
         Ok(true)
