@@ -62,8 +62,8 @@ use maidsafe_utilities::log;
 use parsec::{
     dev_utils::{
         proptest::{arbitrary_delay, ScheduleOptionsStrategy, ScheduleStrategy},
-        DelayDistribution, Environment, Genesis, ObservationSchedule, RngChoice, Sampling,
-        Schedule, ScheduleOptions,
+        DelayDistribution, Environment, Genesis, ObservationEvent, ObservationSchedule, RngChoice,
+        Sampling, Schedule, ScheduleOptions,
     },
     mock::{PeerId, Transaction, NAMES},
     ConsensusMode, Observation,
@@ -257,20 +257,20 @@ fn add_few_peers_and_vote() {
 // Run DKG with the 4 voters in genesis
 #[test]
 fn run_dkg() {
-    let mut env = Environment::new(SEED);
+    let mut env = Environment::with_consensus_mode(SEED, ConsensusMode::Single);
     let named_peer_ids = PeerId::named_peer_ids();
 
     let genesis: BTreeSet<_> = named_peer_ids[0..4].iter().cloned().collect();
 
     let dkgs = vec![(genesis.clone(), "dkg".to_string())];
 
-    run_dkgs(&mut env, &genesis, &genesis, dkgs);
+    run_dkgs(&mut env, &genesis, &genesis, dkgs, vec![]);
 }
 
 // Run 2 DKGs with disjoint sets of 4 peers from the 8 voters in genesis
 #[test]
 fn run_split_dkg() {
-    let mut env = Environment::new(SEED);
+    let mut env = Environment::with_consensus_mode(SEED, ConsensusMode::Single);
     let named_peer_ids = PeerId::named_peer_ids();
 
     let genesis: BTreeSet<_> = named_peer_ids[0..8].iter().cloned().collect();
@@ -279,71 +279,95 @@ fn run_split_dkg() {
 
     let dkgs = vec![(left, "left".to_string()), (right, "right".to_string())];
 
-    run_dkgs(&mut env, &genesis, &genesis, dkgs);
+    run_dkgs(&mut env, &genesis, &genesis, dkgs, vec![]);
 }
 
 // Run a DKG with 4 peers not in the 4 voters in genesis
 #[test]
 fn run_non_voters_dkg() {
-    let mut env = Environment::new(SEED);
+    let mut env = Environment::with_consensus_mode(SEED, ConsensusMode::Single);
     let named_peer_ids = PeerId::named_peer_ids();
 
-    let all_peer_ids: BTreeSet<_> = named_peer_ids[0..8].iter().cloned().collect();
+    let final_peer_ids: BTreeSet<_> = named_peer_ids[0..8].iter().cloned().collect();
     let genesis: BTreeSet<_> = named_peer_ids[0..4].iter().cloned().collect();
     let non_voters: BTreeSet<_> = named_peer_ids[4..8].iter().cloned().collect();
 
     let dkgs = vec![(non_voters, "non_voters".to_string())];
 
-    run_dkgs(&mut env, &genesis, &all_peer_ids, dkgs);
+    run_dkgs(&mut env, &genesis, &final_peer_ids, dkgs, vec![]);
 }
 
 // Run a DKG with 4 peers with one of them not in the 4 voters in genesis
 #[test]
 fn run_non_member_single_add_remove_dkg() {
-    let mut env = Environment::new(SEED);
+    let mut env = Environment::with_consensus_mode(SEED, ConsensusMode::Single);
     let named_peer_ids = PeerId::named_peer_ids();
 
-    let all_peer_ids: BTreeSet<_> = named_peer_ids[0..5].iter().cloned().collect();
+    let final_peer_ids: BTreeSet<_> = named_peer_ids[0..5].iter().cloned().collect();
     let genesis: BTreeSet<_> = named_peer_ids[0..4].iter().cloned().collect();
     let single_add_remove: BTreeSet<_> = named_peer_ids[1..5].iter().cloned().collect();
 
     let dkgs = vec![(single_add_remove, "single_add_remove".to_string())];
 
-    run_dkgs(&mut env, &genesis, &all_peer_ids, dkgs);
+    run_dkgs(&mut env, &genesis, &final_peer_ids, dkgs, vec![]);
 }
 
-// Run 2 DKGs with disjoint sets of 4 peers, each with 2 of the 4 voters in genesis
+// Run a DKG with 4 peers with one of them not in the 4 voters in genesis.
+// After the DKG is initiated or complete, vote for the actual Add/Remove/Opaque events.
 #[test]
-fn run_non_member_split_dkg() {
-    let mut env = Environment::new(SEED);
+fn run_non_member_single_add_remove_dkg_with_member_change() {
+    let mut env = Environment::with_consensus_mode(SEED, ConsensusMode::Single);
     let named_peer_ids = PeerId::named_peer_ids();
 
-    let all_peer_ids: BTreeSet<_> = named_peer_ids[0..8].iter().cloned().collect();
+    let final_peer_ids: BTreeSet<_> = named_peer_ids[1..5].iter().cloned().collect();
+    let genesis: BTreeSet<_> = named_peer_ids[0..4].iter().cloned().collect();
+    let single_add_remove: BTreeSet<_> = named_peer_ids[1..5].iter().cloned().collect();
+
+    let dkgs = vec![(single_add_remove, "single_add_remove".to_string())];
+    let additional_events = vec![
+        (500, ObservationEvent::AddPeer(named_peer_ids[4].clone())),
+        (500, ObservationEvent::RemovePeer(named_peer_ids[0].clone())),
+        (500, ObservationEvent::Opaque(Transaction::new("info"))),
+    ];
+
+    run_dkgs(&mut env, &genesis, &final_peer_ids, dkgs, additional_events);
+}
+
+// Run 2 DKGs with disjoint sets of 4 peers, each with 2 of the 4 voters in genesis.
+// After the DKG is initiated or complete, vote for an additional Opaque event.
+#[test]
+fn run_non_member_split_dkg() {
+    let mut env = Environment::with_consensus_mode(SEED, ConsensusMode::Single);
+    let named_peer_ids = PeerId::named_peer_ids();
+
+    let final_peer_ids: BTreeSet<_> = named_peer_ids[0..8].iter().cloned().collect();
     let genesis: BTreeSet<_> = named_peer_ids[2..6].iter().cloned().collect();
     let left: BTreeSet<_> = named_peer_ids[0..4].iter().cloned().collect();
     let right: BTreeSet<_> = named_peer_ids[4..8].iter().cloned().collect();
 
     let dkgs = vec![(left, "left".to_string()), (right, "right".to_string())];
+    let additional_events = vec![(500, ObservationEvent::Opaque(Transaction::new("info")))];
 
-    run_dkgs(&mut env, &genesis, &all_peer_ids, dkgs);
+    run_dkgs(&mut env, &genesis, &final_peer_ids, dkgs, additional_events);
 }
 
 fn run_dkgs(
     env: &mut Environment,
     peer_ids: &BTreeSet<PeerId>,
-    all_peer_ids: &BTreeSet<PeerId>,
+    final_peer_ids: &BTreeSet<PeerId>,
     dkgs: Vec<(BTreeSet<PeerId>, String)>,
+    additional_events: Vec<(usize, ObservationEvent)>,
 ) {
     //
     // Arrange
     //
-    use parsec::dev_utils::ObservationEvent;
     let dkgs: BTreeMap<_, _> = dkgs.into_iter().collect();
     let obs_schedule = ObservationSchedule {
         genesis: Genesis::new(peer_ids.iter().cloned().collect()),
         schedule: dkgs
             .keys()
             .map(|participants| (50, ObservationEvent::StartDkg(participants.clone())))
+            .chain(additional_events.into_iter())
             .collect(),
     };
 
@@ -389,7 +413,7 @@ fn run_dkgs(
     let expected: BTreeSet<_> = dkgs
         .iter()
         .flat_map(|(participants, dkg_name)| {
-            all_peer_ids
+            final_peer_ids
                 .iter()
                 .map(move |id| (id.clone(), dkg_name.clone(), participants.contains(&id)))
         })
