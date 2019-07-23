@@ -83,6 +83,7 @@ struct ParsedFile {
     graph: ParsedGraph,
     meta_election: ParsedMetaElection,
     secure_rng_values: Vec<u32>,
+    serialized_key_gens_and_next_id: Option<Vec<u8>>,
 }
 
 struct ParserCtx {
@@ -127,21 +128,27 @@ fn parse_file(ctx: &Rc<ParserCtx>) -> Parser<u8, ParsedFile> {
         + parse_peer_list(ctx)
         + parse_consensus_mode()
         + parse_secure_rng()
+        + parse_key_gens()
         + parse_graph()
         + parse_meta_election(ctx)
         - parse_end())
-    .map(
-        |(((((our_id, peer_list), consensus_mode), secure_rng_values), graph), meta_election)| {
-            ParsedFile {
-                our_id,
-                peer_list,
-                consensus_mode,
-                graph,
-                meta_election,
-                secure_rng_values,
-            }
-        },
-    )
+    .map(|head| {
+        let (head, meta_election) = head;
+        let (head, graph) = head;
+        let (head, serialized_key_gens_and_next_id) = head;
+        let (head, secure_rng_values) = head;
+        let (head, consensus_mode) = head;
+        let (our_id, peer_list) = head;
+        ParsedFile {
+            our_id,
+            peer_list,
+            consensus_mode,
+            graph,
+            meta_election,
+            secure_rng_values,
+            serialized_key_gens_and_next_id,
+        }
+    })
 }
 
 fn parse_peer_id() -> Parser<u8, PeerId> {
@@ -218,6 +225,18 @@ fn parse_secure_rng() -> Parser<u8, Vec<u32>> {
     parser
         .opt()
         .map(|secure_rng| secure_rng.unwrap_or_default())
+}
+
+fn parse_key_gens() -> Parser<u8, Option<Vec<u8>>> {
+    let parser_u8 = is_a(digit)
+        .repeat(1..)
+        .convert(String::from_utf8)
+        .convert(|s| u8::from_str(&s));
+
+    let parser_vec =
+        (seq(b"[") * list(parser_u8, seq(b", ")) - seq(b"]")).map(|v| v.into_iter().collect());
+    let parser = comment_prefix() * seq(b"key_gens_and_next_id: ") * parser_vec - next_line();
+    parser.opt()
 }
 
 #[derive(Debug)]
@@ -753,6 +772,7 @@ pub(crate) struct ParsedContents {
     pub observations: ObservationStore<Transaction, PeerId>,
     pub consensus_mode: ConsensusMode,
     pub secure_rng_values: Vec<u32>,
+    pub serialized_key_gens_and_next_id: Option<Vec<u8>>,
 }
 
 impl ParsedContents {
@@ -769,6 +789,7 @@ impl ParsedContents {
             observations: ObservationStore::new(),
             consensus_mode: ConsensusMode::Supermajority,
             secure_rng_values: Vec::new(),
+            serialized_key_gens_and_next_id: None,
         }
     }
 }
@@ -924,6 +945,7 @@ fn convert_into_parsed_contents(result: ParsedFile) -> ParsedContents {
         mut graph,
         meta_election,
         secure_rng_values,
+        serialized_key_gens_and_next_id,
     } = result;
 
     let mut parsed_contents = ParsedContents::new(our_id.clone());
@@ -956,6 +978,7 @@ fn convert_into_parsed_contents(result: ParsedFile) -> ParsedContents {
     parsed_contents.meta_election = meta_election;
     parsed_contents.consensus_mode = consensus_mode;
     parsed_contents.secure_rng_values = secure_rng_values;
+    parsed_contents.serialized_key_gens_and_next_id = serialized_key_gens_and_next_id;
     parsed_contents
 }
 

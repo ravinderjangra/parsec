@@ -200,6 +200,30 @@ impl ProposalState {
     }
 }
 
+#[cfg(feature = "dump-graphs")]
+impl serde::Serialize for ProposalState {
+    fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let values: Vec<_> = self
+            .values
+            .iter()
+            .map(|(idx, fr)| (*idx, FieldWrap(fr)))
+            .collect();
+        (&self.commit, values, &self.acks).serialize(s)
+    }
+}
+
+impl<'a> serde::Deserialize<'a> for ProposalState {
+    fn deserialize<D: serde::Deserializer<'a>>(deserializer: D) -> Result<Self, D::Error> {
+        let (commit, values, acks) = serde::Deserialize::deserialize(deserializer)?;
+        let values: Vec<(u64, FieldWrap<Fr>)> = values;
+        Ok(Self {
+            commit,
+            values: values.into_iter().map(|(idx, fr)| (idx, fr.0)).collect(),
+            acks,
+        })
+    }
+}
+
 /// The outcome of handling and verifying a `Part` message.
 pub enum PartOutcome {
     /// The message was valid: the part of it that was encrypted to us matched the public
@@ -221,7 +245,8 @@ pub enum AckOutcome {
 /// A synchronous algorithm for dealerless distributed key generation.
 ///
 /// It requires that all nodes handle all messages in the exact same order.
-#[derive(Debug)]
+#[cfg_attr(feature = "dump-graphs", derive(Serialize))]
+#[derive(Deserialize)]
 pub struct KeyGen<S: SecretId> {
     /// Our node ID.
     our_id: S::PublicId,
@@ -458,6 +483,18 @@ impl<S: SecretId> KeyGen<S> {
         }
         let _ = part.values.insert(sender_idx + 1, val);
         Ok(())
+    }
+}
+
+// https://github.com/rust-lang/rust/issues/52560
+// Cannot derive Debug without changing the type parameter
+impl<S: SecretId> Debug for KeyGen<S> {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(
+            formatter,
+            "KeyGen{{our_id:{:?}, our_idx:{:?}, pub_keys :{:?}, parts:{:?}, threshold:{:?}}}",
+            self.our_id, self.our_idx, self.pub_keys, self.parts, self.threshold
+        )
     }
 }
 

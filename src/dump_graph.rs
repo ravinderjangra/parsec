@@ -9,12 +9,14 @@
 use crate::{
     gossip::Graph,
     id::SecretId,
-    key_gen::parsec_rng::ParsecRng,
+    key_gen::{parsec_rng::ParsecRng, KeyGen},
     meta_voting::MetaElection,
     network_event::NetworkEvent,
     observation::{ConsensusMode, ObservationStore},
+    parsec::KeyGenId,
     peer_list::PeerList,
 };
+use std::collections::BTreeMap;
 
 /// Use this to initialise the folder into which the dot files will be dumped.  This allows the
 /// folder's path to be displayed at the start of a run, rather than at the arbitrary point when
@@ -39,6 +41,7 @@ pub(crate) struct ToFileInfo<'a, T: NetworkEvent, S: SecretId> {
     pub peer_list: &'a PeerList<S>,
     pub observations: &'a ObservationStore<T, S::PublicId>,
     pub secure_rng: &'a ParsecRng,
+    pub key_gens_and_next_id: (&'a BTreeMap<KeyGenId, KeyGen<S>>, &'a KeyGenId),
     pub info: &'a DumpGraphContext,
 }
 
@@ -64,10 +67,11 @@ mod detail {
     use crate::{
         gossip::{Cause, Event, EventIndex, Graph, GraphSnapshot, IndexedEventRef},
         id::{PublicId, SecretId},
-        key_gen::parsec_rng::ParsecRng,
+        key_gen::{parsec_rng::ParsecRng, KeyGen},
         meta_voting::{MetaElection, MetaElectionSnapshot, MetaEvent, MetaVote, Observer},
         network_event::NetworkEvent,
         observation::{ConsensusMode, Malice, Observation, ObservationKey, ObservationStore},
+        parsec::KeyGenId,
         peer_list::{PeerIndex, PeerIndexMap, PeerIndexSet, PeerList},
         serialise,
     };
@@ -225,6 +229,7 @@ mod detail {
                     meta_election: info.meta_election,
                     peer_list: info.peer_list,
                     secure_rng: info.secure_rng,
+                    key_gens_and_next_id: info.key_gens_and_next_id,
                     observations: &DotObservation::from_observations(
                         &info.observations,
                         info.gossip_graph,
@@ -355,6 +360,7 @@ mod detail {
         meta_election: &'a MetaElection,
         peer_list: &'a PeerList<S>,
         secure_rng: &'a ParsecRng,
+        key_gens_and_next_id: (&'a BTreeMap<KeyGenId, KeyGen<S>>, &'a KeyGenId),
         observations: &'a DotObservationStore,
         peer_ids: &'a PeerIndexMap<DotPeerId>,
         short_peer_ids: &'a PeerIndexMap<String>,
@@ -394,6 +400,7 @@ mod detail {
             self.write_peer_list()?;
             self.write_consensus_mode()?;
             self.write_secure_rng()?;
+            self.write_key_gens()?;
 
             self.writeln(format_args!("digraph GossipGraph {{"))?;
             self.writeln(format_args!("  splines=false"))?;
@@ -467,6 +474,22 @@ mod detail {
                 Self::COMMENT,
                 indent,
                 self.secure_rng.generated_values()
+            ))
+        }
+
+        fn write_key_gens(&mut self) -> io::Result<()> {
+            if self.key_gens_and_next_id.0.is_empty()
+                && *self.key_gens_and_next_id.1 == KeyGenId::default()
+            {
+                return Ok(());
+            }
+
+            let indent = self.indentation();
+            self.writeln(format_args!(
+                "{}{}key_gens_and_next_id: {:?}",
+                Self::COMMENT,
+                indent,
+                serialise(&self.key_gens_and_next_id)
             ))
         }
 
