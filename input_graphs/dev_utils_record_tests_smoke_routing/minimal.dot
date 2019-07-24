@@ -4,7 +4,9 @@
 ///   PublicIdnameab4598: PeerState(VOTE|SEND|RECV)
 ///   PublicIdnamecdb63e: PeerState(VOTE|SEND|RECV)
 ///   PublicIdnameef4fb9: PeerState()
+///   PublicIdnameffffff: PeerState(VOTE|SEND|RECV)
 /// }
+/// consensus_mode: Supermajority
 digraph GossipGraph {
   splines=false
   rankdir=BT
@@ -40,8 +42,11 @@ digraph GossipGraph {
     "PublicIdname1_23" -> "PublicIdname1_24" [minlen=1]
     "PublicIdname1_24" -> "PublicIdname1_25" [minlen=8]
     "PublicIdname1_25" -> "PublicIdname1_26" [minlen=1]
-    "PublicIdname1_26" -> "PublicIdname1_27" [minlen=4]
+    "PublicIdname1_26" -> "PublicIdname1_27" [minlen=1]
     "PublicIdname1_27" -> "PublicIdname1_28" [minlen=1]
+    "PublicIdname1_28" -> "PublicIdname1_29" [minlen=1]
+    "PublicIdname1_29" -> "PublicIdname1_30" [minlen=2]
+    "PublicIdname1_30" -> "PublicIdname1_31" [minlen=1]
   }
   "PublicIdnamec_2" -> "PublicIdname1_2" [constraint=false]
   "PublicIdnamec_6" -> "PublicIdname1_4" [constraint=false]
@@ -57,7 +62,9 @@ digraph GossipGraph {
   "PublicIdnamea_20" -> "PublicIdname1_23" [constraint=false]
   "PublicIdnamea_21" -> "PublicIdname1_24" [constraint=false]
   "PublicIdnamec_30" -> "PublicIdname1_25" [constraint=false]
-  "PublicIdnamec_35" -> "PublicIdname1_27" [constraint=false]
+  "PublicIdnamec_31" -> "PublicIdname1_27" [constraint=false]
+  "PublicIdnamef_1" -> "PublicIdname1_28" [constraint=false]
+  "PublicIdnamec_34" -> "PublicIdname1_30" [constraint=false]
 
   style=invis
   subgraph cluster_PublicIdnameab4598 {
@@ -89,9 +96,6 @@ digraph GossipGraph {
     "PublicIdnamea_22" -> "PublicIdnamea_23" [minlen=1]
     "PublicIdnamea_23" -> "PublicIdnamea_24" [minlen=2]
     "PublicIdnamea_24" -> "PublicIdnamea_25" [minlen=1]
-    "PublicIdnamea_25" -> "PublicIdnamea_26" [minlen=4]
-    "PublicIdnamea_26" -> "PublicIdnamea_27" [minlen=1]
-    "PublicIdnamea_27" -> "PublicIdnamea_28" [minlen=5]
   }
   "PublicIdnamec_4" -> "PublicIdnamea_4" [constraint=false]
   "PublicIdnamec_5" -> "PublicIdnamea_5" [constraint=false]
@@ -105,9 +109,6 @@ digraph GossipGraph {
   "PublicIdname1_24" -> "PublicIdnamea_22" [constraint=false]
   "PublicIdnamec_27" -> "PublicIdnamea_24" [constraint=false]
   "PublicIdnamec_28" -> "PublicIdnamea_25" [constraint=false]
-  "PublicIdnamec_31" -> "PublicIdnamea_26" [constraint=false]
-  "PublicIdnamec_32" -> "PublicIdnamea_27" [constraint=false]
-  "PublicIdname1_28" -> "PublicIdnamea_28" [constraint=false]
 
   style=invis
   subgraph cluster_PublicIdnamecdb63e {
@@ -145,10 +146,9 @@ digraph GossipGraph {
     "PublicIdnamec_28" -> "PublicIdnamec_29" [minlen=2]
     "PublicIdnamec_29" -> "PublicIdnamec_30" [minlen=1]
     "PublicIdnamec_30" -> "PublicIdnamec_31" [minlen=1]
-    "PublicIdnamec_31" -> "PublicIdnamec_32" [minlen=1]
+    "PublicIdnamec_31" -> "PublicIdnamec_32" [minlen=3]
     "PublicIdnamec_32" -> "PublicIdnamec_33" [minlen=1]
     "PublicIdnamec_33" -> "PublicIdnamec_34" [minlen=1]
-    "PublicIdnamec_34" -> "PublicIdnamec_35" [minlen=1]
   }
   "PublicIdname1_2" -> "PublicIdnamec_3" [constraint=false]
   "PublicIdnamea_2" -> "PublicIdnamec_4" [constraint=false]
@@ -167,9 +167,9 @@ digraph GossipGraph {
   "PublicIdname1_20" -> "PublicIdnamec_26" [constraint=false]
   "PublicIdnamea_23" -> "PublicIdnamec_27" [constraint=false]
   "PublicIdnamea_25" -> "PublicIdnamec_29" [constraint=false]
-  "PublicIdnamea_26" -> "PublicIdnamec_33" [constraint=false]
-  "PublicIdname1_25" -> "PublicIdnamec_34" [constraint=false]
-  "PublicIdname1_26" -> "PublicIdnamec_35" [constraint=false]
+  "PublicIdname1_27" -> "PublicIdnamec_32" [constraint=false]
+  "PublicIdname1_25" -> "PublicIdnamec_33" [constraint=false]
+  "PublicIdname1_29" -> "PublicIdnamec_34" [constraint=false]
 
   style=invis
   subgraph cluster_PublicIdnameef4fb9 {
@@ -178,14 +178,24 @@ digraph GossipGraph {
   }
 
 
+  style=invis
+  subgraph cluster_PublicIdnameffffff {
+    label="PublicIdnameffffff"
+    "PublicIdnameffffff" [style=invis]
+    "PublicIdnameffffff" -> "PublicIdnamef_0" [style=invis]
+    "PublicIdnamef_0" -> "PublicIdnamef_1" [minlen=53]
+  }
+  "PublicIdname1_26" -> "PublicIdnamef_1" [constraint=false]
+
   {
     rank=same
     "PublicIdname12abcd" [style=filled, color=white]
     "PublicIdnameab4598" [style=filled, color=white]
     "PublicIdnamecdb63e" [style=filled, color=white]
     "PublicIdnameef4fb9" [style=filled, color=white]
+    "PublicIdnameffffff" [style=filled, color=white]
   }
-  "PublicIdname12abcd" -> "PublicIdnameab4598" -> "PublicIdnamecdb63e" -> "PublicIdnameef4fb9" [style=invis]
+  "PublicIdname12abcd" -> "PublicIdnameab4598" -> "PublicIdnamecdb63e" -> "PublicIdnameef4fb9" -> "PublicIdnameffffff" [style=invis]
 
 /// ===== details of events =====
   "PublicIdname1_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
@@ -247,117 +257,99 @@ digraph GossipGraph {
 /// cause: Observation(Add(PublicIdnameffffff))
 /// last_ancestors: {PublicIdname12abcd: 8, PublicIdnameab4598: 3, PublicIdnamecdb63e: 6}
 
-  "PublicIdname1_9" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_9" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_9</td></tr>
 </table>>]
 /// cause: Request
 /// last_ancestors: {PublicIdname12abcd: 9, PublicIdnameab4598: 7, PublicIdnamecdb63e: 10}
 
-  "PublicIdname1_10" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_10" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_10</td></tr>
 </table>>]
 /// cause: Requesting(PublicIdnamecdb63e)
 /// last_ancestors: {PublicIdname12abcd: 10, PublicIdnameab4598: 7, PublicIdnamecdb63e: 10}
 
-  "PublicIdname1_11" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_11" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_11</td></tr>
-<tr><td colspan="6">[Add(PublicIdnameffffff)]</td></tr></table>>]
+</table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname12abcd: 11, PublicIdnameab4598: 12, PublicIdnamecdb63e: 16}
 
-  "PublicIdname1_12" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_12" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_12</td></tr>
 </table>>]
 /// cause: Request
 /// last_ancestors: {PublicIdname12abcd: 12, PublicIdnameab4598: 15, PublicIdnamecdb63e: 19}
 
-  "PublicIdname1_13" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_13" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_13</td></tr>
 </table>>]
 /// cause: Request
 /// last_ancestors: {PublicIdname12abcd: 13, PublicIdnameab4598: 15, PublicIdnamecdb63e: 21}
 
-  "PublicIdname1_14" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_14" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_14</td></tr>
 </table>>]
 /// cause: Request
 /// last_ancestors: {PublicIdname12abcd: 14, PublicIdnameab4598: 15, PublicIdnamecdb63e: 23}
 
-  "PublicIdname1_15" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_15" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_15</td></tr>
 </table>>]
 /// cause: Request
 /// last_ancestors: {PublicIdname12abcd: 15, PublicIdnameab4598: 17, PublicIdnamecdb63e: 23}
 
-  "PublicIdname1_16" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_16" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_16</td></tr>
 </table>>]
 /// cause: Requesting(PublicIdnamecdb63e)
 /// last_ancestors: {PublicIdname12abcd: 16, PublicIdnameab4598: 17, PublicIdnamecdb63e: 23}
 
-  "PublicIdname1_17" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_17" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_17</td></tr>
 </table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname12abcd: 17, PublicIdnameab4598: 17, PublicIdnamecdb63e: 25}
 
-  "PublicIdname1_18" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_18" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_18</td></tr>
 </table>>]
 /// cause: Requesting(PublicIdnameab4598)
 /// last_ancestors: {PublicIdname12abcd: 18, PublicIdnameab4598: 17, PublicIdnamecdb63e: 25}
 
-  "PublicIdname1_19" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_19" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_19</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>PublicIdname1: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>PublicIdnamea: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>PublicIdnamec: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
+</table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname12abcd: 19, PublicIdnameab4598: 19, PublicIdnamecdb63e: 25}
 
-  "PublicIdname1_20" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_20" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_20</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>PublicIdname1: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>PublicIdnamea: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>PublicIdnamec: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
+</table>>]
 /// cause: Requesting(PublicIdnamecdb63e)
 /// last_ancestors: {PublicIdname12abcd: 20, PublicIdnameab4598: 19, PublicIdnamecdb63e: 25}
 
-  "PublicIdname1_21" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_21" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_21</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>PublicIdname1: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>PublicIdnamea: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>PublicIdnamec: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
+</table>>]
 /// cause: Requesting(PublicIdnameab4598)
 /// last_ancestors: {PublicIdname12abcd: 21, PublicIdnameab4598: 19, PublicIdnamecdb63e: 25}
 
-  "PublicIdname1_22" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_22" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_22</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>PublicIdname1: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
-<tr><td>PublicIdnamea: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
-<tr><td>PublicIdnamec: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr></table>>]
+</table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname12abcd: 22, PublicIdnameab4598: 19, PublicIdnamecdb63e: 26}
 
-  "PublicIdname1_23" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_23" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_23</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>PublicIdname1: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
-<tr><td>PublicIdnamea: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
-<tr><td>PublicIdnamec: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr></table>>]
+</table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname12abcd: 23, PublicIdnameab4598: 20, PublicIdnamecdb63e: 26}
 
-  "PublicIdname1_24" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_24" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_24</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>PublicIdname1: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
-<tr><td>PublicIdnamea: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
-<tr><td>PublicIdnamec: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr></table>>]
+</table>>]
 /// cause: Request
 /// last_ancestors: {PublicIdname12abcd: 24, PublicIdnameab4598: 21, PublicIdnamecdb63e: 26}
 
@@ -367,23 +359,41 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {PublicIdname12abcd: 25, PublicIdnameab4598: 25, PublicIdnamecdb63e: 30}
 
-  "PublicIdname1_26" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_26" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_26</td></tr>
 </table>>]
-/// cause: Requesting(PublicIdnamecdb63e)
+/// cause: Requesting(PublicIdnameffffff)
 /// last_ancestors: {PublicIdname12abcd: 26, PublicIdnameab4598: 25, PublicIdnamecdb63e: 30}
 
-  "PublicIdname1_27" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_27" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_27</td></tr>
 </table>>]
-/// cause: Response
-/// last_ancestors: {PublicIdname12abcd: 27, PublicIdnameab4598: 26, PublicIdnamecdb63e: 35}
+/// cause: Request
+/// last_ancestors: {PublicIdname12abcd: 27, PublicIdnameab4598: 25, PublicIdnamecdb63e: 31}
 
-  "PublicIdname1_28" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdname1_28" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdname1_28</td></tr>
 </table>>]
-/// cause: Requesting(PublicIdnameab4598)
-/// last_ancestors: {PublicIdname12abcd: 28, PublicIdnameab4598: 26, PublicIdnamecdb63e: 35}
+/// cause: Response
+/// last_ancestors: {PublicIdname12abcd: 28, PublicIdnameab4598: 25, PublicIdnamecdb63e: 31, PublicIdnameffffff: 1}
+
+  "PublicIdname1_29" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">PublicIdname1_29</td></tr>
+</table>>]
+/// cause: Requesting(PublicIdnamecdb63e)
+/// last_ancestors: {PublicIdname12abcd: 29, PublicIdnameab4598: 25, PublicIdnamecdb63e: 31, PublicIdnameffffff: 1}
+
+  "PublicIdname1_30" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">PublicIdname1_30</td></tr>
+</table>>]
+/// cause: Response
+/// last_ancestors: {PublicIdname12abcd: 30, PublicIdnameab4598: 25, PublicIdnamecdb63e: 34, PublicIdnameffffff: 1}
+
+  "PublicIdname1_31" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">PublicIdname1_31</td></tr>
+</table>>]
+/// cause: Requesting(PublicIdnameffffff)
+/// last_ancestors: {PublicIdname12abcd: 31, PublicIdnameab4598: 25, PublicIdnamecdb63e: 34, PublicIdnameffffff: 1}
 
   "PublicIdnamea_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamea_0</td></tr>
@@ -410,13 +420,13 @@ digraph GossipGraph {
 /// cause: Requesting(PublicIdnamecdb63e)
 /// last_ancestors: {PublicIdnameab4598: 3}
 
-  "PublicIdnamea_4" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamea_4" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamea_4</td></tr>
 </table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname12abcd: 2, PublicIdnameab4598: 4, PublicIdnamecdb63e: 4}
 
-  "PublicIdnamea_5" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamea_5" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamea_5</td></tr>
 </table>>]
 /// cause: Response
@@ -429,7 +439,7 @@ digraph GossipGraph {
 /// cause: Observation(OpaquePayload(883e91de12Sectio))
 /// last_ancestors: {PublicIdname12abcd: 2, PublicIdnameab4598: 6, PublicIdnamecdb63e: 5}
 
-  "PublicIdnamea_7" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamea_7" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamea_7</td></tr>
 </table>>]
 /// cause: Requesting(PublicIdnamecdb63e)
@@ -442,7 +452,7 @@ digraph GossipGraph {
 /// cause: Observation(Remove(PublicIdnameef4fb9))
 /// last_ancestors: {PublicIdname12abcd: 2, PublicIdnameab4598: 8, PublicIdnamecdb63e: 5}
 
-  "PublicIdnamea_9" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamea_9" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamea_9</td></tr>
 </table>>]
 /// cause: Response
@@ -462,84 +472,69 @@ digraph GossipGraph {
 /// cause: Observation(OpaquePayload(a995f407beSectio))
 /// last_ancestors: {PublicIdname12abcd: 3, PublicIdnameab4598: 11, PublicIdnamecdb63e: 8}
 
-  "PublicIdnamea_12" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamea_12" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamea_12</td></tr>
-<tr><td colspan="6">[Add(PublicIdnameffffff)]</td></tr></table>>]
+</table>>]
 /// cause: Request
 /// last_ancestors: {PublicIdname12abcd: 9, PublicIdnameab4598: 12, PublicIdnamecdb63e: 14}
 
-  "PublicIdnamea_13" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamea_13" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamea_13</td></tr>
 </table>>]
 /// cause: Requesting(PublicIdnamecdb63e)
 /// last_ancestors: {PublicIdname12abcd: 9, PublicIdnameab4598: 13, PublicIdnamecdb63e: 14}
 
-  "PublicIdnamea_14" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamea_14" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamea_14</td></tr>
 </table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname12abcd: 10, PublicIdnameab4598: 14, PublicIdnamecdb63e: 17}
 
-  "PublicIdnamea_15" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamea_15" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamea_15</td></tr>
 </table>>]
 /// cause: Requesting(PublicIdnamecdb63e)
 /// last_ancestors: {PublicIdname12abcd: 10, PublicIdnameab4598: 15, PublicIdnamecdb63e: 17}
 
-  "PublicIdnamea_16" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamea_16" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamea_16</td></tr>
 </table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname12abcd: 10, PublicIdnameab4598: 16, PublicIdnamecdb63e: 18}
 
-  "PublicIdnamea_17" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamea_17" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamea_17</td></tr>
 </table>>]
 /// cause: Requesting(PublicIdname12abcd)
 /// last_ancestors: {PublicIdname12abcd: 10, PublicIdnameab4598: 17, PublicIdnamecdb63e: 18}
 
-  "PublicIdnamea_18" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamea_18" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamea_18</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>PublicIdname1: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>PublicIdnamea: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>PublicIdnamec: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
+</table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname12abcd: 15, PublicIdnameab4598: 18, PublicIdnamecdb63e: 23}
 
-  "PublicIdnamea_19" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamea_19" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamea_19</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>PublicIdname1: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>PublicIdnamea: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>PublicIdnamec: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
+</table>>]
 /// cause: Request
 /// last_ancestors: {PublicIdname12abcd: 18, PublicIdnameab4598: 19, PublicIdnamecdb63e: 25}
 
-  "PublicIdnamea_20" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamea_20" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamea_20</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>PublicIdname1: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>PublicIdnamea: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>PublicIdnamec: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
+</table>>]
 /// cause: Request
 /// last_ancestors: {PublicIdname12abcd: 21, PublicIdnameab4598: 20, PublicIdnamecdb63e: 25}
 
-  "PublicIdnamea_21" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamea_21" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamea_21</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>PublicIdname1: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>PublicIdnamea: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>PublicIdnamec: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
+</table>>]
 /// cause: Requesting(PublicIdname12abcd)
 /// last_ancestors: {PublicIdname12abcd: 21, PublicIdnameab4598: 21, PublicIdnamecdb63e: 25}
 
-  "PublicIdnamea_22" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamea_22" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamea_22</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>PublicIdname1: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
-<tr><td>PublicIdnamea: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
-<tr><td>PublicIdnamec: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr></table>>]
+</table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname12abcd: 24, PublicIdnameab4598: 22, PublicIdnamecdb63e: 26}
 
@@ -560,24 +555,6 @@ digraph GossipGraph {
 </table>>]
 /// cause: Request
 /// last_ancestors: {PublicIdname12abcd: 24, PublicIdnameab4598: 25, PublicIdnamecdb63e: 28}
-
-  "PublicIdnamea_26" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">PublicIdnamea_26</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {PublicIdname12abcd: 24, PublicIdnameab4598: 26, PublicIdnamecdb63e: 31}
-
-  "PublicIdnamea_27" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">PublicIdnamea_27</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {PublicIdname12abcd: 24, PublicIdnameab4598: 27, PublicIdnamecdb63e: 32}
-
-  "PublicIdnamea_28" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">PublicIdnamea_28</td></tr>
-</table>>]
-/// cause: Request
-/// last_ancestors: {PublicIdname12abcd: 28, PublicIdnameab4598: 28, PublicIdnamecdb63e: 35}
 
   "PublicIdnamec_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_0</td></tr>
@@ -629,7 +606,7 @@ digraph GossipGraph {
 /// cause: Observation(OpaquePayload(883e91de12Sectio))
 /// last_ancestors: {PublicIdname12abcd: 3, PublicIdnameab4598: 3, PublicIdnamecdb63e: 7}
 
-  "PublicIdnamec_8" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_8" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_8</td></tr>
 </table>>]
 /// cause: Request
@@ -642,7 +619,7 @@ digraph GossipGraph {
 /// cause: Observation(Add(PublicIdnameffffff))
 /// last_ancestors: {PublicIdname12abcd: 3, PublicIdnameab4598: 7, PublicIdnamecdb63e: 9}
 
-  "PublicIdnamec_10" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_10" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_10</td></tr>
 </table>>]
 /// cause: Requesting(PublicIdname12abcd)
@@ -662,90 +639,87 @@ digraph GossipGraph {
 /// cause: Observation(Remove(PublicIdnameef4fb9))
 /// last_ancestors: {PublicIdname12abcd: 3, PublicIdnameab4598: 7, PublicIdnamecdb63e: 12}
 
-  "PublicIdnamec_13" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_13" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_13</td></tr>
 </table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname12abcd: 9, PublicIdnameab4598: 7, PublicIdnamecdb63e: 13}
 
-  "PublicIdnamec_14" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_14" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_14</td></tr>
 </table>>]
 /// cause: Requesting(PublicIdnameab4598)
 /// last_ancestors: {PublicIdname12abcd: 9, PublicIdnameab4598: 7, PublicIdnamecdb63e: 14}
 
-  "PublicIdnamec_15" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_15" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_15</td></tr>
-<tr><td colspan="6">[Add(PublicIdnameffffff)]</td></tr></table>>]
+</table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname12abcd: 9, PublicIdnameab4598: 12, PublicIdnamecdb63e: 15}
 
-  "PublicIdnamec_16" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_16" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_16</td></tr>
 </table>>]
 /// cause: Request
 /// last_ancestors: {PublicIdname12abcd: 10, PublicIdnameab4598: 12, PublicIdnamecdb63e: 16}
 
-  "PublicIdnamec_17" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_17" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_17</td></tr>
 </table>>]
 /// cause: Request
 /// last_ancestors: {PublicIdname12abcd: 10, PublicIdnameab4598: 13, PublicIdnamecdb63e: 17}
 
-  "PublicIdnamec_18" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_18" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_18</td></tr>
 </table>>]
 /// cause: Request
 /// last_ancestors: {PublicIdname12abcd: 10, PublicIdnameab4598: 15, PublicIdnamecdb63e: 18}
 
-  "PublicIdnamec_19" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_19" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_19</td></tr>
 </table>>]
 /// cause: Requesting(PublicIdname12abcd)
 /// last_ancestors: {PublicIdname12abcd: 10, PublicIdnameab4598: 15, PublicIdnamecdb63e: 19}
 
-  "PublicIdnamec_20" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_20" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_20</td></tr>
 </table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname12abcd: 12, PublicIdnameab4598: 15, PublicIdnamecdb63e: 20}
 
-  "PublicIdnamec_21" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_21" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_21</td></tr>
 </table>>]
 /// cause: Requesting(PublicIdname12abcd)
 /// last_ancestors: {PublicIdname12abcd: 12, PublicIdnameab4598: 15, PublicIdnamecdb63e: 21}
 
-  "PublicIdnamec_22" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_22" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_22</td></tr>
 </table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname12abcd: 13, PublicIdnameab4598: 15, PublicIdnamecdb63e: 22}
 
-  "PublicIdnamec_23" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_23" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_23</td></tr>
 </table>>]
 /// cause: Requesting(PublicIdname12abcd)
 /// last_ancestors: {PublicIdname12abcd: 13, PublicIdnameab4598: 15, PublicIdnamecdb63e: 23}
 
-  "PublicIdnamec_24" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_24" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_24</td></tr>
 </table>>]
 /// cause: Response
 /// last_ancestors: {PublicIdname12abcd: 14, PublicIdnameab4598: 15, PublicIdnamecdb63e: 24}
 
-  "PublicIdnamec_25" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_25" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_25</td></tr>
 </table>>]
 /// cause: Request
 /// last_ancestors: {PublicIdname12abcd: 16, PublicIdnameab4598: 17, PublicIdnamecdb63e: 25}
 
-  "PublicIdnamec_26" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_26" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_26</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>PublicIdname1: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
-<tr><td>PublicIdnamea: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
-<tr><td>PublicIdnamec: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr></table>>]
+</table>>]
 /// cause: Request
 /// last_ancestors: {PublicIdname12abcd: 20, PublicIdnameab4598: 19, PublicIdnamecdb63e: 26}
 
@@ -773,347 +747,99 @@ digraph GossipGraph {
 /// cause: Requesting(PublicIdname12abcd)
 /// last_ancestors: {PublicIdname12abcd: 24, PublicIdnameab4598: 25, PublicIdnamecdb63e: 30}
 
-  "PublicIdnamec_31" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_31" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_31</td></tr>
 </table>>]
-/// cause: Requesting(PublicIdnameab4598)
+/// cause: Requesting(PublicIdname12abcd)
 /// last_ancestors: {PublicIdname12abcd: 24, PublicIdnameab4598: 25, PublicIdnamecdb63e: 31}
 
-  "PublicIdnamec_32" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_32" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_32</td></tr>
 </table>>]
-/// cause: Requesting(PublicIdnameab4598)
-/// last_ancestors: {PublicIdname12abcd: 24, PublicIdnameab4598: 25, PublicIdnamecdb63e: 32}
+/// cause: Response
+/// last_ancestors: {PublicIdname12abcd: 27, PublicIdnameab4598: 25, PublicIdnamecdb63e: 32}
 
-  "PublicIdnamec_33" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_33" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_33</td></tr>
 </table>>]
 /// cause: Response
-/// last_ancestors: {PublicIdname12abcd: 24, PublicIdnameab4598: 26, PublicIdnamecdb63e: 33}
+/// last_ancestors: {PublicIdname12abcd: 27, PublicIdnameab4598: 25, PublicIdnamecdb63e: 33}
 
-  "PublicIdnamec_34" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "PublicIdnamec_34" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">PublicIdnamec_34</td></tr>
 </table>>]
-/// cause: Response
-/// last_ancestors: {PublicIdname12abcd: 25, PublicIdnameab4598: 26, PublicIdnamecdb63e: 34}
+/// cause: Request
+/// last_ancestors: {PublicIdname12abcd: 29, PublicIdnameab4598: 25, PublicIdnamecdb63e: 34, PublicIdnameffffff: 1}
 
-  "PublicIdnamec_35" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">PublicIdnamec_35</td></tr>
+  "PublicIdnamef_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">PublicIdnamef_0</td></tr>
+</table>>]
+/// cause: Initial
+/// last_ancestors: {PublicIdnameffffff: 0}
+
+  "PublicIdnamef_1" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">PublicIdnamef_1</td></tr>
 </table>>]
 /// cause: Request
-/// last_ancestors: {PublicIdname12abcd: 26, PublicIdnameab4598: 26, PublicIdnamecdb63e: 35}
+/// last_ancestors: {PublicIdname12abcd: 26, PublicIdnameab4598: 25, PublicIdnamecdb63e: 30, PublicIdnameffffff: 1}
 
 }
 
 /// ===== meta-elections =====
 /// consensus_history:
-/// d676bf51fd4c2dd9bb3061b95a30d77cafadd52be6fe1d6744302eabe1802794
+/// 1a907b54b07d6271d17e3ad6194b746ec49974988faeeff2bb4df9f761d5b970
 /// 883e91de12e4d2ad95ed5178b9fa9808651e1f1622d7086db18d23ad1ea56134
+/// f14a720bc414b3638c4f0738dee412b52db82dc88cdc15805ba55e1ec907501b
+/// a26885f8a22015767b3fb18faed45ae4190e81434b4f935df8956960f4886f96
 /// a995f407be5a53b800900971a0ecb55be9c862c52a32edddf5dafb990a665a7f
-/// 9249dbc6baeb1915523f8b4ced2450ecaaded3ddc16a6f8c9c0d9e7fa6edc31b
 
 /// interesting_events: {
-///   PublicIdname12abcd -> ["PublicIdname1_11"]
-///   PublicIdnameab4598 -> ["PublicIdnamea_12"]
-///   PublicIdnamecdb63e -> ["PublicIdnamec_15"]
 /// }
-/// all_voters: {PublicIdname12abcd, PublicIdnameab4598, PublicIdnamecdb63e}
-/// unconsensused_events: {"PublicIdname1_8", "PublicIdnamea_10", "PublicIdnamec_9"}
+/// all_voters: {PublicIdname12abcd, PublicIdnameab4598, PublicIdnamecdb63e, PublicIdnameffffff}
+/// unconsensused_events: {}
 /// meta_events: {
-///   PublicIdname1_8 -> {
+///   PublicIdname1_26 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
-///   PublicIdname1_9 -> {
+///   PublicIdname1_27 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
-///   PublicIdname1_10 -> {
+///   PublicIdname1_28 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
-///   PublicIdname1_11 -> {
-///     observees: {}
-///     interesting_content: [Add(PublicIdnameffffff)]
-///   }
-///   PublicIdname1_12 -> {
+///   PublicIdname1_29 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
-///   PublicIdname1_13 -> {
+///   PublicIdname1_30 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
-///   PublicIdname1_14 -> {
+///   PublicIdname1_31 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
-///   PublicIdname1_15 -> {
+///   PublicIdnamec_31 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
-///   PublicIdname1_16 -> {
+///   PublicIdnamec_32 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
-///   PublicIdname1_17 -> {
+///   PublicIdnamec_33 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
-///   PublicIdname1_18 -> {
+///   PublicIdnamec_34 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
-///   PublicIdname1_19 -> {
-///     observees: {PublicIdname12abcd, PublicIdnameab4598, PublicIdnamecdb63e}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   -   -   -
-///       PublicIdnamea: 0/0   t   -   -   -
-///       PublicIdnamec: 0/0   t   -   -   -
-///     }
-///   }
-///   PublicIdname1_20 -> {
+///   PublicIdnamef_1 -> {
 ///     observees: {}
 ///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   -   -   -
-///       PublicIdnamea: 0/0   t   -   -   -
-///       PublicIdnamec: 0/0   t   -   -   -
-///     }
-///   }
-///   PublicIdname1_21 -> {
-///     observees: {}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   -   -   -
-///       PublicIdnamea: 0/0   t   -   -   -
-///       PublicIdnamec: 0/0   t   -   -   -
-///     }
-///   }
-///   PublicIdname1_22 -> {
-///     observees: {}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   t   t   -
-///       PublicIdnamea: 0/0   t   t   t   -
-///       PublicIdnamec: 0/0   t   t   t   -
-///     }
-///   }
-///   PublicIdname1_23 -> {
-///     observees: {}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   t   t   -
-///       PublicIdnamea: 0/0   t   t   t   -
-///       PublicIdnamec: 0/0   t   t   t   -
-///     }
-///   }
-///   PublicIdname1_24 -> {
-///     observees: {}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   t   t   -
-///       PublicIdnamea: 0/0   t   t   t   -
-///       PublicIdnamec: 0/0   t   t   t   -
-///     }
-///   }
-///   PublicIdnamea_4 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamea_5 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamea_6 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamea_7 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamea_8 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamea_9 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamea_10 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamea_11 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamea_12 -> {
-///     observees: {}
-///     interesting_content: [Add(PublicIdnameffffff)]
-///   }
-///   PublicIdnamea_13 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamea_14 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamea_15 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamea_16 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamea_17 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamea_18 -> {
-///     observees: {PublicIdname12abcd, PublicIdnameab4598, PublicIdnamecdb63e}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   -   -   -
-///       PublicIdnamea: 0/0   t   -   -   -
-///       PublicIdnamec: 0/0   t   -   -   -
-///     }
-///   }
-///   PublicIdnamea_19 -> {
-///     observees: {}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   -   -   -
-///       PublicIdnamea: 0/0   t   -   -   -
-///       PublicIdnamec: 0/0   t   -   -   -
-///     }
-///   }
-///   PublicIdnamea_20 -> {
-///     observees: {}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   -   -   -
-///       PublicIdnamea: 0/0   t   -   -   -
-///       PublicIdnamec: 0/0   t   -   -   -
-///     }
-///   }
-///   PublicIdnamea_21 -> {
-///     observees: {}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   -   -   -
-///       PublicIdnamea: 0/0   t   -   -   -
-///       PublicIdnamec: 0/0   t   -   -   -
-///     }
-///   }
-///   PublicIdnamea_22 -> {
-///     observees: {}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   t   t   t
-///       PublicIdnamea: 0/0   t   t   t   t
-///       PublicIdnamec: 0/0   t   t   t   t
-///     }
-///   }
-///   PublicIdnamec_7 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_8 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_9 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_10 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_11 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_12 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_13 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_14 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_15 -> {
-///     observees: {}
-///     interesting_content: [Add(PublicIdnameffffff)]
-///   }
-///   PublicIdnamec_16 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_17 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_18 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_19 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_20 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_21 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_22 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_23 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_24 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_25 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   PublicIdnamec_26 -> {
-///     observees: {PublicIdname12abcd, PublicIdnameab4598, PublicIdnamecdb63e}
-///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       PublicIdname1: 0/0   t   t   t   -
-///       PublicIdnamea: 0/0   t   t   t   -
-///       PublicIdnamec: 0/0   t   t   t   -
-///     }
 ///   }
 /// }
