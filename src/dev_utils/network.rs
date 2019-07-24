@@ -122,6 +122,12 @@ impl Network {
         self.consensus_mode
     }
 
+    fn active_peers(&self) -> impl Iterator<Item = &Peer> {
+        self.peers
+            .values()
+            .filter(|peer| peer.status() == PeerStatus::Active)
+    }
+
     fn running_non_ignoring_peers(&self) -> impl Iterator<Item = &Peer> {
         self.peers
             .values()
@@ -587,10 +593,7 @@ impl Network {
                 if add_type == AddPeerType::Voter && !self.allow_addition_of_peer() {
                     return Ok(false);
                 }
-                let current_peers = self
-                    .running_non_ignoring_peers()
-                    .map(|peer| peer.id().clone())
-                    .collect();
+                let current_peers = self.active_peers().map(|peer| peer.id().clone()).collect();
                 let _ = self.peers.insert(
                     peer_id.clone(),
                     Peer::from_existing(
