@@ -86,6 +86,9 @@ impl Debug for PeerState {
         if self.contains(Self::VOTE) {
             separator = true;
             write!(f, "VOTE")?;
+        } else if self.contains(Self::DKG) {
+            separator = true;
+            write!(f, "DKG")?;
         }
 
         if self.contains(Self::SEND) {
@@ -100,15 +103,7 @@ impl Debug for PeerState {
             if separator {
                 write!(f, "|")?;
             }
-            separator = true;
             write!(f, "RECV")?;
-        }
-
-        if self.contains(Self::DKG) {
-            if separator {
-                write!(f, "|")?;
-            }
-            write!(f, "DKG")?;
         }
 
         write!(f, ")")
