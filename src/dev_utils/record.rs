@@ -413,6 +413,11 @@ mod tests {
     }
 
     #[test]
+    fn smoke_partial_dkg() {
+        smoke("input_graphs/dev_utils_record_tests_smoke_partial_dkg/alice.dot")
+    }
+
+    #[test]
     fn smoke_consensus_history_parsec() {
         let missing_one_consensus = false;
         smoke_consensus_history("input_graphs/benches/minimal.dot", missing_one_consensus)

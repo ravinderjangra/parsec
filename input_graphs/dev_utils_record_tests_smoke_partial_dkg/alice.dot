@@ -8,7 +8,7 @@
 /// }
 /// consensus_mode: Supermajority
 /// secure_rng: [3603127959, 2501323383, 1378120399, 2258206147, 1247984737, 1711956936, 399103948, 1525925779, 86898968, 806145622, 1763837996, 2905183684, 3349568576, 2442019996, 3902037481, 166883978, 4232276904, 520780312, 1429935877, 3485948170, 675181937, 1688735956, 3920011387, 475839308]
-/// key_gens_and_next_id: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]
+/// key_gens_and_next_id: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 65, 108, 105, 99, 101, 15, 132, 11, 140, 67, 202, 47, 109, 240, 108, 62, 68, 88, 69, 149, 179, 5, 190, 148, 159, 58, 87, 15, 101, 6, 176, 238, 38, 11, 39, 160, 13, 15, 132, 11, 140, 67, 202, 47, 109, 240, 108, 62, 68, 88, 69, 149, 179, 5, 190, 148, 159, 58, 87, 15, 101, 6, 176, 238, 38, 11, 39, 160, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 65, 108, 105, 99, 101, 15, 132, 11, 140, 67, 202, 47, 109, 240, 108, 62, 68, 88, 69, 149, 179, 5, 190, 148, 159, 58, 87, 15, 101, 6, 176, 238, 38, 11, 39, 160, 13, 15, 132, 11, 140, 67, 202, 47, 109, 240, 108, 62, 68, 88, 69, 149, 179, 5, 190, 148, 159, 58, 87, 15, 101, 6, 176, 238, 38, 11, 39, 160, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 66, 111, 98, 246, 245, 14, 119, 98, 253, 48, 106, 140, 36, 118, 174, 93, 240, 114, 223, 52, 203, 211, 207, 132, 251, 76, 120, 45, 180, 170, 227, 153, 183, 254, 24, 246, 245, 14, 119, 98, 253, 48, 106, 140, 36, 118, 174, 93, 240, 114, 223, 52, 203, 211, 207, 132, 251, 76, 120, 45, 180, 170, 227, 153, 183, 254, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 67, 97, 114, 111, 108, 2, 229, 214, 227, 189, 156, 176, 218, 177, 124, 30, 70, 54, 228, 0, 112, 38, 166, 235, 212, 232, 255, 2, 219, 113, 190, 168, 66, 188, 27, 54, 71, 2, 229, 214, 227, 189, 156, 176, 218, 177, 124, 30, 70, 54, 228, 0, 112, 38, 166, 235, 212, 232, 255, 2, 219, 113, 190, 168, 66, 188, 27, 54, 71, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 68, 97, 118, 101, 79, 34, 20, 227, 19, 57, 194, 183, 112, 15, 213, 229, 74, 118, 166, 127, 33, 53, 162, 196, 194, 32, 75, 146, 196, 59, 209, 81, 37, 69, 7, 247, 79, 34, 20, 227, 19, 57, 194, 183, 112, 15, 213, 229, 74, 118, 166, 127, 33, 53, 162, 196, 194, 32, 75, 146, 196, 59, 209, 81, 37, 69, 7, 247, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 69, 114, 105, 99, 154, 156, 27, 136, 180, 215, 92, 102, 35, 194, 34, 30, 111, 218, 107, 217, 189, 78, 107, 244, 37, 152, 134, 241, 216, 206, 157, 107, 51, 234, 38, 45, 154, 156, 27, 136, 180, 215, 92, 102, 35, 194, 34, 30, 111, 218, 107, 217, 189, 78, 107, 244, 37, 152, 134, 241, 216, 206, 157, 107, 51, 234, 38, 45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 170, 56, 47, 207, 186, 245, 24, 247, 217, 150, 140, 50, 227, 30, 135, 223, 79, 243, 187, 189, 185, 203, 218, 43, 136, 156, 197, 104, 75, 192, 26, 187, 246, 165, 224, 37, 252, 2, 244, 3, 240, 29, 185, 58, 131, 63, 181, 83, 174, 16, 78, 149, 67, 26, 234, 121, 171, 195, 67, 159, 78, 234, 207, 135, 121, 209, 110, 16, 62, 59, 192, 40, 40, 145, 14, 90, 67, 222, 127, 17, 148, 37, 122, 141, 117, 10, 220, 223, 147, 84, 23, 124, 45, 34, 24, 149, 130, 166, 155, 34, 75, 94, 84, 89, 50, 181, 27, 228, 175, 215, 177, 194, 59, 87, 231, 155, 241, 44, 111, 54, 211, 185, 222, 248, 242, 14, 128, 162, 9, 6, 30, 226, 69, 178, 7, 177, 219, 109, 101, 218, 222, 248, 40, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 143, 109, 107, 205, 223, 15, 34, 217, 94, 2, 224, 245, 182, 211, 85, 189, 116, 97, 48, 47, 112, 41, 122, 50, 133, 226, 99, 97, 108, 151, 197, 65, 145, 217, 250, 167, 17, 112, 128, 255, 185, 47, 219, 50, 238, 18, 106, 83, 142, 43, 1, 127, 78, 192, 134, 73, 208, 40, 124, 88, 228, 78, 110, 233, 211, 177, 34, 223, 167, 120, 34, 213, 16, 124, 35, 18, 172, 83, 33, 35, 113, 173, 218, 141, 18, 132, 23, 232, 117, 174, 207, 18, 141, 222, 44, 82, 139, 149, 214, 93, 0, 146, 252, 84, 162, 145, 85, 33, 108, 152, 115, 70, 151, 160, 231, 183, 147, 234, 62, 21, 66, 176, 91, 228, 86, 233, 162, 64, 34, 188, 172, 206, 39, 34, 192, 151, 173, 104, 1, 180, 238, 39, 245, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 129, 103, 165, 232, 126, 23, 137, 111, 236, 201, 114, 88, 32, 167, 31, 140, 47, 171, 161, 212, 183, 141, 252, 97, 168, 155, 130, 96, 94, 26, 255, 242, 80, 122, 11, 215, 216, 96, 61, 55, 146, 253, 76, 207, 175, 200, 95, 58, 135, 7, 16, 226, 228, 227, 131, 105, 121, 42, 184, 16, 80, 90, 19, 228, 45, 34, 249, 142, 143, 74, 77, 65, 52, 125, 135, 3, 66, 205, 88, 182, 214, 250, 54, 51, 61, 135, 228, 94, 245, 119, 57, 17, 6, 189, 59, 240, 142, 218, 50, 138, 247, 162, 108, 90, 61, 87, 195, 223, 153, 206, 94, 190, 5, 5, 253, 64, 110, 255, 22, 207, 1, 251, 147, 12, 128, 165, 86, 167, 172, 100, 134, 95, 170, 116, 179, 250, 147, 245, 17, 46, 35, 120, 155, 66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 153, 214, 11, 59, 238, 108, 251, 147, 36, 179, 216, 87, 66, 86, 185, 74, 102, 222, 28, 192, 122, 43, 169, 165, 29, 64, 172, 153, 44, 169, 250, 120, 216, 141, 253, 233, 158, 224, 170, 88, 166, 132, 63, 235, 151, 37, 8, 31, 161, 176, 88, 107, 95, 151, 61, 22, 88, 93, 92, 201, 35, 72, 115, 134, 66, 254, 133, 85, 108, 189, 252, 246, 148, 187, 109, 74, 55, 176, 235, 240, 50, 28, 245, 144, 47, 245, 171, 112, 59, 100, 65, 83, 6, 49, 25, 2, 151, 63, 220, 229, 233, 92, 127, 75, 118, 199, 129, 128, 136, 22, 227, 133, 54, 78, 220, 69, 57, 131, 188, 30, 251, 134, 32, 248, 132, 134, 224, 51, 97, 146, 194, 81, 73, 209, 159, 137, 44, 151, 229, 155, 19, 32, 241, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 136, 217, 247, 127, 224, 233, 179, 208, 7, 15, 195, 123, 160, 0, 213, 170, 4, 204, 169, 113, 41, 176, 63, 235, 108, 150, 215, 97, 157, 230, 226, 26, 6, 118, 100, 241, 62, 26, 241, 206, 173, 7, 54, 30, 179, 238, 239, 218, 169, 204, 166, 224, 188, 143, 14, 85, 16, 82, 88, 154, 5, 178, 41, 126, 246, 36, 2, 19, 27, 161, 36, 154, 254, 135, 82, 82, 38, 238, 231, 250, 178, 46, 126, 42, 216, 206, 199, 14, 113, 85, 148, 122, 203, 212, 212, 177, 169, 192, 161, 170, 152, 200, 55, 137, 29, 26, 79, 143, 135, 195, 68, 125, 59, 245, 9, 62, 62, 34, 180, 174, 164, 3, 103, 32, 55, 229, 81, 236, 158, 237, 182, 164, 134, 52, 192, 222, 187, 226, 196, 180, 185, 247, 150, 203, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]
 digraph GossipGraph {
   splines=false
   rankdir=BT
@@ -83,9 +83,6 @@ digraph GossipGraph {
     "A_62" -> "A_63" [minlen=4]
     "A_63" -> "A_64" [minlen=6]
     "A_64" -> "A_65" [minlen=1]
-    "A_65" -> "A_66" [minlen=1]
-    "A_66" -> "A_67" [minlen=1]
-    "A_67" -> "A_68" [minlen=1]
   }
   "B_2" -> "A_3" [constraint=false]
   "C_2" -> "A_5" [constraint=false]
@@ -126,7 +123,6 @@ digraph GossipGraph {
   "D_18" -> "A_63" [constraint=false]
   "D_22" -> "A_64" [constraint=false]
   "D_23" -> "A_65" [constraint=false]
-  "E_38" -> "A_66" [constraint=false]
 
   style=invis
   subgraph cluster_Bob {
@@ -400,8 +396,6 @@ digraph GossipGraph {
     "E_33" -> "E_34" [minlen=1]
     "E_34" -> "E_35" [minlen=1]
     "E_35" -> "E_36" [minlen=1]
-    "E_36" -> "E_37" [minlen=1]
-    "E_37" -> "E_38" [minlen=1]
   }
   "C_27" -> "E_2" [constraint=false]
   "A_35" -> "E_4" [constraint=false]
@@ -423,7 +417,6 @@ digraph GossipGraph {
   "B_51" -> "E_33" [constraint=false]
   "D_19" -> "E_34" [constraint=false]
   "D_20" -> "E_36" [constraint=false]
-  "B_53" -> "E_37" [constraint=false]
 
   {
     rank=same
@@ -749,49 +742,49 @@ digraph GossipGraph {
 /// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 6, 33, 58, 252, 200, 112, 193, 234, 219, 96, 230, 44, 255, 83, 233, 1, 59, 110, 37, 239, 8, 47, 124, 241, 59, 254, 65, 88, 239, 131, 130, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 151, 53, 21, 223, 142, 71, 247, 166, 241, 187, 131, 50, 184, 118, 235, 49, 159, 125, 60, 62, 184, 33, 205, 217, 188, 165, 238, 225, 184, 135, 83, 66, 249, 113, 5, 251, 33, 55, 31, 7, 124, 72, 72, 234, 5, 181, 231, 108, 49, 117, 71, 80, 190, 172, 67, 29, 43, 4, 68, 197, 146, 144, 94, 21, 64, 0, 0, 0, 0, 0, 0, 0, 39, 74, 240, 193, 85, 30, 45, 99, 8, 187, 34, 56, 110, 245, 47, 14, 254, 180, 177, 131, 95, 60, 228, 142, 245, 207, 253, 65, 47, 228, 54, 9, 13, 97, 221, 111, 254, 86, 159, 183, 65, 16, 32, 2, 110, 161, 149, 195, 35, 24, 127, 75, 210, 168, 13, 190, 119, 14, 70, 100, 183, 60, 150, 74, 64, 0, 0, 0, 0, 0, 0, 0, 184, 94, 203, 164, 27, 245, 98, 31, 30, 22, 192, 61, 39, 24, 50, 62, 98, 196, 200, 210, 14, 47, 53, 119, 118, 119, 170, 203, 248, 231, 7, 68, 64, 166, 31, 111, 80, 243, 237, 218, 128, 99, 235, 161, 18, 51, 51, 204, 36, 139, 54, 91, 248, 119, 68, 247, 194, 139, 63, 119, 46, 98, 167, 250, 64, 0, 0, 0, 0, 0, 0, 0, 72, 115, 166, 135, 226, 203, 152, 219, 52, 21, 95, 67, 221, 150, 118, 26, 193, 251, 61, 24, 182, 73, 76, 44, 175, 161, 185, 43, 111, 68, 235, 10, 149, 24, 16, 4, 247, 29, 115, 11, 211, 174, 28, 90, 55, 159, 254, 106, 184, 240, 255, 107, 31, 207, 137, 148, 222, 126, 115, 77, 56, 205, 134, 32]))
 /// last_ancestors: {Alice: 50, Bob: 31, Carol: 36, Dave: 3, Eric: 9}
 
-  "A_51" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "A_51" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_51</td></tr>
-</table>>]
+<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr></table>>]
 /// cause: Response
 /// last_ancestors: {Alice: 51, Bob: 31, Carol: 43, Dave: 3, Eric: 10}
 
-  "A_52" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "A_52" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_52</td></tr>
-</table>>]
+<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr></table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 52, Bob: 41, Carol: 46, Dave: 4, Eric: 12}
 
-  "A_53" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "A_53" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_53</td></tr>
 </table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 53, Bob: 41, Carol: 47, Dave: 4, Eric: 12}
 
-  "A_54" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "A_54" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_54</td></tr>
 </table>>]
 /// cause: Requesting(Carol)
 /// last_ancestors: {Alice: 54, Bob: 41, Carol: 47, Dave: 4, Eric: 12}
 
-  "A_55" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "A_55" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_55</td></tr>
 </table>>]
 /// cause: Response
 /// last_ancestors: {Alice: 55, Bob: 41, Carol: 51, Dave: 5, Eric: 15}
 
-  "A_56" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "A_56" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_56</td></tr>
 </table>>]
 /// cause: Requesting(Carol)
 /// last_ancestors: {Alice: 56, Bob: 41, Carol: 51, Dave: 5, Eric: 15}
 
-  "A_57" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "A_57" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_57</td></tr>
 </table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 57, Bob: 41, Carol: 52, Dave: 5, Eric: 15}
 
-  "A_58" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "A_58" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_58</td></tr>
 </table>>]
 /// cause: Response
@@ -804,74 +797,59 @@ digraph GossipGraph {
 /// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 245, 2, 14, 163, 49, 133, 31, 188, 153, 187, 166, 31, 182, 69, 13, 125, 76, 163, 100, 51, 161, 74, 14, 201, 125, 119, 119, 227, 176, 242, 65, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 135, 159, 192, 68, 148, 118, 149, 130, 192, 66, 38, 146, 69, 170, 215, 132, 94, 44, 70, 181, 180, 36, 48, 171, 28, 237, 81, 34, 11, 108, 132, 67, 249, 113, 5, 251, 33, 55, 31, 7, 124, 72, 72, 234, 5, 181, 231, 108, 49, 117, 71, 80, 190, 172, 67, 29, 43, 4, 68, 197, 146, 144, 94, 21, 64, 0, 0, 0, 0, 0, 0, 0, 24, 60, 115, 230, 247, 103, 11, 73, 232, 109, 167, 4, 210, 106, 228, 56, 107, 221, 133, 45, 192, 38, 24, 90, 115, 229, 142, 55, 18, 62, 217, 4, 13, 97, 221, 111, 254, 86, 159, 183, 65, 16, 32, 2, 110, 161, 149, 195, 35, 24, 127, 75, 210, 168, 13, 190, 119, 14, 70, 100, 183, 60, 150, 74, 64, 0, 0, 0, 0, 0, 0, 0, 170, 216, 37, 136, 90, 89, 129, 15, 15, 245, 38, 119, 97, 207, 174, 64, 125, 102, 103, 175, 211, 0, 58, 60, 18, 91, 105, 118, 108, 183, 27, 58, 64, 166, 31, 111, 80, 243, 237, 218, 128, 99, 235, 161, 18, 51, 51, 204, 36, 139, 54, 91, 248, 119, 68, 247, 194, 139, 63, 119, 46, 98, 167, 250, 64, 0, 0, 0, 0, 0, 0, 0, 60, 117, 216, 41, 189, 74, 247, 213, 53, 124, 166, 233, 240, 51, 121, 72, 143, 239, 72, 49, 231, 218, 91, 30, 177, 208, 67, 181, 198, 48, 94, 111, 149, 24, 16, 4, 247, 29, 115, 11, 211, 174, 28, 90, 55, 159, 254, 106, 184, 240, 255, 107, 31, 207, 137, 148, 222, 126, 115, 77, 56, 205, 134, 32]))
 /// last_ancestors: {Alice: 59, Bob: 41, Carol: 53, Dave: 5, Eric: 15}
 
-  "A_60" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "A_60" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_60</td></tr>
-<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr></table>>]
+<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr><tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr></table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 60, Bob: 44, Carol: 58, Dave: 5, Eric: 16}
 
   "A_61" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_61</td></tr>
-<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr></table>>]
+<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr><tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr></table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 61, Bob: 44, Carol: 58, Dave: 14, Eric: 25}
 
   "A_62" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_62</td></tr>
-</table>>]
+<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr></table>>]
 /// cause: Requesting(Dave)
 /// last_ancestors: {Alice: 62, Bob: 44, Carol: 58, Dave: 14, Eric: 25}
 
   "A_63" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_63</td></tr>
-<tr><td colspan="6">[DkgMessage(DkgAck(0))]</td></tr></table>>]
+<tr><td colspan="6">[DkgMessage(DkgAck(0))]</td></tr><tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr></table>>]
 /// cause: Response
 /// last_ancestors: {Alice: 63, Bob: 44, Carol: 60, Dave: 18, Eric: 25}
 
-  "A_64" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "A_64" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_64</td></tr>
 <tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr><tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
+<tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr></table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 64, Bob: 51, Carol: 60, Dave: 22, Eric: 36}
 
   "A_65" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">A_65</td></tr>
 <tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
+<tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr></table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 65, Bob: 51, Carol: 60, Dave: 23, Eric: 36}
-
-  "A_66" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_66</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
-/// cause: Request
-/// last_ancestors: {Alice: 66, Bob: 53, Carol: 60, Dave: 23, Eric: 38}
-
-  "A_67" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_67</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
-/// cause: Requesting(Carol)
-/// last_ancestors: {Alice: 67, Bob: 53, Carol: 60, Dave: 23, Eric: 38}
-
-  "A_68" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">A_68</td></tr>
-<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
-<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
-/// cause: Requesting(Eric)
-/// last_ancestors: {Alice: 68, Bob: 53, Carol: 60, Dave: 23, Eric: 38}
 
   "B_0" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_0</td></tr>
@@ -1068,19 +1046,19 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 41, Bob: 31, Carol: 34, Dave: 3, Eric: 6}
 
-  "B_32" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_32" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_32</td></tr>
 </table>>]
 /// cause: Requesting(Dave)
 /// last_ancestors: {Alice: 41, Bob: 32, Carol: 34, Dave: 3, Eric: 6}
 
-  "B_33" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_33" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_33</td></tr>
 </table>>]
 /// cause: Response
 /// last_ancestors: {Alice: 41, Bob: 33, Carol: 34, Dave: 4, Eric: 6}
 
-  "B_34" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_34" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_34</td></tr>
 </table>>]
 /// cause: Request
@@ -1114,39 +1092,42 @@ digraph GossipGraph {
 /// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 151, 53, 21, 223, 142, 71, 247, 166, 241, 187, 131, 50, 184, 118, 235, 49, 159, 125, 60, 62, 184, 33, 205, 217, 188, 165, 238, 225, 184, 135, 83, 66, 249, 113, 5, 251, 33, 55, 31, 7, 124, 72, 72, 234, 5, 181, 231, 108, 49, 117, 71, 80, 190, 172, 67, 29, 43, 4, 68, 197, 146, 144, 94, 21, 64, 0, 0, 0, 0, 0, 0, 0, 121, 71, 162, 76, 188, 242, 105, 229, 66, 37, 101, 255, 129, 46, 183, 33, 47, 247, 173, 124, 188, 41, 37, 188, 43, 10, 167, 159, 159, 252, 150, 113, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 90, 89, 47, 186, 234, 157, 220, 35, 149, 50, 72, 204, 72, 66, 197, 189, 185, 152, 125, 177, 184, 89, 67, 107, 82, 241, 193, 51, 51, 202, 236, 44, 244, 16, 216, 148, 223, 97, 128, 176, 61, 88, 104, 232, 107, 20, 114, 175, 18, 109, 56, 27, 108, 4, 78, 163, 92, 10, 2, 161, 37, 172, 200, 95, 64, 0, 0, 0, 0, 0, 0, 0, 60, 107, 188, 39, 24, 73, 79, 98, 230, 155, 41, 153, 18, 250, 144, 173, 73, 18, 239, 239, 188, 97, 155, 77, 193, 85, 122, 241, 25, 63, 48, 92, 185, 215, 26, 148, 113, 196, 242, 221, 252, 43, 163, 75, 23, 134, 212, 160, 21, 254, 113, 11, 70, 219, 7, 234, 233, 143, 123, 178, 188, 242, 249, 239, 64, 0, 0, 0, 0, 0, 0, 0, 29, 125, 73, 149, 70, 244, 193, 160, 56, 169, 12, 102, 217, 13, 159, 73, 212, 179, 190, 36, 185, 145, 185, 252, 231, 60, 149, 133, 173, 12, 134, 23, 108, 105, 21, 255, 214, 42, 108, 12, 175, 230, 84, 176, 50, 42, 25, 6, 137, 133, 184, 59, 161, 99, 202, 137, 245, 122, 55, 136, 170, 93, 216, 53]))
 /// last_ancestors: {Alice: 41, Bob: 38, Carol: 37, Dave: 4, Eric: 12}
 
-  "B_39" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_39" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_39</td></tr>
-</table>>]
+<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr></table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 46, Bob: 39, Carol: 44, Dave: 4, Eric: 12}
 
-  "B_40" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_40" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_40</td></tr>
 </table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 46, Bob: 40, Carol: 46, Dave: 4, Eric: 12}
 
-  "B_41" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_41" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_41</td></tr>
 </table>>]
 /// cause: Requesting(Alice)
 /// last_ancestors: {Alice: 46, Bob: 41, Carol: 46, Dave: 4, Eric: 12}
 
-  "B_42" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_42" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_42</td></tr>
-</table>>]
+<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr></table>>]
 /// cause: Response
 /// last_ancestors: {Alice: 52, Bob: 42, Carol: 46, Dave: 4, Eric: 12}
 
-  "B_43" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_43" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_43</td></tr>
 </table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 52, Bob: 43, Carol: 46, Dave: 5, Eric: 16}
 
-  "B_44" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "B_44" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_44</td></tr>
-</table>>]
+<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 56, Bob: 44, Carol: 54, Dave: 5, Eric: 16}
 
@@ -1159,52 +1140,73 @@ digraph GossipGraph {
 
   "B_46" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_46</td></tr>
-<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr></table>>]
+<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr><tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 56, Bob: 46, Carol: 54, Dave: 11, Eric: 26}
 
   "B_47" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_47</td></tr>
-</table>>]
+<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
 /// cause: Requesting(Eric)
 /// last_ancestors: {Alice: 56, Bob: 47, Carol: 54, Dave: 11, Eric: 26}
 
   "B_48" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_48</td></tr>
-<tr><td colspan="6">[DkgMessage(DkgAck(0))]</td></tr></table>>]
+<tr><td colspan="6">[DkgMessage(DkgAck(0))]</td></tr><tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
 /// cause: Response
 /// last_ancestors: {Alice: 56, Bob: 48, Carol: 54, Dave: 12, Eric: 30}
 
   "B_49" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_49</td></tr>
-</table>>]
+<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
 /// cause: Requesting(Eric)
 /// last_ancestors: {Alice: 56, Bob: 49, Carol: 54, Dave: 12, Eric: 30}
 
   "B_50" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_50</td></tr>
-</table>>]
+<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
 /// cause: Response
 /// last_ancestors: {Alice: 56, Bob: 50, Carol: 54, Dave: 12, Eric: 31}
 
   "B_51" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_51</td></tr>
-</table>>]
+<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
 /// cause: Requesting(Eric)
 /// last_ancestors: {Alice: 56, Bob: 51, Carol: 54, Dave: 12, Eric: 31}
 
   "B_52" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">B_52</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 56, Bob: 52, Carol: 54, Dave: 12, Eric: 33}
-
-  "B_53" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">B_53</td></tr>
-<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr><tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
 <tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
+/// cause: Response
+/// last_ancestors: {Alice: 56, Bob: 52, Carol: 54, Dave: 12, Eric: 33}
+
+  "B_53" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="6">B_53</td></tr>
+<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr><tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>t</td></tr></table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 62, Bob: 53, Carol: 60, Dave: 19, Eric: 35}
 
@@ -1473,79 +1475,79 @@ digraph GossipGraph {
 /// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 39, 74, 240, 193, 85, 30, 45, 99, 8, 187, 34, 56, 110, 245, 47, 14, 254, 180, 177, 131, 95, 60, 228, 142, 245, 207, 253, 65, 47, 228, 54, 9, 13, 97, 221, 111, 254, 86, 159, 183, 65, 16, 32, 2, 110, 161, 149, 195, 35, 24, 127, 75, 210, 168, 13, 190, 119, 14, 70, 100, 183, 60, 150, 74, 64, 0, 0, 0, 0, 0, 0, 0, 90, 89, 47, 186, 234, 157, 220, 35, 149, 50, 72, 204, 72, 66, 197, 189, 185, 152, 125, 177, 184, 89, 67, 107, 82, 241, 193, 51, 51, 202, 236, 44, 244, 16, 216, 148, 223, 97, 128, 176, 61, 88, 104, 232, 107, 20, 114, 175, 18, 109, 56, 27, 108, 4, 78, 163, 92, 10, 2, 161, 37, 172, 200, 95, 64, 0, 0, 0, 0, 0, 0, 0, 141, 104, 110, 178, 127, 29, 140, 228, 33, 170, 109, 96, 35, 143, 90, 109, 117, 124, 73, 223, 17, 119, 162, 71, 175, 18, 134, 37, 55, 176, 162, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 191, 119, 173, 170, 21, 157, 59, 165, 175, 197, 148, 244, 250, 55, 50, 201, 43, 136, 115, 3, 99, 188, 199, 240, 195, 182, 172, 237, 231, 238, 106, 0, 77, 199, 194, 0, 174, 165, 114, 109, 193, 115, 203, 163, 124, 146, 166, 15, 7, 147, 73, 16, 42, 223, 73, 73, 181, 133, 121, 19, 153, 94, 49, 176, 64, 0, 0, 0, 0, 0, 0, 0, 242, 134, 236, 162, 170, 28, 235, 101, 60, 61, 186, 136, 213, 132, 199, 120, 231, 107, 63, 49, 188, 217, 38, 205, 32, 216, 112, 223, 235, 212, 32, 36, 152, 121, 205, 107, 9, 75, 236, 188, 146, 190, 60, 88, 89, 62, 107, 169, 155, 232, 128, 32, 205, 103, 132, 42, 169, 112, 53, 41, 143, 241, 16, 106]))
 /// last_ancestors: {Alice: 45, Bob: 31, Carol: 42, Dave: 3, Eric: 10}
 
-  "C_43" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_43" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_43</td></tr>
-</table>>]
+<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr></table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 46, Bob: 31, Carol: 43, Dave: 3, Eric: 10}
 
-  "C_44" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_44" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_44</td></tr>
 </table>>]
 /// cause: Requesting(Bob)
 /// last_ancestors: {Alice: 46, Bob: 31, Carol: 44, Dave: 3, Eric: 10}
 
-  "C_45" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_45" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_45</td></tr>
-</table>>]
+<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr></table>>]
 /// cause: Response
 /// last_ancestors: {Alice: 46, Bob: 39, Carol: 45, Dave: 4, Eric: 12}
 
-  "C_46" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_46" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_46</td></tr>
 </table>>]
 /// cause: Requesting(Bob)
 /// last_ancestors: {Alice: 46, Bob: 39, Carol: 46, Dave: 4, Eric: 12}
 
-  "C_47" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_47" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_47</td></tr>
 </table>>]
 /// cause: Requesting(Alice)
 /// last_ancestors: {Alice: 46, Bob: 39, Carol: 47, Dave: 4, Eric: 12}
 
-  "C_48" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_48" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_48</td></tr>
 </table>>]
 /// cause: Response
 /// last_ancestors: {Alice: 46, Bob: 40, Carol: 48, Dave: 4, Eric: 12}
 
-  "C_49" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_49" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_49</td></tr>
 </table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 46, Bob: 40, Carol: 49, Dave: 5, Eric: 15}
 
-  "C_50" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_50" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_50</td></tr>
-</table>>]
+<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr></table>>]
 /// cause: Response
 /// last_ancestors: {Alice: 53, Bob: 41, Carol: 50, Dave: 5, Eric: 15}
 
-  "C_51" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_51" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_51</td></tr>
 </table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 54, Bob: 41, Carol: 51, Dave: 5, Eric: 15}
 
-  "C_52" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_52" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_52</td></tr>
 </table>>]
 /// cause: Requesting(Alice)
 /// last_ancestors: {Alice: 54, Bob: 41, Carol: 52, Dave: 5, Eric: 15}
 
-  "C_53" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_53" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_53</td></tr>
 </table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 56, Bob: 41, Carol: 53, Dave: 5, Eric: 15}
 
-  "C_54" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_54" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_54</td></tr>
 </table>>]
 /// cause: Requesting(Bob)
 /// last_ancestors: {Alice: 56, Bob: 41, Carol: 54, Dave: 5, Eric: 15}
 
-  "C_55" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_55" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_55</td></tr>
 </table>>]
 /// cause: Response
@@ -1558,27 +1560,39 @@ digraph GossipGraph {
 /// cause: Observation(DkgMessage(DkgAck(0)), SerialisedDkgMessage([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 24, 60, 115, 230, 247, 103, 11, 73, 232, 109, 167, 4, 210, 106, 228, 56, 107, 221, 133, 45, 192, 38, 24, 90, 115, 229, 142, 55, 18, 62, 217, 4, 13, 97, 221, 111, 254, 86, 159, 183, 65, 16, 32, 2, 110, 161, 149, 195, 35, 24, 127, 75, 210, 168, 13, 190, 119, 14, 70, 100, 183, 60, 150, 74, 64, 0, 0, 0, 0, 0, 0, 0, 99, 76, 155, 15, 50, 13, 200, 62, 193, 121, 148, 37, 98, 51, 174, 173, 194, 159, 95, 242, 239, 112, 154, 27, 225, 205, 111, 242, 141, 192, 91, 112, 244, 16, 216, 148, 223, 97, 128, 176, 61, 88, 104, 232, 107, 20, 114, 175, 18, 109, 56, 27, 108, 4, 78, 163, 92, 10, 2, 161, 37, 172, 200, 95, 64, 0, 0, 0, 0, 0, 0, 0, 173, 92, 195, 56, 109, 178, 132, 52, 155, 41, 131, 70, 239, 87, 186, 206, 20, 138, 151, 173, 23, 227, 226, 169, 6, 57, 179, 131, 182, 155, 240, 103, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 247, 108, 235, 97, 168, 87, 65, 42, 117, 217, 113, 103, 124, 124, 198, 239, 102, 116, 207, 104, 63, 85, 43, 56, 44, 164, 246, 20, 223, 118, 133, 95, 77, 199, 194, 0, 174, 165, 114, 109, 193, 115, 203, 163, 124, 146, 166, 15, 7, 147, 73, 16, 42, 223, 73, 73, 181, 133, 121, 19, 153, 94, 49, 176, 64, 0, 0, 0, 0, 0, 0, 0, 65, 125, 19, 139, 227, 252, 253, 31, 79, 137, 96, 136, 9, 161, 210, 16, 185, 94, 7, 36, 103, 199, 115, 198, 81, 15, 58, 166, 7, 82, 26, 87, 152, 121, 205, 107, 9, 75, 236, 188, 146, 190, 60, 88, 89, 62, 107, 169, 155, 232, 128, 32, 205, 103, 132, 42, 169, 112, 53, 41, 143, 241, 16, 106]))
 /// last_ancestors: {Alice: 57, Bob: 41, Carol: 56, Dave: 5, Eric: 15}
 
-  "C_57" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
+  "C_57" [style=filled, fillcolor=orange, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_57</td></tr>
-<tr><td colspan="6">[DkgMessage(DkgAck(0))]</td></tr></table>>]
+<tr><td colspan="6">[DkgMessage(DkgAck(0))]</td></tr><tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
 /// cause: Response
 /// last_ancestors: {Alice: 57, Bob: 44, Carol: 57, Dave: 5, Eric: 16}
 
   "C_58" [fillcolor=white, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_58</td></tr>
-</table>>]
+<tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>-</td><td>-</td><td>-</td></tr></table>>]
 /// cause: Requesting(Alice)
 /// last_ancestors: {Alice: 57, Bob: 44, Carol: 58, Dave: 5, Eric: 16}
 
   "C_59" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_59</td></tr>
-<tr><td colspan="6">[DkgMessage(DkgAck(0))]</td></tr></table>>]
+<tr><td colspan="6">[DkgMessage(DkgAck(0))]</td></tr><tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr></table>>]
 /// cause: Response
 /// last_ancestors: {Alice: 60, Bob: 44, Carol: 59, Dave: 5, Eric: 16}
 
   "C_60" [style=filled, fillcolor=crimson, shape=rectangle, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="6">C_60</td></tr>
-<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr></table>>]
+<tr><td colspan="6">[DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]</td></tr><tr><td></td><td width="50">stage</td><td width="30">est</td><td width="30">bin</td><td width="30">aux</td><td width="30">dec</td></tr>
+<tr><td>A: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>B: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr>
+<tr><td>C: </td><td>0/0</td><td>t</td><td>t</td><td>t</td><td>-</td></tr></table>>]
 /// cause: Request
 /// last_ancestors: {Alice: 60, Bob: 44, Carol: 60, Dave: 13, Eric: 25}
 
@@ -1960,18 +1974,6 @@ digraph GossipGraph {
 /// cause: Request
 /// last_ancestors: {Alice: 62, Bob: 51, Carol: 60, Dave: 20, Eric: 36}
 
-  "E_37" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">E_37</td></tr>
-</table>>]
-/// cause: Response
-/// last_ancestors: {Alice: 62, Bob: 53, Carol: 60, Dave: 20, Eric: 37}
-
-  "E_38" [fillcolor=white, label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="6">E_38</td></tr>
-</table>>]
-/// cause: Requesting(Alice)
-/// last_ancestors: {Alice: 62, Bob: 53, Carol: 60, Dave: 20, Eric: 38}
-
 }
 
 /// ===== meta-elections =====
@@ -1983,51 +1985,95 @@ digraph GossipGraph {
 /// f00b25fe0a70a3d30e8391668c6ea1d585fba7c12f29301d601ac751fb641952
 /// 78a0db7021819ef81af689aed6b21445d93f566af4144f8a5cc34e64ea29c300
 /// bd33f6fb8979fc3b372250fe6ef9fa04f8f4d9065b5be4e5a9922bf2643cc5f6
-/// 3f73733827db57d63ce69be5a51ddb9cbe303216f0f045fe8c10d7d387e52919
-/// 5b66cda5925726f427918120fe650c0cdf195ebabceaebcf266109268d8af299
-/// f637c84064c99c837f99ca522932ce791a0563dc0a73e87f8f1c7f21724fcd2e
-/// 14c12494447b68301248da9264f7dbd74c2b1fe147a5cad04fbbe5aca28c73fc
-/// 2a803d0adf28084530d69a612c0447975818fe80de141e962e4087d89454eddd
-/// d23b7bc0e2823f300461c67657886e489db3f4c279ed4ab35ecd21f707cc63a9
-/// 1a2d4059556864cda151f0b2a8b3837ab4ea90563a9edd6a6326686fdac6e207
-/// 2060bc3605e5b7b31288013b08b7285bb265e9b051fa1f5d25536769b4eee27f
-/// 66bd83d60c24da119e404a386c13f780d4afabefb3bfb2f03a8cb0d77b628933
-/// 4ecb846605e829fce9e5825c326cfd33910ad0184af82e4ff893da0d28b81be2
-/// 50f0796aadfc18ff44efb93a1ea56b08739cd91e4dc35cf2f2c373d1ef14c566
-/// ef8a1ceca19fb213f183e3d9b7cc988e191d18bfed32e93f2398f11d7bd7da16
 
 /// interesting_events: {
-///   Alice -> ["A_60", "A_61", "A_63", "A_64"]
-///   Bob -> ["B_46", "B_48", "B_53"]
-///   Carol -> ["C_57", "C_59", "C_60"]
+///   Alice -> ["A_51", "A_52", "A_60", "A_61", "A_63", "A_64"]
+///   Bob -> ["B_39", "B_42", "B_46", "B_48", "B_53"]
+///   Carol -> ["C_43", "C_45", "C_50", "C_57", "C_59", "C_60"]
 /// }
 /// all_voters: {Alice, Bob, Carol}
-/// unconsensused_events: {"A_59", "B_45", "C_56", "D_10", "D_15", "D_7", "D_8", "D_9", "E_17", "E_18", "E_19", "E_20", "E_28"}
+/// unconsensused_events: {"A_47", "A_48", "A_49", "A_50", "A_59", "B_35", "B_36", "B_37", "B_38", "B_45", "C_39", "C_40", "C_41", "C_42", "C_56", "D_10", "D_15", "D_7", "D_8", "D_9", "E_17", "E_18", "E_19", "E_20", "E_28"}
 /// meta_events: {
-///   A_60 -> {
-///     observees: {}
-///     interesting_content: [DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]
-///   }
-///   A_61 -> {
+///   A_51 -> {
 ///     observees: {}
 ///     interesting_content: [DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]
 ///   }
-///   A_62 -> {
+///   A_52 -> {
+///     observees: {}
+///     interesting_content: [DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]
+///   }
+///   A_53 -> {
 ///     observees: {}
 ///     interesting_content: []
 ///   }
-///   A_63 -> {
+///   A_54 -> {
 ///     observees: {}
-///     interesting_content: [DkgMessage(DkgAck(0))]
+///     interesting_content: []
 ///   }
-///   A_64 -> {
+///   A_55 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   A_56 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   A_57 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   A_58 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   A_60 -> {
 ///     observees: {Alice, Bob, Carol}
 ///     interesting_content: [DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
+///       A: 0/0   t   t   t   - 
+///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
+///     }
+///   }
+///   A_61 -> {
+///     observees: {}
+///     interesting_content: [DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   t   t   - 
+///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
+///     }
+///   }
+///   A_62 -> {
+///     observees: {}
+///     interesting_content: []
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   t   t   - 
+///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
+///     }
+///   }
+///   A_63 -> {
+///     observees: {}
+///     interesting_content: [DkgMessage(DkgAck(0))]
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   t   t   - 
+///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
+///     }
+///   }
+///   A_64 -> {
+///     observees: {}
+///     interesting_content: [DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   t   t   - 
+///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///     }
 ///   }
 ///   A_65 -> {
@@ -2035,33 +2081,45 @@ digraph GossipGraph {
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
+///       A: 0/0   t   t   t   - 
+///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
 ///     }
 ///   }
-///   A_66 -> {
+///   B_32 -> {
 ///     observees: {}
 ///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///     }
 ///   }
-///   A_67 -> {
+///   B_33 -> {
 ///     observees: {}
 ///     interesting_content: []
-///     meta_votes: {
-///         stage est bin aux dec
-///       A: 0/0   t   -   -   - 
-///       B: 0/0   t   -   -   - 
-///       C: 0/0   t   -   -   - 
-///     }
 ///   }
-///   A_68 -> {
+///   B_34 -> {
 ///     observees: {}
+///     interesting_content: []
+///   }
+///   B_39 -> {
+///     observees: {}
+///     interesting_content: [DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]
+///   }
+///   B_40 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   B_41 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   B_42 -> {
+///     observees: {}
+///     interesting_content: [DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]
+///   }
+///   B_43 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   B_44 -> {
+///     observees: {Alice, Bob, Carol}
 ///     interesting_content: []
 ///     meta_votes: {
 ///         stage est bin aux dec
@@ -2073,34 +2131,6 @@ digraph GossipGraph {
 ///   B_46 -> {
 ///     observees: {}
 ///     interesting_content: [DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]
-///   }
-///   B_47 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   B_48 -> {
-///     observees: {}
-///     interesting_content: [DkgMessage(DkgAck(0))]
-///   }
-///   B_49 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   B_50 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   B_51 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   B_52 -> {
-///     observees: {}
-///     interesting_content: []
-///   }
-///   B_53 -> {
-///     observees: {Alice, Bob, Carol}
-///     interesting_content: [DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]
 ///     meta_votes: {
 ///         stage est bin aux dec
 ///       A: 0/0   t   -   -   - 
@@ -2108,20 +2138,166 @@ digraph GossipGraph {
 ///       C: 0/0   t   -   -   - 
 ///     }
 ///   }
-///   C_57 -> {
+///   B_47 -> {
+///     observees: {}
+///     interesting_content: []
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   -   -   - 
+///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
+///     }
+///   }
+///   B_48 -> {
 ///     observees: {}
 ///     interesting_content: [DkgMessage(DkgAck(0))]
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   -   -   - 
+///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
+///     }
+///   }
+///   B_49 -> {
+///     observees: {}
+///     interesting_content: []
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   -   -   - 
+///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
+///     }
+///   }
+///   B_50 -> {
+///     observees: {}
+///     interesting_content: []
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   -   -   - 
+///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
+///     }
+///   }
+///   B_51 -> {
+///     observees: {}
+///     interesting_content: []
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   -   -   - 
+///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
+///     }
+///   }
+///   B_52 -> {
+///     observees: {}
+///     interesting_content: []
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   -   -   - 
+///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
+///     }
+///   }
+///   B_53 -> {
+///     observees: {}
+///     interesting_content: [DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   t   t   t 
+///       B: 0/0   t   t   t   t 
+///       C: 0/0   t   t   t   t 
+///     }
+///   }
+///   C_43 -> {
+///     observees: {}
+///     interesting_content: [DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]
+///   }
+///   C_44 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   C_45 -> {
+///     observees: {}
+///     interesting_content: [DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]
+///   }
+///   C_46 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   C_47 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   C_48 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   C_49 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   C_50 -> {
+///     observees: {}
+///     interesting_content: [DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]
+///   }
+///   C_51 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   C_52 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   C_53 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   C_54 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   C_55 -> {
+///     observees: {}
+///     interesting_content: []
+///   }
+///   C_57 -> {
+///     observees: {Alice, Bob, Carol}
+///     interesting_content: [DkgMessage(DkgAck(0))]
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   -   -   - 
+///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
+///     }
 ///   }
 ///   C_58 -> {
 ///     observees: {}
 ///     interesting_content: []
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   -   -   - 
+///       B: 0/0   t   -   -   - 
+///       C: 0/0   t   -   -   - 
+///     }
 ///   }
 ///   C_59 -> {
 ///     observees: {}
 ///     interesting_content: [DkgMessage(DkgAck(0))]
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   t   t   - 
+///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
+///     }
 ///   }
 ///   C_60 -> {
 ///     observees: {}
 ///     interesting_content: [DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0)), DkgMessage(DkgAck(0))]
+///     meta_votes: {
+///         stage est bin aux dec
+///       A: 0/0   t   t   t   - 
+///       B: 0/0   t   t   t   - 
+///       C: 0/0   t   t   t   - 
+///     }
 ///   }
 /// }

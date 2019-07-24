@@ -792,6 +792,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             peer_list: &self.peer_list,
             observations: &self.observations,
             secure_rng: &self.secure_rng,
+            key_gens_and_next_id: (&self.key_gen, &self.key_gen_next_id),
             info: &dump_graph::DumpGraphContext::ConsensusReached,
         });
 
@@ -2270,6 +2271,7 @@ impl<T: NetworkEvent, S: SecretId> Drop for Parsec<T, S> {
             peer_list: &self.peer_list,
             observations: &self.observations,
             secure_rng: &self.secure_rng,
+            key_gens_and_next_id: (&self.key_gen, &self.key_gen_next_id),
             info: &dump_graph::DumpGraphContext::DroppingParsec,
         });
     }
@@ -2358,6 +2360,22 @@ impl Parsec<Transaction, PeerId> {
                 .observations
                 .get_mut(consensused)
                 .map(|info| info.consensused = true);
+        }
+
+        if let Some(serialized_key_gens_and_next_id) =
+            &parsed_contents.serialized_key_gens_and_next_id
+        {
+            // `serialisation::deserialise` is over constrained and require `Serialize` which is
+            // only available with `dump-graphs` enabled (as it is not safe to dump secrets).
+            // Use Cursor to get an io::Read object so we can use the not over constrained
+            // `deserialise_from`.
+            let mut cursor = std::io::Cursor::new(serialized_key_gens_and_next_id);
+            let (key_gen, key_gen_next_id) = unwrap!(
+                maidsafe_utilities::serialisation::deserialise_from(&mut cursor)
+            );
+
+            parsec.key_gen = key_gen;
+            parsec.key_gen_next_id = key_gen_next_id;
         }
 
         parsec.graph = parsed_contents.graph;
