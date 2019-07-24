@@ -480,6 +480,7 @@ impl Network {
     pub fn execute_schedule<R: Rng>(
         &mut self,
         rng: &mut R,
+        rng2: &mut R,
         schedule: Schedule,
     ) -> Result<(), ConsensusError> {
         let Schedule {
@@ -496,7 +497,7 @@ impl Network {
         let mut additional_step = || additional_steps.next().map(ScheduleEvent::LocalStep);
 
         while let Some(event) = queue.pop_front().or_else(&mut additional_step) {
-            if self.execute_event(rng, &options, event.clone())? {
+            if self.execute_event(rng, rng2, &options, event.clone())? {
                 for event in retry.drain(..).rev() {
                     queue.push_front(event)
                 }
@@ -526,6 +527,7 @@ impl Network {
     fn execute_event<R: Rng>(
         &mut self,
         rng: &mut R,
+        rng2: &mut R,
         options: &ScheduleOptions,
         event: ScheduleEvent,
     ) -> Result<bool, ConsensusError> {
@@ -544,7 +546,7 @@ impl Network {
                             id.clone(),
                             &genesis_ids,
                             self.consensus_mode,
-                            new_rng(rng),
+                            new_rng(rng2),
                         )
                     })
                     .collect_vec();
@@ -555,7 +557,7 @@ impl Network {
                             id.clone(),
                             &genesis_ids,
                             self.consensus_mode,
-                            new_rng(rng),
+                            new_rng(rng2),
                         )
                     })
                     .collect_vec();;
@@ -596,7 +598,7 @@ impl Network {
                         &self.genesis,
                         &current_peers,
                         self.consensus_mode,
-                        new_rng(rng),
+                        new_rng(rng2),
                     ),
                 );
             }

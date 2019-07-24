@@ -630,7 +630,7 @@ impl Scenario {
             let mut env = Environment::with_consensus_mode(self.seed, self.consensus_mode);
             let schedule = (self.schedule_fn)(&mut env);
             println!("Using {:?}", env.rng);
-            let result = env.network.execute_schedule(&mut env.rng, schedule);
+            let result = env.execute_schedule(schedule);
             assert!(result.is_ok(), "{:?}", result);
         }
 
