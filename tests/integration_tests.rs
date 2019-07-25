@@ -89,7 +89,7 @@ fn minimal_network() {
 
     let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(&mut env.rng, schedule);
+    let result = env.execute_schedule(schedule);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -105,7 +105,7 @@ fn multiple_votes_before_gossip() {
 
     let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(&mut env.rng, schedule);
+    let result = env.execute_schedule(schedule);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -120,7 +120,7 @@ fn multiple_votes_during_gossip() {
 
     let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(&mut env.rng, schedule);
+    let result = env.execute_schedule(schedule);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -135,7 +135,7 @@ fn duplicate_vote_is_reduced_to_single() {
 
     let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(&mut env.rng, schedule);
+    let result = env.execute_schedule(schedule);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -156,7 +156,7 @@ fn faulty_third_never_gossip() {
     };
     let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(&mut env.rng, schedule);
+    let result = env.execute_schedule(schedule);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -177,7 +177,7 @@ fn faulty_third_terminate_concurrently() {
     };
     let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(&mut env.rng, schedule);
+    let result = env.execute_schedule(schedule);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -195,7 +195,7 @@ fn faulty_nodes_terminate_at_random_points() {
     };
     let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(&mut env.rng, schedule);
+    let result = env.execute_schedule(schedule);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -210,7 +210,7 @@ fn random_schedule_no_delays() {
     };
     let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(&mut env.rng, schedule);
+    let result = env.execute_schedule(schedule);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -226,7 +226,7 @@ fn add_many_peers() {
 
     let schedule = Schedule::new(&mut env, &options);
 
-    unwrap!(env.network.execute_schedule(&mut env.rng, schedule));
+    unwrap!(env.execute_schedule(schedule));
 }
 
 #[test]
@@ -251,7 +251,7 @@ fn add_few_peers_and_vote() {
     let options = ScheduleOptions::default();
     let schedule = Schedule::from_observation_schedule(&mut env, &options, obs_schedule);
 
-    unwrap!(env.network.execute_schedule(&mut env.rng, schedule));
+    unwrap!(env.execute_schedule(schedule));
 }
 
 // Run DKG with the 4 voters in genesis
@@ -377,7 +377,7 @@ fn run_dkgs(
     //
     // Act
     //
-    unwrap!(env.network.execute_schedule(&mut env.rng, schedule));
+    unwrap!(env.execute_schedule(schedule));
 
     //
     // Assert
@@ -439,7 +439,7 @@ fn add_many_peers_and_vote() {
 
     let schedule = Schedule::new(&mut env, &options);
 
-    unwrap!(env.network.execute_schedule(&mut env.rng, schedule));
+    unwrap!(env.execute_schedule(schedule));
 }
 
 #[test]
@@ -452,7 +452,7 @@ fn remove_one_peer() {
     };
     let schedule = Schedule::new(&mut env, &options);
 
-    let result = env.network.execute_schedule(&mut env.rng, schedule);
+    let result = env.execute_schedule(schedule);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -473,7 +473,7 @@ fn remove_many_peers_at_once() {
     let options = ScheduleOptions::default();
     let schedule = Schedule::from_observation_schedule(&mut env, &options, obs_schedule);
 
-    let result = env.network.execute_schedule(&mut env.rng, schedule);
+    let result = env.execute_schedule(schedule);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -503,7 +503,7 @@ fn fail_add_remove() {
     let options = ScheduleOptions::default();
     let schedule = Schedule::from_observation_schedule(&mut env, &options, obs_schedule);
 
-    let result = env.network.execute_schedule(&mut env.rng, schedule);
+    let result = env.execute_schedule(schedule);
     assert!(result.is_ok(), "{:?}", result);
 }
 
@@ -520,7 +520,7 @@ fn consensus_mode_single() {
     };
     let schedule = Schedule::new(&mut env, &options);
 
-    unwrap!(env.network.execute_schedule(&mut env.rng, schedule));
+    unwrap!(env.execute_schedule(schedule));
 }
 
 #[test]
@@ -577,7 +577,7 @@ fn extensive_dynamic_membership() {
     let options = ScheduleOptions::default();
     let schedule = Schedule::from_observation_schedule(&mut env, &options, obs_schedule);
 
-    unwrap!(env.network.execute_schedule(&mut env.rng, schedule));
+    unwrap!(env.execute_schedule(schedule));
 }
 
 #[test]
@@ -590,7 +590,7 @@ fn consensus_with_fork() {
         ..Default::default()
     };
     let schedule = Schedule::new(&mut env, &options);
-    unwrap!(env.network.execute_schedule(&mut env.rng, schedule));
+    unwrap!(env.execute_schedule(schedule));
 }
 
 #[test]
@@ -602,7 +602,7 @@ fn grow_network_from_two_nodes() {
         ..Default::default()
     };
     let schedule = Schedule::new(&mut env, &options);
-    unwrap!(env.network.execute_schedule(&mut env.rng, schedule));
+    unwrap!(env.execute_schedule(schedule));
 }
 
 #[test]
@@ -614,7 +614,7 @@ fn grow_network_from_one_node() {
         ..Default::default()
     };
     let schedule = Schedule::new(&mut env, &options);
-    unwrap!(env.network.execute_schedule(&mut env.rng, schedule));
+    unwrap!(env.execute_schedule(schedule));
 }
 
 proptest! {
@@ -637,7 +637,7 @@ proptest! {
     }) {
         let _ = log::init(true);
 
-        let result = env.network.execute_schedule(&mut env.rng, sched);
+        let result = env.execute_schedule(sched);
         assert!(result.is_ok(), "{:?}", result);
     }
 }

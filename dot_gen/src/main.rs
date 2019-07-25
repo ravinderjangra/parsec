@@ -180,6 +180,7 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
             };
             Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
         })
+        .seed([1, 2, 3, 4])
         .file("Alice", "0.dot")
         .file("Bob", "1.dot");
 
@@ -346,7 +347,8 @@ fn add_dev_utils_record_smoke_tests(scenarios: &mut Scenarios) {
             Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
         })
         .seed([1, 2, 3, 4])
-        .file("PublicIdname12abcd", "minimal.dot");
+        .file("PublicIdname12abcd", "minimal.dot")
+        .dump_mode(DumpGraphMode::OnParsecDrop);
 
     let _ = scenarios
         .add("dev_utils::record::tests::smoke_dkg", |env| {
@@ -583,7 +585,7 @@ impl Scenario {
     /// Use the given seed instead of randomly generated one.
     #[allow(unused)]
     pub fn seed(&mut self, seed: [u32; 4]) -> &mut Self {
-        self.seed = RngChoice::Seeded(seed);
+        self.seed = RngChoice::SeededXor(seed);
         self
     }
 
@@ -628,7 +630,7 @@ impl Scenario {
             let mut env = Environment::with_consensus_mode(self.seed, self.consensus_mode);
             let schedule = (self.schedule_fn)(&mut env);
             println!("Using {:?}", env.rng);
-            let result = env.network.execute_schedule(&mut env.rng, schedule);
+            let result = env.execute_schedule(schedule);
             assert!(result.is_ok(), "{:?}", result);
         }
 
