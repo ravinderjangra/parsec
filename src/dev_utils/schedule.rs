@@ -280,6 +280,8 @@ pub struct ScheduleOptions {
     pub intermediate_consistency_checks: bool,
     /// The only genesis members that will compute consensus if provided. All if none.
     pub genesis_restrict_consensus_to: Option<BTreeSet<PeerId>>,
+    /// Allows for voting for the same OpaquePayload. This applies only when `ConsensusMode::Single`
+    pub vote_for_same: bool,
 }
 
 impl ScheduleOptions {
@@ -337,6 +339,7 @@ impl Default for ScheduleOptions {
             transparent_voters: Sampling::Fraction(1.0, 1.0),
             intermediate_consistency_checks: true,
             genesis_restrict_consensus_to: None,
+            vote_for_same: false,
         }
     }
 }
@@ -574,9 +577,16 @@ impl Schedule {
     ) -> Schedule {
         let mut pending = PendingObservations::new(options);
 
+        let observation_multiplier =
+            if options.vote_for_same && ConsensusMode::Single == env.network.consensus_mode() {
+                options.genesis_size
+            } else {
+                1
+            };
         // the +1 below is to account for genesis
-        let max_observations =
-            obs_schedule.count_observations() + obs_schedule.count_expected_accusations() + 1;
+        let max_observations = obs_schedule.count_observations() * observation_multiplier
+            + obs_schedule.count_expected_accusations()
+            + 1;
 
         let mut peers = PeerStatuses::new(&obs_schedule.genesis.all_ids());
         let mut added_peers: BTreeSet<_> = peers.all_peers().cloned().collect();
@@ -590,7 +600,13 @@ impl Schedule {
         if options.votes_before_gossip {
             let opaque_transactions = obs_schedule.extract_opaque();
             let sampling = match env.network.consensus_mode() {
-                ConsensusMode::Single => Sampling::Constant(1),
+                ConsensusMode::Single => {
+                    if options.vote_for_same {
+                        Sampling::Constant(peers.all_peers().count())
+                    } else {
+                        Sampling::Constant(1)
+                    }
+                }
                 ConsensusMode::Supermajority => options.opaque_voters,
             };
 
@@ -684,7 +700,13 @@ impl Schedule {
                     ObservationEvent::Opaque(payload) => {
                         let observation = ParsecObservation::OpaquePayload(payload);
                         let sampling = match env.network.consensus_mode() {
-                            ConsensusMode::Single => Sampling::Constant(1),
+                            ConsensusMode::Single => {
+                                if options.vote_for_same {
+                                    Sampling::Constant(peers.all_peers().count())
+                                } else {
+                                    Sampling::Constant(1)
+                                }
+                            }
                             ConsensusMode::Supermajority => options.opaque_voters,
                         };
 

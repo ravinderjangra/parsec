@@ -641,3 +641,17 @@ proptest! {
         assert!(result.is_ok(), "{:?}", result);
     }
 }
+
+#[test]
+fn consensus_mode_single_all_vote_same() {
+    let mut env = Environment::with_consensus_mode(SEED, ConsensusMode::Single);
+    let options = ScheduleOptions {
+        genesis_size: 8,
+        opaque_to_add: 2,
+        vote_for_same: true,
+        ..Default::default()
+    };
+    let schedule = Schedule::new(&mut env, &options);
+
+    unwrap!(env.execute_schedule(schedule));
+}
