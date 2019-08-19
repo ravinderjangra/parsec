@@ -560,7 +560,7 @@ fn add_bench_scalability_common(
 struct Scenario {
     name: String,
     seed: RngChoice,
-    schedule_fn: Box<FnMut(&mut Environment) -> Schedule>,
+    schedule_fn: Box<dyn FnMut(&mut Environment) -> Schedule>,
     files: BTreeMap<String, String>,
     consensus_mode: ConsensusMode,
     dump_mode: DumpGraphMode,
