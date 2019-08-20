@@ -270,7 +270,7 @@ impl<S: SecretId> KeyGen<S> {
         sec_key: &S,
         pub_keys: BTreeSet<S::PublicId>,
         threshold: usize,
-        rng: &mut rand::Rng,
+        rng: &mut dyn rand::Rng,
     ) -> Result<(KeyGen<S>, Option<Part>), Error> {
         let our_id = sec_key.public_id().clone();
         let our_idx = pub_keys

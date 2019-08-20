@@ -663,7 +663,7 @@ mod detail {
             &mut self,
             event: &IndexedEventRef<S::PublicId>,
         ) -> io::Result<()> {
-            let mut buffer;
+            let buffer;
             let cause = match event.cause() {
                 Cause::Requesting { recipient, .. } => {
                     buffer = format!(

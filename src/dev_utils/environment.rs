@@ -19,10 +19,10 @@ pub struct Environment {
     /// The network for test
     pub network: Network,
     /// Rng for random execution
-    pub rng: Box<RngDebug>,
+    pub rng: Box<dyn RngDebug>,
     /// Additional Rng used for additional randomness without breaking seed from `rng`.
     /// It can be used to create Parsec instances new `Rng`.
-    pub rng2: Box<RngDebug>,
+    pub rng2: Box<dyn RngDebug>,
 }
 
 impl Environment {
