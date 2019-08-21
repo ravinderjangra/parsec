@@ -24,8 +24,12 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use super::{dkg_threshold, KeyGen, PartOutcome};
-use crate::dev_utils::{Environment, RngChoice};
 use crate::mock::PeerId;
+use crate::{
+    dev_utils::{Environment, RngChoice},
+    serialise,
+};
+use rand::Rng;
 
 // Alter the seed here to reproduce failures
 static SEED: RngChoice = RngChoice::SeededRandom;
@@ -79,7 +83,7 @@ fn test_key_gen_with(threshold: usize, node_num: usize) {
         }
     }
 
-    // Compute the keys and test a threshold signature.
+    // Compute the keys and threshold signature shares.
     let msg = "Help I'm trapped in a unit test factory";
     let pub_key_set = nodes[0]
         .generate()
@@ -108,10 +112,30 @@ fn test_key_gen_with(threshold: usize, node_num: usize) {
             (idx, sig)
         })
         .collect();
+
+    // Test a threshold signature
     let sig = pub_key_set
         .combine_signatures(sig_shares.iter().take(threshold + 1))
         .expect("signature shares match");
     assert!(pub_key_set.public_key().verify(&sig, msg));
+
+    // Test a second threshold signature
+    let sig2_start_idx = env.rng.gen_range(1, std::cmp::max(2, sig_shares.len()));
+    let sig2 = pub_key_set
+        .combine_signatures(
+            sig_shares
+                .iter()
+                .cycle()
+                .skip(sig2_start_idx)
+                .take(threshold + 1),
+        )
+        .expect("signature shares match");
+    assert!(pub_key_set.public_key().verify(&sig2, msg));
+
+    // Test signature aggregated from different share are the same
+    let sig_ser = serialise(&sig);
+    let sig2_ser = serialise(&sig2);
+    assert_eq!(sig_ser, sig2_ser);
 }
 
 fn test_key_gen(node_num: usize) {
