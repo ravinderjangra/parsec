@@ -49,7 +49,7 @@ pub struct Network {
 #[derive(Debug)]
 pub struct BlocksOrder {
     peer: PeerId,
-    order: Vec<Observation>,
+    order: Vec<(Observation, Option<PeerId>)>,
 }
 
 pub struct DifferingBlocksOrder {
@@ -173,11 +173,11 @@ impl Network {
             Err(ConsensusError::DifferingBlocksOrder(DifferingBlocksOrder {
                 order_1: BlocksOrder {
                     peer: first_peer.id().clone(),
-                    order: payloads.into_iter().cloned().collect(),
+                    order: self.block_keys(&first_peer),
                 },
                 order_2: BlocksOrder {
                     peer: peer.id().clone(),
-                    order: peer.blocks_payloads().into_iter().cloned().collect(),
+                    order: self.block_keys(&peer),
                 },
             }))
         } else {
@@ -306,11 +306,11 @@ impl Network {
                         return Err(ConsensusError::DifferingBlocksOrder(DifferingBlocksOrder {
                             order_1: BlocksOrder {
                                 peer: peer.id().clone(),
-                                order: peer.blocks_payloads().into_iter().cloned().collect(),
+                                order: self.block_keys(peer),
                             },
                             order_2: BlocksOrder {
                                 peer: old_peer.id().clone(),
-                                order: old_peer.blocks_payloads().into_iter().cloned().collect(),
+                                order: self.block_keys(&old_peer),
                             },
                         }));
                     }
@@ -318,6 +318,15 @@ impl Network {
             }
         }
         Ok(())
+    }
+
+    fn block_keys(&self, peer: &Peer) -> Vec<(Observation, Option<PeerId>)> {
+        peer.blocks()
+            .map(|block| {
+                let (obs, opt_peer_id) = self.block_key(block);
+                (obs.clone(), opt_peer_id.cloned())
+            })
+            .collect()
     }
 
     fn block_key<'a>(

@@ -8,6 +8,7 @@
 
 use crate::{gossip::AbstractEventRef, observation::ObservationKey};
 use itertools::Itertools;
+use std::cmp::Ordering;
 use std::usize;
 
 /// Find interesting payloads for the builder_event.
@@ -15,6 +16,7 @@ use std::usize;
 pub(crate) fn find_interesting_content_for_event<'a, E>(
     builder_event: E,
     unconsensused_events: impl Iterator<Item = E>,
+    consistent_cmp: impl Fn(&ObservationKey, &ObservationKey) -> Ordering,
     is_descendant: impl Fn(E, E) -> bool,
     is_already_interesting_content: impl Fn(&ObservationKey) -> bool,
     is_interesting_payload: impl Fn(&ObservationKey) -> bool,
@@ -79,7 +81,11 @@ where
 
     // Sort the payloads in the order the creator voted for them, followed by the ones
     // not voted for by the creator (if any).
-    interesting_payload_keys.sort();
+    interesting_payload_keys.sort_by(|(l_index, l_key), (r_index, r_key)| {
+        l_index
+            .cmp(r_index)
+            .then_with(|| consistent_cmp(l_key, r_key))
+    });
 
     interesting_payload_keys
         .into_iter()
@@ -121,13 +127,13 @@ mod tests {
             peer_index: PeerIndex,
             creator_index: usize,
             payload_hash: Option<ObservationHash>,
+            consensus_mode: ConsensusMode,
         ) -> Self {
             Self {
                 peer_index,
                 creator_index,
-                payload_key: payload_hash.map(|hash| {
-                    ObservationKey::new(hash, peer_index, ConsensusMode::Supermajority)
-                }),
+                payload_key: payload_hash
+                    .map(|hash| ObservationKey::new(hash, peer_index, consensus_mode)),
                 has_ancestors: false,
             }
         }
@@ -195,6 +201,8 @@ mod tests {
             payload_properties: PayloadProperties,
             /// Expected returned payloads
             expected_payloads: Vec<AssertObservationKey>,
+            /// In consistent_cmp functor, whether sort by peer_index or its reversed order.
+            is_reverse: bool,
         }
 
         struct PayloadProperties {
@@ -216,20 +224,35 @@ mod tests {
             }
 
             /// A simple setup for Events that can be used in multiple tests.
-            fn new_basic_setup() -> Self {
+            fn new_basic_setup(consensus_mode: ConsensusMode) -> Self {
                 let opaque_1 = Some(OPAQUE_HASHES[1]);
                 let opaque_2 = Some(OPAQUE_HASHES[2]);
                 let last_event_peer = PEER_IDS[6];
 
                 Self {
-                    builder_event: TestEvent::new(last_event_peer, 100, None),
+                    builder_event: TestEvent::new(last_event_peer, 100, None, consensus_mode),
                     unconsensused_events: vec![
-                        TestEvent::new(PEER_IDS[2], 2, opaque_1),
-                        TestEvent::new(PEER_IDS[8], 11, opaque_1),
-                        TestEvent::new(last_event_peer, 6, opaque_1),
-                        TestEvent::new(last_event_peer, 10, opaque_2),
+                        TestEvent::new(PEER_IDS[2], 2, opaque_1, consensus_mode),
+                        TestEvent::new(PEER_IDS[8], 11, opaque_1, consensus_mode),
+                        TestEvent::new(last_event_peer, 6, opaque_1, consensus_mode),
+                        TestEvent::new(last_event_peer, 10, opaque_2, consensus_mode),
                     ],
                 }
+            }
+        }
+
+        fn fake_consistent_cmp(
+            lhs_key: &ObservationKey,
+            rhs_key: &ObservationKey,
+            is_reverse: bool,
+        ) -> Ordering {
+            // Real consistent_cmp will compare the PublicId, as a result they can be in any order.
+            // For test purpose we ensure they are either the same or reverse order of the
+            // peer_index so we do not sort by it.
+            if is_reverse {
+                lhs_key.peer_index().cmp(&rhs_key.peer_index()).reverse()
+            } else {
+                lhs_key.peer_index().cmp(&rhs_key.peer_index())
             }
         }
 
@@ -241,11 +264,13 @@ mod tests {
                 events,
                 payload_properties,
                 expected_payloads,
+                is_reverse,
             } = data;
 
             let payloads = find_interesting_content_for_event(
                 &events.builder_event,
                 events.unconsensused_events.iter(),
+                |lhs_key, rhs_key| fake_consistent_cmp(lhs_key, rhs_key, is_reverse),
                 |event_x, _event_y| event_x.has_ancestors,
                 |_payload_key| payload_properties.is_already_interesting_content,
                 |_payload_key| payload_properties.is_interesting_payload,
@@ -264,12 +289,34 @@ mod tests {
         /// Basic happy path
         fn all_payloads_interesting() {
             test_find_interesting_content_for_event(TestSimpleData {
-                events: Events::new_basic_setup().with_builder_event_sees_other(),
+                events: Events::new_basic_setup(ConsensusMode::Supermajority)
+                    .with_builder_event_sees_other(),
                 payload_properties: PayloadProperties {
                     is_already_interesting_content: false,
                     is_interesting_payload: true,
                 },
                 expected_payloads: vec![Supermajority(1), Supermajority(2)],
+                is_reverse: false,
+            });
+        }
+
+        #[test]
+        /// Basic happy path
+        fn all_payloads_interesting_single() {
+            test_find_interesting_content_for_event(TestSimpleData {
+                events: Events::new_basic_setup(ConsensusMode::Single)
+                    .with_builder_event_sees_other(),
+                payload_properties: PayloadProperties {
+                    is_already_interesting_content: false,
+                    is_interesting_payload: true,
+                },
+                expected_payloads: vec![
+                    Single(1, PEER_IDS[6]),
+                    Single(2, PEER_IDS[6]),
+                    Single(1, PEER_IDS[8]),
+                    Single(1, PEER_IDS[2]),
+                ],
+                is_reverse: true,
             });
         }
 
@@ -277,12 +324,14 @@ mod tests {
         /// Filter out already interesting payloads
         fn all_payloads_already_interesting() {
             test_find_interesting_content_for_event(TestSimpleData {
-                events: Events::new_basic_setup().with_builder_event_sees_other(),
+                events: Events::new_basic_setup(ConsensusMode::Supermajority)
+                    .with_builder_event_sees_other(),
                 payload_properties: PayloadProperties {
                     is_already_interesting_content: true,
                     is_interesting_payload: true,
                 },
                 expected_payloads: vec![],
+                is_reverse: false,
             });
         }
 
@@ -290,12 +339,14 @@ mod tests {
         /// Basic case where we found no interesting payloads
         fn no_payloads_interesting() {
             test_find_interesting_content_for_event(TestSimpleData {
-                events: Events::new_basic_setup().with_builder_event_sees_other(),
+                events: Events::new_basic_setup(ConsensusMode::Supermajority)
+                    .with_builder_event_sees_other(),
                 payload_properties: PayloadProperties {
                     is_already_interesting_content: false,
                     is_interesting_payload: false,
                 },
                 expected_payloads: vec![],
+                is_reverse: false,
             });
         }
     }
