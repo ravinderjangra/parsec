@@ -935,9 +935,12 @@ mod detail {
             attr.label = format!("{}</table>", attr.label);
             attr
         }
+    }
 
-        fn to_string(&self) -> String {
-            format!(
+    impl fmt::Display for EventAttributes {
+        fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+            write!(
+                f,
                 "[{}, {}label=<{}>]",
                 self.fillcolor,
                 if self.is_rectangle {
