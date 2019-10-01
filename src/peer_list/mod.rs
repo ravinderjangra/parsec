@@ -117,6 +117,7 @@ impl<S: SecretId> PeerList<S> {
     }
 
     /// Returns an iterator of peers that can vote.
+    #[cfg(feature = "malice-detection")]
     pub fn voters(&self) -> impl Iterator<Item = (PeerIndex, &Peer<S::PublicId>)> {
         self.iter().filter(|(_, peer)| peer.state().can_vote())
     }
@@ -139,6 +140,7 @@ impl<S: SecretId> PeerList<S> {
     }
 
     /// Return public ids of all peers.
+    #[cfg(all(test, any(feature = "testing", feature = "mock")))]
     pub fn all_ids(&self) -> impl Iterator<Item = (PeerIndex, &S::PublicId)> {
         self.iter().map(|(index, peer)| (index, peer.id()))
     }
@@ -260,7 +262,7 @@ impl<S: SecretId> PeerList<S> {
     }
 
     /// Removes last event from its creator.
-    #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
+    #[cfg(all(test, feature = "mock"))]
     pub fn remove_last_event(&mut self, creator: PeerIndex) -> Option<EventIndex> {
         if let Some(peer) = self.get_known_mut(creator) {
             peer.remove_last_event()

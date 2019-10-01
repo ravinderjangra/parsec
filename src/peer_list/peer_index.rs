@@ -19,7 +19,7 @@ impl PeerIndex {
     /// `PeerIndex` of ourselves.
     pub const OUR: Self = PeerIndex(0);
 
-    #[cfg(any(test, feature = "testing"))]
+    #[cfg(test)]
     pub fn new_test_peer_index(index: usize) -> Self {
         Self(index)
     }
@@ -38,10 +38,6 @@ impl<T> PeerIndexMap<T> {
         self.0.get(key.0).and_then(Option::as_ref)
     }
 
-    pub fn get_mut(&mut self, key: PeerIndex) -> Option<&mut T> {
-        self.0.get_mut(key.0).and_then(Option::as_mut)
-    }
-
     pub fn contains_key(&self, key: PeerIndex) -> bool {
         self.0.get(key.0).map(Option::is_some).unwrap_or(false)
     }
@@ -55,14 +51,6 @@ impl<T> PeerIndexMap<T> {
             map: self,
             current: 0,
         }
-    }
-
-    pub fn keys<'a>(&'a self) -> impl Iterator<Item = PeerIndex> + 'a {
-        self.0
-            .iter()
-            .enumerate()
-            .filter(|(_, value)| value.is_some())
-            .map(|(index, _)| PeerIndex(index))
     }
 
     pub fn insert(&mut self, key: PeerIndex, value: T) -> Option<T> {
@@ -160,13 +148,6 @@ pub(crate) enum Entry<'a, T> {
 }
 
 impl<'a, T> Entry<'a, T> {
-    pub fn or_insert(self, default: T) -> &'a mut T {
-        match self {
-            Entry::Occupied(entry) => entry.into_mut(),
-            Entry::Vacant(entry) => entry.insert(default),
-        }
-    }
-
     pub fn or_insert_with<F: FnOnce() -> T>(self, default: F) -> &'a mut T {
         match self {
             Entry::Occupied(entry) => entry.into_mut(),
@@ -211,6 +192,7 @@ impl PeerIndexSet {
         self.0.get(key.0).cloned().unwrap_or(false)
     }
 
+    #[cfg(any(test, feature = "testing"))]
     pub fn is_empty(&self) -> bool {
         self.0.iter().all(|value| !*value)
     }
@@ -242,10 +224,6 @@ impl PeerIndexSet {
         } else {
             false
         }
-    }
-
-    pub fn clear(&mut self) {
-        self.0.clear()
     }
 }
 
