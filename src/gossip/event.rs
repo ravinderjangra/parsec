@@ -379,6 +379,11 @@ impl<P: PublicId> Event<P> {
         }
     }
 
+    #[cfg(any(
+        feature = "testing",
+        feature = "malice-detection",
+        all(test, feature = "mock")
+    ))]
     pub fn is_requesting(&self) -> bool {
         if let Cause::Requesting { .. } = self.content.cause {
             true
@@ -396,6 +401,11 @@ impl<P: PublicId> Event<P> {
         }
     }
 
+    #[cfg(any(
+        feature = "testing",
+        feature = "malice-detection",
+        all(test, feature = "mock")
+    ))]
     pub fn is_request(&self) -> bool {
         if let Cause::Request { .. } = self.content.cause {
             true
@@ -404,6 +414,7 @@ impl<P: PublicId> Event<P> {
         }
     }
 
+    #[cfg(any(test, feature = "testing", feature = "malice-detection"))]
     pub fn is_response(&self) -> bool {
         if let Cause::Response { .. } = self.content.cause {
             true

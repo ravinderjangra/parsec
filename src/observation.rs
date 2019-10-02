@@ -281,10 +281,6 @@ impl<'a> Visitor<'a> for UnprovableMaliceVisitor {
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub(crate) struct ObservationHash(pub(crate) Hash);
 
-impl ObservationHash {
-    pub const ZERO: Self = ObservationHash(Hash::ZERO);
-}
-
 impl<'a, T: NetworkEvent, P: PublicId> From<&'a Observation<T, P>> for ObservationHash {
     fn from(observation: &'a Observation<T, P>) -> Self {
         ObservationHash(Hash::from(serialise(observation).as_slice()))
@@ -340,15 +336,6 @@ impl ObservationKey {
         match *self {
             ObservationKey::Single(ref hash, _) => hash,
             ObservationKey::Supermajority(ref hash) => hash,
-        }
-    }
-
-    pub fn matches(&self, other_hash: &ObservationHash, other_creator: PeerIndex) -> bool {
-        match *self {
-            ObservationKey::Single(ref hash, creator) => {
-                other_hash == hash && other_creator == creator
-            }
-            ObservationKey::Supermajority(ref hash) => other_hash == hash,
         }
     }
 

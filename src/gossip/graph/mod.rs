@@ -102,6 +102,7 @@ impl<P: PublicId> Graph<P> {
     }
 
     /// Gets `Event` by the given `hash`, if it exists.
+    #[cfg(any(feature = "malice-detection", feature = "dump-graphs"))]
     pub fn get_by_hash<'a>(&'a self, hash: &EventHash) -> Option<IndexedEventRef<'a, P>> {
         self.get_index(hash).and_then(|index| self.get(index))
     }
@@ -130,6 +131,7 @@ impl<P: PublicId> Graph<P> {
     }
 
     /// Returns self-parent of the given event, if any.
+    #[cfg(feature = "malice-detection")]
     pub fn self_parent<E: AsRef<Event<P>>>(&self, event: E) -> Option<IndexedEventRef<P>> {
         event
             .as_ref()
@@ -138,6 +140,7 @@ impl<P: PublicId> Graph<P> {
     }
 
     /// Returns other-parent of the given event, if any.
+    #[cfg(feature = "malice-detection")]
     pub fn other_parent<E: AsRef<Event<P>>>(&self, event: E) -> Option<IndexedEventRef<P>> {
         event
             .as_ref()
@@ -158,6 +161,7 @@ impl<P: PublicId> Graph<P> {
     }
 
     /// Returns `event` if it's a sync event, or else `self_sync_parent()` of it otherwise.
+    #[cfg(feature = "malice-detection")]
     pub fn self_sync_ancestor<'a>(
         &'a self,
         event: IndexedEventRef<'a, P>,
@@ -259,6 +263,7 @@ impl<P: PublicId> Graph<P> {
 #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 impl<P: PublicId> Graph<P> {
     /// Remove the topologically last event.
+    #[cfg(test)]
     pub fn remove_last(&mut self) -> Option<(EventIndex, Event<P>)> {
         let index = EventIndex(self.events.len() - 1);
         #[cfg(feature = "malice-detection")]
