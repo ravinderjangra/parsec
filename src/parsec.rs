@@ -295,7 +295,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let event = self.new_event_from_observation(self_parent, observation)?;
 
         let _ = self.add_event(event)?;
-        Ok(())
+        self.create_sole_voter_gossip_event()
     }
 
     /// Returns an iterator with the IDs of peers who the owning peer can send gossip messages to.
@@ -316,6 +316,26 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let peer_index = self.get_peer_index(peer_id)?;
         self.confirm_allowed_to_gossip_to(peer_index)?;
 
+        self.add_requesting_event(peer_id)?;
+
+        let events = if self.peer_list.last_event(peer_index).is_some() {
+            self.events_to_gossip_to_peer(peer_index)?
+        } else {
+            self.graph.iter().map(|e| e.inner()).collect()
+        };
+        self.pack_events(events).map(Request::new)
+    }
+
+    fn create_sole_voter_gossip_event(&mut self) -> Result<()> {
+        if !iter::once(PeerIndex::OUR).eq(self.voters()) {
+            return Ok(());
+        }
+
+        let self_id = self.our_pub_id().clone();
+        self.add_requesting_event(&self_id)
+    }
+
+    fn add_requesting_event(&mut self, peer_id: &S::PublicId) -> Result<()> {
         debug!(
             "{:?} creating gossip request for {:?}",
             self.our_pub_id(),
@@ -329,12 +349,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         let sync_event = Event::new_from_requesting(self_parent, peer_id, self.event_context())?;
         let _ = self.add_event(sync_event)?;
 
-        let events = if self.peer_list.last_event(peer_index).is_some() {
-            self.events_to_gossip_to_peer(peer_index)?
-        } else {
-            self.graph.iter().map(|e| e.inner()).collect()
-        };
-        self.pack_events(events).map(Request::new)
+        Ok(())
     }
 
     /// Handles a `Request` the owning peer received from the `src` peer.  Returns a `Response` to
@@ -1412,7 +1427,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         // If the creator of the current event is the only known voter and the event carries
         // a payload, decide it immediately.
         if iter::once(event.creator()).eq(self.voters()) {
-            return event.payload_key().into_iter().cloned().collect();
+            return self.compute_payloads_for_consensus(iter::once((event.creator(), true)));
         }
 
         // Otherwise proceed normally with evaluating the meta-election.

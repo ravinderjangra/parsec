@@ -267,6 +267,22 @@ fn run_dkg() {
     run_dkgs(&mut env, &genesis, &genesis, dkgs, vec![]);
 }
 
+// Run a DKG with 2 peers and only 1 voter in genesis (like routing adding first node).
+#[test]
+fn run_one_voter_two_participants_dkg() {
+    let _ = maidsafe_utilities::log::init(false);
+    let mut env = Environment::with_consensus_mode(SEED, ConsensusMode::Single);
+    let named_peer_ids = PeerId::named_peer_ids();
+
+    let final_peer_ids: BTreeSet<_> = named_peer_ids[0..2].iter().cloned().collect();
+    let genesis: BTreeSet<_> = named_peer_ids[0..1].iter().cloned().collect();
+    let participants: BTreeSet<_> = named_peer_ids[0..2].iter().cloned().collect();
+
+    let dkgs = vec![(participants, "one_voter_two_participants".to_string())];
+
+    run_dkgs(&mut env, &genesis, &final_peer_ids, dkgs, vec![]);
+}
+
 // Run 2 DKGs with disjoint sets of 4 peers from the 8 voters in genesis
 #[test]
 fn run_split_dkg() {
