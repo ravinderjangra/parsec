@@ -753,7 +753,8 @@ impl Schedule {
 
         // Gossip should theoretically complete in O(log N) steps
         // The constant (adjustment_coeff) is for making the number big enough.
-        let n = peers.present_peers().count() as f64;
+        let non_zero_ln = 2;
+        let n = std::cmp::max(peers.present_peers().count(), non_zero_ln) as f64;
         let adjustment_coeff = 250.0 / options.prob_gossip;
         let additional_steps = (adjustment_coeff * n.ln()) as usize;
 
