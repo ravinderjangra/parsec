@@ -1164,7 +1164,7 @@ digraph GossipGraph {
 
 /// ===== meta-elections =====
 /// consensus_history:
-/// a45229fc0d2cec585bf6bc84fcb535c917145c1a62dd70b25b7511ca4db5a169
+/// 337995bed8cf52d036d28828ce577f13b74b718121c6600106d82ecd4c10bb57
 
 /// interesting_events: {
 ///   Annie -> ["An_19"]

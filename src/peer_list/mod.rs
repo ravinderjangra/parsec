@@ -136,7 +136,7 @@ impl<S: SecretId> PeerList<S> {
             None
         };
 
-        iter.into_iter().flat_map(|iter| iter)
+        iter.into_iter().flatten()
     }
 
     /// Return public ids of all peers.

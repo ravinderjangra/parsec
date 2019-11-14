@@ -5482,7 +5482,7 @@ digraph GossipGraph {
 
 /// ===== meta-elections =====
 /// consensus_history:
-/// ac38cac32cab03eb5d2c68be685f2a9e95df932c5d2e3bda313c396c14327ec3
+/// bd0f848ea4cea41a625a97bd89326c0a2cb682900f3c9e257595ad13cc38bc6c
 
 /// interesting_events: {
 /// }
