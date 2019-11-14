@@ -11,9 +11,9 @@ use crate::{
     network_event::NetworkEvent,
 };
 use rand::{Rand, Rng};
-use safe_crypto::{gen_sign_keypair, PublicSignKey, SecretSignKey, Signature as SafeSignature};
 use std::{
     cmp::Ordering,
+    collections::hash_map::DefaultHasher,
     fmt::{self, Debug, Display, Formatter},
     hash::{Hash, Hasher},
 };
@@ -27,18 +27,8 @@ pub const NAMES: &[&str] = &[
 lazy_static! {
     static ref PEERS: Vec<PeerId> = NAMES
         .iter()
-        .map(|name| PeerId::new_with_random_keypair(name))
+        .map(|name| PeerId::new_with_keypair(name))
         .collect();
-}
-
-/// **NOT FOR PRODUCTION USE**: Mock signature type.
-#[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
-pub struct Signature(SafeSignature);
-
-impl Debug for Signature {
-    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
-        write!(formatter, "..")
-    }
 }
 
 /// **NOT FOR PRODUCTION USE**: Mock type implementing `PublicId` and `SecretId` traits.  For
@@ -47,8 +37,8 @@ impl Debug for Signature {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct PeerId {
     id: String,
-    pub_sign: PublicSignKey,
-    sec_sign: SecretSignKey,
+    public_key: PublicKey,
+    secret_key: SecretKey,
 }
 
 impl PeerId {
@@ -64,32 +54,23 @@ impl PeerId {
         &PEERS
     }
 
-    pub fn new_with_random_keypair(id: &str) -> Self {
-        let (pub_sign, sec_sign) = gen_sign_keypair();
-        Self {
-            id: id.to_string(),
-            pub_sign,
-            sec_sign,
-        }
-    }
-
     #[cfg(not(feature = "mock"))]
     fn new_with_keypair(id: &str) -> Self {
-        Self::new_with_random_keypair(id)
+        let (public_key, secret_key) = gen_keypair();
+        Self {
+            id: id.to_owned(),
+            public_key,
+            secret_key,
+        }
     }
 
     #[cfg(feature = "mock")]
     fn new_with_keypair(id: &str) -> Self {
-        use crate::hash::Hash;
-        use safe_crypto::{gen_sign_keypair_from_seed, Seed};
-
-        let name_hash = Hash::from(id.as_bytes());
-        let (pub_sign, sec_sign) =
-            gen_sign_keypair_from_seed(&Seed::from_bytes(*name_hash.as_bytes()));
+        let (public_key, secret_key) = derive_keypair(id.as_bytes());
         Self {
             id: id.to_string(),
-            pub_sign,
-            sec_sign,
+            public_key,
+            secret_key,
         }
     }
 
@@ -113,13 +94,13 @@ impl Debug for PeerId {
 impl Hash for PeerId {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.id.hash(state);
-        self.pub_sign.hash(state);
+        self.public_key.hash(state);
     }
 }
 
 impl PartialEq for PeerId {
     fn eq(&self, other: &PeerId) -> bool {
-        self.id == other.id && self.pub_sign == other.pub_sign
+        self.id == other.id && self.public_key == other.public_key
     }
 }
 
@@ -139,18 +120,33 @@ impl Ord for PeerId {
 
 impl PublicId for PeerId {
     type Signature = Signature;
+
     fn verify_signature(&self, signature: &Self::Signature, data: &[u8]) -> bool {
-        self.pub_sign.verify_detached(&signature.0, data)
+        let mut hasher = DefaultHasher::new();
+        hasher.write(data);
+        hasher.write(&self.public_key.0);
+        let hash = hasher.finish().to_le_bytes();
+
+        signature.0[..hash.len()] == hash
     }
 }
 
 impl SecretId for PeerId {
     type PublicId = PeerId;
+
     fn public_id(&self) -> &Self::PublicId {
         &self
     }
+
     fn sign_detached(&self, data: &[u8]) -> Signature {
-        Signature(self.sec_sign.sign_detached(data))
+        let mut hasher = DefaultHasher::new();
+        hasher.write(data);
+        hasher.write(&self.secret_key.0);
+        let hash = hasher.finish().to_le_bytes();
+
+        let mut signature = Signature([0; SIGNATURE_LENGTH]);
+        signature.0[..hash.len()].copy_from_slice(&hash[..]);
+        signature
     }
 
     #[cfg(not(feature = "mock"))]
@@ -169,47 +165,25 @@ impl SecretId for PeerId {
 
     #[cfg(feature = "mock")]
     fn encrypt<M: AsRef<[u8]>>(&self, to: &Self::PublicId, msg: M) -> Option<Vec<u8>> {
-        use safe_crypto::{PublicEncryptKey, SecretEncryptKey};
-        // Create a deterministic key based on safe_crypto mock implementation.
-        let to_pub_encrypt = PublicEncryptKey::from_bytes(to.pub_sign.into_bytes());
-        let self_sec_encrypt = SecretEncryptKey::from_bytes(self.pub_sign.into_bytes());
-
-        let shared_secret = self_sec_encrypt.shared_secret(&to_pub_encrypt);
-
-        // Cannot use encrypt_bytes/decrypt_bytes because encrypt add a radom nonce
-        // that cannot be replayed.
-        // Otherwise we would use `shared_secret.encrypt_bytes(msg.as_ref()).ok()`
-        let fake_encrypt = || {
-            let mut msg = msg.as_ref().to_vec();
-            msg.extend(shared_secret.into_bytes().iter());
-            Some(msg)
-        };
-
-        fake_encrypt()
+        let shared_secret = SharedSecret::new(&to.public_key, &self.secret_key);
+        Some(
+            msg.as_ref()
+                .iter()
+                .chain(shared_secret.0.iter())
+                .copied()
+                .collect(),
+        )
     }
 
     #[cfg(feature = "mock")]
     fn decrypt(&self, from: &Self::PublicId, ct: &[u8]) -> Option<Vec<u8>> {
-        use safe_crypto::{PublicEncryptKey, SecretEncryptKey};
-        // Create a deterministic key based on safe_crypto mock implementation.
-        let from_pub_encrypt = PublicEncryptKey::from_bytes(from.pub_sign.into_bytes());
-        let self_sec_encrypt = SecretEncryptKey::from_bytes(self.pub_sign.into_bytes());
+        let shared_secret = SharedSecret::new(&from.public_key, &self.secret_key);
 
-        let shared_secret = self_sec_encrypt.shared_secret(&from_pub_encrypt);
-
-        // Cannot use encrypt_bytes/decrypt_bytes because encrypt add a radom nonce
-        // that cannot be replayed.
-        // Otherwise we would use `shared_secret.decrypt_bytes(ct).ok()`
-        let fake_decrypt = || {
-            let shared_secret_bytes = shared_secret.into_bytes();
-            if ct.ends_with(&shared_secret_bytes) {
-                Some(ct[0..(ct.len() - shared_secret_bytes.len())].to_vec())
-            } else {
-                None
-            }
-        };
-
-        fake_decrypt()
+        if ct.ends_with(&shared_secret.0) {
+            Some(ct[..(ct.len() - shared_secret.0.len())].to_vec())
+        } else {
+            None
+        }
     }
 }
 
@@ -247,4 +221,56 @@ impl Rand for Transaction {
 pub fn create_ids(count: usize) -> Vec<PeerId> {
     assert!(count <= NAMES.len());
     NAMES.iter().take(count).cloned().map(PeerId::new).collect()
+}
+
+const SIGNATURE_LENGTH: usize = 32;
+const KEY_LENGTH: usize = 32;
+
+// **NOT FOR PRODUCTION USE**: Mock public key.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+pub struct PublicKey([u8; KEY_LENGTH]);
+
+// **NOT FOR PRODUCTION USE**: Mock secret key.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct SecretKey([u8; KEY_LENGTH]);
+
+// **NOT FOR PRODUCTION USE**: Mock signature.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+pub struct Signature([u8; SIGNATURE_LENGTH]);
+
+impl Debug for Signature {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "Signature(..)")
+    }
+}
+
+#[cfg(feature = "mock")]
+struct SharedSecret([u8; KEY_LENGTH]);
+
+#[cfg(feature = "mock")]
+impl SharedSecret {
+    fn new(pk: &PublicKey, sk: &SecretKey) -> Self {
+        let mut result = Self([0; KEY_LENGTH]);
+        for i in 0..KEY_LENGTH {
+            result.0[i] = pk.0[i] ^ sk.0[i];
+        }
+
+        result
+    }
+}
+
+#[cfg(not(feature = "mock"))]
+fn gen_keypair() -> (PublicKey, SecretKey) {
+    use maidsafe_utilities::SeededRng;
+
+    let mut rng = SeededRng::thread_rng();
+    let bytes: [u8; KEY_LENGTH] = rng.gen();
+    (PublicKey(bytes), SecretKey(bytes))
+}
+
+#[cfg(feature = "mock")]
+fn derive_keypair(seed: &[u8]) -> (PublicKey, SecretKey) {
+    use crate::hash::Hash;
+    let hash = Hash::from(seed);
+    (PublicKey(*hash.as_bytes()), SecretKey(*hash.as_bytes()))
 }

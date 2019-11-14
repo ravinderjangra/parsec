@@ -207,16 +207,13 @@ fn add_functional_tests(scenarios: &mut Scenarios) {
         .file("Alice", "alice.dot");
 
     let _ = scenarios
-        .add(
-            "functional_tests::unpolled_and_unconsensused_observations",
-            |env| {
-                let obs = ObservationSchedule {
-                    genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave")),
-                    schedule: vec![(1, AddPeer(PeerId::new("Eric")))],
-                };
-                Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
-            },
-        )
+        .add("functional_tests::unpolled_observations", |env| {
+            let obs = ObservationSchedule {
+                genesis: Genesis::new(peer_ids!("Alice", "Bob", "Carol", "Dave")),
+                schedule: vec![(1, AddPeer(PeerId::new("Eric")))],
+            };
+            Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
+        })
         .seed([3016139397, 1416620722, 2110786801, 3768414447])
         .file("Alice-002", "alice.dot");
 
@@ -362,7 +359,7 @@ fn add_dev_utils_record_smoke_tests(scenarios: &mut Scenarios) {
         })
         .seed([1, 2, 3, 4])
         .file("Alice", "alice.dot")
-        .dump_mode(DumpGraphMode::OnParsecDrop);;
+        .dump_mode(DumpGraphMode::OnParsecDrop);
 
     let _ = scenarios
         .add("dev_utils::record::tests::smoke_partial_dkg", |env| {

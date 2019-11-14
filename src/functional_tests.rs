@@ -356,11 +356,11 @@ fn unpolled_observations() {
     // Generated with RNG seed: [3016139397, 1416620722, 2110786801, 3768414447], but using
     // Alice-002.dot to get the dot file where we get consensus on `Add(Eric)`.
     let mut alice_contents = parse_test_dot_file("alice.dot");
-    let a_17 = unwrap!(alice_contents.remove_last_event());
+    let d_21 = unwrap!(alice_contents.remove_last_event());
 
     let mut alice = TestParsec::from_parsed_contents(alice_contents, new_rng(&mut common_rng));
 
-    // `Add(Eric)` should still be unpolled since A_17 would be the first gossip event to
+    // `Add(Eric)` should still be unpolled since D_21 would be the first gossip event to
     // reach consensus on `Add(Eric)`, but it was removed from the graph.
     assert!(alice.has_unpolled_observations());
 
@@ -380,8 +380,8 @@ fn unpolled_observations() {
     assert_eq!(alice.our_unpolled_observations().count(), 1);
     assert_eq!(*unwrap!(alice.our_unpolled_observations().next()), add_eric);
 
-    // Have Alice process A_17 to get consensus on `Add(Eric)`.
-    unwrap!(alice.add_event(a_17));
+    // Have Alice process D_21 to get consensus on `Add(Eric)`.
+    unwrap!(alice.add_event(d_21));
 
     // Since we haven't call `poll()` again yet, should still return our vote for `Add(Eric)`.
     assert!(alice.has_unpolled_observations());
@@ -403,14 +403,16 @@ fn unpolled_observations() {
     assert_eq!(alice.our_unpolled_observations().count(), 1);
     assert_eq!(*unwrap!(alice.our_unpolled_observations().next()), vote);
 
-    // Reset, and re-run, this time adding Alice's vote early to check that it is returned in
-    // the correct order, i.e. after `Add(Eric)` at the point where `Add(Eric)` is consensused
-    // but has not been returned by `poll()`.
-    alice = TestParsec::from_parsed_contents(
-        parse_test_dot_file("alice.dot"),
-        new_rng(&mut common_rng),
-    );
+    // Reset, re-run, and add another vote by Alice. Both `Add(Eric)` and the new vote should be
+    // returned in `out_unpolled_observations`. `Add(Eric)` should appear first, because it is
+    // consensused while the other vote is not.
+    let mut alice_contents = parse_test_dot_file("alice.dot");
+    let d_21 = unwrap!(alice_contents.remove_last_event());
+    let mut alice = TestParsec::from_parsed_contents(alice_contents, new_rng(&mut common_rng));
+    unwrap!(alice.add_event(d_21));
+
     unwrap!(alice.vote_for(vote.clone()));
+
     let mut unpolled_observations = alice.our_unpolled_observations();
     assert_eq!(*unwrap!(unpolled_observations.next()), add_eric);
     assert_eq!(*unwrap!(unpolled_observations.next()), vote);

@@ -80,6 +80,7 @@ impl fmt::Debug for DifferingBlocksOrder {
 }
 
 #[derive(Debug)]
+#[allow(clippy::large_enum_variant)]
 pub enum ConsensusError {
     DifferingBlocksOrder(DifferingBlocksOrder),
     WrongBlocksNumber {
@@ -575,7 +576,7 @@ impl Network {
                             new_rng(rng2),
                         )
                     })
-                    .collect_vec();;
+                    .collect_vec();
 
                 self.peers = good_peers
                     .into_iter()

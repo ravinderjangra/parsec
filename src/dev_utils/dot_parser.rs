@@ -532,8 +532,7 @@ fn parse_unconsensused_events() -> Parser<u8, BTreeSet<String>> {
         * list(sym(b'"') * parse_event_id() - sym(b'"'), seq(b", "))
         - seq(b"}")
         - next_line();
-    line.opt()
-        .map(|ids| ids.into_iter().flat_map(|ids| ids).collect())
+    line.opt().map(|ids| ids.into_iter().flatten().collect())
 }
 
 fn parse_observation() -> Parser<u8, Observation<Transaction, PeerId>> {

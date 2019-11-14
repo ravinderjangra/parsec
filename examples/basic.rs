@@ -499,7 +499,7 @@ impl Environment {
     // Returns a randomly created new `PeerId`.
     fn new_peer_id(&mut self) -> PeerId {
         let peer = PeerId::from_index(self.pretty_id_count).unwrap_or_else(|| {
-            PeerId::new_with_random_keypair(
+            PeerId::new(
                 self.rng
                     .gen_ascii_chars()
                     .take(6)

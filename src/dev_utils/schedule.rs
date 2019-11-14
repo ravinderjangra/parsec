@@ -110,6 +110,7 @@ pub enum AddPeerType {
 /// of being scheduled to perform a local step, consisting of receiving messages that reached it
 /// by this time, generating appropriate responses and optionally sending a gossip request.
 #[derive(Clone, Debug)]
+#[allow(clippy::large_enum_variant)]
 pub enum ScheduleEvent {
     /// Event storing the names of the initial nodes
     Genesis(Genesis),
