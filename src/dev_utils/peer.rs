@@ -19,7 +19,7 @@ use crate::{
     peer_list::PeerIndex,
 };
 use itertools::Itertools;
-use rand::Rng;
+use rand::{seq::SliceRandom, Rng, RngCore};
 use std::{
     collections::{BTreeMap, BTreeSet},
     fmt::{self, Debug, Formatter},
@@ -123,7 +123,7 @@ impl MaliciousComponents {
                 .peer_list()
                 .gossip_recipients()
                 .collect_vec();
-            rng.shuffle(&mut gossip_recipients);
+            gossip_recipients.shuffle(rng);
 
             unwrap!(gossip_recipients
                 .iter()
@@ -244,7 +244,7 @@ impl Peer {
         id: PeerId,
         genesis_group: &BTreeSet<PeerId>,
         consensus_mode: ConsensusMode,
-        secure_rng: Box<dyn Rng>,
+        secure_rng: Box<dyn RngCore>,
     ) -> Self {
         Self::new(WrappedParsec::Good(Parsec::from_genesis(
             id,
@@ -259,7 +259,7 @@ impl Peer {
         id: PeerId,
         genesis_group: &BTreeSet<PeerId>,
         consensus_mode: ConsensusMode,
-        secure_rng: Box<dyn Rng>,
+        secure_rng: Box<dyn RngCore>,
     ) -> Self {
         Self::new(WrappedParsec::Malicious(MaliciousComponents {
             test_parsec: TestParsec::from_genesis(id, genesis_group, consensus_mode, secure_rng),
@@ -272,7 +272,7 @@ impl Peer {
         genesis_group: &BTreeSet<PeerId>,
         current_group: &BTreeSet<PeerId>,
         consensus_mode: ConsensusMode,
-        secure_rng: Box<dyn Rng>,
+        secure_rng: Box<dyn RngCore>,
     ) -> Self {
         Self::new(WrappedParsec::Good(Parsec::from_existing(
             id,
@@ -288,7 +288,7 @@ impl Peer {
         genesis_group: &BTreeSet<PeerId>,
         current_group: &BTreeSet<PeerId>,
         consensus_mode: ConsensusMode,
-        secure_rng: Box<dyn Rng>,
+        secure_rng: Box<dyn RngCore>,
     ) -> Self {
         Self::new(WrappedParsec::Malicious(MaliciousComponents {
             test_parsec: TestParsec::from_existing(

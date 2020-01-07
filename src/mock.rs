@@ -10,7 +10,10 @@ use crate::{
     id::{PublicId, SecretId},
     network_event::NetworkEvent,
 };
-use rand::{Rand, Rng};
+use rand::{
+    distributions::{Alphanumeric, Distribution, Standard},
+    Rng,
+};
 use std::{
     cmp::Ordering,
     collections::hash_map::DefaultHasher,
@@ -211,9 +214,9 @@ impl Debug for Transaction {
     }
 }
 
-impl Rand for Transaction {
-    fn rand<R: Rng>(rng: &mut R) -> Self {
-        Transaction(rng.gen_ascii_chars().take(5).collect())
+impl Distribution<Transaction> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Transaction {
+        Transaction(rng.sample_iter(Alphanumeric).take(5).collect())
     }
 }
 
@@ -261,7 +264,7 @@ impl SharedSecret {
 
 #[cfg(not(feature = "mock"))]
 fn gen_keypair() -> (PublicKey, SecretKey) {
-    use maidsafe_utilities::SeededRng;
+    use crate::seeded_rng::SeededRng;
 
     let mut rng = SeededRng::thread_rng();
     let bytes: [u8; KEY_LENGTH] = rng.gen();

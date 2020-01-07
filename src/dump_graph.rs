@@ -76,7 +76,7 @@ mod detail {
         serialise,
     };
     use itertools::Itertools;
-    use rand::{self, Rng};
+    use rand::{self, distributions::Alphanumeric, Rng};
     use std::{
         cell::RefCell,
         cmp,
@@ -94,7 +94,7 @@ mod detail {
         static ref ROOT_DIR_PREFIX: PathBuf = { env::temp_dir().join("parsec_graphs") };
         static ref ROOT_DIR_SUFFIX: String = {
             rand::thread_rng()
-                .gen_ascii_chars()
+                .sample_iter(Alphanumeric)
                 .take(6)
                 .collect::<String>()
         };

@@ -14,7 +14,7 @@ use crate::{
     observation::{ConsensusMode, Observation as ParsecObservation},
 };
 use itertools::Itertools;
-use rand::{seq, Rng};
+use rand::{seq::SliceRandom, Rng};
 use std::{
     collections::{BTreeMap, BTreeSet},
     fmt, iter, mem,
@@ -834,5 +834,5 @@ fn sample<T: Clone, R: Rng>(rng: &mut R, items: &[T], strategy: Sampling) -> Vec
         }
     };
 
-    seq::sample_slice(rng, items, amount)
+    items.choose_multiple(rng, amount).cloned().collect()
 }

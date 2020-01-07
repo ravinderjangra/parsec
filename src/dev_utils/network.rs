@@ -22,7 +22,7 @@ use crate::{
     },
 };
 use itertools::Itertools;
-use rand::Rng;
+use rand::{seq::SliceRandom, Rng};
 use std::{
     collections::{BTreeMap, BTreeSet, VecDeque},
     fmt,
@@ -257,7 +257,7 @@ impl Network {
         }
 
         let recipient = loop {
-            let recipient = unwrap!(rng.choose(present_peers));
+            let recipient = unwrap!(present_peers.choose(rng));
             if recipient != sender {
                 break recipient;
             }

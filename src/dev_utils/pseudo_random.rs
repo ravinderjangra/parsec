@@ -6,14 +6,16 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use maidsafe_utilities::SeededRng;
-use rand::{Rng, SeedableRng, XorShiftRng};
+use crate::seeded_rng::SeededRng;
+use rand::{Error, RngCore, SeedableRng};
+use rand_core::impls;
+use rand_xorshift::XorShiftRng;
 use std::fmt;
 
-pub trait RngDebug: Rng + fmt::Debug {}
+pub trait RngDebug: RngCore + fmt::Debug {}
 
-impl RngDebug for SeededRng {}
 impl RngDebug for XorShiftRng {}
+impl RngDebug for SeededRng {}
 
 #[derive(Clone, Copy, Debug)]
 pub enum RngChoice {
@@ -29,7 +31,7 @@ pub fn new_common_rng(seed: RngChoice) -> Box<dyn RngDebug> {
         RngChoice::SeededRandom => Box::new(SeededRng::new()),
         RngChoice::Seeded(seed) => Box::new(SeededRng::from_seed(seed)),
         RngChoice::SeededXor(seed) => {
-            let rng = Box::new(XorShiftRng::from_seed(seed));
+            let rng = Box::new(XorShiftRng::from_seed(convert_seed(seed)));
             println!("Using {:?}", rng);
             rng
         }
@@ -37,14 +39,14 @@ pub fn new_common_rng(seed: RngChoice) -> Box<dyn RngDebug> {
 }
 
 /// Create a new RNG using a seed generated from random data provided by `rng`.
-pub fn new_rng<R: Rng>(rng: &mut R) -> Box<dyn Rng> {
+pub fn new_rng<R: RngCore>(rng: &mut R) -> Box<dyn RngCore> {
     let new_seed = [
         rng.next_u32().wrapping_add(rng.next_u32()),
         rng.next_u32().wrapping_add(rng.next_u32()),
         rng.next_u32().wrapping_add(rng.next_u32()),
         rng.next_u32().wrapping_add(rng.next_u32()),
     ];
-    Box::new(XorShiftRng::from_seed(new_seed))
+    Box::new(XorShiftRng::from_seed(convert_seed(new_seed)))
 }
 
 /// Create a RNG that will replay the given value and when complete will panic if more value needed.
@@ -60,10 +62,36 @@ impl ReplayRng {
     }
 }
 
-impl Rng for ReplayRng {
+impl RngCore for ReplayRng {
     fn next_u32(&mut self) -> u32 {
         let value = unwrap!(self.values.get(self.index));
         self.index += 1;
         *value
     }
+
+    fn next_u64(&mut self) -> u64 {
+        impls::next_u64_via_u32(self)
+    }
+
+    fn fill_bytes(&mut self, dest: &mut [u8]) {
+        impls::fill_bytes_via_next(self, dest)
+    }
+
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), Error> {
+        self.fill_bytes(dest);
+        Ok(())
+    }
+}
+
+// Convert the XorShiftRng seed from the old to the new format.
+fn convert_seed(src: [u32; 4]) -> [u8; 16] {
+    let mut bytes = [0; 16];
+    let mut index = 0;
+    for num in src.iter() {
+        for num_byte in &num.to_le_bytes() {
+            bytes[index] = *num_byte;
+            index += 1;
+        }
+    }
+    bytes
 }
