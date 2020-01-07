@@ -352,7 +352,7 @@ fn add_dev_utils_record_smoke_tests(scenarios: &mut Scenarios) {
             let peer_ids = peer_ids!("Alice", "Bob", "Carol");
             let dkg_peer_ids = peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric");
             let obs = ObservationSchedule {
-                genesis: Genesis::new(peer_ids.clone()),
+                genesis: Genesis::new(peer_ids),
                 schedule: vec![(1, StartDkg(dkg_peer_ids))],
             };
             Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)
@@ -366,7 +366,7 @@ fn add_dev_utils_record_smoke_tests(scenarios: &mut Scenarios) {
             let peer_ids = peer_ids!("Alice", "Bob", "Carol");
             let dkg_peer_ids = peer_ids!("Alice", "Bob", "Carol", "Dave", "Eric");
             let obs = ObservationSchedule {
-                genesis: Genesis::new(peer_ids.clone()),
+                genesis: Genesis::new(peer_ids),
                 schedule: vec![(1, StartDkg(dkg_peer_ids))],
             };
             Schedule::from_observation_schedule(env, &ScheduleOptions::default(), obs)

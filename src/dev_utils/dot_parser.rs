@@ -992,7 +992,7 @@ fn convert_to_meta_election(
         .into_iter()
         .map(|(ev_id, mev)| {
             let event_index = *event_indices
-                .entry(ev_id.clone())
+                .entry(ev_id)
                 .or_insert_with(|| EventIndex::PHONY);
             let meta_event = convert_to_meta_event(mev, peer_list);
             (event_index, meta_event)
@@ -1202,7 +1202,7 @@ fn in_peer_order(
                 fork_index,
             };
 
-            ((prefix, event_key), (name.clone(), evt))
+            ((prefix, event_key), (name, evt))
         })
         .map(|(name, evt)| ((peer_list.get_index(&evt.1.creator), name), evt))
         .collect();

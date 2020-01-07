@@ -1193,7 +1193,12 @@ mod detail {
         fn new_peer_id_peer_index_map(values: &[(usize, &str)]) -> PeerIndexMap<String> {
             values
                 .iter()
-                .map(|(index, string)| (PeerIndex::new_test_peer_index(*index), string.to_string()))
+                .map(|(index, string)| {
+                    (
+                        PeerIndex::new_test_peer_index(*index),
+                        (*string).to_string(),
+                    )
+                })
                 .collect()
         }
 

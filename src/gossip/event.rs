@@ -835,7 +835,7 @@ mod tests {
         let self_parent_index = EventIndex::PHONY;
         let net_event = Observation::OpaquePayload(Transaction::new("event_observed_by_alice"));
 
-        match Event::new_from_observation(self_parent_index, net_event.clone(), alice.as_ref()) {
+        match Event::new_from_observation(self_parent_index, net_event, alice.as_ref()) {
             Err(Error::UnknownSelfParent) => (),
             x => panic!("Unexpected {:?}", x),
         }

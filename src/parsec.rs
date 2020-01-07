@@ -915,7 +915,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     ) -> Option<()> {
         if let Some(key_gen) = &mut self.key_gen.get_mut(&key_gen_id) {
             let part_result = key_gen
-                .handle_part(self.peer_list.our_id(), creator_id, part.clone())
+                .handle_part(self.peer_list.our_id(), creator_id, part)
                 .map_err(|err| warn!("handle_dkg_message_part error: {:?}", err))
                 .ok()?;
 
@@ -945,7 +945,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     ) -> Option<()> {
         if let Some(key_gen) = &mut self.key_gen.get_mut(&key_gen_id) {
             let ack_result = key_gen
-                .handle_ack(&self.peer_list.our_id(), creator_id, ack.clone())
+                .handle_ack(&self.peer_list.our_id(), creator_id, ack)
                 .map_err(|err| warn!("handle_dkg_message_ack error: {:?}", err))
                 .ok()?;
 
@@ -1504,7 +1504,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                         let creator_id = self.peer_list.get(event.creator()).map(Peer::id)?;
                         Some((key, vote, creator_id))
                     })
-                    .map(|(_, vote, creator_id)| (creator_id.clone(), vote.clone()))
+                    .map(|(_, vote, creator_id)| (creator_id.clone(), vote))
                     .collect();
 
                 Block::new(&votes)
