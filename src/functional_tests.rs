@@ -60,7 +60,7 @@ fn from_existing() {
     let peers = peers.into_iter().collect();
 
     let parsec = TestParsec::<Transaction, _>::from_existing(
-        our_id.clone(),
+        our_id,
         &peers,
         &peers,
         ConsensusMode::Supermajority,
@@ -199,7 +199,7 @@ fn from_genesis_requires_the_genesis_group_contains_us() {
     let peers = peers.into_iter().collect();
 
     let _ = TestParsec::<Transaction, _>::from_genesis(
-        our_id.clone(),
+        our_id,
         &peers,
         ConsensusMode::Supermajority,
         new_rng(&mut common_rng),
@@ -327,7 +327,7 @@ fn remove_peer() {
         .collect();
     let _ = section.remove(&eric_id);
     let mut eric = TestParsec::<Transaction, _>::from_existing(
-        eric_id.clone(),
+        eric_id,
         &section,
         &section,
         ConsensusMode::Supermajority,
@@ -1439,7 +1439,7 @@ mod handle_malice {
         // [A_0, A_1, A_2,1, A_3,1] will be sent to Dave.
         let a_3_1 =
             PackedEvent::new_requesting(alice_id.clone(), dave_id.clone(), a_2_1.compute_hash());
-        request.packed_events = vec![a_0.clone(), a_1.clone(), a_2_1.clone(), a_3_1.clone()];
+        request.packed_events = vec![a_0, a_1.clone(), a_2_1.clone(), a_3_1.clone()];
         unwrap!(dave.handle_request(&alice_id, request));
 
         // Send a request from Dave to Carol.  Carol should accuse A_2_1.  Don't send the response.
@@ -1534,7 +1534,7 @@ mod handle_malice {
         // [A_0, A_1, A_2,1, A_3,2] will be sent to Carol.
         let a_3_2 =
             PackedEvent::new_requesting(alice_id.clone(), carol_id.clone(), a_2_1.compute_hash());
-        request.packed_events = vec![a_0.clone(), a_1.clone(), a_2_1.clone(), a_3_2.clone()];
+        request.packed_events = vec![a_0, a_1, a_2_1.clone(), a_3_2.clone()];
         unwrap!(carol.handle_request(&alice_id, request));
 
         // Send a request from Bob to Carol.  Carol should accuse A_1 and A_2_1.
@@ -1596,7 +1596,7 @@ mod handle_malice {
         // [A_0, A_1, A_2,2] will be sent to Dave.
         let a_2_2 =
             PackedEvent::new_requesting(alice_id.clone(), dave_id.clone(), a_1.compute_hash());
-        request.packed_events = vec![a_0.clone(), a_1.clone(), a_2_2.clone()];
+        request.packed_events = vec![a_0, a_1.clone(), a_2_2.clone()];
         unwrap!(dave.handle_request(&alice_id, request));
 
         // Send a request from Bob to Carol and send the response.  Bob and Carol should accuse A_1.

@@ -607,7 +607,7 @@ impl Network {
                 let _ = self.peers.insert(
                     peer_id.clone(),
                     Peer::from_existing(
-                        peer_id.clone(),
+                        peer_id,
                         &self.genesis,
                         &current_peers,
                         self.consensus_mode,

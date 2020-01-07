@@ -418,7 +418,7 @@ fn run_dkgs(
                 participants,
                 dkg_result,
             } => Some((
-                id.clone(),
+                id,
                 dkg_name(participants),
                 dkg_result.0.secret_key_share.is_some(),
             )),

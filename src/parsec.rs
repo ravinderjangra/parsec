@@ -446,10 +446,11 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
 
     /// Check if there are any observations that have been voted for but not yet polled - that is,
     /// either they haven't been consensused yet or a block containing that observation hasn't yet
-    /// been retrieved by calling `poll`.
+    /// been retrieved by calling `poll`, or a DKG is running.
     pub fn has_unpolled_observations(&self) -> bool {
         self.observations.values().any(|info| !info.consensused)
             || !self.consensused_blocks.is_empty()
+            || !self.key_gen.is_empty()
     }
 
     /// Returns observations voted for by the owning peer which haven't been returned as a stable
@@ -915,7 +916,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     ) -> Option<()> {
         if let Some(key_gen) = &mut self.key_gen.get_mut(&key_gen_id) {
             let part_result = key_gen
-                .handle_part(self.peer_list.our_id(), creator_id, part.clone())
+                .handle_part(self.peer_list.our_id(), creator_id, part)
                 .map_err(|err| warn!("handle_dkg_message_part error: {:?}", err))
                 .ok()?;
 
@@ -945,7 +946,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
     ) -> Option<()> {
         if let Some(key_gen) = &mut self.key_gen.get_mut(&key_gen_id) {
             let ack_result = key_gen
-                .handle_ack(&self.peer_list.our_id(), creator_id, ack.clone())
+                .handle_ack(&self.peer_list.our_id(), creator_id, ack)
                 .map_err(|err| warn!("handle_dkg_message_ack error: {:?}", err))
                 .ok()?;
 
@@ -1504,7 +1505,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                         let creator_id = self.peer_list.get(event.creator()).map(Peer::id)?;
                         Some((key, vote, creator_id))
                     })
-                    .map(|(_, vote, creator_id)| (creator_id.clone(), vote.clone()))
+                    .map(|(_, vote, creator_id)| (creator_id.clone(), vote))
                     .collect();
 
                 Block::new(&votes)
