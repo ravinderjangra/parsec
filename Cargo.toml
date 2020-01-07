@@ -19,7 +19,7 @@ log = "~0.3.8"
 maidsafe_utilities = "~0.18.0"
 pom = { version = "~1.1.0", optional = true }
 proptest = { version = "~0.8.6", optional = true }
-rand = "~0.7.0"
+rand = "~0.7.2"
 rand_core = "~0.5.1"
 rand_maidsafe_utilities = { package = "rand", version = "~0.3.15" }
 rand_threshold_crypto = { package = "rand", version = "~0.6.5" }
