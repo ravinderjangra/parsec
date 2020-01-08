@@ -1,4 +1,4 @@
-// Copyright 2019 MaidSafe.net limited.
+// Copyright 2020 MaidSafe.net limited.
 //
 // This SAFE Network Software is licensed to you under The General Public License (GPL), version 3.
 // Unless required by applicable law or agreed to in writing, the SAFE Network Software distributed
@@ -6,28 +6,29 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
+use maidsafe_utilities::SeededRng as InnerRng;
 use rand::{Error, RngCore};
 use rand_maidsafe_utilities::Rng;
 use std::fmt::{self, Debug, Formatter};
 
 // Wrapper for maidsafe_utilities::SeededRng that is compatible with the latest rand crate.
-pub struct SeededRng(maidsafe_utilities::SeededRng);
+pub struct SeededRng(InnerRng);
 
 #[cfg(any(test, feature = "testing"))]
 impl SeededRng {
     pub fn new() -> Self {
-        Self(maidsafe_utilities::SeededRng::new())
+        Self(InnerRng::new())
     }
 
     pub fn from_seed(seed: [u32; 4]) -> Self {
-        Self(maidsafe_utilities::SeededRng::from_seed(seed))
+        Self(InnerRng::from_seed(seed))
     }
 }
 
 #[cfg(all(test, not(feature = "mock")))]
 impl SeededRng {
     pub fn thread_rng() -> Self {
-        Self(maidsafe_utilities::SeededRng::thread_rng())
+        Self(InnerRng::thread_rng())
     }
 }
 
