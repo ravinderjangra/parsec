@@ -106,7 +106,7 @@ mod tests;
 use crate::{DkgResult, SecretId};
 use failure::Fail;
 use maidsafe_utilities::serialisation;
-use rand;
+use rand::RngCore;
 use serde_derive::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::{self, Debug, Formatter};
@@ -270,7 +270,7 @@ impl<S: SecretId> KeyGen<S> {
         sec_key: &S,
         pub_keys: BTreeSet<S::PublicId>,
         threshold: usize,
-        rng: &mut dyn rand::Rng,
+        rng: &mut dyn RngCore,
     ) -> Result<(KeyGen<S>, Option<Part>), Error> {
         let our_id = sec_key.public_id().clone();
         let our_idx = pub_keys

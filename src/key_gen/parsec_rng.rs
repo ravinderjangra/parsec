@@ -6,10 +6,14 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
+use rand::{Error, RngCore};
+#[cfg(feature = "dump-graphs")]
+use rand_core::impls;
+
 /// Secure RNG used by Parsec for DKG:
 /// If feature = "dump-graphs" is enabled, allow dumping the produced value to allow replay.
 pub struct ParsecRng {
-    secure_rng: Box<dyn rand::Rng>,
+    secure_rng: Box<dyn RngCore>,
     #[cfg(feature = "dump-graphs")]
     generated_values: Vec<u32>,
 }
@@ -17,7 +21,7 @@ pub struct ParsecRng {
 impl ParsecRng {
     /// Create ParsecRng that will output value from the secure_rng.
     /// `secure_rng`: a cryptographically secure RNG.
-    pub fn new(secure_rng: Box<dyn rand::Rng>) -> Self {
+    pub fn new(secure_rng: Box<dyn RngCore>) -> Self {
         Self {
             secure_rng,
             #[cfg(feature = "dump-graphs")]
@@ -32,16 +36,43 @@ impl ParsecRng {
     }
 }
 
-impl rand::Rng for ParsecRng {
-    #[cfg(not(feature = "dump-graphs"))]
+#[cfg(not(feature = "dump-graphs"))]
+impl RngCore for ParsecRng {
     fn next_u32(&mut self) -> u32 {
         self.secure_rng.next_u32()
     }
 
-    #[cfg(feature = "dump-graphs")]
+    fn next_u64(&mut self) -> u64 {
+        self.secure_rng.next_u64()
+    }
+
+    fn fill_bytes(&mut self, dest: &mut [u8]) {
+        self.secure_rng.fill_bytes(dest)
+    }
+
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), Error> {
+        self.secure_rng.try_fill_bytes(dest)
+    }
+}
+
+#[cfg(feature = "dump-graphs")]
+impl RngCore for ParsecRng {
     fn next_u32(&mut self) -> u32 {
         let next = self.secure_rng.next_u32();
         self.generated_values.push(next);
         next
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        impls::next_u64_via_u32(self)
+    }
+
+    fn fill_bytes(&mut self, dest: &mut [u8]) {
+        impls::fill_bytes_via_next(self, dest)
+    }
+
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), Error> {
+        self.fill_bytes(dest);
+        Ok(())
     }
 }

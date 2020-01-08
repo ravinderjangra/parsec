@@ -56,12 +56,13 @@ extern crate clap;
 extern crate unwrap;
 
 use clap::{App, Arg, ArgMatches};
-use maidsafe_utilities::{log, SeededRng};
+use maidsafe_utilities::log;
 use parsec::{
     mock::{PeerId, Transaction},
     Block, ConsensusMode, Parsec, Request,
 };
-use rand::Rng;
+use rand::{distributions::Alphanumeric, seq::SliceRandom, Rng, RngCore, SeedableRng};
+use rand_xorshift::XorShiftRng;
 use std::{
     cmp,
     collections::BTreeSet,
@@ -95,7 +96,7 @@ const ADD_PEER_CHANCE: u32 = 2;
 // We generate Remove observation(s) in a given round with 1 in `REMOVE_PEERS_CHANCE` odds.
 const REMOVE_PEERS_CHANCE: u32 = 5;
 
-type Seed = [u32; 4];
+type Seed = u64;
 type Observation = parsec::Observation<Transaction, PeerId>;
 
 struct Peer {
@@ -112,7 +113,7 @@ impl Peer {
     fn from_genesis(
         our_id: PeerId,
         genesis_group: &BTreeSet<PeerId>,
-        secure_rng: Box<dyn Rng>,
+        secure_rng: Box<dyn RngCore>,
     ) -> Self {
         Self {
             id: our_id.clone(),
@@ -132,7 +133,7 @@ impl Peer {
         our_id: PeerId,
         genesis_group: &BTreeSet<PeerId>,
         section: &BTreeSet<PeerId>,
-        secure_rng: Box<dyn Rng>,
+        secure_rng: Box<dyn RngCore>,
     ) -> Self {
         Self {
             id: our_id.clone(),
@@ -239,7 +240,7 @@ impl Params {
             MIN_PEER_COUNT, MAX_PEER_COUNT_ARG_LONG_NAME
         );
         let seed_info = format!(
-            "should be quoted and in the form of four unsigned integers e.g. --{}=\"1, 2, 3, 4\".",
+            "should be a positive integer, e.g. --{}=1234.",
             SEED_ARG_LONG_NAME
         );
         let matches = App::new("Parsec basic example")
@@ -393,16 +394,15 @@ impl Params {
             }
         }
         params.max_rounds = parse_usize(&matches, MAX_ROUNDS_ARG_LONG_NAME);
-        params.seed =
-            matches
-                .value_of(SEED_ARG_LONG_NAME)
-                .map(|seed_str| match parse_seed(seed_str) {
-                    Ok(seed) => seed,
-                    Err(()) => {
-                        println!("'{}' {}", SEED_ARG_LONG_NAME, seed_info);
-                        process::exit(6);
-                    }
-                });
+        params.seed = matches
+            .value_of(SEED_ARG_LONG_NAME)
+            .map(|seed_str| match seed_str.parse() {
+                Ok(seed) => seed,
+                Err(_) => {
+                    println!("'{}' {}", SEED_ARG_LONG_NAME, seed_info);
+                    process::exit(6);
+                }
+            });
 
         params
     }
@@ -423,27 +423,9 @@ fn parse_usize(matches: &ArgMatches, arg: &str) -> usize {
     }
 }
 
-fn parse_seed(seed_str: &str) -> Result<Seed, ()> {
-    let parts = seed_str
-        .split(',')
-        .map(ToString::to_string)
-        .collect::<Vec<String>>();
-    if parts.len() != 4 {
-        return Err(());
-    }
-    let mut seed = [0; 4];
-    for (index, part) in parts.iter().enumerate() {
-        seed[index] = part
-            .trim_matches(|c: char| !c.is_digit(10))
-            .parse::<u32>()
-            .map_err(|_| ())?;
-    }
-    Ok(seed)
-}
-
 struct Environment {
     params: Params,
-    rng: SeededRng,
+    rng: XorShiftRng,
     genesis_group: BTreeSet<PeerId>,
     peers: Vec<Peer>,
     opaque_observations: Vec<Observation>,
@@ -459,14 +441,12 @@ impl Environment {
     fn new() -> Self {
         let params = Params::new();
 
-        let rng = params
-            .seed
-            .map_or_else(SeededRng::new, SeededRng::from_seed);
-        println!("Using {:?}", rng);
+        let seed = params.seed.unwrap_or_else(|| rand::thread_rng().gen());
+        println!("Using seed {}", seed);
 
         let mut env = Environment {
             params,
-            rng,
+            rng: XorShiftRng::seed_from_u64(seed),
             genesis_group: BTreeSet::new(),
             peers: vec![],
             opaque_observations: vec![],
@@ -485,7 +465,13 @@ impl Environment {
 
         env.peers = genesis_group
             .iter()
-            .map(|id| Peer::from_genesis(id.clone(), &genesis_group, Box::new(env.rng.new_rng())))
+            .map(|id| {
+                Peer::from_genesis(
+                    id.clone(),
+                    &genesis_group,
+                    Box::new(XorShiftRng::seed_from_u64(env.rng.gen())),
+                )
+            })
             .collect();
         env.genesis_group = genesis_group;
 
@@ -500,8 +486,8 @@ impl Environment {
     fn new_peer_id(&mut self) -> PeerId {
         let peer = PeerId::from_index(self.pretty_id_count).unwrap_or_else(|| {
             PeerId::new(
-                self.rng
-                    .gen_ascii_chars()
+                (&mut self.rng)
+                    .sample_iter(Alphanumeric)
                     .take(6)
                     .collect::<String>()
                     .as_str(),
@@ -516,7 +502,7 @@ impl Environment {
     fn num_to_drop(&mut self) -> usize {
         if self.peers.len() > MIN_PEER_COUNT
             && self.params.remove_peers_count != self.peers_removed_count
-            && self.rng.gen_weighted_bool(REMOVE_PEERS_CHANCE)
+            && self.rng.gen_ratio(1, REMOVE_PEERS_CHANCE)
         {
             assert!(self.peers_removed_count < self.params.remove_peers_count);
             let respect_remove_peers_count =
@@ -543,7 +529,7 @@ impl Environment {
     fn try_new_peer(&mut self) {
         self.current_new_peer = if self.peers.len() < self.params.max_peer_count
             && self.params.add_peers_count != self.peers_added_count
-            && self.rng.gen_weighted_bool(ADD_PEER_CHANCE)
+            && self.rng.gen_ratio(1, ADD_PEER_CHANCE)
         {
             Some(self.new_peer_id())
         } else {
@@ -558,7 +544,7 @@ impl Environment {
         self.peers_removed_count += num_to_drop;
         self.current_remove_peers.clear();
         while num_to_drop > 0 {
-            self.rng.shuffle(&mut self.peers);
+            self.peers.shuffle(&mut self.rng);
             let dropped = unwrap!(self.peers.pop());
             println!("Dropping {:?}", dropped.id);
             self.current_remove_peers.push(dropped.id);
@@ -572,7 +558,7 @@ impl Environment {
                 new_peer_id.clone(),
                 &self.genesis_group,
                 &section,
-                Box::new(self.rng.new_rng()),
+                Box::new(XorShiftRng::seed_from_u64(self.rng.gen())),
             );
             self.peers.push(new_peer);
         }
@@ -638,7 +624,7 @@ impl Environment {
         println!("\nGossip Round {:03}\n================", self.current_round);
         self.current_round += 1;
 
-        self.rng.shuffle(&mut self.peers);
+        self.peers.shuffle(&mut self.rng);
 
         // Each peer will send a request and handle the corresponding response.  For each peer,
         // there is also a chance that they will vote for one of the observations if they haven't
@@ -665,9 +651,9 @@ impl Environment {
 
             let peer = &mut self.peers[sender_index];
             if peer.observations.len() < self.params.total_observations()
-                && self.rng.gen_weighted_bool(OPAQUE_CHANCE)
+                && self.rng.gen_ratio(1, OPAQUE_CHANCE)
             {
-                self.rng.shuffle(&mut self.opaque_observations);
+                self.opaque_observations.shuffle(&mut self.rng);
                 peer.vote_for_first_not_already_voted_for(&self.opaque_observations);
             }
 

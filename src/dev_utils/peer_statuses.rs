@@ -8,7 +8,7 @@
 
 use super::PeerStatus;
 use crate::mock::PeerId;
-use rand::Rng;
+use rand::{seq::SliceRandom, Rng};
 use std::collections::{BTreeMap, BTreeSet};
 
 pub struct PeerStatuses {
@@ -38,7 +38,7 @@ impl PeerStatuses {
             .peers_by_status(|s| *s == PeerStatus::Active || *s == PeerStatus::Failed)
             .map(|(id, _)| id)
             .collect();
-        (*unwrap!(rng.choose(&names))).clone()
+        (*unwrap!(names.choose(rng))).clone()
     }
 
     fn choose_name_to_fail<R: Rng>(&self, rng: &mut R) -> PeerId {
@@ -46,7 +46,7 @@ impl PeerStatuses {
             .peers_by_status(|s| *s == PeerStatus::Active)
             .map(|(id, _)| id)
             .collect();
-        (*unwrap!(rng.choose(&names))).clone()
+        (*unwrap!(names.choose(rng))).clone()
     }
 
     /// Returns an iterator through all the peers.

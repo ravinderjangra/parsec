@@ -41,6 +41,7 @@ use crate::{
     mock::{PeerId, Transaction},
 };
 use itertools::Itertools;
+use rand::RngCore;
 #[cfg(any(test, feature = "testing"))]
 use std::ops::{Deref, DerefMut};
 use std::{
@@ -139,7 +140,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         genesis_group: &BTreeSet<S::PublicId>,
         genesis_related_info: Vec<u8>,
         consensus_mode: ConsensusMode,
-        secure_rng: Box<dyn rand::Rng>,
+        secure_rng: Box<dyn RngCore>,
     ) -> Self {
         if !genesis_group.contains(our_id.public_id()) {
             log_or_panic!("Genesis group must contain us");
@@ -198,7 +199,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         genesis_group: &BTreeSet<S::PublicId>,
         section: &BTreeSet<S::PublicId>,
         consensus_mode: ConsensusMode,
-        secure_rng: Box<dyn rand::Rng>,
+        secure_rng: Box<dyn RngCore>,
     ) -> Self {
         if genesis_group.is_empty() {
             log_or_panic!("Genesis group can't be empty");
@@ -243,7 +244,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         peer_list: PeerList<S>,
         genesis_group: PeerIndexSet,
         consensus_mode: ConsensusMode,
-        secure_rng: Box<dyn rand::Rng>,
+        secure_rng: Box<dyn RngCore>,
     ) -> Self {
         dump_graph::init();
 
@@ -2327,7 +2328,7 @@ impl Parsec<Transaction, PeerId> {
     #[cfg(all(test, feature = "mock"))]
     pub(crate) fn from_parsed_contents(
         mut parsed_contents: ParsedContents,
-        secure_rng: Box<dyn rand::Rng>,
+        secure_rng: Box<dyn RngCore>,
     ) -> Self {
         let peer_list = PeerList::new(parsed_contents.our_id);
         let mut parsec = Parsec::empty(
@@ -2397,7 +2398,7 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         our_id: S,
         genesis_group: &BTreeSet<S::PublicId>,
         consensus_mode: ConsensusMode,
-        secure_rng: Box<dyn rand::Rng>,
+        secure_rng: Box<dyn RngCore>,
     ) -> Self {
         TestParsec(Parsec::from_genesis(
             our_id,
@@ -2413,7 +2414,7 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
         genesis_group: &BTreeSet<S::PublicId>,
         section: &BTreeSet<S::PublicId>,
         consensus_mode: ConsensusMode,
-        secure_rng: Box<dyn rand::Rng>,
+        secure_rng: Box<dyn RngCore>,
     ) -> Self {
         TestParsec(Parsec::from_existing(
             our_id,
@@ -2468,7 +2469,7 @@ impl<T: NetworkEvent, S: SecretId> TestParsec<T, S> {
 impl TestParsec<Transaction, PeerId> {
     pub fn from_parsed_contents(
         parsed_contents: ParsedContents,
-        secure_rng: Box<dyn rand::Rng>,
+        secure_rng: Box<dyn RngCore>,
     ) -> Self {
         TestParsec(Parsec::from_parsed_contents(parsed_contents, secure_rng))
     }

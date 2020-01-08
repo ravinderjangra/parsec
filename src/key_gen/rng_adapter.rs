@@ -6,14 +6,13 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use rand::Rng;
-use rand_core::RngCore;
+use rand::RngCore;
 
 pub(super) struct RngAdapter<'a, T: ?Sized>(pub &'a mut T);
 
-impl<'a, T> RngCore for RngAdapter<'a, T>
+impl<'a, T> rand_threshold_crypto::RngCore for RngAdapter<'a, T>
 where
-    T: Rng + ?Sized,
+    T: RngCore + ?Sized,
 {
     #[inline]
     fn next_u32(&mut self) -> u32 {
@@ -31,7 +30,7 @@ where
     }
 
     #[inline]
-    fn try_fill_bytes(&mut self, bytes: &mut [u8]) -> Result<(), rand_core::Error> {
+    fn try_fill_bytes(&mut self, bytes: &mut [u8]) -> Result<(), rand_threshold_crypto::Error> {
         self.0.fill_bytes(bytes);
         Ok(())
     }
