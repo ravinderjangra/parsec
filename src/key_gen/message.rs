@@ -12,7 +12,7 @@ use std::fmt;
 
 /// Messages used for running BLS DKG.
 #[serde(bound = "")]
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum DkgMessage {
     Part { key_gen_id: KeyGenId, part: Part },
     Ack { key_gen_id: KeyGenId, ack: Ack },

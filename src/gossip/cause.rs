@@ -32,7 +32,7 @@ use serde::{Deserialize, Serialize};
     serialize = "V: Serialize, E: Serialize, P: Serialize",
     deserialize = "V: Deserialize<'de>, E: Deserialize<'de>, P: Deserialize<'de>"
 ))]
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Debug, Serialize, Deserialize)]
 pub(crate) enum Cause<V, E, P> {
     // Identifier of the latest `Event` of the peer which sent the request and the `PublicId` of the
     // intended recipient.
