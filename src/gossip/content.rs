@@ -23,7 +23,7 @@ use serde::{Deserialize, Serialize};
     serialize = "V: Serialize, E: Serialize, P: Serialize",
     deserialize = "V: Deserialize<'de>, E: Deserialize<'de>, P: Deserialize<'de>"
 ))]
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, Debug)]
+#[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize, Debug)]
 pub(super) struct Content<V, E, P> {
     // Identifier of the peer which created this `Event`.
     pub creator: P,

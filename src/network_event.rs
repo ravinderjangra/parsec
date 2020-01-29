@@ -7,11 +7,11 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use serde::{de::DeserializeOwned, Serialize};
-use std::fmt::Debug;
+use std::{fmt::Debug, hash::Hash};
 
 /// This represents the type which will be voted for by peers; generally it is the set of
 /// constraints on `T` throughout this library.
 pub trait NetworkEvent:
-    Clone + Eq + Ord + PartialEq + PartialOrd + Serialize + DeserializeOwned + Debug
+    Clone + Eq + Ord + PartialEq + PartialOrd + Hash + Serialize + DeserializeOwned + Debug
 {
 }

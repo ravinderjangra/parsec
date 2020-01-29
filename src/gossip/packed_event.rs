@@ -19,7 +19,7 @@ use std::fmt::{self, Debug, Formatter};
 
 /// Packed event contains only content and signature.
 #[serde(bound = "")]
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct PackedEvent<T: NetworkEvent, P: PublicId> {
     pub(super) content: Content<Vote<T, P>, EventHash, P>,
     pub(super) signature: P::Signature,

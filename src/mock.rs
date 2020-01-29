@@ -191,7 +191,7 @@ impl SecretId for PeerId {
 }
 
 /// **NOT FOR PRODUCTION USE**: Mock type implementing `NetworkEvent` trait.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize)]
+#[derive(Clone, Eq, PartialEq, Hash, Ord, PartialOrd, Serialize, Deserialize)]
 pub struct Transaction(String);
 
 impl Transaction {

@@ -10,6 +10,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{
     cmp::Ordering,
     fmt::{self, Debug, Formatter},
+    hash::{Hash, Hasher},
 };
 use threshold_crypto::{PublicKeySet, SecretKeyShare};
 
@@ -71,6 +72,12 @@ impl PartialEq for DkgResultWrapper {
 }
 
 impl Eq for DkgResultWrapper {}
+
+impl Hash for DkgResultWrapper {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.comparison_value().hash(state)
+    }
+}
 
 impl PartialOrd for DkgResultWrapper {
     fn partial_cmp(&self, rhs: &Self) -> Option<Ordering> {

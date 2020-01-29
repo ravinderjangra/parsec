@@ -21,11 +21,12 @@ use std::{
     collections::{BTreeMap, BTreeSet},
     error::Error,
     fmt::{self, Debug, Formatter},
+    hash::{Hash as StdHash, Hasher},
 };
 
 /// An enum of the various network events for which a peer can vote.
 #[serde(bound = "")]
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum Observation<T: NetworkEvent, P: PublicId> {
     /// Genesis group
     Genesis {
@@ -139,7 +140,7 @@ impl<T: NetworkEvent, P: PublicId> Debug for Observation<T, P> {
 
 /// Type of malicious behaviour.
 #[serde(bound = "")]
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, Debug)]
+#[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize, Debug)]
 pub enum Malice<T: NetworkEvent, P: PublicId> {
     /// Event carries a vote for `Observation::Genesis`, but shouldn't.
     UnexpectedGenesis(EventHash),
@@ -239,6 +240,10 @@ impl PartialEq for UnprovableMalice {
 }
 
 impl Eq for UnprovableMalice {}
+
+impl StdHash for UnprovableMalice {
+    fn hash<H: Hasher>(&self, _state: &mut H) {}
+}
 
 impl PartialOrd for UnprovableMalice {
     fn partial_cmp(&self, _: &Self) -> Option<Ordering> {
