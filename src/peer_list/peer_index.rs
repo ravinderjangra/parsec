@@ -192,7 +192,7 @@ impl PeerIndexSet {
         self.0.get(key.0).cloned().unwrap_or(false)
     }
 
-    #[cfg(any(test, feature = "testing"))]
+    #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
     pub fn is_empty(&self) -> bool {
         self.0.iter().all(|value| !*value)
     }

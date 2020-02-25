@@ -172,7 +172,7 @@ pub enum Malice<T: NetworkEvent, P: PublicId> {
     Accomplice(EventHash, Box<Malice<T, P>>),
 }
 
-#[cfg(any(test, feature = "testing"))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 #[derive(Debug)]
 pub(crate) enum MaliceInput {
     Fork(String),

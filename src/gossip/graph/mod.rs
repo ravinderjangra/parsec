@@ -10,16 +10,17 @@ mod ancestors;
 mod event_index;
 mod event_ref;
 
-pub(crate) use self::{ancestors::Ancestors, event_index::EventIndex, event_ref::IndexedEventRef};
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
+pub(crate) use self::ancestors::Ancestors;
+pub(crate) use self::{event_index::EventIndex, event_ref::IndexedEventRef};
 
 use super::{event::Event, event_hash::EventHash};
 use crate::id::PublicId;
 #[cfg(feature = "malice-detection")]
 use fnv::FnvHashSet;
-use std::collections::{
-    btree_map::{BTreeMap, Entry},
-    BTreeSet,
-};
+use std::collections::btree_map::{BTreeMap, Entry};
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
+use std::collections::BTreeSet;
 
 /// The gossip graph.
 #[derive(Eq, PartialEq, Debug)]
@@ -175,7 +176,7 @@ impl<P: PublicId> Graph<P> {
 
     /// Iterator over all ancestors of the given event (including itself) in reverse topological
     /// order.
-    #[allow(unused)]
+    #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
     pub fn ancestors<'a>(&'a self, event: IndexedEventRef<'a, P>) -> Ancestors<'a, P> {
         let mut queue = BTreeSet::new();
         let _ = queue.insert(event);
@@ -279,7 +280,7 @@ impl<P: PublicId> Graph<P> {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "mock"))]
 impl<P: PublicId> Graph<P> {
     /// Finds the first event which has the `short_name` provided.
     pub fn find_by_short_name<'a>(&'a self, short_name: &str) -> Option<IndexedEventRef<'a, P>> {
@@ -368,6 +369,7 @@ impl<'a, P: PublicId> Iterator for Iter<'a, P> {
 #[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
 pub(crate) mod snapshot {
     use super::*;
+    use std::collections::BTreeSet;
 
     /// Snapshot of the graph. Two snapshots compare as equal if the graphs had the same events
     /// modulo their insertion order.
@@ -392,7 +394,7 @@ pub(crate) mod snapshot {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "testing"))]
 mod tests {
     use crate::dev_utils::parse_test_dot_file;
 

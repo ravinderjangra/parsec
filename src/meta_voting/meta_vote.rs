@@ -6,11 +6,10 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
+use super::meta_vote_values::{AuxValue, BinValues, Estimates};
 #[cfg(any(test, feature = "testing"))]
-use super::{
-    bool_set::BoolSet,
-    meta_vote_values::{AuxValue, BinValues, Estimates, UndecidedMetaVoteValues},
-};
+use super::{bool_set::BoolSet, meta_vote_values::UndecidedMetaVoteValues};
 use super::{
     meta_vote_counts::MetaVoteCounts,
     meta_vote_values::{MetaVoteValues, Step},
@@ -38,7 +37,7 @@ impl Debug for MetaVote {
 }
 
 impl MetaVote {
-    #[cfg(any(test, feature = "testing"))]
+    #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
     pub fn new(
         round: usize,
         step: Step,

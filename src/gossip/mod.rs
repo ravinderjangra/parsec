@@ -19,7 +19,7 @@ mod packed_event;
 
 #[cfg(any(test, feature = "testing", feature = "dump-graphs"))]
 pub(super) use self::cause::Cause;
-#[cfg(any(test, feature = "testing"))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 pub(super) use self::event::CauseInput;
 #[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
 pub(super) use self::graph::snapshot::GraphSnapshot;

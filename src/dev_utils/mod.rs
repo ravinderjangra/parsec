@@ -10,7 +10,7 @@
 mod macros;
 
 /// This is used to read a dumped dot file and rebuild the event graph and associated info.
-#[cfg(any(test, feature = "testing"))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 mod dot_parser;
 mod environment;
 mod misc;
@@ -24,7 +24,7 @@ mod pseudo_random;
 mod record;
 mod schedule;
 
-#[cfg(test)]
+#[cfg(all(test, feature = "mock"))]
 pub(crate) use self::dot_parser::parse_test_dot_file;
 #[cfg(all(test, feature = "mock"))]
 pub(crate) use self::dot_parser::ParsedContents;
