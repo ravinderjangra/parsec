@@ -20,7 +20,7 @@ pub(crate) use self::{
 
 #[cfg(all(test, feature = "mock"))]
 use crate::gossip::Graph;
-#[cfg(any(test, feature = "testing"))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 use crate::mock::PeerId;
 use crate::{
     error::Error,
@@ -299,7 +299,7 @@ impl<S: SecretId> Debug for PeerList<S> {
     }
 }
 
-#[cfg(any(test, feature = "testing"))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 impl PeerList<PeerId> {
     // Creates a PeerList using the input parameters directly.
     pub(super) fn build_from_dot_input(

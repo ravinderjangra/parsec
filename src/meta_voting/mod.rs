@@ -15,7 +15,7 @@ mod meta_vote_values;
 
 #[cfg(any(all(test, feature = "mock"), feature = "dump-graphs"))]
 pub(crate) use self::meta_election::snapshot::MetaElectionSnapshot;
-#[cfg(any(test, feature = "testing"))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 pub(crate) use self::meta_election::UnconsensusedEvents;
 #[cfg(any(test, feature = "testing"))]
 pub(crate) use self::{bool_set::BoolSet, meta_vote_values::Step};

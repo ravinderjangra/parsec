@@ -15,10 +15,10 @@ pub const HASH_LEN: usize = 32;
 pub struct Hash([u8; HASH_LEN]);
 
 impl Hash {
-    #[cfg(any(test, feature = "testing"))]
+    #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
     pub const ZERO: Self = Hash([0; HASH_LEN]);
 
-    #[cfg(any(test, feature = "testing"))]
+    #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
     pub fn from_bytes(bytes: [u8; HASH_LEN]) -> Self {
         Hash(bytes)
     }

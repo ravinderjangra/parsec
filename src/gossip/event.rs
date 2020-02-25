@@ -15,7 +15,11 @@ use super::{
     graph::{EventIndex, Graph},
     packed_event::PackedEvent,
 };
-#[cfg(any(test, feature = "testing"))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
+use crate::mock::{PeerId, Transaction};
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
+use crate::observation::ConsensusMode;
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 use crate::observation::MaliceInput;
 use crate::{
     error::Error,
@@ -26,11 +30,6 @@ use crate::{
     peer_list::{PeerIndex, PeerIndexMap, PeerList},
     serialise,
     vote::{Vote, VoteKey},
-};
-#[cfg(any(test, feature = "testing"))]
-use crate::{
-    mock::{PeerId, Transaction},
-    observation::ConsensusMode,
 };
 use itertools::Itertools;
 use std::fmt::{self, Debug, Display, Formatter};
@@ -367,7 +366,7 @@ impl<P: PublicId> Event<P> {
         }
     }
 
-    #[cfg(any(test, feature = "testing"))]
+    #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
     pub fn ancestor_info(&self) -> &PeerIndexMap<AncestorInfo> {
         &self.cache.ancestor_info
     }
@@ -503,7 +502,7 @@ impl<P: PublicId> AsRef<Self> for Event<P> {
     }
 }
 
-#[cfg(any(test, feature = "testing"))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 impl Event<PeerId> {
     // Creates a new event using the input parameters directly.
     #[allow(clippy::too_many_arguments)]
@@ -583,7 +582,7 @@ pub(crate) struct UnpackedEvent<T: NetworkEvent, P: PublicId> {
     pub observation_for_store: ObservationForStore<T, P>,
 }
 
-#[cfg(any(test, feature = "testing"))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 #[derive(Debug)]
 pub(crate) enum CauseInput {
     Initial,

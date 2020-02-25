@@ -6,7 +6,7 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-#[cfg(any(test, feature = "testing"))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 use super::event::CauseInput;
 use super::{
     event_context::EventContextRef,
@@ -21,7 +21,7 @@ use crate::{
     peer_list::{PeerIndex, PeerList},
     vote::{Vote, VoteKey},
 };
-#[cfg(any(test, feature = "testing"))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 use crate::{
     mock::{PeerId, Transaction},
     observation::{ConsensusMode, ObservationStore},
@@ -143,7 +143,7 @@ impl<P: PublicId> Cause<VoteKey<P>, EventIndex, PeerIndex> {
     }
 }
 
-#[cfg(any(test, feature = "testing"))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 impl Cause<Vote<Transaction, PeerId>, EventHash, PeerId> {
     pub(crate) fn new_from_dot_input(
         input: CauseInput,
@@ -181,7 +181,7 @@ impl Cause<Vote<Transaction, PeerId>, EventHash, PeerId> {
     }
 }
 
-#[cfg(any(test, feature = "testing"))]
+#[cfg(any(all(test, feature = "mock"), feature = "testing"))]
 impl Cause<VoteKey<PeerId>, EventIndex, PeerIndex> {
     pub(crate) fn unpack_from_dot_input(
         packed_cause: Cause<Vote<Transaction, PeerId>, EventHash, PeerId>,

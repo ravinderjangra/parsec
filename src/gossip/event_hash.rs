@@ -20,6 +20,6 @@ impl Debug for EventHash {
 }
 
 impl EventHash {
-    #[cfg(any(test, feature = "testing"))]
+    #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
     pub(crate) const ZERO: Self = EventHash(Hash::ZERO);
 }

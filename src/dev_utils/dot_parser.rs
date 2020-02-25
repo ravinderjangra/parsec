@@ -859,13 +859,13 @@ pub(crate) fn parse_dot_file<P: AsRef<Path>>(full_path: P) -> io::Result<ParsedC
 /// test name as part of the path automatically, but depends on not explicitly running the tests
 /// single-threaded, i.e. by passing '--test-threads=1' on the command line or setting the env var
 /// 'RUST_TEST_THREADS=1'.
-#[cfg(test)]
+#[cfg(all(test, feature = "mock"))]
 pub(crate) fn parse_test_dot_file(filename: &str) -> ParsedContents {
     let test_name = derive_test_name_from_current_thread_name();
     parse_dot_file_with_test_name(filename, &test_name)
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "mock"))]
 fn derive_test_name_from_current_thread_name() -> String {
     use std::{env, thread};
 
@@ -901,7 +901,7 @@ fn derive_test_name_from_current_thread_name() -> String {
 
 /// For use by functional/unit tests which provide a dot file for the test setup.  This reads and
 /// parses the dot file as per `parse_dot_file()` above, with test name being part of the path.
-#[cfg(test)]
+#[cfg(all(test, feature = "mock"))]
 fn parse_dot_file_with_test_name(filename: &str, test_name: &str) -> ParsedContents {
     use std::path::PathBuf;
 

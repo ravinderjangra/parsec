@@ -23,6 +23,7 @@ pub(crate) struct Peer<P: PublicId> {
     presence: Presence,
     pub(super) events: Events,
     pub(super) last_gossiped_event: Option<EventIndex>,
+    has_fork: bool,
     // As a performance optimisation we keep track of which events we've cleared for Accomplice
     // accusations.
     #[cfg(feature = "malice-detection")]
@@ -36,6 +37,7 @@ impl<P: PublicId> Peer<P> {
             presence: Presence::Present(state),
             events: Events::new(),
             last_gossiped_event: None,
+            has_fork: false,
             #[cfg(feature = "malice-detection")]
             accomplice_event_checkpoint: None,
         }
@@ -66,6 +68,13 @@ impl<P: PublicId> Peer<P> {
         self.events.iter()
     }
 
+    pub fn events_from<'a>(
+        &'a self,
+        start_index_by_creator: usize,
+    ) -> impl DoubleEndedIterator<Item = EventIndex> + 'a {
+        self.events.iter_from(start_index_by_creator)
+    }
+
     #[cfg(all(test, feature = "mock"))]
     pub fn indexed_events<'a>(
         &'a self,
@@ -86,11 +95,23 @@ impl<P: PublicId> Peer<P> {
 
     pub(super) fn add_event(&mut self, index_by_creator: usize, event_index: EventIndex) {
         self.events.add(index_by_creator, event_index);
+
+        if self.has_fork_at(index_by_creator) {
+            self.has_fork = true;
+        }
     }
 
     #[cfg(all(test, feature = "mock"))]
     pub(super) fn remove_last_event(&mut self) -> Option<EventIndex> {
         self.events.remove_last()
+    }
+
+    pub fn has_fork(&self) -> bool {
+        self.has_fork
+    }
+
+    pub fn has_fork_at(&self, index_by_creator: usize) -> bool {
+        self.events.by_index(index_by_creator).take(2).count() > 1
     }
 }
 
@@ -137,6 +158,14 @@ impl Events {
 
     fn iter<'a>(&'a self) -> impl DoubleEndedIterator<Item = EventIndex> + 'a {
         self.0.iter().flat_map(Slot::iter)
+    }
+
+    fn iter_from<'a>(
+        &'a self,
+        start_index_by_creator: usize,
+    ) -> impl DoubleEndedIterator<Item = EventIndex> + 'a {
+        let start_index_by_creator = start_index_by_creator.min(self.0.len());
+        self.0[start_index_by_creator..].iter().flat_map(Slot::iter)
     }
 
     #[cfg(all(test, feature = "mock"))]

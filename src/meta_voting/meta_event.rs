@@ -34,7 +34,7 @@ pub(crate) enum Observer {
 }
 
 impl Observer {
-    #[cfg(any(test, feature = "testing"))]
+    #[cfg(any(all(test, feature = "mock"), feature = "testing"))]
     pub fn new(observees: PeerIndexSet) -> Self {
         if observees.is_empty() {
             Observer::None
