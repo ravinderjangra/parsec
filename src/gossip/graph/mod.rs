@@ -175,6 +175,7 @@ impl<P: PublicId> Graph<P> {
 
     /// Iterator over all ancestors of the given event (including itself) in reverse topological
     /// order.
+    #[allow(unused)]
     pub fn ancestors<'a>(&'a self, event: IndexedEventRef<'a, P>) -> Ancestors<'a, P> {
         let mut queue = BTreeSet::new();
         let _ = queue.insert(event);

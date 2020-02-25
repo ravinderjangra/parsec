@@ -1612,9 +1612,9 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         Ok(())
     }
 
-    // Returns an iterator over `self.events` which will yield all the events we think `peer_id`
-    // doesn't yet know about.  We should already have checked that we know `peer_id` and that we
-    // have recorded at least one event from this peer before calling this function.
+    // Returns an iterator over `self.events` which will yield all the events we think the peer at
+    // `peer_index` doesn't yet know about. We should already have checked that we know the peer
+    // and that we have recorded at least one event from this peer before calling this function.
     fn events_to_gossip_to_peer(&self, peer_index: PeerIndex) -> Result<Vec<&Event<S::PublicId>>> {
         let last_event = if let Some(event_index) = self.peer_list.last_event(peer_index) {
             self.get_known_event(event_index)?
@@ -1623,19 +1623,50 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
             return Err(Error::Logic);
         };
 
-        // Events to include in the result. Initially start with including everything...
-        let mut inclusion_list = vec![true; self.graph.len()];
+        let last_ancestors: PeerIndexMap<_> = last_event.last_ancestors().collect();
 
-        // ...then exclude events that are ancestors of `last_event`, because the peer already has
-        // them.
-        for event in self.graph.ancestors(last_event) {
-            inclusion_list[event.topological_index()] = false;
+        // Collect all events that are newer than the last ancestors of the last event.
+        let mut event_indices: Vec<_> = self
+            .peer_list
+            .iter()
+            .flat_map(|(peer_index, peer)| {
+                let first = last_ancestors
+                    .get(peer_index)
+                    .map(|index_by_creator| index_by_creator + 1)
+                    .unwrap_or(0);
+                peer.events_from(first)
+            })
+            .collect();
+
+        // Include older forked events.
+        for (peer_index, &last_index_by_creator) in &last_ancestors {
+            let peer = if let Some(peer) = self
+                .peer_list
+                .get(peer_index)
+                .filter(|peer| peer.has_fork())
+            {
+                peer
+            } else {
+                continue;
+            };
+
+            for index_by_creator in 0..=last_index_by_creator {
+                if !peer.has_fork_at(index_by_creator) {
+                    continue;
+                }
+
+                for event_index in peer.events_by_index(index_by_creator) {
+                    event_indices.push(event_index);
+                }
+            }
         }
 
-        Ok(self
-            .graph
-            .iter()
-            .filter(|event| inclusion_list[event.topological_index()])
+        // Sort topologically
+        event_indices.sort();
+
+        Ok(event_indices
+            .into_iter()
+            .filter_map(|event_index| self.graph.get(event_index))
             .map(|event| event.inner())
             .collect())
     }
