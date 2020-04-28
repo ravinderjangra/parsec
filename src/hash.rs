@@ -7,7 +7,6 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use std::fmt::{self, Debug, Formatter};
-use tiny_keccak;
 
 pub const HASH_LEN: usize = 32;
 

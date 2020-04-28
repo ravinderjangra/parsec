@@ -115,7 +115,7 @@
     test(attr(forbid(warnings)))
 )]
 #![forbid(
-    exceeding_bitshifts,
+    arithmetic_overflow,
     mutable_transmutes,
     no_mangle_const_items,
     unknown_crate_types,
