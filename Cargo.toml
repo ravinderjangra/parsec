@@ -9,7 +9,7 @@ license = "GPL-3.0"
 name = "parsec"
 readme = "README.md"
 repository = "https://github.com/maidsafe/parsec"
-version = "0.6.0"
+version = "0.7.0"
 
 [dependencies]
 fnv = "~1.0.6"

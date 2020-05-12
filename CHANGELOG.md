@@ -1,5 +1,9 @@
 # Parsec - Change Log
 
+## [0.7.0]
+- Migrate CI/CD to GitHub actions
+- Update maidsafe_utilities dependency to 0.19.0
+
 ## [0.6.0](https://github.com/maidsafe/parsec/compare/0.5.0...0.6.0)
 Note that as this is such a large comparison we are only showing the most recent 250 commits, see the [GitHub compare here](https://github.com/maidsafe/parsec/compare/0.5.0...0.6.0) for further details.
 - chore/all: revert spam-handling code
