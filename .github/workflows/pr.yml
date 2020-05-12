@@ -21,16 +21,15 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
+        name: Install Rust and required components
         with:
           profile: minimal
           toolchain: stable
           override: true
           components: rustfmt, clippy
       # Check if the code is formatted correctly.
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+      - name: Check formatting
+        run: cargo fmt --all -- --check
 
       # Cache.
       - name: Cache cargo registry
@@ -51,6 +50,7 @@ jobs:
 
       # Run Clippy.
       - shell: bash
+        name: Run clippy checks
         run: ./scripts/clippy  
 
   test:
@@ -68,9 +68,8 @@ jobs:
           override: true
 
       # Generate Cargo.lock, needed for the cache.
-      - uses: actions-rs/cargo@v1
-        with:
-          command: generate-lockfile
+      - name: Generate lockfile
+        run: cargo generate-lockfile
 
       # Cache.
       - name: Cache cargo registry
@@ -91,4 +90,5 @@ jobs:
 
       # Run tests.
       - shell: bash
+        name: Run tests
         run: ./scripts/tests
