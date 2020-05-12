@@ -16,7 +16,7 @@ fnv = "~1.0.6"
 itertools = "~0.8.0"
 lazy_static = "1.4"
 log = "~0.3.8"
-maidsafe_utilities = "~0.18.0"
+maidsafe_utilities = "~0.19.0"
 pom = { version = "~1.1.0", optional = true }
 proptest = { version = "~0.8.6", optional = true }
 rand = "~0.7.2"
