@@ -32,7 +32,7 @@ use crate::{
 use rand::Rng;
 
 // Alter the seed here to reproduce failures
-static SEED: RngChoice = RngChoice::SeededRandom;
+static SEED: RngChoice = RngChoice::Random;
 
 fn test_key_gen_with(threshold: usize, node_num: usize) {
     let mut env = Environment::new(SEED);

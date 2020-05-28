@@ -13,7 +13,6 @@ use crate::gossip::EventContextRef;
 use crate::{
     gossip::{CauseInput, Event, EventIndex, Graph, IndexedEventRef},
     hash::{Hash, HASH_LEN},
-    maidsafe_utilities::serialisation::deserialise,
     meta_voting::{
         BoolSet, MetaElection, MetaEvent, MetaVote, Observer, Step, UnconsensusedEvents,
     },
@@ -635,7 +634,7 @@ fn parse_dkg_msg() -> Parser<u8, Observation<Transaction, PeerId>> {
         * seq(b")), SerialisedDkgMessage(")
         * parser_vec
         - seq(b")"))
-    .map(|v| unwrap!(deserialise(&v)))
+    .map(|v| bincode::deserialize(&v).unwrap())
     .map(Observation::DkgMessage)
 }
 
@@ -1263,7 +1262,6 @@ mod tests {
         dev_utils::{Environment, RngChoice, Schedule, ScheduleOptions},
         dump_graph::DIR,
         gossip::GraphSnapshot,
-        maidsafe_utilities::serialisation::deserialise,
         meta_voting::MetaElectionSnapshot,
         mock::PeerId,
     };
@@ -1272,7 +1270,7 @@ mod tests {
     type Snapshot = (GraphSnapshot, MetaElectionSnapshot<PeerId>);
 
     // Alter the seed here to reproduce failures
-    static SEED: RngChoice = RngChoice::SeededRandom;
+    static SEED: RngChoice = RngChoice::Random;
 
     #[test]
     fn dot_parser() {
@@ -1299,7 +1297,7 @@ mod tests {
             let mut core_file = unwrap!(File::open(entry.path()));
             let mut core_info = Vec::new();
             assert_ne!(unwrap!(core_file.read_to_end(&mut core_info)), 0);
-            let expected_snapshot: Snapshot = unwrap!(deserialise(&core_info));
+            let expected_snapshot: Snapshot = bincode::deserialize(&core_info).unwrap();
 
             let mut dot_file_path = entry.path();
             assert!(dot_file_path.set_extension("dot"));

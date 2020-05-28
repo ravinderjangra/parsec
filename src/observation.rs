@@ -434,7 +434,6 @@ pub(crate) mod snapshot {
 mod tests {
     use super::*;
     use crate::mock::{PeerId, Transaction};
-    use maidsafe_utilities::serialisation::deserialise;
 
     #[test]
     fn malice_comparison_and_hashing_ignores_unprovable_value() {
@@ -455,6 +454,6 @@ mod tests {
     fn unprovable_malice_is_deserialisable() {
         let before = Malice::Unprovable::<Transaction, PeerId>(UnprovableMalice::Spam);
         let serialised = serialise(&before);
-        let _: Malice<Transaction, PeerId> = unwrap!(deserialise(&serialised));
+        let _: Malice<Transaction, PeerId> = bincode::deserialize(&serialised).unwrap();
     }
 }

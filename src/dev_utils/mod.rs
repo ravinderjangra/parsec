@@ -36,7 +36,7 @@ pub use self::{
     network::{ConsensusError, Network},
     peer::{NetworkView, Peer, PeerStatus},
     peer_statuses::PeerStatuses,
-    pseudo_random::{new_common_rng, new_rng, ReplayRng, RngChoice, RngDebug},
+    pseudo_random::{new_common_rng, new_rng, thread_rng, ReplayRng, RngChoice, RngDebug},
     schedule::*,
 };
 

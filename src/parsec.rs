@@ -2389,14 +2389,8 @@ impl Parsec<Transaction, PeerId> {
         if let Some(serialized_key_gens_and_next_id) =
             &parsed_contents.serialized_key_gens_and_next_id
         {
-            // `serialisation::deserialise` is over constrained and require `Serialize` which is
-            // only available with `dump-graphs` enabled (as it is not safe to dump secrets).
-            // Use Cursor to get an io::Read object so we can use the not over constrained
-            // `deserialise_from`.
-            let mut cursor = std::io::Cursor::new(serialized_key_gens_and_next_id);
-            let (key_gen, key_gen_next_id) = unwrap!(
-                maidsafe_utilities::serialisation::deserialise_from(&mut cursor)
-            );
+            let (key_gen, key_gen_next_id) =
+                bincode::deserialize(serialized_key_gens_and_next_id).unwrap();
 
             parsec.key_gen = key_gen;
             parsec.key_gen_next_id = key_gen_next_id;

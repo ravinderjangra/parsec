@@ -57,7 +57,6 @@ extern crate proptest;
 #[macro_use]
 extern crate unwrap;
 
-use maidsafe_utilities::log;
 use parsec::{
     dev_utils::{
         proptest::{arbitrary_delay, ScheduleOptionsStrategy, ScheduleStrategy},
@@ -69,10 +68,13 @@ use parsec::{
 };
 use proptest::{prelude::ProptestConfig, test_runner::FileFailurePersistence};
 use rand::Rng;
-use std::collections::{BTreeMap, BTreeSet};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    sync::Once,
+};
 
 // Alter the seed here to reproduce failures
-static SEED: RngChoice = RngChoice::SeededRandom;
+static SEED: RngChoice = RngChoice::Random;
 
 #[test]
 fn minimal_network() {
@@ -269,7 +271,6 @@ fn run_dkg() {
 // Run a DKG with 2 peers and only 1 voter in genesis (like routing adding first node).
 #[test]
 fn run_one_voter_two_participants_dkg() {
-    let _ = maidsafe_utilities::log::init(false);
     let mut env = Environment::with_consensus_mode(SEED, ConsensusMode::Single);
     let named_peer_ids = PeerId::named_peer_ids();
 
@@ -650,7 +651,8 @@ proptest! {
             delay_distr: arbitrary_delay(0..10, 0.0..10.0),
         },
     }) {
-        let _ = log::init(true);
+        static INIT_LOG: Once = Once::new();
+        INIT_LOG.call_once(env_logger::init);
 
         let result = env.execute_schedule(sched);
         assert!(result.is_ok(), "{:?}", result);

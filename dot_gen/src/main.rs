@@ -570,7 +570,7 @@ impl Scenario {
     {
         Scenario {
             name: name.into(),
-            seed: RngChoice::SeededRandom,
+            seed: RngChoice::Random,
             schedule_fn: Box::new(schedule),
             files: BTreeMap::new(),
             consensus_mode: ConsensusMode::Supermajority,
@@ -581,7 +581,7 @@ impl Scenario {
     /// Use the given seed instead of randomly generated one.
     #[allow(unused)]
     pub fn seed(&mut self, seed: [u32; 4]) -> &mut Self {
-        self.seed = RngChoice::SeededXor(seed);
+        self.seed = RngChoice::Seeded(seed);
         self
     }
 

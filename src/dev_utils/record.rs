@@ -285,7 +285,7 @@ mod tests {
     use std::{iter, path::PathBuf, thread};
 
     // Use Fixed seed for functional tests and replay: No randomization.
-    static SEED: RngChoice = RngChoice::SeededXor([1, 2, 3, 4]);
+    static SEED: RngChoice = RngChoice::Seeded([1, 2, 3, 4]);
 
     #[derive(PartialEq, Eq, Debug)]
     struct TruncatedHashes<'th> {
@@ -327,7 +327,7 @@ mod tests {
         let mut common_rng = new_common_rng(SEED);
         let _p = PathPrinter(path.as_ref().to_owned());
         let contents = unwrap!(parse_dot_file(path.as_ref()));
-        let expected = Parsec::from_parsed_contents(contents, new_rng(&mut common_rng));
+        let expected = Parsec::from_parsed_contents(contents, Box::new(new_rng(&mut common_rng)));
         let expected_events = {
             let ignore_last_events = 0;
             get_graph_snapshot(&expected, ignore_last_events)

@@ -6,47 +6,52 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use crate::seeded_rng::SeededRng;
-use rand::{Error, RngCore, SeedableRng};
+use rand::{Error, Rng, RngCore, SeedableRng};
 use rand_core::impls;
 use rand_xorshift::XorShiftRng;
-use std::fmt;
+use std::{cell::RefCell, fmt};
 
 pub trait RngDebug: RngCore + fmt::Debug {}
 
 impl RngDebug for XorShiftRng {}
-impl RngDebug for SeededRng {}
 
 #[derive(Clone, Copy, Debug)]
 pub enum RngChoice {
-    SeededRandom,
-    #[allow(unused)]
+    Random,
     Seeded([u32; 4]),
-    SeededXor([u32; 4]),
 }
 
 /// Create a new Rng: Use once per test.
-pub fn new_common_rng(seed: RngChoice) -> Box<dyn RngDebug> {
-    match seed {
-        RngChoice::SeededRandom => Box::new(SeededRng::new()),
-        RngChoice::Seeded(seed) => Box::new(SeededRng::from_seed(seed)),
-        RngChoice::SeededXor(seed) => {
-            let rng = Box::new(XorShiftRng::from_seed(convert_seed(seed)));
-            println!("Using {:?}", rng);
-            rng
-        }
-    }
+pub fn new_common_rng(seed: RngChoice) -> XorShiftRng {
+    let seed = match seed {
+        RngChoice::Random => rand::thread_rng().gen(),
+        RngChoice::Seeded(seed) => seed,
+    };
+
+    println!("Seed: {:?}", seed);
+
+    let mut rng = XorShiftRng::from_seed(convert_seed(seed));
+    RNG.with(|thread_rng| *thread_rng.borrow_mut() = new_rng(&mut rng));
+    rng
 }
 
 /// Create a new RNG using a seed generated from random data provided by `rng`.
-pub fn new_rng<R: RngCore>(rng: &mut R) -> Box<dyn RngCore> {
+pub fn new_rng<R: RngCore>(rng: &mut R) -> XorShiftRng {
     let new_seed = [
         rng.next_u32().wrapping_add(rng.next_u32()),
         rng.next_u32().wrapping_add(rng.next_u32()),
         rng.next_u32().wrapping_add(rng.next_u32()),
         rng.next_u32().wrapping_add(rng.next_u32()),
     ];
-    Box::new(XorShiftRng::from_seed(convert_seed(new_seed)))
+    XorShiftRng::from_seed(convert_seed(new_seed))
+}
+
+pub fn thread_rng() -> XorShiftRng {
+    RNG.with(|rng| new_rng(&mut *rng.borrow_mut()))
+}
+
+thread_local! {
+    static RNG: RefCell<XorShiftRng> = RefCell::new(XorShiftRng::from_seed(rand::thread_rng().gen()));
 }
 
 /// Create a RNG that will replay the given value and when complete will panic if more value needed.

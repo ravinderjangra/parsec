@@ -562,7 +562,7 @@ impl Network {
                             id.clone(),
                             &genesis_ids,
                             self.consensus_mode,
-                            new_rng(rng2),
+                            Box::new(new_rng(rng2)),
                         )
                     })
                     .collect_vec();
@@ -573,7 +573,7 @@ impl Network {
                             id.clone(),
                             &genesis_ids,
                             self.consensus_mode,
-                            new_rng(rng2),
+                            Box::new(new_rng(rng2)),
                         )
                     })
                     .collect_vec();
@@ -611,7 +611,7 @@ impl Network {
                         &self.genesis,
                         &current_peers,
                         self.consensus_mode,
-                        new_rng(rng2),
+                        Box::new(new_rng(rng2)),
                     ),
                 );
             }

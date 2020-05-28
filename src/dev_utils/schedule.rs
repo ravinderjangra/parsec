@@ -415,7 +415,7 @@ impl ObservationSchedule {
                 opaque_count += 1;
             }
             if added_peers < options.peers_to_add && rng.gen::<f64>() < options.prob_add {
-                let next_id = PeerId::new(&unwrap!(names_iter.next()));
+                let next_id = PeerId::new(&names_iter.next().unwrap());
                 peers.add_peer(next_id.clone());
                 schedule.push((step, ObservationEvent::AddPeer(next_id)));
                 num_observations += 1;

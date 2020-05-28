@@ -9,28 +9,29 @@
 use crate::{
     dev_utils::{
         network::{ConsensusError, Network},
-        new_common_rng, RngChoice, RngDebug, Schedule,
+        new_common_rng, new_rng, RngChoice, Schedule,
     },
     observation::ConsensusMode,
 };
+use rand_xorshift::XorShiftRng;
 use std::fmt;
 
 pub struct Environment {
     /// The network for test
     pub network: Network,
     /// Rng for random execution
-    pub rng: Box<dyn RngDebug>,
+    pub rng: XorShiftRng,
     /// Additional Rng used for additional randomness without breaking seed from `rng`.
     /// It can be used to create Parsec instances new `Rng`.
-    pub rng2: Box<dyn RngDebug>,
+    pub rng2: XorShiftRng,
 }
 
 impl Environment {
     /// Initialise the test environment. The random number generator will be seeded with `seed`
     /// or randomly if this is `SeededRandom`.
     pub fn with_consensus_mode(seed: RngChoice, consensus_mode: ConsensusMode) -> Self {
-        let rng = new_common_rng(seed);
-        let rng2 = new_common_rng(seed);
+        let mut rng = new_common_rng(seed);
+        let rng2 = new_rng(&mut rng);
         let network = Network::new(consensus_mode);
 
         Self { network, rng, rng2 }

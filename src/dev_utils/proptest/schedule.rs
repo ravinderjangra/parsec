@@ -208,7 +208,7 @@ pub struct ScheduleValueTree {
 
 impl ScheduleValueTree {
     pub fn new(seed: [u32; 4], opts: ScheduleOptionsValueTree) -> Self {
-        let mut env = Environment::new(RngChoice::SeededXor(seed));
+        let mut env = Environment::new(RngChoice::Seeded(seed));
         let max_opts = opts.max();
         let max_schedule = Schedule::new(&mut env, &max_opts);
         ScheduleValueTree {
@@ -222,7 +222,7 @@ impl ScheduleValueTree {
 impl ScheduleValueTree {
     fn filtered_schedule(&self, opts: &ScheduleOptions) -> (Environment, Schedule) {
         // TODO: implement actual filtering of the max schedule
-        let mut env = Environment::new(RngChoice::SeededXor(self.seed));
+        let mut env = Environment::new(RngChoice::Seeded(self.seed));
         let schedule = Schedule::new(&mut env, opts);
         (env, schedule)
     }

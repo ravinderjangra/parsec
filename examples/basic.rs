@@ -55,7 +55,6 @@ extern crate clap;
 extern crate unwrap;
 
 use clap::{App, Arg, ArgMatches};
-use maidsafe_utilities::log;
 use parsec::{
     mock::{PeerId, Transaction},
     Block, ConsensusMode, Parsec, Request,
@@ -715,7 +714,7 @@ impl Environment {
 }
 
 fn main() {
-    unwrap!(log::init(false));
+    env_logger::init();
 
     let mut env = Environment::new();
 

@@ -160,8 +160,6 @@
 extern crate lazy_static;
 #[macro_use]
 extern crate log;
-#[macro_use]
-extern crate maidsafe_utilities;
 #[cfg(feature = "testing")]
 #[macro_use]
 extern crate proptest as proptest_crate;
@@ -170,6 +168,16 @@ extern crate serde_derive;
 #[cfg(any(test, feature = "testing", feature = "dump-graphs"))]
 #[macro_use]
 extern crate unwrap;
+
+macro_rules! log_or_panic {
+    ($($arg:tt)*) => {
+        if cfg!(any(test, feature = "testing")) && !::std::thread::panicking() {
+            panic!($($arg)*);
+        } else {
+            log::error!($($arg)*);
+        }
+    };
+}
 
 #[doc(hidden)]
 #[cfg(any(test, feature = "testing"))]
@@ -189,7 +197,6 @@ mod observation;
 mod parsec;
 mod parsec_helpers;
 mod peer_list;
-mod seeded_rng;
 mod vote;
 
 #[cfg(all(test, feature = "mock"))]
@@ -218,15 +225,15 @@ pub use crate::{
     vote::Vote,
 };
 
-use maidsafe_utilities::serialisation;
 use serde::ser::Serialize;
 use std::fmt::Debug;
 
 fn serialise<T: Serialize + Debug>(data: &T) -> Vec<u8> {
-    if let Ok(serialised) = serialisation::serialise(data) {
-        serialised
-    } else {
-        log_or_panic!("Failed to serialise {:?}", data);
-        vec![]
+    match bincode::serialize(data) {
+        Ok(serialised) => serialised,
+        Err(error) => {
+            log_or_panic!("Failed to serialise {:?}: {}", data, error);
+            vec![]
+        }
     }
 }

@@ -264,9 +264,7 @@ impl SharedSecret {
 
 #[cfg(not(feature = "mock"))]
 fn gen_keypair() -> (PublicKey, SecretKey) {
-    use crate::seeded_rng::SeededRng;
-
-    let mut rng = SeededRng::thread_rng();
+    let mut rng = crate::dev_utils::thread_rng();
     let bytes: [u8; KEY_LENGTH] = rng.gen();
     (PublicKey(bytes), SecretKey(bytes))
 }

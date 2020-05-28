@@ -105,7 +105,6 @@ mod tests;
 
 use crate::{DkgResult, SecretId};
 use failure::Fail;
-use maidsafe_utilities::serialisation;
 use rand::RngCore;
 use serde_derive::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -132,8 +131,8 @@ pub enum Error {
     Encryption,
 }
 
-impl From<serialisation::SerialisationError> for Error {
-    fn from(err: serialisation::SerialisationError) -> Error {
+impl From<bincode::Error> for Error {
+    fn from(err: bincode::Error) -> Error {
         Error::Serialization(format!("{:?}", err))
     }
 }
@@ -294,7 +293,7 @@ impl<S: SecretId> KeyGen<S> {
         let encrypt = |(i, pk): (usize, &S::PublicId)| {
             let row = our_part.row(i + 1);
             sec_key
-                .encrypt(pk, &serialisation::serialise(&row)?)
+                .encrypt(pk, &bincode::serialize(&row)?)
                 .ok_or(Error::Encryption)
         };
         let rows = key_gen
@@ -334,7 +333,7 @@ impl<S: SecretId> KeyGen<S> {
         let mut values = Vec::new();
         for (idx, pk) in self.pub_keys.iter().enumerate() {
             let val = row.evaluate(idx + 1);
-            let ser_val = serialisation::serialise(&FieldWrap(val))?;
+            let ser_val = bincode::serialize(&FieldWrap(val))?;
             values.push(sec_key.encrypt(pk, ser_val).ok_or(Error::Encryption)?);
         }
         Ok(PartOutcome::Valid(Some(Ack(sender_idx, values))))
@@ -441,8 +440,7 @@ impl<S: SecretId> KeyGen<S> {
         let ser_row = sec_key
             .decrypt(sender_id, &rows[our_idx as usize])
             .ok_or(PartFault::DecryptRow)?;
-        let row: Poly =
-            serialisation::deserialise(&ser_row).map_err(|_| PartFault::DeserializeRow)?;
+        let row: Poly = bincode::deserialize(&ser_row).map_err(|_| PartFault::DeserializeRow)?;
         if row.commitment() != commit_row {
             return Err(PartFault::RowCommitment);
         }
@@ -475,7 +473,7 @@ impl<S: SecretId> KeyGen<S> {
         let ser_val = sec_key
             .decrypt(sender_id, &values[our_idx as usize])
             .ok_or(AckFault::DecryptValue)?;
-        let val = serialisation::deserialise::<FieldWrap<Fr>>(&ser_val)
+        let val = bincode::deserialize::<FieldWrap<Fr>>(&ser_val)
             .map_err(|_| AckFault::DeserializeValue)?
             .into_inner();
         if part.commit.evaluate(our_idx + 1, sender_idx + 1) != G1Affine::one().mul(val) {
