@@ -1,5 +1,8 @@
 # Parsec - Change Log
 
+## [0.7.1]
+- Remove maidsafe_utilities dependency
+
 ## [0.7.0]
 - Migrate CI/CD to GitHub actions
 - Update maidsafe_utilities dependency to 0.19.0
