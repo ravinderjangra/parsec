@@ -17,7 +17,12 @@ use std::{
     iter::{self, FromIterator},
 };
 
-#[derive(Debug)]
+impl<P: PublicId> Debug for Peer<P> {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "{:?}", self.id())
+    }
+}
+
 pub(crate) struct Peer<P: PublicId> {
     id: P,
     presence: Presence,
