@@ -91,14 +91,14 @@ mod detail {
     };
 
     lazy_static! {
-        static ref ROOT_DIR_PREFIX: PathBuf = { env::temp_dir().join("parsec_graphs") };
+        static ref ROOT_DIR_PREFIX: PathBuf = env::temp_dir().join("parsec_graphs");
         static ref ROOT_DIR_SUFFIX: String = {
             rand::thread_rng()
                 .sample_iter(Alphanumeric)
                 .take(6)
                 .collect::<String>()
         };
-        static ref ROOT_DIR: PathBuf = { ROOT_DIR_PREFIX.join(&*ROOT_DIR_SUFFIX) };
+        static ref ROOT_DIR: PathBuf = ROOT_DIR_PREFIX.join(&*ROOT_DIR_SUFFIX);
 
         static ref GENERATE_SVG: bool = {
             // PARSEC_DUMP_GRAPH_SVG=0 to disable svg file generation

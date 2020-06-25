@@ -880,10 +880,7 @@ fn derive_test_name_from_current_thread_name() -> String {
 
         const THREADS_ARG: &str = "--test-threads";
         let mut args_itr = env::args().skip_while(|arg| !arg.starts_with(THREADS_ARG));
-        match (
-            args_itr.next().as_ref().map(|x| &**x),
-            args_itr.next().as_ref().map(|x| &**x),
-        ) {
+        match (args_itr.next().as_deref(), args_itr.next().as_deref()) {
             (Some(THREADS_ARG), Some("1")) | (Some("--test-threads=1"), _) => {
                 panic(THREADS_ARG);
             }

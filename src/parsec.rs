@@ -1472,7 +1472,7 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
                 }
             })
             .fold(BTreeMap::new(), |mut map, (idx, payload_key)| {
-                let (count, min_index) = map.entry(payload_key.clone()).or_insert((0, idx));
+                let (count, min_index) = map.entry(*payload_key).or_insert((0, idx));
                 *count += 1;
                 *min_index = std::cmp::min(*min_index, idx);
                 map
