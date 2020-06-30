@@ -978,6 +978,17 @@ impl<T: NetworkEvent, S: SecretId> Parsec<T, S> {
         Some(())
     }
 
+    /// Add a gossip peer by force
+    pub fn add_force_gossip_peer(&mut self, peer_id: &S::PublicId) {
+        debug!(
+            "{:?}: adding a new gossip_peer {:?} by force.",
+            self.peer_list.our_pub_id(),
+            peer_id
+        );
+        let state = PeerState::DKG | PeerState::SEND | PeerState::RECV;
+        let _ = self.add_gossip_peer(peer_id, state);
+    }
+
     // This function must be called on consensus on a `StartDkg` observation.
     fn handle_dkg_start_consensus(&mut self, peers: &BTreeSet<S::PublicId>) -> Option<()> {
         let state = if self.new_peer_can_recv(self.our_pub_id()) {
